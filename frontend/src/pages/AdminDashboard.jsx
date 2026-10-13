@@ -4,9 +4,10 @@ import { Download, X, AlertTriangle, Clock, ClipboardList, Printer, Star, Users,
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-import jsPDF from 'jspdf';
 import { descargarArchivo } from '../utils/descargar';
-import autoTable from 'jspdf-autotable';
+import { datosDeLaTienda, hoyLocal } from '../utils/reportesPdf';
+import { construirInventario, construirResumenTienda } from '../utils/reportesTienda';
+import { useAjustesCtx } from '../context/AjustesContext';
 import StatCard from '../components/UI/StatCard';
 import DescargaPredictiva from '../components/Admin/DescargaPredictiva';
 import { useAuth } from '../hooks/useAuth';
@@ -17,54 +18,6 @@ import { dashboardService } from '../api/dashboardService';
 import { productService } from '../api/productService';
 import { modalTransition, overlayTransition, modalInitial, modalAnimate } from '../utils/motion';
 import { formatearFecha } from '../utils/fechas';
-
-// "#RRGGBB" → [r, g, b] enteros, que es lo que pide jsPDF (setFillColor no
-// entiende variables CSS ni hex directo).
-const hexARgbArr = (hex) => {
-  const h = String(hex || '').replace('#', '');
-  const n = parseInt(h.length === 3 ? h.split('').map((c) => c + c).join('') : h, 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-};
-
-/*
- * Encabezado compartido por los dos reportes (resumen e inventario). El
- * nombre va como el logotipo de dos líneas que se usa en toda la tienda
- * (MenuTienda.jsx, LoginAdmin.jsx): "Tienda" y "la 635" al MISMO tamaño y
- * peso, pegaditas entre sí — antes "Tienda" salía chiquita como kicker y
- * "la 635" enorme abajo, que no es como se ve la marca en ningún otro lado.
- */
-const pintarEncabezado = (doc, colorFondo, subtitulo) => {
-  const pageWidth = doc.internal.pageSize.getWidth();
-  doc.setFillColor(...colorFondo);
-  doc.rect(0, 0, pageWidth, 38, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFont(undefined, 'bold');
-  doc.setFontSize(20);
-  doc.text('Tienda', 14, 18);
-  doc.text('la 635', 14, 30);
-  doc.setFont(undefined, 'normal');
-  doc.setFontSize(10);
-  doc.text(subtitulo, pageWidth - 14, 16, { align: 'right' });
-  doc.text(`Fecha: ${new Date().toLocaleDateString('es-SV')}`, pageWidth - 14, 24, { align: 'right' });
-  return pageWidth;
-};
-
-// Numeración de página, la misma para cualquier reporte que se genere.
-const pintarPiePagina = (doc) => {
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const totalPaginas = doc.internal.getNumberOfPages();
-  for (let i = 1; i <= totalPaginas; i++) {
-    doc.setPage(i);
-    doc.setFontSize(8);
-    doc.setTextColor(150, 150, 150);
-    doc.text(
-      `Tienda la 635 · Página ${i} de ${totalPaginas}`,
-      pageWidth / 2,
-      doc.internal.pageSize.getHeight() - 8,
-      { align: 'center' }
-    );
-  }
-};
 
 /*
  * AdminDashboard — el resumen operativo de la tienda, con datos REALES.
@@ -123,117 +76,23 @@ const AdminDashboard = () => {
   const [descargando, setDescargando] = useState(false);
   const [descargandoInventario, setDescargandoInventario] = useState(false);
 
-  // Cómo se llama, en el reporte, el rango que de verdad trae la gráfica de
-  // Ventas y Compras según el periodo elegido. Ver construirSerie en
-  // dashboardController.js — 'semana' son 7 días, los otros dos van por mes.
-  const etiquetaPeriodo = {
-    semana: 'últimos 7 días',
-    mes: 'últimos 6 meses',
-    anio: 'últimos 12 meses',
-  };
-
-  // El café de marca, igual en los dos reportes.
-  const coloresDeMarca = () => {
-    // El azul de la casa, el mismo que declara index.css. Antes salía del
-    // color que el dueño hubiera elegido; ese ajuste ya no existe.
-    const escalaMarca = { '--marca-600': '#003049', '--marca-700': '#00283D' };
-    return {
-      brown: hexARgbArr(escalaMarca['--marca-600']),
-      brownDark: hexARgbArr(escalaMarca['--marca-700']),
-    };
-  };
+  // Los datos de la tienda para el encabezado de los reportes (Personalización).
+  const { ajustes } = useAjustesCtx();
 
   /*
    * ── Reporte "Resumen de la tienda" ──
-   * Antes tomaba lo que ya estaba en pantalla; el selector de periodo del
-   * modal era decorativo (rotulaba, pero nunca volvía a pedir datos). Ahora
-   * pide el resumen DE VERDAD para el periodo elegido — semanal, mensual o
-   * anual — así que el PDF trae otros números aunque no se haya tocado nada
-   * en pantalla.
+   * Pide el resumen DE VERDAD para el periodo elegido en el modal —semanal,
+   * mensual o anual—, así que el PDF trae esos números aunque en pantalla se
+   * esté viendo otro. El documento lo arma utils/reportesTienda.js, con el
+   * mismo formato que el reporte predictivo.
    */
   const handleDescargarResumen = async () => {
     setDescargando(true);
     try {
       const datosReporte = await dashboardService.getSummary(periodoDescarga);
-      const doc = new jsPDF();
-      const { brown, brownDark } = coloresDeMarca();
-      pintarEncabezado(doc, brownDark, `Resumen — ${etiquetaPeriodo[periodoDescarga] || periodoDescarga}`);
-
-      const tabla = (titulo, y, head, body, color = brown) => {
-        doc.setTextColor(...brownDark);
-        doc.setFontSize(14);
-        doc.setFont(undefined, 'bold');
-        doc.text(titulo, 14, y);
-        autoTable(doc, {
-          startY: y + 5,
-          head: [head],
-          body,
-          theme: 'grid',
-          headStyles: { fillColor: color, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 10 },
-          bodyStyles: { fontSize: 10 },
-          alternateRowStyles: { fillColor: [250, 245, 240] },
-          styles: { cellPadding: 4 },
-        });
-        return doc.lastAutoTable.finalY + 12;
-      };
-
-      const data = datosReporte;
-      const grafica = datosReporte.grafica || [];
-
-      let y = tabla('Resumen General', 50, ['Métrica', 'Valor'], [
-      ['Pedidos de hoy', String(data.pedidosHoy.valor)],
-      ['Entregados (7 días)', String(data.entregados.valor)],
-      ['Ingresos del día', money(data.ingresos?.valor ?? 0)],
-      ['Inversión del día', money(data.inversion?.valor ?? 0)],
-      ['Ganancia real', money(data.ganancia?.valor ?? 0)],
-      ['Margen', `${data.ganancia?.margen ?? 0}%`],
-      ['Ticket promedio', money(data.ticketPromedio)],
-      ['Productos por reponer', String(data.porReponer.total)],
-      ['Lotes por caducar', String(data.porCaducar.total)],
-      ['Pedidos por preparar', String(data.pedidosPorPreparar)],
-      ['Impresiones pendientes', String(data.impresionesPendientes)],
-      ['Clientes nuevos (7 días)', String(data.clientesNuevos)],
-      ['Puntos canjeados (30 días)', String(data.puntosCanjeados)],
-      ['Descuento por puntos (30 días)', money(data.descuentoPorPuntos)],
-      ['Productos activos', String(data.totalProductos)],
-      ['Clientes activos', String(data.totalClientes)],
-    ]);
-
-      y = tabla('Productos Más Vendidos', y, ['#', 'Producto', 'Vendidos', 'En bodega', 'Precio'],
-        data.masVendidos.map((p, i) => [i + 1, p.nombre, p.vendidos, p.stock ?? '—', money(p.precio)]), brownDark);
-
-      if (y > 220) { doc.addPage(); y = 20; }
-      y = tabla(`Ventas y Compras (${etiquetaPeriodo[periodoDescarga] || 'periodo actual'})`, y,
-        ['Periodo', 'Ventas ($)', 'Compras ($)', 'Diferencia ($)'],
-        grafica.map((d) => [d.etiqueta, d.ventas.toFixed(2), d.compras.toFixed(2), (d.ventas - d.compras).toFixed(2)]));
-
-      if (data.ventasPorModulo.length) {
-        if (y > 220) { doc.addPage(); y = 20; }
-        y = tabla('Ventas por Módulo', y, ['Módulo', 'Total'],
-          data.ventasPorModulo.map((m) => [m.modulo, money(m.total)]), brownDark);
-      }
-
-      if (data.porReponer.lista.length) {
-        if (y > 220) { doc.addPage(); y = 20; }
-        y = tabla('Productos por Reponer', y, ['Producto', 'Stock'],
-          data.porReponer.lista.map((p) => [p.name, p.stock]), brownDark);
-      }
-
-      if (data.porCaducar.lista.length) {
-        if (y > 220) { doc.addPage(); y = 20; }
-        y = tabla('Lotes por Caducar', y, ['Producto', 'Caduca el', 'Stock'],
-          data.porCaducar.lista.map((p) => [p.name, formatearFecha(p.expirationDate) || 'Sin fecha', p.stock]), brownDark);
-      }
-
-      if (data.sinMovimiento.length) {
-        if (y > 220) { doc.addPage(); y = 20; }
-        tabla('Productos Sin Movimiento', y, ['Producto', 'Stock', 'Precio'],
-          data.sinMovimiento.map((p) => [p.name, p.stock, money(p.salePrice)]), brownDark);
-      }
-
-      pintarPiePagina(doc);
+      const doc = construirResumenTienda(datosReporte, periodoDescarga, await datosDeLaTienda(ajustes));
       // No doc.save(): dentro de la app del teléfono no descargaría nada (ver utils/descargar.js).
-      await descargarArchivo(doc.output('blob'), `reporte-la635-${new Date().toISOString().slice(0, 10)}.pdf`);
+      await descargarArchivo(doc.output('blob'), `resumen-tienda-la635-${hoyLocal()}.pdf`);
       setModal(null);
     } catch (error) {
       console.error('Error generando el reporte:', error);
@@ -245,41 +104,15 @@ const AdminDashboard = () => {
 
   /*
    * ── Reporte "Inventario completo" ──
-   * Todo el catálogo activo con precio, costo y existencia — SIN imágenes: es
-   * para leer en una lista o imprimir, no para lucir fotos. Una sola tabla
-   * larga en horizontal, que jspdf-autotable pagina y repite el encabezado
-   * sola; a diferencia del resumen, aquí no hay que trocearla a mano.
+   * Todo el catálogo activo con precio, costo, margen y existencia —sin
+   * imágenes: es para leer o imprimir—, por categoría y en horizontal.
    */
   const handleDescargarInventario = async () => {
     setDescargandoInventario(true);
     try {
       const productos = await productService.getInventario();
-      const doc = new jsPDF({ orientation: 'landscape' });
-      const { brownDark } = coloresDeMarca();
-      pintarEncabezado(doc, brownDark, `Inventario — ${productos.length} productos`);
-
-      autoTable(doc, {
-        startY: 46,
-        margin: { top: 46 },
-        head: [['Producto', 'Categoría', 'Marca', 'Módulo', 'Precio', 'Costo', 'Stock']],
-        body: productos.map((p) => [
-          p.name || '—',
-          p.typeId?.type || '—',
-          p.brandId?.name || '—',
-          p.moduleId?.name || '—',
-          money(p.salePrice),
-          money(p.priceCost),
-          p.unidadVenta === 'libra' ? `${p.stock ?? 0} lb` : String(p.stock ?? 0),
-        ]),
-        theme: 'grid',
-        headStyles: { fillColor: brownDark, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 10 },
-        bodyStyles: { fontSize: 9 },
-        alternateRowStyles: { fillColor: [250, 245, 240] },
-        styles: { cellPadding: 3 },
-      });
-
-      pintarPiePagina(doc);
-      await descargarArchivo(doc.output('blob'), `inventario-la635-${new Date().toISOString().slice(0, 10)}.pdf`);
+      const doc = construirInventario(productos, await datosDeLaTienda(ajustes));
+      await descargarArchivo(doc.output('blob'), `inventario-la635-${hoyLocal()}.pdf`);
       setModal(null);
     } catch (error) {
       console.error('Error generando el inventario:', error);

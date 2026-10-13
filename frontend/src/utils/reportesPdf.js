@@ -248,10 +248,116 @@ export const pie = (doc, texto) => {
   }
 };
 
+/*
+ * Los datos de la tienda para el encabezado, sacados de Personalización:
+ * nombre, dirección, y teléfono, NIT y NRC de "Datos del negocio", más el
+ * logo si hay. Lo usan todos los reportes del panel.
+ */
+export const datosDeLaTienda = async (ajustes) => {
+  const negocio = ajustes?.negocio || {};
+  return {
+    nombre: `${ajustes?.nombreLinea1 || ''} ${ajustes?.nombreLinea2 || ''}`.trim() || 'Tienda la 635',
+    direccion: ajustes?.direccion,
+    telefono: negocio.telefono,
+    nit: negocio.nit,
+    nrc: negocio.nrc,
+    logo: await cargarLogo(ajustes?.logoUrl),
+  };
+};
+
+// Un paso "redondo" para las líneas guía de una gráfica: 1, 2, 2.5 o 5 por potencia de 10.
+export const pasoRedondo = (bruto) => {
+  if (!(bruto > 0)) return 1;
+  const potencia = 10 ** Math.floor(Math.log10(bruto));
+  return [1, 2, 2.5, 5, 10].map((f) => f * potencia).find((p) => p >= bruto);
+};
+
+const GRIS_BARRA = [173, 181, 189];
+export const COLOR_GRAFICA = { real: GRIS_BARRA, marca: COLOR.marca };
+
+/*
+ * Una gráfica de barras sobria, dibujada a mano con jsPDF (una librería de
+ * gráficas para unas cuantas barras sería más peso que gráfica).
+ *
+ *   grupos   [{ etiqueta, barras: [{ valor, color, bajo?, alto? }] }]: cada
+ *            grupo es un lugar del eje (una semana, un mes) con una o más
+ *            barras lado a lado. Con `bajo` y `alto`, la barra lleva la
+ *            línea de su rango (un pronóstico).
+ *   leyenda  [{ texto, color }]
+ *
+ * Las líneas guía caen en montos redondos ($150, $300, $450).
+ */
+export const graficaDeBarras = (doc, y, { grupos, leyenda = [], altoGrafica = 46 }) => {
+  y = asegurarEspacio(doc, y, altoGrafica + 16);
+  const izquierda = MARGEN + 14;
+  const util = ancho(doc) - MARGEN * 2 - 14;
+  const todas = grupos.flatMap((g) => g.barras);
+  const mayor = Math.max(...todas.map((b) => b.alto ?? b.valor), 1);
+  const pasoGuia = pasoRedondo(mayor / 3);
+  const lineasGuia = Math.ceil(mayor / pasoGuia);
+  const maximo = pasoGuia * lineasGuia;
+  const escala = (v) => (Math.max(v, 0) / maximo) * altoGrafica;
+  const base = y + altoGrafica;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  for (let i = 0; i <= lineasGuia; i++) {
+    const v = pasoGuia * i;
+    const linea = base - escala(v);
+    doc.setDrawColor(...COLOR.linea);
+    doc.setLineWidth(i === 0 ? 0.3 : 0.1);
+    doc.line(izquierda, linea, izquierda + util, linea);
+    doc.setTextColor(...COLOR.suave);
+    doc.text(dinero(v).replace('.00', ''), izquierda - 2, linea + 1, { align: 'right' });
+  }
+
+  const paso = util / Math.max(grupos.length, 1);
+  // Las etiquetas no se enciman: con muchos lugares, se escribe una sí y otra no.
+  const saltoEtiquetas = Math.max(1, Math.ceil(grupos.length / 14));
+  grupos.forEach((g, i) => {
+    const cuantas = g.barras.length || 1;
+    const anchoBarra = Math.min((paso * 0.62) / cuantas, 14);
+    const inicio = izquierda + paso * i + (paso - anchoBarra * cuantas) / 2;
+    g.barras.forEach((b, j) => {
+      const x = inicio + anchoBarra * j;
+      const h = escala(b.valor);
+      doc.setFillColor(...(b.color || COLOR.marca));
+      if (h > 0) doc.rect(x, base - h, anchoBarra, h, 'F');
+      if (b.alto != null && b.bajo != null) {
+        // El rango probable, de lo bajo a lo alto. Gris medio: se ve sobre la barra y sobre el blanco.
+        const medio = x + anchoBarra / 2;
+        doc.setDrawColor(134, 142, 150);
+        doc.setLineWidth(0.45);
+        doc.line(medio, base - escala(b.alto), medio, base - escala(b.bajo));
+        doc.line(medio - 1.5, base - escala(b.alto), medio + 1.5, base - escala(b.alto));
+        doc.line(medio - 1.5, base - escala(b.bajo), medio + 1.5, base - escala(b.bajo));
+      }
+    });
+    if (i % saltoEtiquetas === 0) {
+      doc.setTextColor(...COLOR.suave);
+      doc.text(g.etiqueta, izquierda + paso * i + paso / 2, base + 4, { align: 'center' });
+    }
+  });
+
+  let x = izquierda;
+  const renglon = base + 9.5;
+  leyenda.forEach(({ texto, color }) => {
+    doc.setFillColor(...color);
+    doc.rect(x, renglon - 2.4, 3, 3, 'F');
+    doc.setTextColor(...COLOR.tinta);
+    doc.text(texto, x + 4.5, renglon);
+    x += 4.5 + doc.getTextWidth(texto) + 8;
+  });
+  return renglon + 8;
+};
+
 // ── Cómo se escriben los números y las fechas en los reportes ──
 
-const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+export const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+export const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+
+// "12%", sin signo: el texto dice si es más o menos.
+export const porciento = (x) => `${Math.round(Math.abs(x) * 100)}%`;
 
 const MONEDA = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
