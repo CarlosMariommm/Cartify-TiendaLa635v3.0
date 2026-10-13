@@ -55,18 +55,17 @@ export const esTokenExpo = (token) =>
   typeof token === "string" && /^Expo(nent)?PushToken\[[^\]]+\]$/.test(token.trim());
 
 /*
- * Los teléfonos de quien tiene encendido ESTE aviso.
+ * Los teléfonos de quien tiene encendido ESTE aviso EN LA APP.
  *
- * Las mismas dos reglas que `destinatariosDe` en avisosCliente.js, y por las
- * mismas razones: `$ne: false` para los avisos que nacen encendidos (quien se
- * registró antes de que existieran las preferencias no tiene el campo), y
- * `true` exacto para `pedidoCerca`, que nace apagado y donde "no tengo el
- * campo" significa "no lo pedí".
+ * Mira `avisosApp`, no `notificationPrefs` (que son los correos): apagar el
+ * correo de las promociones no apaga su notificación, ni al revés. Ver
+ * utils/preferenciasAvisos.js. `$ne: false` porque nacen encendidos y quien
+ * no tiene el campo nunca lo apagó.
  */
-export const dispositivosDe = async (preferencia, exigirTrue = false) => {
+export const dispositivosDe = async (preferencia) => {
   const clientes = await clientModel
     .find({
-      [`notificationPrefs.${preferencia}`]: exigirTrue ? true : { $ne: false },
+      [`avisosApp.${preferencia}`]: { $ne: false },
       isActive: { $ne: false },
       pushTokens: { $exists: true, $ne: [] },
     })

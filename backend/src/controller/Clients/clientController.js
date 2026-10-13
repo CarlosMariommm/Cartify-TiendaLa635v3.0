@@ -3,6 +3,7 @@ import clientModel from "../../models/client.js";
 import { eliminarCliente } from "../../utils/eliminarCliente.js";
 import { leerTokenBaja } from "../../utils/tokenBaja.js";
 import { esTokenExpo } from "../../utils/pushExpo.js";
+import { AVISOS_CORREO, cambiosDePreferencias } from "../../utils/preferenciasAvisos.js";
 import { v2 as cloudinary } from "cloudinary";
 import bcryptjs from "bcryptjs";
 
@@ -390,16 +391,18 @@ clientController.updatePaymentMethods = async (req, res) => {
   }
 };
 
-// El cliente actualiza sus preferencias de notificación (interruptores).
+/*
+ * El cliente actualiza sus preferencias de notificación (interruptores): por
+ * correo (`correo`) y en la app (`app`), cada uno por su lado. Ver
+ * utils/preferenciasAvisos.js.
+ */
 clientController.updateNotifications = async (req, res) => {
   try {
-    const { promociones, nuevosProductos, pedidoCerca } = req.body;
-
-    // Usamos notación de punto para tocar solo la sub-preferencia que cambió.
-    const prefs = {};
-    if (promociones !== undefined) prefs["notificationPrefs.promociones"] = promociones;
-    if (nuevosProductos !== undefined) prefs["notificationPrefs.nuevosProductos"] = nuevosProductos;
-    if (pedidoCerca !== undefined) prefs["notificationPrefs.pedidoCerca"] = pedidoCerca;
+    // Notación de punto: solo se toca la preferencia que cambió.
+    const prefs = cambiosDePreferencias(req.body);
+    if (!Object.keys(prefs).length) {
+      return res.status(400).json({ message: "No llegó ninguna preferencia para guardar" });
+    }
 
     const updated = await clientModel
       .findByIdAndUpdate(req.params.id, { $set: prefs }, { new: true })
@@ -495,12 +498,13 @@ clientController.bajaNotificacion = async (req, res) => {
     }
 
     /*
-     * Solo se apaga lo que traía ese correo. Quien se cansó de las promociones
-     * no está pidiendo que dejen de avisarle cuando su pedido va en camino — y
-     * apagárselo todo de una sería decidir por él.
+     * Solo se apaga lo que traía ese correo, y solo POR CORREO. Quien se cansó
+     * de las promociones no está pidiendo que dejen de avisarle cuando su
+     * pedido va en camino, ni que su teléfono deje de avisarle de las ofertas
+     * (eso se apaga aparte, en `avisosApp`) — apagárselo todo de una sería
+     * decidir por él.
      */
-    const PERMITIDAS = ["promociones", "nuevosProductos", "pedidoCerca"];
-    const clave = PERMITIDAS.includes(datos.clave) ? datos.clave : "promociones";
+    const clave = AVISOS_CORREO.includes(datos.clave) ? datos.clave : "promociones";
 
     const actualizado = await clientModel
       .findByIdAndUpdate(datos.id, { $set: { [`notificationPrefs.${clave}`]: false } }, { new: true })

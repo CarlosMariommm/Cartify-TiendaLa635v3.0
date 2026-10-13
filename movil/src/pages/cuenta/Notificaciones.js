@@ -1,10 +1,15 @@
 /*
  * ============================================================
- * NOTIFICACIONES — qué avisos quiere recibir
+ * NOTIFICACIONES — qué avisos quiere recibir, y por dónde
  * ============================================================
- * Los tres interruptores de `frontend/src/pages/cliente/Notificaciones.jsx`,
- * con las mismas claves, porque escriben en el mismo documento: cambiar uno
- * desde el teléfono tiene que verse al abrir la tienda en la computadora.
+ * La misma lista que `frontend/src/pages/cliente/Notificaciones.jsx`, con las
+ * mismas claves, porque escriben en el mismo documento: cambiar uno desde el
+ * teléfono tiene que verse al abrir la tienda en la computadora.
+ *
+ * Cada aviso tiene su interruptor EN LA APP (`avisosApp`) y, si sale por
+ * correo, el suyo POR CORREO (`notificationPrefs`). Apagar uno no toca al
+ * otro: quien se cansó de los correos de promociones puede seguir
+ * enterándose en el teléfono (ver backend/src/utils/preferenciasAvisos.js).
  *
  * ── Se guarda solo (y se deshace solo si falla) ──
  *
@@ -33,7 +38,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CargandoMascota } from '../../components/Tiqui/Mascota';
 import { useColores, useEstilos } from '../../context/ModoContext';
 import { useAuth } from '../../hooks/useAuth';
@@ -48,17 +53,51 @@ import { contenidoCentrado } from '../../theme/pantalla';
 
 // Los mismos valores por defecto que la web, para que un cliente nuevo vea lo
 // mismo en los dos lados antes de tocar nada.
-const POR_DEFECTO = { promociones: true, nuevosProductos: true, pedidoCerca: false };
+const POR_DEFECTO = {
+  correo: { promociones: true, nuevosProductos: true, pedidoCerca: false },
+  app: {
+    promociones: true,
+    favoritosEnOferta: true,
+    nuevosProductos: true,
+    pedidoPreparando: true,
+    pedidoListo: true,
+    pedidoEntregado: true,
+    pedidoCancelado: true,
+  },
+};
 
-const OPCIONES = [
-  { clave: 'promociones', titulo: 'Promociones nuevas', sub: 'Avíseme de ofertas y descuentos.' },
-  { clave: 'nuevosProductos', titulo: 'Productos nuevos', sub: 'Avíseme cuando lleguen productos.' },
-  /*
-   * Los avisos del pedido en la app (preparando, en camino, listo, entregado)
-   * llegan siempre: son de servicio. Este interruptor es solo el correo.
-   */
-  { clave: 'pedidoCerca', titulo: 'Correo cuando mi pedido sale', sub: 'En la app los avisos de tu pedido llegan siempre; esto suma un correo.' },
+const desdeCliente = (cliente) => ({
+  correo: { ...POR_DEFECTO.correo, ...(cliente?.notificationPrefs || {}) },
+  app: { ...POR_DEFECTO.app, ...(cliente?.avisosApp || {}) },
+});
+
+/*
+ * `app`: la clave en avisosApp. `correo`: la de notificationPrefs, solo si ese
+ * aviso también sale por correo. "Sale o está listo" usa `pedidoCerca`, el
+ * correo de siempre de "tu pedido va en camino".
+ */
+const GRUPOS = [
+  {
+    titulo: 'Ofertas y novedades',
+    avisos: [
+      { app: 'promociones', correo: 'promociones', titulo: 'Promociones nuevas', sub: 'Ofertas y descuentos de la tienda.' },
+      { app: 'favoritosEnOferta', titulo: 'Mis favoritos en oferta', sub: 'Cuando algo que guardaste en favoritos entra en una promoción.' },
+      { app: 'nuevosProductos', correo: 'nuevosProductos', titulo: 'Productos nuevos', sub: 'Cuando llegan productos a la tienda.' },
+    ],
+  },
+  {
+    titulo: 'Tu pedido',
+    avisos: [
+      { app: 'pedidoPreparando', titulo: 'Lo empiezan a preparar', sub: 'Cuando la tienda junta tus productos.' },
+      { app: 'pedidoListo', correo: 'pedidoCerca', titulo: 'Sale o está listo para recoger', sub: 'El correo es solo cuando sale a domicilio.' },
+      { app: 'pedidoEntregado', titulo: 'Cuando te llega', sub: 'Solo en pedidos a domicilio.' },
+      { app: 'pedidoCancelado', titulo: 'Si se cancela', sub: 'El correo con el motivo te llega siempre.' },
+    ],
+  },
 ];
+
+// El ancho de cada columna de interruptores (App y Correo).
+const COLUMNA = 54;
 
 // Mismo tiempo que --dur-press en la web: es el mismo interruptor, misma duración.
 const DURACION_INTERRUPTOR = 160;
@@ -134,7 +173,7 @@ const Notificaciones = ({ alVolver }) => {
     setError('');
     try {
       const cliente = await getCliente(user.id);
-      setPrefs({ ...POR_DEFECTO, ...(cliente?.notificationPrefs || {}) });
+      setPrefs(desdeCliente(cliente));
     } catch (e) {
       setError(e?.message || t('No se pudieron cargar tus preferencias'));
     } finally {
@@ -190,14 +229,15 @@ const Notificaciones = ({ alVolver }) => {
     }
   };
 
-  const alternar = async (clave) => {
+  // `canal`: 'app' o 'correo'.
+  const alternar = async (canal, clave) => {
     const antes = prefs;
-    const despues = { ...prefs, [clave]: !prefs[clave] };
+    const valor = !prefs[canal][clave];
 
-    setPrefs(despues); // se ve al instante
+    setPrefs({ ...prefs, [canal]: { ...prefs[canal], [clave]: valor } }); // se ve al instante
     try {
       // Solo la que cambió: el controlador la mezcla con las que ya estaban.
-      await actualizarNotificaciones(user.id, { [clave]: despues[clave] });
+      await actualizarNotificaciones(user.id, { [canal]: { [clave]: valor } });
     } catch (e) {
       setPrefs(antes);
       avisar(e?.message || t('No se pudo guardar la preferencia'), 'error');
@@ -205,12 +245,13 @@ const Notificaciones = ({ alVolver }) => {
     }
 
     /*
-     * Encender algo es el momento de pedir el permiso, y va DESPUÉS de guardar
-     * la preferencia: si el permiso se rechaza, lo que la persona eligió queda
-     * guardado igual. Mañana lo concede desde los ajustes y los avisos
-     * empiezan a llegar sin tener que volver a tocar el interruptor.
+     * Encender un aviso de la app es el momento de pedir el permiso, y va
+     * DESPUÉS de guardar la preferencia: si el permiso se rechaza, lo que la
+     * persona eligió queda guardado igual. Mañana lo concede desde los ajustes
+     * y los avisos empiezan a llegar sin tener que volver a tocar el
+     * interruptor. Un correo no necesita nada del teléfono.
      */
-    if (despues[clave] && avisos !== 'listo') asegurarAvisos();
+    if (canal === 'app' && valor && avisos !== 'listo') asegurarAvisos();
   };
 
   /*
@@ -255,20 +296,49 @@ const Notificaciones = ({ alVolver }) => {
           </View>
         </View>
       ) : (
-        <View style={estilos.cuerpo}>
-          {OPCIONES.map((op) => (
-            <View key={op.clave} style={estilos.fila}>
-              <View style={estilos.textos}>
-                <Text style={estilos.titulo}>{t(op.titulo)}</Text>
-                <Text style={estilos.sub}>{t(op.sub)}</Text>
+        <ScrollView contentContainerStyle={estilos.cuerpo} showsVerticalScrollIndicator={false}>
+          <Text style={estilos.intro}>
+            {t('Elige qué te avisamos y por dónde: en la app del teléfono o por correo.')}
+          </Text>
+
+          {GRUPOS.map((grupo) => (
+            <View key={grupo.titulo} style={estilos.grupo}>
+              <View style={estilos.cabecera}>
+                <Text style={estilos.grupoTitulo} accessibilityRole="header">{t(grupo.titulo)}</Text>
+                <Text style={estilos.columnaTitulo}>{t('App')}</Text>
+                <Text style={estilos.columnaTitulo}>{t('Correo')}</Text>
               </View>
 
-              <Interruptor
-                encendido={!!prefs[op.clave]}
-                alTocar={() => alternar(op.clave)}
-                color={colores.marca}
-                etiqueta={t(op.titulo)}
-              />
+              {grupo.avisos.map((aviso) => {
+                const titulo = t(aviso.titulo);
+                return (
+                  <View key={aviso.app} style={estilos.fila}>
+                    <View style={estilos.textos}>
+                      <Text style={estilos.titulo}>{titulo}</Text>
+                      <Text style={estilos.sub}>{t(aviso.sub)}</Text>
+                    </View>
+
+                    <View style={estilos.columna}>
+                      <Interruptor
+                        encendido={!!prefs.app[aviso.app]}
+                        alTocar={() => alternar('app', aviso.app)}
+                        color={colores.marca}
+                        etiqueta={t('{aviso}, en la app', { aviso: titulo })}
+                      />
+                    </View>
+                    <View style={estilos.columna}>
+                      {aviso.correo ? (
+                        <Interruptor
+                          encendido={!!prefs.correo[aviso.correo]}
+                          alTocar={() => alternar('correo', aviso.correo)}
+                          color={colores.marca}
+                          etiqueta={t('{aviso}, por correo', { aviso: titulo })}
+                        />
+                      ) : null}
+                    </View>
+                  </View>
+                );
+              })}
             </View>
           ))}
 
@@ -281,7 +351,7 @@ const Notificaciones = ({ alVolver }) => {
               </Text>
             </Pressable>
           )}
-        </View>
+        </ScrollView>
       )}
     </View>
   );
@@ -317,22 +387,51 @@ const crearEstilos = (COLORES) => StyleSheet.create({
   cuerpo: {
     ...contenidoCentrado,
     padding: 16,
-    gap: 10,
+    paddingBottom: 40,
+    gap: 22,
   },
+  intro: {
+    fontSize: 13.5,
+    lineHeight: 20,
+    color: COLORES.textoSuave,
+  },
+  grupo: {},
+  // El título del grupo y, encima de cada columna de interruptores, de qué es.
+  cabecera: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 8,
+    paddingBottom: 8,
+  },
+  grupoTitulo: {
+    flex: 1,
+    fontSize: 15.5,
+    fontWeight: '800',
+    color: COLORES.tituloFuerte,
+  },
+  columnaTitulo: {
+    width: COLUMNA,
+    textAlign: 'center',
+    fontSize: 12,
+    fontWeight: '700',
+    color: COLORES.textoSuave,
+  },
+  // Sin recuadro: una línea fina entre aviso y aviso.
   fila: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 16,
-    borderWidth: 1,
-    borderColor: COLORES.lineaCard,
-    borderRadius: 14,
-    paddingHorizontal: 15,
-    paddingVertical: 14,
+    gap: 8,
+    paddingVertical: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: COLORES.linea,
   },
   textos: {
-    flexShrink: 1,
+    flex: 1,
     gap: 2,
+  },
+  columna: {
+    width: COLUMNA,
+    alignItems: 'center',
   },
   titulo: {
     fontSize: 14.5,

@@ -13,12 +13,17 @@
  * después se anota en la consola y en la propia promoción.
  *
  * A QUIÉN LE LLEGA
- * A los clientes activos, verificados y con `notificationPrefs.promociones`
- * encendido. Quien se registró y dejó la casilla en blanco NO recibe nada: en
+ * Por correo: a los clientes activos, verificados y con
+ * `notificationPrefs.promociones` encendido. Quien se registró y dejó la casilla en blanco NO recibe nada: en
  * el registro esa casilla llega desmarcada y su valor se copia tal cual a las
  * preferencias (ver registerClient). Los clientes viejos —los de antes de que
  * hubiera dónde elegir— sí reciben, porque el modelo los deja en true a
  * propósito, y en el pie del correo tienen su enlace para darse de baja.
+ *
+ * En el teléfono: con su propio interruptor (`avisosApp.promociones`), que
+ * no se toca al darse de baja del correo. Y quien tiene en favoritos algo de
+ * la promo recibe uno con su favorito (`avisosApp.favoritosEnOferta`) en vez
+ * del general. Ver utils/preferenciasAvisos.js.
  * ============================================================
  */
 
@@ -28,7 +33,8 @@ import { identidadDeLaTienda } from "./avisosCliente.js";
 import { enlaceDeBaja, enlaceDeBajaUnClic } from "./tokenBaja.js";
 import { sendEmail } from "./sendMailMailjet.js";
 import { plantillaCorreoPromo } from "./plantillaCorreoPromo.js";
-import { dispositivosDe, enviarPushEnSegundoPlano } from "./pushExpo.js";
+import { enviarPushEnSegundoPlano, esTokenExpo } from "./pushExpo.js";
+import { quiereEnLaApp } from "./preferenciasAvisos.js";
 
 /*
  * De los items de la promo a lo que la plantilla sabe pintar.
@@ -56,6 +62,8 @@ const armarItems = (promo) =>
       // hace el carrito al cobrar, y el anuncio no rebaja nada.
 
       return {
+        // Para cruzarlo con los favoritos de cada cliente (aviso del teléfono).
+        id: String(producto._id || ""),
         nombre: producto.name || "Producto",
         imagen: Array.isArray(producto.image) ? producto.image[0] : producto.image,
         precio,
@@ -72,13 +80,13 @@ const armarItems = (promo) =>
  * alcanzaba a leer no daba ganas de abrirla.
  *
  * Ahora se arma aparte del correo, corta y con un poco de misterio:
- *   - el título dice el gancho ("Tenemos un 2x1 para usted", "Hasta 25%
+ *   - el título dice el gancho ("Tenemos un 2x1 para ti", "Hasta 25%
  *     menos en la tienda") en 40 caracteres o menos;
- *   - el texto no cuenta todo ("¿En qué producto? Toque y descúbralo.") o
- *     apura si vence pronto ("Solo hasta el domingo. Toque para verlo."), en
+ *   - el texto no cuenta todo ("¿En qué producto? Toca y descúbrelo.") o
+ *     apura si vence pronto ("Solo hasta el domingo. Toca para verlo."), en
  *     45 o menos.
  * El qué y el cuánto quedan para cuando la abren (y para el correo, que sí
- * trae el detalle). De "usted", como las demás notificaciones de la tienda.
+ * trae el detalle). De "tú", como todo lo que le habla al cliente.
  */
 const MAX_TITULO = 40;
 const MAX_CUERPO = 45;
@@ -107,35 +115,102 @@ export const textoDelPush = (promo, items) => {
   let titulo;
   if (promo.type === "nxm") {
     const nxm = `${Number(promo.buyQty) || 2}x${Number(promo.payQty) || 1}`;
-    titulo = elegir([`Tenemos un ${nxm} para usted`, `Llegó un ${nxm} a la tienda`], semilla);
+    titulo = elegir([`Tenemos un ${nxm} para ti`, `Llegó un ${nxm} a la tienda`], semilla);
   } else if (promo.type === "descuento" && maximo > 0) {
     titulo = parejo
-      ? elegir([`${maximo}% menos, solo en la tienda`, `Tenemos ${maximo}% menos para usted`], semilla)
+      ? elegir([`${maximo}% menos, solo en la tienda`, `Tenemos ${maximo}% menos para ti`], semilla)
       : `Hasta ${maximo}% menos en la tienda`;
   } else if (promo.type === "precio_fijo") {
-    titulo = elegir(["Tenemos un precio especial", "Bajamos un precio para usted"], semilla);
+    titulo = elegir(["Tenemos un precio especial", "Bajamos un precio para ti"], semilla);
   } else {
-    titulo = elegir(["Llegó algo nuevo a la tienda", "Tenemos una novedad para usted"], semilla);
+    titulo = elegir(["Llegó algo nuevo a la tienda", "Tenemos una novedad para ti"], semilla);
   }
 
   let cuerpo;
   const vence = promo.endsAt ? new Date(promo.endsAt) : null;
   const faltan = vence ? vence.getTime() - Date.now() : Infinity;
   if (faltan < DIA) {
-    cuerpo = "Solo por hoy. Toque para verlo.";
+    cuerpo = "Solo por hoy. Toca para verlo.";
   } else if (faltan < 7 * DIA) {
     const dia = vence.toLocaleDateString("es-SV", { weekday: "long", timeZone: "America/El_Salvador" });
-    cuerpo = `Solo hasta el ${dia}. Toque para verlo.`;
+    cuerpo = `Solo hasta el ${dia}. Toca para verlo.`;
   } else if (promo.type === "anuncio") {
-    cuerpo = "Toque para ver qué es.";
+    cuerpo = "Toca para ver qué es.";
   } else if (items.length > 1) {
     cuerpo = `Son ${items.length} productos. ¿Adivina cuáles?`;
   } else {
-    cuerpo = "¿En qué producto? Toque y descúbralo.";
+    cuerpo = "¿En qué producto? Toca y descúbrelo.";
   }
 
   return { titulo: caber(titulo, MAX_TITULO), cuerpo: caber(cuerpo, MAX_CUERPO) };
 };
+
+/*
+ * El aviso de quien tiene en favoritos algo de la promo: ese sí dice qué es,
+ * porque es justo lo que estaba esperando.
+ */
+export const textoDeFavoritos = (nombres) => {
+  if (nombres.length === 1) {
+    const conLlamado = `${nombres[0]}. Toca para verlo.`;
+    return {
+      titulo: "Uno de tus favoritos está en oferta",
+      cuerpo: conLlamado.length <= MAX_CUERPO ? conLlamado : caber(nombres[0], MAX_CUERPO),
+    };
+  }
+  return {
+    titulo: caber(`${nombres.length} de tus favoritos están en oferta`, MAX_TITULO),
+    cuerpo: caber(nombres.join(", "), MAX_CUERPO),
+  };
+};
+
+/*
+ * Quién recibe cuál, en el teléfono. Quien tiene un favorito en la promo (y
+ * ese aviso encendido) recibe el suyo; los demás, el general si tienen las
+ * promociones encendidas en la app. Nadie recibe los dos.
+ *
+ * Los del mismo favorito van juntos: es el mismo texto, sale en un solo envío.
+ */
+export const repartirPushDeLaPromo = (clientes, items) => {
+  const generales = new Set();
+  const porFavoritos = new Map();
+
+  for (const cliente of clientes) {
+    const tokens = (cliente.pushTokens || []).filter(esTokenExpo);
+    if (!tokens.length) continue;
+
+    const favoritos = new Set((cliente.favorites || []).map(String));
+    const suyos = quiereEnLaApp(cliente, "favoritosEnOferta")
+      ? items.filter((i) => favoritos.has(i.id)).map((i) => i.nombre)
+      : [];
+
+    if (suyos.length) {
+      const clave = suyos.join("\n");
+      if (!porFavoritos.has(clave)) porFavoritos.set(clave, { nombres: suyos, tokens: [] });
+      porFavoritos.get(clave).tokens.push(...tokens);
+    } else if (quiereEnLaApp(cliente, "promociones")) {
+      tokens.forEach((t) => generales.add(t));
+    }
+  }
+
+  const favoritos = [...porFavoritos.values()];
+  // Un teléfono con dos cuentas no recibe el general además del de su favorito.
+  favoritos.forEach((g) => g.tokens.forEach((t) => generales.delete(t)));
+  return { generales: [...generales], favoritos };
+};
+
+// Los clientes con la app que podrían recibir algo de esta promo.
+const clientesConLaApp = () =>
+  clientModel
+    .find({
+      isActive: { $ne: false },
+      pushTokens: { $exists: true, $ne: [] },
+      $or: [
+        { "avisosApp.promociones": { $ne: false } },
+        { "avisosApp.favoritosEnOferta": { $ne: false } },
+      ],
+    })
+    .select("+pushTokens avisosApp favorites")
+    .lean();
 
 /*
  * Los destinatarios. Solo el correo: no hace falta traerse la cuenta entera de
@@ -208,16 +283,19 @@ export const avisarPromoNueva = async (promoId) => {
 
   /*
    * El volante, también al teléfono. Antes del corte de abajo porque tener la
-   * app y no tener correo verificado es perfectamente posible: es la misma
-   * preferencia ("promociones"), servida por dos canales.
+   * app y no tener correo verificado es perfectamente posible, y porque el
+   * teléfono tiene su propio interruptor: haberse dado de baja del correo no
+   * lo apaga.
    *
    * Sale una sola vez por promo igual que el correo — lo garantiza el
    * `avisoEnviadoEn` de más arriba, que ya cortó si esta promo se anunció.
    */
-  enviarPushEnSegundoPlano(await dispositivosDe("promociones"), {
-    // Corto y con misterio, para la vista previa del teléfono (ver textoDelPush).
-    ...textoDelPush(promo, items),
-    datos: { tipo: "promo", promoId: String(promo._id || "") },
+  const { generales, favoritos } = repartirPushDeLaPromo(await clientesConLaApp(), items);
+  const datos = { tipo: "promo", promoId: String(promo._id || "") };
+  // Corto y con misterio, para la vista previa del teléfono (ver textoDelPush).
+  enviarPushEnSegundoPlano(generales, { ...textoDelPush(promo, items), datos });
+  favoritos.forEach((grupo) => {
+    enviarPushEnSegundoPlano(grupo.tokens, { ...textoDeFavoritos(grupo.nombres), datos });
   });
 
   const correos = await buscarDestinatarios();
