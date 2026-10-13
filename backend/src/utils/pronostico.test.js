@@ -24,7 +24,7 @@ vi.mock("../models/shoppings.js", () => ({
   default: { find: () => conLean([{ supplierId: "s1", date: new Date("2026-10-05T18:00:00Z") }]) },
 }));
 
-const { armarSolicitud, obtenerPronostico, olvidarPronostico, diaLocal } = await import("./pronostico.js");
+const { armarSolicitud, obtenerPronostico, olvidarPronostico, diaLocal, textoDelPronostico, pronosticoParaTiqui } = await import("./pronostico.js");
 
 // Lunes 12 de octubre de 2026, 9 de la mañana en El Salvador.
 const AHORA = new Date("2026-10-12T15:00:00Z");
@@ -100,5 +100,80 @@ describe("el pronóstico, del lado de la tienda", () => {
     conVentas();
     fetch.mockResolvedValueOnce({ ok: false, status: 401 });
     await expect(obtenerPronostico({ ahora: AHORA })).rejects.toMatchObject({ codigo: "fallo" });
+  });
+});
+
+/* ── Lo que se le cuenta a Tiqui del panel ── */
+
+const PRONOSTICO = {
+  historial: { dias: 34, pedidos: 51 },
+  tienda: {
+    dias: Array.from({ length: 28 }, () => ({})),
+    semanas: [{ desde: "2026-10-13", hasta: "2026-10-19", esperado: 281.08, bajo: 182.46, alto: 383.56 }],
+    periodo: { esperado: 1094.4, bajo: 894.06, alto: 1297.54 },
+    periodo_anterior: 1139.15,
+  },
+  productos: [
+    { nombre: "Lays Barbacoa", unidad: "unidad", se_acaba: { agotado: true }, pedir: 12, semana: { esperado: 4.5 } },
+    { nombre: "Queso Crema", unidad: "unidad", se_acaba: { agotado: false, probable: "2026-10-17", pronto: "2026-10-15" }, pedir: 6, semana: { esperado: 3.8 } },
+    { nombre: "Agua", unidad: "unidad", se_acaba: { agotado: false, probable: null }, pedir: null, semana: { esperado: 9.8 } },
+  ],
+  proveedores: [{
+    nombre: "Distribuidora La Constancia", ciclo_dias: 7, costo_total: 16.5,
+    productos: [{ nombre: "Lays Barbacoa", unidad: "unidad", pedir: 12 }, { nombre: "Queso Crema", unidad: "unidad", pedir: 6 }],
+  }],
+  precision: { probado: true, semanas: 1, tienda: { error: 0.9, error_ingenuo: 0.66 } },
+};
+
+describe("el pronóstico contado a Tiqui", () => {
+  beforeEach(() => {
+    olvidarPronostico();
+    config.analitica.url = "http://analitica.test";
+    conVentas();
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("van las cuentas hechas, con su rango, y dice si es preliminar", () => {
+    const texto = textoDelPronostico(PRONOSTICO, AHORA.getTime() - 3 * 60_000, AHORA.getTime());
+    expect(texto).toContain("Calculado hace 3 min con 34 días de ventas (51 pedidos). Es PRELIMINAR");
+    expect(texto).toContain("Venta esperada las próximas 4 semanas: $1,094.40 (entre $894.06 y $1,297.54); las 4 semanas anteriores fueron $1,139.15.");
+    expect(texto).toContain("Próxima semana (13 de octubre al 19 de octubre): $281.08");
+    expect(texto).toContain("Ya agotados, y se venden: Lays Barbacoa.");
+    expect(texto).toContain("Queso Crema hacia el 17 de octubre (tan pronto como el 15 de octubre)");
+    expect(texto).toContain("Compra sugerida a Distribuidora La Constancia (se le compra cada 7 días): Lays Barbacoa 12, Queso Crema 6 = $16.50.");
+    expect(texto).toContain("Con muy pocas ventas para sugerir cuánto pedir: Agua.");
+    expect(texto).toContain("Lo que más se va a vender la próxima semana: Agua (9.8), Lays Barbacoa (4.5), Queso Crema (3.8).");
+  });
+
+  it("si ya está calculado, va siempre; si no, solo se espera cuando preguntan por eso", async () => {
+    // El servicio "dormido": contesta después de 10 s.
+    let contestar;
+    vi.stubGlobal("fetch", vi.fn(() => new Promise((r) => { contestar = r; })));
+    vi.useFakeTimers();
+    try {
+      // Una pregunta de otra cosa no espera: manda a calcular y sigue.
+      expect(await pronosticoParaTiqui("¿cómo vamos hoy?", AHORA)).toBe("");
+      await vi.advanceTimersByTimeAsync(0); // lee la base y recién ahí le pide al servicio
+      expect(fetch).toHaveBeenCalledTimes(1);
+
+      // "¿Qué tengo que pedir?" espera unos segundos y, si no llega, lo dice; no lanza otro cálculo.
+      const pendiente = pronosticoParaTiqui("¿Qué tengo que pedir esta semana?", AHORA);
+      await vi.advanceTimersByTimeAsync(5000);
+      expect(await pendiente).toMatch(/^Se está calculando en este momento/);
+      expect(fetch).toHaveBeenCalledTimes(1);
+
+      // Llega el cálculo: desde ahí va en cada pregunta, sin volver a pedirlo.
+      contestar({ ok: true, json: async () => PRONOSTICO });
+      await vi.advanceTimersByTimeAsync(0);
+      expect(await pronosticoParaTiqui("buenos días", AHORA)).toContain("Venta esperada");
+      expect(fetch).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("sin el servicio configurado, Tiqui no recibe nada del pronóstico", async () => {
+    config.analitica.url = "";
+    expect(await pronosticoParaTiqui("¿qué tengo que pedir?", AHORA)).toBe("");
   });
 });

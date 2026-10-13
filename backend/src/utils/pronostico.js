@@ -113,9 +113,13 @@ export const armarSolicitud = async (ahora = new Date()) => {
 };
 
 let guardado = null; // { datos, en }
+// El cálculo que está en camino: si piden otro mientras tanto (el panel y
+// Tiqui a la vez), se espera ese mismo en vez de lanzar dos.
+let enCamino = null;
 
 export const olvidarPronostico = () => {
   guardado = null;
+  enCamino = null;
 };
 
 /*
@@ -124,6 +128,29 @@ export const olvidarPronostico = () => {
  */
 export const obtenerPronostico = async ({ forzar = false, ahora = new Date() } = {}) => {
   if (!forzar && guardado && ahora.getTime() - guardado.en < VIGENCIA_MS) return guardado.datos;
+  if (!forzar && enCamino) return enCamino;
+  enCamino = calcular(ahora).finally(() => { enCamino = null; });
+  return enCamino;
+};
+
+/*
+ * Lo último que se calculó, sin pedir nada: para Tiqui, que no puede quedarse
+ * esperando a un servicio dormido. Vale hasta 6 horas (dice de cuándo es).
+ */
+const VIGENCIA_PARA_TIQUI_MS = 6 * 60 * 60 * 1000;
+export const pronosticoReciente = (ahora = new Date()) =>
+  guardado && ahora.getTime() - guardado.en < VIGENCIA_PARA_TIQUI_MS ? guardado : null;
+
+// Que se vaya calculando, sin esperarlo (al despertar a Tiqui del panel).
+export const calentarPronostico = () => {
+  if (!config.analitica.url) return null;
+  return obtenerPronostico().catch((error) => {
+    console.log(`pronóstico en segundo plano: ${error?.codigo || "error"} ${error?.message || error}`);
+    return null;
+  });
+};
+
+const calcular = async (ahora) => {
   if (!config.analitica.url) {
     throw new ErrorPronostico("sin-servicio", "El servicio de analítica no está configurado (ANALITICA_URL)");
   }
@@ -152,4 +179,108 @@ export const obtenerPronostico = async ({ forzar = false, ahora = new Date() } =
   const datos = { ...(await respuesta.json()), generado: ahora.toISOString() };
   guardado = { datos, en: ahora.getTime() };
   return datos;
+};
+
+/* ══════════ Lo que se le cuenta a Tiqui del panel ══════════ */
+
+const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+const fecha = (dia) => {
+  const [, m, d] = String(dia).slice(0, 10).split("-").map(Number);
+  return `${d} de ${MESES[m - 1]}`;
+};
+const MONEDA = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+const dinero = (n) => MONEDA.format(Number(n) || 0);
+const porciento = (x) => `${Math.round(Math.abs(x) * 100)}%`;
+const cuanto = (n, unidad) => (unidad === "libra" ? `${Number(n).toFixed(1)} lb` : String(Math.round(n)));
+const lista = (nombres, maximo = 4) =>
+  nombres.slice(0, maximo).join(", ") + (nombres.length > maximo ? ` y ${nombres.length - maximo} más` : "");
+
+/*
+ * El pronóstico en renglones cortos, con las cuentas ya hechas: Tiqui solo
+ * los cuenta (igual que los consejos de ventas, ver consejosVentas.js). Los
+ * montos van siempre con su rango, y si todavía no se pudo medir qué tan bien
+ * acierta, lo dice: "preliminar".
+ */
+export const textoDelPronostico = (datos, calculadoEn, ahora = Date.now()) => {
+  if (!datos) return "";
+  if (datos.vacio) return "Todavía no hay ventas de las que aprender: no hay pronóstico.";
+  const { tienda, historial, precision } = datos;
+  const semanas = Math.round((tienda.dias?.length || 28) / 7);
+  const minutos = Math.round((ahora - calculadoEn) / 60000);
+  const renglones = [];
+
+  const confiable = precision?.probado && precision.semanas >= 2;
+  renglones.push(
+    `Calculado ${minutos < 2 ? "hace un momento" : minutos < 90 ? `hace ${minutos} min` : `hace ${Math.round(minutos / 60)} h`} con ${historial.dias} días de ventas (${historial.pedidos} pedidos). ` +
+      (confiable
+        ? `Probado contra ${precision.semanas} semanas pasadas: se equivocó un ${porciento(precision.tienda.error)} en la venta semanal (repetir la semana anterior: ${porciento(precision.tienda.error_ingenuo)}).`
+        : "Es PRELIMINAR: todavía hay pocas semanas para medir qué tan bien acierta.")
+  );
+
+  renglones.push(
+    `Venta esperada las próximas ${semanas} semanas: ${dinero(tienda.periodo.esperado)} (entre ${dinero(tienda.periodo.bajo)} y ${dinero(tienda.periodo.alto)})` +
+      (tienda.periodo_anterior ? `; las ${semanas} semanas anteriores fueron ${dinero(tienda.periodo_anterior)}.` : ".")
+  );
+  const proxima = tienda.semanas?.[0];
+  if (proxima) {
+    renglones.push(`Próxima semana (${fecha(proxima.desde)} al ${fecha(proxima.hasta)}): ${dinero(proxima.esperado)} (entre ${dinero(proxima.bajo)} y ${dinero(proxima.alto)}).`);
+  }
+
+  const productos = datos.productos || [];
+  const agotados = productos.filter((p) => p.se_acaba?.agotado).map((p) => p.nombre);
+  if (agotados.length) renglones.push(`Ya agotados, y se venden: ${lista(agotados)}.`);
+  const seAgotan = productos.filter((p) => !p.se_acaba?.agotado && p.se_acaba?.probable);
+  if (seAgotan.length) {
+    renglones.push(`Se agotarían: ${lista(seAgotan.map((p) =>
+      `${p.nombre} hacia el ${fecha(p.se_acaba.probable)}${p.se_acaba.pronto && p.se_acaba.pronto !== p.se_acaba.probable ? ` (tan pronto como el ${fecha(p.se_acaba.pronto)})` : ""}`))}.`);
+  } else if (!agotados.length) {
+    renglones.push(`Ningún producto se agotaría en las próximas ${semanas} semanas.`);
+  }
+
+  const proveedores = datos.proveedores || [];
+  if (proveedores.length) {
+    proveedores.slice(0, 4).forEach((g) => {
+      renglones.push(`Compra sugerida a ${g.nombre || "(sin proveedor asignado)"} (se le compra cada ${g.ciclo_dias} días): ${lista(g.productos.map((p) => `${p.nombre} ${cuanto(p.pedir, p.unidad)}`), 6)} = ${dinero(g.costo_total)}.`);
+    });
+    const total = proveedores.reduce((s, g) => s + g.costo_total, 0);
+    renglones.push(`Compra sugerida en total: ${dinero(total)} con ${proveedores.length} ${proveedores.length === 1 ? "proveedor" : "proveedores"}.`);
+  } else {
+    renglones.push("Compra sugerida: nada por ahora; la existencia alcanza hasta la próxima compra.");
+  }
+
+  const sinBase = productos.filter((p) => p.pedir === null).map((p) => p.nombre);
+  if (sinBase.length) renglones.push(`Con muy pocas ventas para sugerir cuánto pedir: ${lista(sinBase)}.`);
+
+  const masVendidos = [...productos].sort((a, b) => b.semana.esperado - a.semana.esperado).slice(0, 3);
+  if (masVendidos.length) {
+    renglones.push(`Lo que más se va a vender la próxima semana: ${masVendidos.map((p) => `${p.nombre} (${p.unidad === "libra" ? `${p.semana.esperado.toFixed(1)} lb` : p.semana.esperado.toFixed(1)})`).join(", ")}.`);
+  }
+  return renglones.join("\n");
+};
+
+// "¿Qué tengo que pedir?", "¿qué se va a acabar?", "¿cuánto vamos a vender?"
+const PIDE_PRONOSTICO = /pronostic|predic|proyecc|\bpedir|\bpido\b|pidamos|surtir|reabastec|abastec|compra sugerid|que (tengo|debo|hay) que comprar|agot|acab|vamos a vender|voy a vender|vender[aá]|proxima semana|proximo mes|proveedor/;
+const aPlano = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+// Lo que Tiqui espera al servicio, solo si la pregunta es justo del pronóstico.
+const ESPERA_TIQUI_MS = 5000;
+
+/*
+ * El bloque PRONÓSTICO para la pregunta de Tiqui (solo el administrador).
+ * Si ya hay uno calculado, va siempre. Si no, se manda a calcular sin
+ * esperarlo; y si la pregunta es justo de eso, se le dan unos segundos por si
+ * el servicio estaba despierto. Si tampoco llega, Tiqui dice que lo está
+ * calculando, en vez de inventar.
+ */
+export const pronosticoParaTiqui = async (frase, ahora = new Date()) => {
+  const reciente = pronosticoReciente(ahora);
+  if (reciente) return textoDelPronostico(reciente.datos, reciente.en, ahora.getTime());
+  if (!config.analitica.url) return "";
+
+  const enCalculo = calentarPronostico();
+  if (!PIDE_PRONOSTICO.test(aPlano(frase))) return "";
+
+  const listo = await Promise.race([enCalculo, new Promise((r) => setTimeout(() => r(null), ESPERA_TIQUI_MS))]);
+  const ya = pronosticoReciente();
+  if (listo && ya) return textoDelPronostico(ya.datos, ya.en);
+  return "Se está calculando en este momento (el servicio de análisis estaba en reposo y tarda cerca de un minuto en despertar). No hay cifras todavía.";
 };
