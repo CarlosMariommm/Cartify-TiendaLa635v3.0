@@ -97,6 +97,10 @@ const employeeSchema = new Schema({
     // Bloqueo por intentos fallidos al iniciar sesión — igual que el admin.
     loginAttemps: { type: Number, default: 0 },
     timeOut: { type: Date, default: null },
+
+    // Los teléfonos donde suena cada pedido nuevo, mientras tenga la sesión
+    // abierta en la app. Ver utils/avisosPersonal.js.
+    pushTokens: { type: [String], default: [], select: false },
 },
 {
     timestamps: true,

@@ -58,7 +58,11 @@ import { direccionConPase, esDelPanel, queHacerCon } from '../../utils/panelWeb'
 const MAXIMO_REINTENTOS = 2;
 const VENTANA_REINTENTOS_MS = 30000;
 
-const PanelWeb = forwardRef(({ activo }, ref) => {
+/*
+ * `inicio`: la pantalla del panel con la que abre la primera vez (p. ej.
+ * '/pedidos' cuando se llega tocando el aviso de un pedido nuevo).
+ */
+const PanelWeb = forwardRef(({ activo, inicio }, ref) => {
   const estilos = useEstilos(crearEstilos);
   const COLORES = useColores();
   const { colores } = useTema();
@@ -110,10 +114,16 @@ const PanelWeb = forwardRef(({ activo }, ref) => {
     }
   }, [sesion?.token, salir]);
 
-  useEffect(() => { abrir(); }, [abrir]);
+  const inicioRef = useRef(inicio);
+  useEffect(() => { abrir(inicioRef.current); }, [abrir]);
 
   useImperativeHandle(ref, () => ({
     recargar: () => (estado === 'listo' ? vista.current?.reload() : abrir()),
+    // Ir a otra pantalla del panel. Ya abierto, con su sesión; si no, con un pase nuevo.
+    irA: (ruta) => {
+      if (estado === 'listo') vista.current?.injectJavaScript(`window.location.assign(${JSON.stringify(ruta)}); true;`);
+      else abrir(ruta);
+    },
   }), [estado, abrir]);
 
   // Atrás de Android: hacia atrás dentro del panel, mientras se pueda.

@@ -52,9 +52,22 @@ export const personalApi = {
   /*
    * Al salir se le pide al servidor que borre la cookie de sesión del personal
    * que el teléfono guardó al entrar: si se quedara, la tienda la seguiría
-   * mandando en cada llamada.
+   * mandando en cada llamada. Va también el token de avisos del teléfono, para
+   * que dejen de sonarle los pedidos nuevos (no pide sesión: si ya venció, la
+   * baja igual pasa).
    */
-  salir: () => peticion('/logoutAdmin', { metodo: 'POST' }).catch(() => null),
+  salir: (tokenAvisos) =>
+    peticion('/logoutAdmin', { metodo: 'POST', cuerpo: tokenAvisos ? { pushToken: tokenAvisos } : undefined })
+      .catch(() => null),
+
+  // Este teléfono avisa de cada pedido nuevo mientras dure la sesión.
+  apuntarTelefono: (token, tokenAvisos) =>
+    peticion('/perfil/avisos', {
+      metodo: 'PUT',
+      cuerpo: { token: tokenAvisos },
+      cabeceras: conToken(token),
+      tiempoMaximo: 45000,
+    }),
 
   // ── Tiqui del panel (solo el administrador) ──
 

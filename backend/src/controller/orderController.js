@@ -17,6 +17,7 @@ import { generarCodigoEntrega } from "../utils/codigoEntrega.js";
 import { cambiarEstadoDePedido } from "../utils/estadoPedido.js";
 import storeSettingsModel, { CLAVE_UNICA } from "../models/storeSettings.js";
 import { rutaDelRepartidor, olvidarRuta } from "../utils/rutaReparto.js";
+import { avisarPedidoNuevoEnSegundoPlano } from "../utils/avisosPersonal.js";
 import { config } from "../../config.js";
 
 const orderController = {};
@@ -395,6 +396,9 @@ orderController.createOrder = async (req, res) => {
         orderId: newOrder._id,
       });
     }
+
+    // Que le suene al personal en la app (no si lo cobró el mismo personal en caja).
+    if (!req.cobraPersonal) avisarPedidoNuevoEnSegundoPlano(newOrder);
 
     return res.status(201).json({
       message: "Pedido creado",
@@ -775,6 +779,8 @@ orderController.createPrintOrder = async (req, res) => {
       expiresAt.setMonth(expiresAt.getMonth() + (config.expiryMonths || 3));
       await loyaltyLedgerModel.create({ clientId, points: pointsEarned, earnedAt, expiresAt, orderId: newOrder._id });
     }
+
+    if (!req.cobraPersonal) avisarPedidoNuevoEnSegundoPlano(newOrder);
 
     return res.status(201).json({
       message: "Pedido de impresión creado",

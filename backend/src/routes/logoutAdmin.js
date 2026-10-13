@@ -17,6 +17,14 @@ import logoutController from "../controller/Admin/logoutAdmin.js";
  *     tags: [Admin Auth]
  *     security:
  *       - cookieAuth: []
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pushToken: { type: string, description: "Desde la app: el token de avisos de ese teléfono, que deja de recibir los pedidos nuevos." }
  *     responses:
  *       200:
  *         description: Sesión cerrada. Limpia la cookie authCookie.
