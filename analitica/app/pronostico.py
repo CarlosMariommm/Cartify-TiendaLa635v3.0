@@ -49,6 +49,8 @@ import numpy as np
 SEMANA = 7
 # Para ajustar Holt-Winters hacen falta al menos tres vueltas de la semana.
 MINIMO_HOLT_WINTERS = 21
+# Cuántas semanas pasadas, como mucho, se usan para medir la precisión.
+SEMANAS_DE_PRUEBA = 6
 SIMULACIONES = 2000
 # Si un proveedor no tiene compras suficientes para saber cada cuánto se le
 # compra, se asume una vez por semana.
@@ -276,8 +278,9 @@ def _wape(real: np.ndarray, pronostico: np.ndarray):
 
 def medir_precision(tienda, pedidos, dias, series_productos, semilla=635):
     """
-    Pronostica las últimas semanas como si no se supieran (hasta 3, de una en
-    una) y compara con lo que de verdad pasó. Al lado, el error de la forma
+    Pronostica las últimas semanas como si no se supieran (hasta 6, de una en
+    una) y compara con lo que de verdad pasó. Con 3 el resultado dependía
+    demasiado de qué semanas tocaron: una semana rara volteaba la conclusión. Al lado, el error de la forma
     ingenua: decir que esta semana va a ser igual que la anterior. Si el
     modelo no le gana a eso, el reporte lo dice.
 
@@ -286,7 +289,7 @@ def medir_precision(tienda, pedidos, dias, series_productos, semilla=635):
     lo que domina es el azar de cada día y no dice nada del modelo.
     """
     n = len(tienda)
-    semanas = min(3, (n - MINIMO_HOLT_WINTERS) // SEMANA)
+    semanas = min(SEMANAS_DE_PRUEBA, (n - MINIMO_HOLT_WINTERS) // SEMANA)
     if semanas < 1:
         return {
             "probado": False,
