@@ -77,5 +77,11 @@ export const config = {
    */
   rutas: {
     llave: process.env.OPENROUTESERVICE_API_KEY || ""
+  },
+  // El servicio de analítica en Python (analitica/): dónde está y la clave
+  // que comparten. Sin URL, el pronóstico dice que no está conectado.
+  analitica: {
+    url: (process.env.ANALITICA_URL || "").replace(/\/+$/, ""),
+    clave: process.env.ANALITICA_CLAVE || ""
   }
 };

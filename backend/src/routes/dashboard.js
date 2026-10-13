@@ -1,7 +1,7 @@
 import express from "express";
 import dashboardController from "../controller/dashboardController.js";
 
-import { soloPersonal } from "../middlewares/validarSesion.js";
+import { soloAdmin, soloPersonal } from "../middlewares/validarSesion.js";
 
 const router = express.Router();
 
@@ -13,5 +13,10 @@ router.route("/summary").get(dashboardController.getSummary);
 
 // GET /api/dashboard/chart?periodo=...  -> solo la gráfica (cambio de periodo)
 router.route("/chart").get(dashboardController.getChart);
+
+// GET /api/dashboard/pronostico[?forzar=1]  -> lo que se va a vender, cuándo se
+// acaba cada producto y qué pedirle a cada proveedor. Solo el administrador:
+// son compras y proveedores. Ver utils/pronostico.js.
+router.route("/pronostico").get(soloAdmin, dashboardController.getPronostico);
 
 export default router;

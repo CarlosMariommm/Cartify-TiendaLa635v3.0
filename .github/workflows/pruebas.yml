@@ -1,8 +1,8 @@
 # Revisión automática de cada cambio.
 #
 # En cada pull request (y al llegar a develop o main) corre, por separado y
-# a la vez, lo de la web, el servidor y la app: el linter, las pruebas y la
-# construcción. Si algo falla, el PR lo muestra en rojo antes de juntarlo;
+# a la vez, lo de la web, el servidor, el servicio de analítica (Python) y la
+# app: el linter, las pruebas y la construcción. Si algo falla, el PR lo muestra en rojo antes de juntarlo;
 # hasta ahora cada cambio se probaba a mano y lo roto se descubría publicado.
 #
 # Las pruebas no tocan la base de datos ni mandan correos: lo que necesita
@@ -54,6 +54,23 @@ jobs:
       - run: npm ci
       - name: Pruebas
         run: npm test
+
+  analitica:
+    name: Analítica
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: analitica
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: analitica/requirements*.txt
+      - run: pip install -r requirements-dev.txt
+      - name: Pruebas
+        run: pytest -q
 
   app:
     name: App
