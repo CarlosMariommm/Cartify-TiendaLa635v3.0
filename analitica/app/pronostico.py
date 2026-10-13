@@ -53,6 +53,10 @@ SIMULACIONES = 2000
 # Si un proveedor no tiene compras suficientes para saber cada cuánto se le
 # compra, se asume una vez por semana.
 CICLO_POR_DEFECTO = 7
+# Lo que suele variar una tienda de un día de la semana a otro (ver perfil_semanal).
+VARIACION_SEMANAL = 0.3
+# Un pedido de más de este tanto de lo normal es "al por mayor" (ver tope_al_por_mayor).
+VECES_AL_POR_MAYOR = 3
 
 
 # ── Utilidades ──────────────────────────────────────────────
@@ -88,9 +92,12 @@ def perfil_semanal(pedidos: np.ndarray, dias: list[date]) -> np.ndarray:
     Cuánto se vende cada día de la semana comparado con un día promedio (1 =
     normal, 1.5 = la mitad más). Lunes es el 0, como en Python.
 
-    Con pocas semanas de historial, un domingo bueno por casualidad parecería
-    un patrón. Por eso el perfil se ENCOGE hacia 1 según cuántas semanas hay:
-    con 2 semanas pesa la mitad, con 8 casi completo.
+    Con pocos pedidos, un sábado bueno por casualidad parecería un patrón. Por
+    eso el perfil se ENCOGE hacia 1 según cuánta información hay (un
+    encogimiento de James-Stein): cada día de la semana se estima con total/7
+    pedidos, y su ruido de conteo (varianza relativa 7/total) se compara con lo
+    que suele variar una tienda de un día a otro (±30%). Con 9 pedidos pesa un
+    10%; con 50, un 40%; con 200, un 70%; con 1,000, más del 90%.
     """
     if len(pedidos) == 0 or pedidos.sum() <= 0:
         return np.ones(SEMANA)
@@ -100,8 +107,9 @@ def perfil_semanal(pedidos: np.ndarray, dias: list[date]) -> np.ndarray:
         pedidos[dia_semana == k].mean() / promedio if np.any(dia_semana == k) else 1.0
         for k in range(SEMANA)
     ])
-    semanas = len(pedidos) / SEMANA
-    perfil = 1 + (semanas / (semanas + 2)) * (crudo - 1)
+    ruido = SEMANA / pedidos.sum()
+    peso = VARIACION_SEMANAL ** 2 / (VARIACION_SEMANAL ** 2 + ruido)
+    perfil = 1 + peso * (crudo - 1)
     return perfil / perfil.mean()
 
 
@@ -128,17 +136,20 @@ def _caminos_holt_winters(serie: np.ndarray, horizonte: int, semilla: int):
 
 
 def _caminos_promedio(serie, dias, perfil, futuros, semilla):
-    """Sin historial para Holt-Winters: el promedio de las 2 últimas semanas con el perfil semanal."""
+    """
+    Sin historial para Holt-Winters: cada día futuro es uno de los días reales
+    de las últimas 4 semanas, sacado al azar (bootstrap) y ajustado por el día
+    de la semana. Así el rango sale de cómo de verdad varían las ventas —con
+    sus días en cero y sus días buenos— y nunca da ventas negativas, que es lo
+    que pasaba con una campana normal cuando hay pocos pedidos.
+    """
     rng = np.random.default_rng(semilla)
-    ventana = slice(-14, None)
+    ventana = slice(-SEMANA * 4, None)
     factor_pasado = np.array([perfil[d.weekday()] for d in dias])[ventana]
-    nivel = float(np.mean(serie[ventana] / factor_pasado)) if len(serie) else 0.0
-    residuos = serie[ventana] - nivel * factor_pasado
-    sigma = float(np.std(residuos)) if len(residuos) > 1 else nivel
+    base = serie[ventana] / factor_pasado  # cada día, como si fuera un día promedio
     factor = np.array([perfil[d.weekday()] for d in futuros])
-    media = nivel * factor
-    caminos = media + rng.normal(0, sigma, size=(SIMULACIONES, len(futuros)))
-    return media, caminos
+    caminos = rng.choice(base, size=(SIMULACIONES, len(futuros))) * factor
+    return base.mean() * factor, caminos
 
 
 def pronostico_tienda(serie, dias, perfil, horizonte, semilla=635):
@@ -146,6 +157,9 @@ def pronostico_tienda(serie, dias, perfil, horizonte, semilla=635):
     Lo que se espera vender (en dólares) cada uno de los próximos `horizonte`
     días, con los futuros simulados para sacar los rangos. Devuelve también
     el método que se pudo usar.
+
+    Lo esperado de cada día es el promedio de los futuros simulados, ya sin
+    ventas negativas: así siempre cae dentro de su propio rango.
     """
     futuros = [dias[-1] + timedelta(days=i + 1) for i in range(horizonte)]
     metodo = "promedio-semanal"
@@ -158,7 +172,8 @@ def pronostico_tienda(serie, dias, perfil, horizonte, semilla=635):
     else:
         media, caminos = _caminos_promedio(serie, dias, perfil, futuros, semilla)
     # No hay ventas negativas: lo que la estadística ponga bajo cero es cero.
-    return futuros, np.clip(media, 0, None), np.clip(caminos, 0, None), metodo
+    caminos = np.clip(caminos, 0, None)
+    return futuros, caminos.mean(axis=0), caminos, metodo
 
 
 # ── Cada producto ───────────────────────────────────────────
@@ -212,7 +227,22 @@ def simular_producto(p, z, tamanos, factores, rng):
     return np.where(ocurre, cantidades, 0.0)
 
 
+def tope_al_por_mayor(serie: np.ndarray) -> float:
+    """
+    Hasta cuánto cuenta una venta como "de todos los días". Un pedido de 125
+    botellas de agua para una fiesta es real, pero no es lo que se vende cada
+    semana: si entrara entero al pronóstico, se sugeriría llenar la bodega. Por
+    encima de 3 veces la venta típica (la mediana) se cuenta como el tope.
+    Hacen falta al menos 3 ventas para saber qué es "típico".
+    """
+    ventas = serie[serie > 0]
+    if len(ventas) < 3:
+        return math.inf
+    return VECES_AL_POR_MAYOR * float(np.median(ventas))
+
+
 def _confianza(dias_con_venta: int, dias_historial: int) -> str:
+    """Con menos de 3 días de venta es "baja": se muestra, pero no se sugiere cuánto pedir."""
     if dias_con_venta >= 8 and dias_historial >= 28:
         return "alta"
     if dias_con_venta >= 3:
@@ -279,7 +309,7 @@ def medir_precision(tienda, pedidos, dias, series_productos, semilla=635):
             pasado = serie[:corte]
             if not (pasado > 0).any():
                 continue
-            p, z = ajustar_tsb(pasado)
+            p, z = ajustar_tsb(np.minimum(pasado, tope_al_por_mayor(pasado)))
             real_p.append(serie[prueba].sum())
             modelo_p.append(float(np.sum(np.clip(p * factores, 0, 1)) * z))
             ingenuo_p.append(pasado[-SEMANA:].sum())
@@ -364,9 +394,14 @@ def pronosticar(solicitud: dict) -> dict:
         inicio = max(desde, min(prod.get("creado") or desde, primera))
         serie = serie_diaria(dias_entre(inicio, hasta), filas, "unidades")
         series_productos.append(serie_diaria(dias, filas, "unidades"))
+        dias_con_venta = int((serie > 0).sum())
+        confianza = _confianza(dias_con_venta, len(serie))
 
-        p, z = ajustar_tsb(serie)
-        caminos_p = simular_producto(p, z, serie[serie > 0], factores, rng)
+        # Lo que se vende de todos los días, sin los pedidos al por mayor.
+        tope = tope_al_por_mayor(serie)
+        normal = np.minimum(serie, tope)
+        p, z = ajustar_tsb(normal)
+        caminos_p = simular_producto(p, z, normal[normal > 0], factores, rng)
         acumulado = np.cumsum(caminos_p, axis=1)
         esperado = np.clip(p * factores, 0, 1) * z
         stock = float(prod.get("stock") or 0)
@@ -385,10 +420,15 @@ def pronosticar(solicitud: dict) -> dict:
                 "pronto": futuros_alcance[pronto].isoformat() if pronto < alcance else None,
             }
 
-        # ¿Cuánto pedir? Lo que alcanza hasta la próxima compra en el 90% de los futuros.
+        # ¿Cuánto pedir? Lo que alcanza hasta la próxima compra en el 90% de los
+        # futuros. Con menos de 3 días de venta no hay con qué decirlo: None
+        # ("todavía no se sabe"), que no es lo mismo que 0 ("no hace falta").
         ciclo = ciclo_de.get(prod.get("proveedor"), CICLO_POR_DEFECTO)
-        necesidad = _cuantil(acumulado[:, ciclo - 1], servicio)
-        pedir = _redondear_pedido(necesidad - max(stock, 0), unidad)
+        if confianza == "baja":
+            pedir = None
+        else:
+            necesidad = _cuantil(acumulado[:, ciclo - 1], servicio)
+            pedir = _redondear_pedido(necesidad - max(stock, 0), unidad)
 
         semana_1 = acumulado[:, SEMANA - 1]
         mes = acumulado[:, horizonte - 1]
@@ -399,8 +439,9 @@ def pronosticar(solicitud: dict) -> dict:
             "proveedor": prod.get("proveedor"),
             "stock": _redondo(stock),
             "vendido": _redondo(serie.sum()),
-            "dias_con_venta": int((serie > 0).sum()),
-            "confianza": _confianza(int((serie > 0).sum()), len(serie)),
+            "dias_con_venta": dias_con_venta,
+            "al_por_mayor": int((serie > tope).sum()),
+            "confianza": confianza,
             "por_dia": _redondo(esperado[:horizonte].mean(), 3),
             "semana": {"esperado": _redondo(esperado[:SEMANA].sum()), "bajo": _redondo(_cuantil(semana_1, abajo)), "alto": _redondo(_cuantil(semana_1, arriba))},
             "periodo": {"esperado": _redondo(esperado[:horizonte].sum()), "bajo": _redondo(_cuantil(mes, abajo)), "alto": _redondo(_cuantil(mes, arriba))},
@@ -408,7 +449,7 @@ def pronosticar(solicitud: dict) -> dict:
             "se_acaba": se_acaba,
             "ciclo_dias": ciclo,
             "pedir": pedir,
-            "costo_pedido": _redondo(pedir * float(prod.get("costo") or 0)),
+            "costo_pedido": _redondo((pedir or 0) * float(prod.get("costo") or 0)),
         })
 
     # El más urgente primero: lo agotado, luego lo que se acaba antes.
@@ -423,7 +464,7 @@ def pronosticar(solicitud: dict) -> dict:
     nombres = {prov["id"]: prov.get("nombre", "") for prov in solicitud.get("proveedores", [])}
     por_proveedor: dict = {}
     for prod in productos:
-        if prod["pedir"] <= 0:
+        if not prod["pedir"]:  # 0 (no hace falta) o None (todavía no se sabe)
             continue
         clave = prod["proveedor"]
         grupo = por_proveedor.setdefault(clave, {
