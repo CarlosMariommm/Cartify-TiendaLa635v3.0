@@ -146,6 +146,10 @@ def test_las_semanas_y_el_periodo_tienen_rango():
         assert tramo["bajo"] <= tramo["esperado"] <= tramo["alto"]
     assert tienda["periodo_anterior"] is not None
     assert len(salida["perfil_semana"]) == 7
+    # Las 4 semanas reales de antes, la última termina ayer.
+    anteriores = salida["historial"]["semanas"]
+    assert len(anteriores) == 4 and anteriores[-1]["hasta"] == HASTA.isoformat()
+    assert sum(s["total"] for s in anteriores) == pytest.approx(tienda["periodo_anterior"])
 
 
 def test_la_precision_se_mide_solo_con_historial_suficiente():
