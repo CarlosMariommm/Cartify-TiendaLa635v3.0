@@ -31,7 +31,7 @@ const EASE_OUT = [0.23, 1, 0.32, 1];
 
 // Lo que se le puede preguntar, para quien no sabe por dónde empezar.
 // "¿Qué me recomiendas?" la vuelve ayudante de ventas: promos que pierden, lo que no se mueve.
-const SUGERENCIAS_ADMIN = ['¿Cómo vamos hoy?', '¿Qué me recomiendas para vender más?', '¿Cómo van las promociones?', '¿Qué pedidos esperan?', '¿Qué se está acabando?'];
+const SUGERENCIAS_ADMIN = ['¿Cómo vamos hoy?', '¿Qué tengo que pedir esta semana?', '¿Qué me recomiendas para vender más?', '¿Cómo van las promociones?', '¿Qué pedidos esperan?'];
 const SUGERENCIAS_EMPLEADO = ['¿Cómo vamos hoy?', '¿Qué pedidos esperan?', '¿Qué va en camino?'];
 
 // Si el fondo del panel es claro, Tiqui va navy (como en el modo claro de la tienda).

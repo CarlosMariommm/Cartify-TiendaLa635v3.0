@@ -25,7 +25,7 @@ import { useTiquiAdmin } from '../../hooks/useTiquiAdmin';
 import { contenidoCentrado } from '../../theme/pantalla';
 
 // Por dónde empezar, para quien no sabe qué pedirle.
-const SUGERENCIAS = ['¿Cómo vamos hoy?', '¿Qué pedidos esperan?', '¿Qué se está acabando?', '¿Cuánto les debemos a los proveedores?'];
+const SUGERENCIAS = ['¿Cómo vamos hoy?', '¿Qué pedidos esperan?', '¿Qué tengo que pedir esta semana?', '¿Cuánto les debemos a los proveedores?'];
 
 const TiquiAdmin = () => {
   const estilos = useEstilos(crearEstilos);

@@ -83,6 +83,7 @@ const Suppliers = lazy(() => import('./pages/Suppliers'));
 const Categories = lazy(() => import('./pages/Categories'));
 const Fidelidad = lazy(() => import('./pages/Fidelidad'));
 const Promociones = lazy(() => import('./pages/Promociones'));
+const Pronostico = lazy(() => import('./pages/Pronostico'));  // Lo que se va a vender y qué pedir (servicio de analítica)
 const GiftCards = lazy(() => import('./pages/GiftCards'));
 const ServiciosImpresion = lazy(() => import('./pages/ServiciosImpresion'));
 const Personalizacion = lazy(() => import('./pages/Personalizacion'));
@@ -358,6 +359,7 @@ function App() {
                 <Route path="/categorias"  element={<Categories />} />
                 <Route path="/fidelidad"   element={<Fidelidad />} />
                 <Route path="/promociones" element={<Promociones />} />
+                <Route path="/pronostico"  element={<Pronostico />} />
                 <Route path="/servicios-impresion" element={<ServiciosImpresion />} />
                 <Route path="/tarjetas"    element={<GiftCards />} />
                 {/* Nombre, logo y orden de la portada de la tienda */}
