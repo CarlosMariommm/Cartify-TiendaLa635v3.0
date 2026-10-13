@@ -83,7 +83,7 @@ describe('la pantalla Pronóstico', () => {
     abrir();
     await screen.findByText('$1,200.00');
     fireEvent.click(screen.getByRole('button', { name: /Actualizar/ }));
-    await waitFor(() => expect(dashboardService.getPronostico).toHaveBeenLastCalledWith({ forzar: true }));
+    await waitFor(() => expect(dashboardService.getPronostico).toHaveBeenLastCalledWith({ forzar: true, demo: false }));
 
     fireEvent.click(screen.getByRole('button', { name: /Descargar PDF/ }));
     await waitFor(() => expect(descargarReportePredictivo).toHaveBeenCalledWith(PRONOSTICO, AJUSTES));
@@ -103,5 +103,32 @@ describe('la pantalla Pronóstico', () => {
     abrir();
     expect(await screen.findByText('Todavía no hay ventas de las que aprender.')).toBeTruthy();
     expect(screen.getByRole('button', { name: /Descargar PDF/ }).disabled).toBe(true);
+  });
+});
+
+describe('la demostración en la pantalla Pronóstico', () => {
+  afterEach(() => { cleanup(); vi.clearAllMocks(); });
+
+  it('si el servidor la tiene, se puede cambiar a ella y lo dice claro', async () => {
+    dashboardService.getPronostico.mockImplementation(async ({ demo }) => ({ ...PRONOSTICO, demoDisponible: true, ...(demo ? { demo: true } : {}) }));
+    abrir();
+    await screen.findByText('$1,200.00');
+    expect(screen.getByRole('tab', { name: 'Tienda real' }).getAttribute('aria-selected')).toBe('true');
+    expect(screen.queryByText(/Está viendo una demostración/)).toBeNull();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Demostración' }));
+    await waitFor(() => expect(dashboardService.getPronostico).toHaveBeenLastCalledWith({ forzar: false, demo: true }));
+    expect(await screen.findByText(/Está viendo una demostración/)).toBeTruthy();
+
+    // El PDF sale de lo que se está viendo: la demostración.
+    fireEvent.click(await screen.findByRole('button', { name: /Descargar PDF/ }));
+    await waitFor(() => expect(descargarReportePredictivo).toHaveBeenCalledWith(expect.objectContaining({ demo: true }), AJUSTES));
+  });
+
+  it('sin demostración en el servidor, no se ofrece', async () => {
+    dashboardService.getPronostico.mockResolvedValue({ ...PRONOSTICO, demoDisponible: false });
+    abrir();
+    await screen.findByText('$1,200.00');
+    expect(screen.queryByRole('tab', { name: 'Demostración' })).toBeNull();
   });
 });

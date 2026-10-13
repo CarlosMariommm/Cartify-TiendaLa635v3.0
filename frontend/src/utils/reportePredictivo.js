@@ -114,7 +114,13 @@ export const resumenDelPronostico = (datos) => {
   // Una sola semana de prueba no alcanza para hablar de precisión: se dice preliminar.
   if (precision?.probado && precision.semanas >= 2) {
     const t = precision.tienda;
-    puntos.push(`Probado contra las últimas ${precision.semanas} semanas como si no se conocieran: la venta semanal de la tienda se estimó con un error de ${porciento(t.error)} (repetir la semana anterior: ${porciento(t.error_ingenuo)}).`);
+    // Las dos cifras: en la venta de la tienda puede empatar con lo ingenuo;
+    // por producto (lo que dice qué se agota) es donde suele ganar.
+    const p = precision.productos;
+    const porProducto = p?.error != null && p?.error_ingenuo != null
+      ? `, y la de cada producto con ${porciento(p.error)} (repetir la semana anterior: ${porciento(p.error_ingenuo)})`
+      : '';
+    puntos.push(`Probado contra las últimas ${precision.semanas} semanas como si no se conocieran: la venta semanal de la tienda se estimó con un error de ${porciento(t.error)} (repetir la semana anterior: ${porciento(t.error_ingenuo)})${porProducto}.`);
   } else {
     puntos.push(`Pronóstico preliminar: se basa en ${historial.dias} días de ventas (${historial.pedidos} pedidos). Su precisión se mide bien desde 5 semanas de historial, y mejora con cada semana que pasa.`);
   }
@@ -149,8 +155,10 @@ export const construirReportePredictivo = (datos, tienda, ahora = new Date()) =>
 
   const { doc, y: inicio } = nuevoReporte({
     tienda,
-    titulo: 'Reporte predictivo',
+    // La demostración lo dice en el título: es un papel que se imprime y se enseña.
+    titulo: datos.demo ? 'Reporte predictivo · demostración' : 'Reporte predictivo',
     renglones: [
+      ...(datos.demo ? ['Con ventas inventadas para mostrar el pronóstico: no son de la tienda real'] : []),
       `Proyección ${rangoDeFechas(primero, ultimo)}`,
       `Generado el ${fechaLarga(hoyLocal(ahora))}  ·  Basado en ${historial.dias} días de ventas, ${rangoDeFechas(historial.desde, historial.hasta)} (${historial.pedidos} pedidos)`,
     ],
@@ -259,6 +267,6 @@ export const construirReportePredictivo = (datos, tienda, ahora = new Date()) =>
     'Rangos y fechas de agotamiento: 2,000 escenarios simulados por producto. El patrón semanal se ajusta según la cantidad de pedidos disponibles, para no tomar por patrón lo que es casualidad.',
   ].join(' '), y);
 
-  pie(doc, `${tienda.nombre}  ·  Reporte predictivo  ·  ${fechaLarga(hoyLocal(ahora))}`);
+  pie(doc, `${tienda.nombre}  ·  Reporte predictivo${datos.demo ? ' (demostración)' : ''}  ·  ${fechaLarga(hoyLocal(ahora))}`);
   return doc;
 };

@@ -155,7 +155,7 @@ def test_las_semanas_y_el_periodo_tienen_rango():
 def test_la_precision_se_mide_solo_con_historial_suficiente():
     assert pronosticar(solicitud(semanas=3))["precision"]["probado"] is False
     precision = pronosticar(solicitud(semanas=8))["precision"]
-    assert precision["probado"] is True and precision["semanas"] == 3
+    assert precision["probado"] is True and precision["semanas"] == 5  # 8 semanas: 3 para ajustar y 5 de prueba
     assert precision["tienda"]["error"] is not None and precision["tienda"]["error_ingenuo"] is not None
 
 

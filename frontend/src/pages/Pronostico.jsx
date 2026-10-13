@@ -24,6 +24,10 @@ import { descargarReportePredictivo } from '../utils/descargarPredictivo';
  * cerca de un minuto, y la pantalla lo dice mientras espera. Después queda
  * guardado un rato en el servidor y abre al instante; "Actualizar" lo vuelve
  * a calcular con las ventas más recientes.
+ *
+ * "Demostración": el mismo pronóstico con ventas inventadas de varios meses
+ * (la Expo), para ver todo lo que hace cuando hay historia, sin mezclar nada
+ * con la tienda real. Lo dice arriba y en el PDF.
  * ============================================================
  */
 
@@ -91,18 +95,30 @@ const Pronostico = () => {
   const [error, setError] = useState('');
   const [descargando, setDescargando] = useState(false);
   const [buscar, setBuscar] = useState('');
+  // La tienda real o la demostración; el servidor dice si hay demostración.
+  const [demo, setDemo] = useState(false);
+  const [hayDemo, setHayDemo] = useState(false);
 
   const cargar = useCallback(async (forzar = false) => {
     setCargando(true);
     setError('');
     try {
-      setDatos(await dashboardService.getPronostico({ forzar }));
+      const respuesta = await dashboardService.getPronostico({ forzar, demo });
+      setDatos(respuesta);
+      setHayDemo(Boolean(respuesta?.demoDisponible));
     } catch (e) {
       setError(e?.response?.data?.message || 'No se pudo calcular el pronóstico. Intente de nuevo en un minuto.');
     } finally {
       setCargando(false);
     }
-  }, []);
+  }, [demo]);
+
+  // Al cambiar de la tienda real a la demostración (o al revés), nada de la otra se queda en pantalla.
+  const cambiarModo = (conDemo) => {
+    if (conDemo === demo) return;
+    setDatos(null);
+    setDemo(conDemo);
+  };
 
   useEffect(() => { cargar(); }, [cargar]);
 
@@ -163,6 +179,29 @@ const Pronostico = () => {
           </button>
         </div>
       </div>
+
+      {(hayDemo || demo) && (
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="inline-flex rounded-full border border-gray-300 p-1" role="tablist" aria-label="Con qué datos">
+            {[[false, 'Tienda real'], [true, 'Demostración']].map(([valor, texto]) => (
+              <button
+                key={texto}
+                role="tab"
+                aria-selected={demo === valor}
+                onClick={() => cambiarModo(valor)}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium ${demo === valor ? 'bg-[#003049] text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+              >
+                {texto}
+              </button>
+            ))}
+          </div>
+          {demo && (
+            <p className="text-sm text-amber-700 max-w-2xl">
+              Está viendo una demostración: ventas inventadas de 3 meses y medio para mostrar todo lo que hace el pronóstico. La tienda real no cambia.
+            </p>
+          )}
+        </div>
+      )}
 
       {cargando && !datos ? (
         <div className="py-16 text-center" role="status">

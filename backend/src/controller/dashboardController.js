@@ -2,7 +2,7 @@ import orderModel from "../models/order.js";
 import productModel from "../models/product.js";
 import supplierMovementModel from "../models/supplierMovement.js";
 import clientModel from "../models/client.js";
-import { obtenerPronostico } from "../utils/pronostico.js";
+import { hayDemostracion, obtenerPronostico } from "../utils/pronostico.js";
 
 /*
  * Dashboard del admin — arma TODO el resumen en una sola llamada.
@@ -406,12 +406,18 @@ const MENSAJES_PRONOSTICO = {
   "sin-servicio": [503, "El pronóstico todavía no está conectado: falta configurar el servicio de analítica."],
   lento: [504, "El servicio de pronóstico tardó demasiado; puede estar despertando. Intente de nuevo en un minuto."],
   "sin-conexion": [502, "No se pudo conectar con el servicio de pronóstico. Intente de nuevo en un minuto."],
+  "sin-demo": [404, "La demostración del pronóstico no está disponible."],
 };
 
+/*
+ * `?demo=1`: con la demostración (ventas inventadas de varios meses, para
+ * mostrar el pronóstico sin tocar la tienda real; ver utils/pronostico.js).
+ * `demoDisponible` le dice al panel si puede ofrecer ese modo.
+ */
 dashboardController.getPronostico = async (req, res) => {
   try {
-    const datos = await obtenerPronostico({ forzar: req.query.forzar === "1" });
-    return res.status(200).json(datos);
+    const datos = await obtenerPronostico({ forzar: req.query.forzar === "1", demo: req.query.demo === "1" });
+    return res.status(200).json({ ...datos, demoDisponible: hayDemostracion() });
   } catch (error) {
     const [estado, mensaje] = MENSAJES_PRONOSTICO[error?.codigo] || [502, "No se pudo calcular el pronóstico."];
     console.log(`pronóstico: ${error?.codigo || "error"} ${error?.message || error}`);

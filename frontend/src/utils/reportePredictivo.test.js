@@ -58,7 +58,7 @@ describe('el resumen del pronóstico', () => {
     expect(texto).toContain('suma $16.50: 2 productos con 1 proveedor.');
     expect(texto).toContain('1 producto tiene menos de 3 días con venta');
     expect(texto).toContain('El día más fuerte de la semana es el sábado (25% más que un día promedio) y el más flojo, el martes (20% menos).');
-    expect(texto).toContain('error de 14% (repetir la semana anterior: 23%)');
+    expect(texto).toContain('error de 14% (repetir la semana anterior: 23%), y la de cada producto con 49% (repetir la semana anterior: 61%).');
   });
 
   it('con una sola semana de prueba, o sin prueba, se dice preliminar', () => {
@@ -109,5 +109,15 @@ describe('el PDF', () => {
   it('sin compras ni productos por agotarse también sale', () => {
     const tranquilo = { ...PRONOSTICO, proveedores: [], productos: [producto({})], precision: { probado: false, motivo: 'Hacen falta al menos 28 días.' } };
     expect(() => construirReportePredictivo(tranquilo, TIENDA)).not.toThrow();
+  });
+});
+
+describe('el PDF de la demostración', () => {
+  it('lo dice en el título y arriba, para que nadie lo tome por ventas reales', () => {
+    const contenido = construirReportePredictivo({ ...PRONOSTICO, demo: true }, TIENDA).output();
+    expect(contenido).toContain('REPORTE PREDICTIVO');
+    expect(contenido).toContain('DEMOSTRACI');
+    expect(contenido).toContain('ventas inventadas');
+    expect(construirReportePredictivo(PRONOSTICO, TIENDA).output()).not.toContain('ventas inventadas');
   });
 });

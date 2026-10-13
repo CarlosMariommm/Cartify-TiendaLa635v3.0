@@ -208,6 +208,7 @@ export const TEMAS_AYUDA = [
       '“Productos que se agotarían” dice cuándo se acabaría cada uno con la venta esperada y lo antes que podría pasar.',
       '“Compra sugerida” separa por proveedor cuánto pedir para llegar a la próxima compra y cuánto costaría.',
       '“Actualizar” lo vuelve a calcular con las ventas más recientes; “Descargar PDF” saca el reporte predictivo para imprimir o compartir.',
+      'Arriba puede elegir “Tienda real” o “Demostración”. La demostración muestra el pronóstico con 3 meses y medio de ventas inventadas, para ver todo lo que hace cuando hay historia; la tienda real no cambia, y el PDF dice que es una demostración.',
     ],
     consejos: [
       'Con pocas semanas de ventas el pronóstico es preliminar, y así lo dice. Mejora con cada semana que pasa.',
