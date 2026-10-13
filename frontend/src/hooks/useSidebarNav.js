@@ -6,7 +6,7 @@ import {
   Megaphone, Award, Gift,
   UserSquare2, Users, Truck,
   Library, Store, Contact, Palette,
-  Wrench, Bug,
+  Wrench, Bug, TrendingUp,
 } from 'lucide-react';
 import { useAuth } from './useAuth';
 
@@ -57,6 +57,8 @@ export const GRUPOS = [
     name: 'Ventas',
     icon: Store,
     items: [
+      // Lo que se va a vender y qué pedir: el primer paso para vender mejor.
+      { name: 'Pronóstico', path: '/pronostico', icon: TrendingUp },
       { name: 'Promociones', path: '/promociones', icon: Megaphone },
       { name: 'Fidelidad', path: '/fidelidad', icon: Award },
       { name: 'Tarjetas de regalo', path: '/tarjetas', icon: Gift },

@@ -1,6 +1,6 @@
 import {
   Compass, LayoutDashboard, ShoppingBag, Package, Shapes, Tag, Blocks, Printer,
-  Megaphone, Award, Gift, Palette, UserSquare2, Users, Truck, Settings, Sparkles,
+  Megaphone, Award, Gift, Palette, UserSquare2, Users, Truck, Settings, Sparkles, TrendingUp,
 } from 'lucide-react';
 
 /*
@@ -84,7 +84,7 @@ export const TEMAS_AYUDA = [
       'La gráfica compara ventas y compras por semana o por mes.',
       '“Requiere tu atención” junta lo urgente: pedidos que esperan, productos que se acaban o que caducan.',
       'Más abajo: lo más vendido, cuánto vende cada módulo de la tienda y lo que nadie ha comprado.',
-      '“Descargar” saca el resumen de la tienda en PDF (del periodo que elija) o el inventario completo.',
+      '“Descargar” saca el resumen de la tienda en PDF (del periodo que elija), el inventario completo o, para el administrador, el reporte predictivo.',
     ],
     consejos: [
       'Lo que “nadie ha comprado” es buen candidato para una promoción o para dejar de surtirlo.',
@@ -191,6 +191,28 @@ export const TEMAS_AYUDA = [
     ],
     consejos: [
       'Actualice lo que queda cuando llega papel o se acaba un cartucho: el “Avisar desde” le marca a tiempo cuándo reponer.',
+    ],
+  },
+  {
+    id: 'pronostico',
+    ruta: '/pronostico',
+    grupo: 'ventas',
+    soloAdmin: true,
+    titulo: 'Pronóstico',
+    Icono: TrendingUp,
+    resumen: 'Lo que se espera vender las próximas 4 semanas, qué se agotaría y qué conviene pedir a cada proveedor.',
+    pasos: [
+      'Se calcula al abrirla, con el historial de ventas. Si el servicio de análisis estaba en reposo, la primera vez del día puede tardar hasta un minuto; después abre al instante.',
+      'Arriba están la venta esperada de las próximas 4 semanas y de la próxima semana, cada una con su rango: lo más probable es que la venta caiga entre esos dos montos. Al lado, lo que de verdad se vendió en las 4 semanas anteriores.',
+      'El resumen dice en palabras lo más importante. La gráfica pone las semanas que pasaron junto a las que vienen, con la línea del rango.',
+      '“Productos que se agotarían” dice cuándo se acabaría cada uno con la venta esperada y lo antes que podría pasar.',
+      '“Compra sugerida” separa por proveedor cuánto pedir para llegar a la próxima compra y cuánto costaría.',
+      '“Actualizar” lo vuelve a calcular con las ventas más recientes; “Descargar PDF” saca el reporte predictivo para imprimir o compartir.',
+    ],
+    consejos: [
+      'Con pocas semanas de ventas el pronóstico es preliminar, y así lo dice. Mejora con cada semana que pasa.',
+      'Con menos de 3 días de venta no se sugiere cuánto pedir de un producto: todavía no hay base para decirlo.',
+      'Pregúntele a Tiqui “¿qué tengo que pedir esta semana?” o “¿qué se va a agotar?”.',
     ],
   },
   {

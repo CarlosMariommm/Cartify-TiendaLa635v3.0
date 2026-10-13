@@ -5,6 +5,7 @@ import { getIA, generarConCobertura } from "../utils/iaClient.js";
 import { comprobarVoz } from "../utils/vozTiqui.js";
 import { panoramaDelNegocio, productosDeLaCharla } from "../utils/panoramaNegocio.js";
 import { consejoPrincipal } from "../utils/consejosVentas.js";
+import { calentarPronostico, pronosticoParaTiqui } from "../utils/pronostico.js";
 import {
   CAMBIOS_ADMIN, CAMBIOS_EMPLEADO, ESTADOS_DESTINO, aplicarCambio, firmarPropuesta, leerPropuesta, proponerCambio,
 } from "../utils/cambiosTiqui.js";
@@ -60,6 +61,7 @@ const SECCIONES = {
   modulos: { ruta: "/modulos", nombre: "los módulos", soloAdmin: true },
   impresiones: { ruta: "/servicios-impresion", nombre: "las impresiones", soloAdmin: true },
   promociones: { ruta: "/promociones", nombre: "las promociones", soloAdmin: true },
+  pronostico: { ruta: "/pronostico", nombre: "el pronóstico", soloAdmin: true },
   fidelidad: { ruta: "/fidelidad", nombre: "la fidelidad", soloAdmin: true },
   tarjetas: { ruta: "/tarjetas", nombre: "las tarjetas de regalo", soloAdmin: true },
   personalizacion: { ruta: "/personalizacion", nombre: "la personalización", soloAdmin: true },
@@ -75,12 +77,12 @@ const SECCIONES = {
  */
 const TEMAS_AYUDA = [
   "primeros-pasos", "tiqui", "dashboard", "pedidos", "inventario", "categorias", "marcas", "modulos",
-  "impresiones", "promociones", "fidelidad", "tarjetas", "personalizacion", "clientes", "empleados",
+  "impresiones", "promociones", "pronostico", "fidelidad", "tarjetas", "personalizacion", "clientes", "empleados",
   "proveedores", "cuenta",
 ];
 // Los que el empleado no ve (sus pantallas son del administrador).
 const TEMAS_AYUDA_ADMIN = [
-  "inventario", "categorias", "marcas", "modulos", "impresiones", "promociones", "fidelidad", "tarjetas",
+  "inventario", "categorias", "marcas", "modulos", "impresiones", "promociones", "pronostico", "fidelidad", "tarjetas",
   "personalizacion", "clientes", "empleados", "proveedores",
 ];
 
@@ -237,6 +239,16 @@ const instrucciones = ({ esAdmin, nombre }) => [
         "- Si te dice que sí a un ajuste que sugeriste, propón el cambio con 'precio_promocion' (o",
         "  'precio' si es el precio de un producto) con los números que sugeriste.",
         "",
+        "PRONÓSTICO (si te lo paso):",
+        "- En 'PRONÓSTICO' está lo que calculó el servicio de análisis con el historial de ventas: la",
+        "  venta esperada con su rango, lo que se agotaría y la compra sugerida por proveedor. Si te",
+        "  preguntan qué pedir, qué se va a acabar o cuánto se va a vender, contesta con eso: lo más",
+        "  urgente con sus números ('A Distribuidora La Constancia: 12 Lays y 6 Queso Crema, $16.50') y",
+        "  ofrece abrir el pronóstico completo (abrir = pronostico) si la lista es larga.",
+        "- La venta esperada va con su rango ('entre $894 y $1,298'): es una estimación, no una promesa.",
+        "- Si dice PRELIMINAR, avisa que todavía hay pocos datos. Si dice que se está calculando, dilo",
+        "  así y pide que te pregunten de nuevo en un minuto. Nunca inventes cifras del pronóstico.",
+        "",
       ]
     : []),
   "DE DÓNDE SACAS LOS DATOS:",
@@ -313,12 +325,12 @@ const charlaReciente = (historial, nombre) =>
 const PANTALLAS = {
   "/dashboard": "Dashboard", "/pedidos": "Pedidos", "/inventario": "Inventario", "/cuenta": "Mi cuenta",
   "/categorias": "Categorías", "/marcas": "Marcas", "/modulos": "Módulos", "/servicios-impresion": "Impresiones",
-  "/promociones": "Promociones", "/fidelidad": "Fidelidad", "/tarjetas": "Tarjetas de regalo",
+  "/promociones": "Promociones", "/pronostico": "Pronóstico", "/fidelidad": "Fidelidad", "/tarjetas": "Tarjetas de regalo",
   "/personalizacion": "Personalización", "/clientes": "Clientes", "/empleados": "Empleados", "/proveedores": "Proveedores",
   "/ayuda": "Ayuda",
 };
 
-const armarPregunta = ({ frase, charla, panorama, productos, pantalla }) => {
+const armarPregunta = ({ frase, charla, panorama, productos, pantalla, pronostico = "" }) => {
   const ahora = new Date().toLocaleString("es-SV", {
     weekday: "long", day: "numeric", month: "long", hour: "numeric", minute: "2-digit", timeZone: "America/El_Salvador",
   });
@@ -339,6 +351,7 @@ const armarPregunta = ({ frase, charla, panorama, productos, pantalla }) => {
     ...(productos.length
       ? ["", "PRODUCTOS DE LOS QUE SE ESTÁ HABLANDO (nombre · existencia · precio · categoría · marca):", ...productos]
       : []),
+    ...(pronostico ? ["", "PRONÓSTICO (próximas semanas, calculado por el servicio de análisis):", pronostico] : []),
   ].filter((l, i, arr) => l !== "" || arr[i - 1] !== "").join("\n");
 };
 
@@ -375,15 +388,17 @@ tiquiPanelController.conversar = async (req, res) => {
     const nombre = await nombreDe(req.usuario);
     const charla = charlaReciente(req.body?.historial, nombre);
 
-    const [panorama, productos] = await Promise.all([
+    const [panorama, productos, pronostico] = await Promise.all([
       panoramaDelNegocio({ esAdmin }),
       // Lo que se está hablando decide qué productos van: la frase y lo último.
       productosDeLaCharla([frase, ...charla.slice(-2).map((m) => m.texto)].join(" "), { esAdmin }),
+      // Compras y proveedores: solo el administrador. Ver utils/pronostico.js.
+      esAdmin ? pronosticoParaTiqui(frase) : Promise.resolve(""),
     ]);
 
     try {
       const respuesta = await generarConCobertura({
-        contents: armarPregunta({ frase, charla, panorama, productos, pantalla }),
+        contents: armarPregunta({ frase, charla, panorama, productos, pantalla, pronostico }),
         config: {
           systemInstruction: instrucciones({ esAdmin, nombre }),
           tools: herramientasDe(esAdmin),
@@ -480,9 +495,14 @@ tiquiPanelController.confirmar = async (req, res) => {
  * vender mejor (una promo que deja pérdida, algo que caduca). Lo muestra en
  * vez del saludo: una ayudante de ventas no espera a que le pregunten si se
  * está perdiendo plata. Vacío si no hay nada que lo amerite.
+ *
+ * Y se manda a calcular el pronóstico, sin esperarlo: el servicio de análisis
+ * duerme y tarda en despertar, así que para cuando le pregunten "¿qué tengo
+ * que pedir?" ya debería estar listo.
  */
 tiquiPanelController.listo = async (req, res) => {
   const esAdmin = req.usuario.tipo === "Admin";
+  if (esAdmin) calentarPronostico();
   let consejo = "";
   try {
     const [, principal] = await Promise.all([
