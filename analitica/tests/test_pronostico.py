@@ -159,6 +159,57 @@ def test_siempre_sale_lo_mismo_con_la_misma_semilla():
     assert pronosticar(solicitud()) == pronosticar(solicitud())
 
 
+def tienda_recien_abierta():
+    """Como la tienda real el 13 de octubre: 15 días, 9 pedidos, y un pedido de 125 botellas de agua."""
+    dias = dias_entre(HASTA - timedelta(days=14), HASTA)
+    ventas_por_dia = {1: 12.5, 4: 30.0, 5: 8.75, 7: 41.2, 9: 15.0, 11: 22.3, 12: 9.4, 13: 18.06, 14: 20.0}
+    tienda = [{"dia": dias[i], "total": t, "pedidos": 1} for i, t in ventas_por_dia.items()]
+    return {
+        "desde": dias[0],
+        "hasta": HASTA,
+        "tienda": tienda,
+        "ventas": [
+            {"dia": dias[7], "producto": "agua", "unidades": 125.0},
+            {"dia": dias[2], "producto": "pan", "unidades": 2.0},
+            {"dia": dias[5], "producto": "pan", "unidades": 1.0},
+            {"dia": dias[9], "producto": "pan", "unidades": 2.0},
+            {"dia": dias[12], "producto": "pan", "unidades": 60.0},  # una fiesta
+        ],
+        "productos": [
+            {"id": "agua", "nombre": "Agua", "stock": 95, "costo": 0.39, "proveedor": "p1"},
+            {"id": "pan", "nombre": "Pan", "stock": 3, "costo": 0.2, "proveedor": "p1"},
+        ],
+    }
+
+
+def test_con_pocos_pedidos_lo_esperado_cae_dentro_de_su_rango():
+    tienda = pronosticar(tienda_recien_abierta())["tienda"]
+    assert tienda["metodo"] == "promedio-semanal"
+    for tramo in [*tienda["dias"], *tienda["semanas"], tienda["periodo"]]:
+        assert 0 <= tramo["bajo"] <= tramo["esperado"] <= tramo["alto"]
+
+
+def test_con_nueve_pedidos_el_patron_de_la_semana_casi_no_pesa():
+    caso = tienda_recien_abierta()
+    perfil = pronosticar(caso)["perfil_semana"]
+    assert max(abs(f - 1) for f in perfil) < 0.15
+
+
+def test_con_una_sola_venta_no_se_sugiere_cuanto_pedir():
+    salida = pronosticar(tienda_recien_abierta())
+    agua = next(p for p in salida["productos"] if p["id"] == "agua")
+    assert agua["confianza"] == "baja"
+    assert agua["pedir"] is None and agua["costo_pedido"] == 0
+    assert all(p["id"] != "agua" for g in salida["proveedores"] for p in g["productos"])
+
+
+def test_un_pedido_al_por_mayor_no_infla_lo_de_todos_los_dias():
+    pan = next(p for p in pronosticar(tienda_recien_abierta())["productos"] if p["id"] == "pan")
+    assert pan["al_por_mayor"] == 1
+    assert pan["vendido"] == 65  # lo vendido sí es todo
+    assert pan["semana"]["esperado"] < 6  # pero el ritmo es el de 1 o 2 panes, no el de la fiesta
+
+
 def test_medir_precision_sin_ventas_de_productos():
     dias, pedidos, ventas = historial(6)
     resultado = medir_precision(ventas, pedidos, dias, [])
