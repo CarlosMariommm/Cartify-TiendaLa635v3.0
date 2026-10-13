@@ -25,6 +25,7 @@ import orderModel from "../models/order.js";
 import productModel from "../models/product.js";
 import supplierModel from "../models/supplier.js";
 import shoppingModel from "../models/shoppings.js";
+import { readFileSync } from "node:fs";
 import { config } from "../../config.js";
 
 const ZONA = "America/El_Salvador";
@@ -53,11 +54,33 @@ const sumarDias = (dia, n) => new Date(Date.parse(`${dia}T00:00:00Z`) + n * DIA)
 // Un número aunque venga guardado como texto (hay existencias así; ver orderController).
 const aNumero = (campo) => ({ $convert: { input: campo, to: "double", onError: 0, onNull: 0 } });
 
+// De dónde salen los datos: los modelos de la tienda (lo normal).
+const DE_LA_TIENDA = { pedidos: orderModel, productos: productModel, proveedores: supplierModel, compras: shoppingModel };
+
+/*
+ * Lo mismo, pero de otra base (la de demostración, para exportarla; ver
+ * scripts/exportarDemoPronostico.js): las colecciones crudas con la misma
+ * forma de uso que los modelos (aggregate, y find().select().lean()).
+ */
+export const fuenteDeBase = (db) => {
+  const coleccion = (nombre) => ({
+    aggregate: (pipeline) => db.collection(nombre).aggregate(pipeline).toArray(),
+    find: (filtro = {}) => ({
+      select: (campos) => ({
+        lean: () => db.collection(nombre)
+          .find(filtro, { projection: Object.fromEntries(campos.split(/\s+/).map((c) => [c, 1])) })
+          .toArray(),
+      }),
+    }),
+  });
+  return { pedidos: coleccion("Orders"), productos: coleccion("Products"), proveedores: coleccion("Suppliers"), compras: coleccion("Shoppings") };
+};
+
 /*
  * Lo que se le manda al servicio. `ahora` se puede pasar para las pruebas.
  * Devuelve null si todavía no hay ventas de las que aprender.
  */
-export const armarSolicitud = async (ahora = new Date()) => {
+export const armarSolicitud = async (ahora = new Date(), fuente = DE_LA_TIENDA) => {
   const hoy = diaLocal(ahora);
   const hasta = sumarDias(hoy, -1);
   const finDeAyer = new Date(`${hoy}T00:00:00${DESFASE}`);
@@ -66,21 +89,21 @@ export const armarSolicitud = async (ahora = new Date()) => {
   const diaDelPedido = { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: ZONA } };
 
   const [tienda, ventas, productos, proveedores, compras] = await Promise.all([
-    orderModel.aggregate([
+    fuente.pedidos.aggregate([
       { $match: vendidos },
       { $group: { _id: diaDelPedido, total: { $sum: aNumero("$total") }, pedidos: { $sum: 1 } } },
     ]),
-    orderModel.aggregate([
+    fuente.pedidos.aggregate([
       { $match: vendidos },
       { $unwind: "$items" },
       { $match: { "items.productId": { $ne: null } } },
       { $group: { _id: { dia: diaDelPedido, producto: "$items.productId" }, unidades: { $sum: aNumero("$items.amount") } } },
     ]),
-    productModel.find({ isActive: { $ne: false } })
+    fuente.productos.find({ isActive: { $ne: false } })
       .select("name stock unidadVenta salePrice priceCost supplierId createdAt")
       .lean(),
-    supplierModel.find().select("name").lean(),
-    shoppingModel.find({ date: { $gte: inicio } }).select("supplierId date").lean(),
+    fuente.proveedores.find().select("name").lean(),
+    fuente.compras.find({ date: { $gte: inicio } }).select("supplierId date").lean(),
   ]);
 
   if (!tienda.length) return null;
@@ -112,25 +135,75 @@ export const armarSolicitud = async (ahora = new Date()) => {
   };
 };
 
-let guardado = null; // { datos, en }
-// El cálculo que está en camino: si piden otro mientras tanto (el panel y
-// Tiqui a la vez), se espera ese mismo en vez de lanzar dos.
-let enCamino = null;
+/* ══════════ La demostración ══════════ */
+
+/*
+ * Para mostrar el pronóstico con una historia de varios meses (la Expo) sin
+ * meter ventas inventadas en la tienda real: datos/pronosticoDemo.json trae
+ * la base de demostración ya resumida por día —lo vendido por día y por
+ * producto, existencias, proveedores y compras; nada de clientes—, exportada
+ * con scripts/exportarDemoPronostico.js.
+ *
+ * Sus fechas se corren solas para que la historia termine AYER, la abran
+ * cuando la abran: no hay que volver a exportarla el día que se presenta.
+ */
+const ARCHIVO_DEMO = new URL("../datos/pronosticoDemo.json", import.meta.url);
+let demoLeida;
+
+export const hayDemostracion = () => {
+  try {
+    leerDemo();
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const leerDemo = () => {
+  if (!demoLeida) demoLeida = JSON.parse(readFileSync(ARCHIVO_DEMO, "utf8"));
+  return demoLeida;
+};
+
+// La demostración, con todas sus fechas corridas para que termine ayer.
+export const solicitudDeDemostracion = (ahora = new Date(), demo = leerDemo()) => {
+  const ayer = sumarDias(diaLocal(ahora), -1);
+  const corrimiento = Math.round((Date.parse(`${ayer}T00:00:00Z`) - Date.parse(`${demo.hasta}T00:00:00Z`)) / DIA);
+  const correr = (dia) => (dia ? sumarDias(dia, corrimiento) : dia);
+  return {
+    ...demo,
+    desde: correr(demo.desde),
+    hasta: ayer,
+    tienda: demo.tienda.map((t) => ({ ...t, dia: correr(t.dia) })),
+    ventas: demo.ventas.map((v) => ({ ...v, dia: correr(v.dia) })),
+    productos: demo.productos.map((p) => ({ ...p, creado: correr(p.creado) })),
+    compras: demo.compras.map((c) => ({ ...c, dia: correr(c.dia) })),
+  };
+};
+
+/* ══════════ Lo calculado, guardado un rato ══════════ */
+
+// Cada uno por su lado: la tienda real y la demostración.
+const estado = { real: { guardado: null, enCamino: null }, demo: { guardado: null, enCamino: null } };
 
 export const olvidarPronostico = () => {
-  guardado = null;
-  enCamino = null;
+  for (const e of Object.values(estado)) {
+    e.guardado = null;
+    e.enCamino = null;
+  }
 };
 
 /*
  * El pronóstico, del servicio o del rato que se guarda. `forzar` lo vuelve a
- * calcular (el botón "Actualizar" del panel).
+ * calcular (el botón "Actualizar" del panel); `demo`, con la demostración.
+ * Si piden otro mientras uno está en camino (el panel y Tiqui a la vez), se
+ * espera ese mismo en vez de lanzar dos.
  */
-export const obtenerPronostico = async ({ forzar = false, ahora = new Date() } = {}) => {
-  if (!forzar && guardado && ahora.getTime() - guardado.en < VIGENCIA_MS) return guardado.datos;
-  if (!forzar && enCamino) return enCamino;
-  enCamino = calcular(ahora).finally(() => { enCamino = null; });
-  return enCamino;
+export const obtenerPronostico = async ({ forzar = false, ahora = new Date(), demo = false } = {}) => {
+  const e = estado[demo ? "demo" : "real"];
+  if (!forzar && e.guardado && ahora.getTime() - e.guardado.en < VIGENCIA_MS) return e.guardado.datos;
+  if (!forzar && e.enCamino) return e.enCamino;
+  e.enCamino = calcular(ahora, demo).finally(() => { e.enCamino = null; });
+  return e.enCamino;
 };
 
 /*
@@ -138,8 +211,10 @@ export const obtenerPronostico = async ({ forzar = false, ahora = new Date() } =
  * esperando a un servicio dormido. Vale hasta 6 horas (dice de cuándo es).
  */
 const VIGENCIA_PARA_TIQUI_MS = 6 * 60 * 60 * 1000;
-export const pronosticoReciente = (ahora = new Date()) =>
-  guardado && ahora.getTime() - guardado.en < VIGENCIA_PARA_TIQUI_MS ? guardado : null;
+export const pronosticoReciente = (ahora = new Date()) => {
+  const { guardado } = estado.real;
+  return guardado && ahora.getTime() - guardado.en < VIGENCIA_PARA_TIQUI_MS ? guardado : null;
+};
 
 // Que se vaya calculando, sin esperarlo (al despertar a Tiqui del panel).
 export const calentarPronostico = () => {
@@ -150,12 +225,15 @@ export const calentarPronostico = () => {
   });
 };
 
-const calcular = async (ahora) => {
+const calcular = async (ahora, demo) => {
   if (!config.analitica.url) {
     throw new ErrorPronostico("sin-servicio", "El servicio de analítica no está configurado (ANALITICA_URL)");
   }
+  if (demo && !hayDemostracion()) {
+    throw new ErrorPronostico("sin-demo", "No está el archivo de la demostración (datos/pronosticoDemo.json)");
+  }
 
-  const solicitud = await armarSolicitud(ahora);
+  const solicitud = demo ? solicitudDeDemostracion(ahora) : await armarSolicitud(ahora);
   if (!solicitud) {
     return { vacio: true, generado: ahora.toISOString() };
   }
@@ -176,8 +254,8 @@ const calcular = async (ahora) => {
     throw new ErrorPronostico("fallo", `El servicio de analítica contestó ${respuesta.status}`);
   }
 
-  const datos = { ...(await respuesta.json()), generado: ahora.toISOString() };
-  guardado = { datos, en: ahora.getTime() };
+  const datos = { ...(await respuesta.json()), generado: ahora.toISOString(), ...(demo ? { demo: true } : {}) };
+  estado[demo ? "demo" : "real"].guardado = { datos, en: ahora.getTime() };
   return datos;
 };
 
@@ -213,7 +291,10 @@ export const textoDelPronostico = (datos, calculadoEn, ahora = Date.now()) => {
   renglones.push(
     `Calculado ${minutos < 2 ? "hace un momento" : minutos < 90 ? `hace ${minutos} min` : `hace ${Math.round(minutos / 60)} h`} con ${historial.dias} días de ventas (${historial.pedidos} pedidos). ` +
       (confiable
-        ? `Probado contra ${precision.semanas} semanas pasadas: se equivocó un ${porciento(precision.tienda.error)} en la venta semanal (repetir la semana anterior: ${porciento(precision.tienda.error_ingenuo)}).`
+        ? `Probado contra ${precision.semanas} semanas pasadas: se equivocó un ${porciento(precision.tienda.error)} en la venta semanal de la tienda (repetir la semana anterior: ${porciento(precision.tienda.error_ingenuo)})` +
+          (precision.productos?.error != null && precision.productos?.error_ingenuo != null
+            ? ` y un ${porciento(precision.productos.error)} en la de cada producto (repetir la semana anterior: ${porciento(precision.productos.error_ingenuo)}).`
+            : ".")
         : "Es PRELIMINAR: todavía hay pocas semanas para medir qué tan bien acierta.")
   );
 

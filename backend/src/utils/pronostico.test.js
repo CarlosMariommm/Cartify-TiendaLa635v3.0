@@ -24,7 +24,7 @@ vi.mock("../models/shoppings.js", () => ({
   default: { find: () => conLean([{ supplierId: "s1", date: new Date("2026-10-05T18:00:00Z") }]) },
 }));
 
-const { armarSolicitud, obtenerPronostico, olvidarPronostico, diaLocal, textoDelPronostico, pronosticoParaTiqui } = await import("./pronostico.js");
+const { armarSolicitud, obtenerPronostico, olvidarPronostico, diaLocal, textoDelPronostico, pronosticoParaTiqui, solicitudDeDemostracion, hayDemostracion } = await import("./pronostico.js");
 
 // Lunes 12 de octubre de 2026, 9 de la mañana en El Salvador.
 const AHORA = new Date("2026-10-12T15:00:00Z");
@@ -175,5 +175,53 @@ describe("el pronóstico contado a Tiqui", () => {
   it("sin el servicio configurado, Tiqui no recibe nada del pronóstico", async () => {
     config.analitica.url = "";
     expect(await pronosticoParaTiqui("¿qué tengo que pedir?", AHORA)).toBe("");
+  });
+});
+
+/* ── La demostración (datos/pronosticoDemo.json) ── */
+
+describe("la demostración del pronóstico", () => {
+  beforeEach(() => {
+    olvidarPronostico();
+    config.analitica.url = "http://analitica.test";
+    aggregate.mockReset();
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, json: async () => ({ productos: [] }) })));
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("corre todas sus fechas para que la historia termine ayer", () => {
+    const demo = {
+      desde: "2026-06-30", hasta: "2026-10-12", horizonte: 28,
+      tienda: [{ dia: "2026-06-30", total: 10, pedidos: 1 }, { dia: "2026-10-12", total: 20, pedidos: 2 }],
+      ventas: [{ dia: "2026-10-12", producto: "p1", unidades: 3 }],
+      productos: [{ id: "p1", creado: "2026-06-01" }, { id: "p2", creado: null }],
+      proveedores: [],
+      compras: [{ proveedor: "s1", dia: "2026-10-10" }],
+    };
+    // Abierta el 1 de diciembre: la historia tiene que llegar al 30 de noviembre.
+    const s = solicitudDeDemostracion(new Date("2026-12-01T15:00:00Z"), demo);
+    expect(s.hasta).toBe("2026-11-30");
+    expect(s.desde).toBe("2026-08-18");
+    expect(s.tienda.map((t) => t.dia)).toEqual(["2026-08-18", "2026-11-30"]);
+    expect(s.ventas[0].dia).toBe("2026-11-30");
+    expect(s.compras[0].dia).toBe("2026-11-28");
+    expect(s.productos.map((p) => p.creado)).toEqual(["2026-07-20", null]);
+    expect(demo.hasta).toBe("2026-10-12"); // la original no se toca
+  });
+
+  it("no toca la base, va marcada como demostración y se guarda aparte de la real", async () => {
+    expect(hayDemostracion()).toBe(true);
+    const datos = await obtenerPronostico({ ahora: AHORA, demo: true });
+    expect(datos.demo).toBe(true);
+    expect(aggregate).not.toHaveBeenCalled();
+    const enviada = JSON.parse(fetch.mock.calls[0][1].body);
+    expect(enviada.hasta).toBe("2026-10-11"); // el día antes de AHORA
+    expect(enviada.tienda.length).toBeGreaterThan(90);
+
+    // La real sigue siendo otra cuenta: pide a la base y al servicio otra vez.
+    conVentas();
+    const real = await obtenerPronostico({ ahora: AHORA });
+    expect(real.demo).toBeUndefined();
+    expect(fetch).toHaveBeenCalledTimes(2);
   });
 });
