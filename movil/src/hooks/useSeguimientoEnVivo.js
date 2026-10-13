@@ -28,7 +28,12 @@ const CADA_CUANTO_MS = 10000;      // se pregunta cada 10 segundos
 const SENAL_FRIA_MS = 90000;       // sin noticias en minuto y medio: se avisa
 const YA_CASI_M = 250;             // dos cuadras: el punto de levantarse
 
-export const useSeguimientoEnVivo = (pedidoId, activo = true) => {
+/*
+ * `conAviso`: si este seguimiento da el aviso de "ya casi toca tu puerta". Lo
+ * da la burbuja; el detalle del pedido sigue el mismo pedido sin avisar, para
+ * que no salga dos veces.
+ */
+export const useSeguimientoEnVivo = (pedidoId, activo = true, { conAviso = true } = {}) => {
   const { avisar } = useAviso();
   const [datos, setDatos] = useState(null);
   const [ahora, setAhora] = useState(() => Date.now());
@@ -66,7 +71,7 @@ export const useSeguimientoEnVivo = (pedidoId, activo = true) => {
         if (courier) anteriorRef.current = { ...courier, velocidad };
 
         // "Ya casi toca tu puerta" — una sola vez por pedido.
-        if (courier && data?.destino && !avisadoRef.current) {
+        if (conAviso && courier && data?.destino && !avisadoRef.current) {
           const faltan = distanciaMetros(courier, data.destino);
           if (faltan != null && faltan <= YA_CASI_M) {
             avisadoRef.current = true;
@@ -92,7 +97,7 @@ export const useSeguimientoEnVivo = (pedidoId, activo = true) => {
     preguntar();
     reloj = setInterval(preguntar, CADA_CUANTO_MS);
     return () => { vivo = false; clearInterval(reloj); };
-  }, [pedidoId, activo, avisar]);
+  }, [pedidoId, activo, avisar, conAviso]);
 
   // Un tic aparte para que "hace 2 min" envejezca solo.
   useEffect(() => {

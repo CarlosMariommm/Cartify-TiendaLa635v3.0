@@ -8,8 +8,9 @@
  * ============================================================
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HelpCircle, Volume2, VolumeX } from 'lucide-react-native';
 import { useColores, useEstilos } from '../context/ModoContext';
@@ -48,9 +49,12 @@ const Asistente = () => {
   const nombre = user?.type === 'client' ? primerNombre(user?.fullName) : '';
   const [saludaConNombre] = useState(() => Math.random() < 0.5);
 
+  // La lleva Tiqui a otra pantalla (las promociones): ahí sigue escuchando.
+  const saleConTiquiRef = useRef(false);
+
   const {
     activo, escuchando, muteado, transcripcion, historial, pensando, hablando, esperandoVoz,
-    iniciar, detener, toggleMute, interrumpir,
+    iniciar, detener, toggleMute, interrumpir, pausar, reanudar,
   } = useAsistenteVoz({
     productos, carrito, totalCarrito, agregarAlCarrito, eliminarDelCarrito, actualizarCantidad, limpiarCarrito,
     mostrarProducto: setProductoAbierto,
@@ -65,9 +69,26 @@ const Asistente = () => {
       setPromoSeleccionada?.(null);
       setCategoriaSeleccionada?.(null);
       setTerminoBusqueda?.('');
+      saleConTiquiRef.current = true;
       navegarA('Tabs', { screen: 'inicio' });
     },
   });
+
+  /*
+   * Si la persona se va por su cuenta de esta pantalla (otra pestaña, el
+   * carrito, la presentación), Tiqui deja de escuchar pero sigue despierta, y
+   * al volver retoma sola. Si la llevó Tiqui ("enséñame las promociones"), la
+   * charla sigue: le están hablando a ella. Ver pausar en useAsistenteVoz.
+   */
+  useFocusEffect(
+    useCallback(() => {
+      reanudar();
+      return () => {
+        if (saleConTiquiRef.current) saleConTiquiRef.current = false;
+        else pausar();
+      };
+    }, [pausar, reanudar])
+  );
 
   const chatRef = useRef(null);
 
