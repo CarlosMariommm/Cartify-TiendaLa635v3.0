@@ -21,14 +21,12 @@
  */
 
 import {
-  COLOR, MARGEN, asegurarEspacio, dinero, fechaCorta, fechaLarga, hoyLocal,
-  nuevoReporte, parrafo, pie, rangoDeFechas, seccion, tabla, vinetas,
+  COLOR, COLOR_GRAFICA, MARGEN, asegurarEspacio, dinero, fechaCorta, fechaLarga, graficaDeBarras, hoyLocal,
+  nuevoReporte, parrafo, pie, porciento, rangoDeFechas, seccion, tabla, vinetas,
 } from './reportesPdf';
 
 const DIAS_SEMANA = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
 const CONFIANZA = { alta: 'Alta', media: 'Media', baja: 'Baja' };
-
-const porciento = (x) => `${Math.round(Math.abs(x) * 100)}%`;
 
 /*
  * Cuántas unidades, escrito siempre igual en todo el reporte:
@@ -50,13 +48,6 @@ export const rango = (bajo, alto, unidad = 'unidad') =>
 
 // "Un producto" / "3 productos"
 const contar = (n, singular, plural) => `${n} ${n === 1 ? singular : plural}`;
-
-// Un paso "redondo" para las líneas guía de la gráfica: 1, 2, 2.5 o 5 por potencia de 10.
-export const pasoRedondo = (bruto) => {
-  if (!(bruto > 0)) return 1;
-  const potencia = 10 ** Math.floor(Math.log10(bruto));
-  return [1, 2, 2.5, 5, 10].map((f) => f * potencia).find((p) => p >= bruto);
-};
 
 const semanasDe = (datos) => Math.round((datos.tienda?.dias?.length || 28) / 7);
 
@@ -133,74 +124,18 @@ export const resumenDelPronostico = (datos) => {
 
 /*
  * La gráfica: las semanas que pasaron (gris) y las que vienen (azul), con el
- * rango del pronóstico como una línea vertical. Dibujada a mano con jsPDF:
- * una librería de gráficas para ocho barras sería más peso que gráfica.
+ * rango del pronóstico como una línea vertical (ver reportesPdf.graficaDeBarras).
  */
-const grafica = (doc, y, datos) => {
-  const anteriores = datos.historial?.semanas || [];
-  const futuras = datos.tienda.semanas;
-  const barras = [
-    ...anteriores.map((s) => ({ etiqueta: fechaCorta(s.desde), valor: s.total, real: true })),
-    ...futuras.map((s) => ({ etiqueta: fechaCorta(s.desde), valor: s.esperado, bajo: s.bajo, alto: s.alto })),
-  ];
-  const altoGrafica = 46;
-  y = asegurarEspacio(doc, y, altoGrafica + 16);
-
-  const ancho = doc.internal.pageSize.getWidth() - MARGEN * 2;
-  const izquierda = MARGEN + 14;
-  const util = ancho - 14;
-  // Líneas guía en montos redondos ($150, $300, $450), no en tercios exactos.
-  const mayor = Math.max(...barras.map((b) => b.alto ?? b.valor), 1);
-  const pasoGuia = pasoRedondo(mayor / 3);
-  const lineasGuia = Math.ceil(mayor / pasoGuia);
-  const maximo = pasoGuia * lineasGuia;
-  const escala = (v) => (v / maximo) * altoGrafica;
-  const base = y + altoGrafica;
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7);
-  for (let i = 0; i <= lineasGuia; i++) {
-    const v = pasoGuia * i;
-    const linea = base - escala(v);
-    doc.setDrawColor(...COLOR.linea);
-    doc.setLineWidth(i === 0 ? 0.3 : 0.1);
-    doc.line(izquierda, linea, izquierda + util, linea);
-    doc.setTextColor(...COLOR.suave);
-    doc.text(dinero(v).replace('.00', ''), izquierda - 2, linea + 1, { align: 'right' });
-  }
-
-  const paso = util / barras.length;
-  const anchoBarra = paso * 0.5;
-  barras.forEach((b, i) => {
-    const x = izquierda + paso * i + (paso - anchoBarra) / 2;
-    const h = escala(b.valor);
-    doc.setFillColor(...(b.real ? [173, 181, 189] : COLOR.marca));
-    doc.rect(x, base - h, anchoBarra, h, 'F');
-    if (!b.real) {
-      // El rango probable, de lo bajo a lo alto. Gris medio: se ve sobre la
-      // barra azul y sobre el blanco.
-      const medio = x + anchoBarra / 2;
-      doc.setDrawColor(134, 142, 150);
-      doc.setLineWidth(0.45);
-      doc.line(medio, base - escala(b.alto), medio, base - escala(b.bajo));
-      doc.line(medio - 1.5, base - escala(b.alto), medio + 1.5, base - escala(b.alto));
-      doc.line(medio - 1.5, base - escala(b.bajo), medio + 1.5, base - escala(b.bajo));
-    }
-    doc.setTextColor(...COLOR.suave);
-    doc.text(b.etiqueta, x + anchoBarra / 2, base + 4, { align: 'center' });
-  });
-
-  // La leyenda.
-  const leyenda = base + 9.5;
-  doc.setFillColor(173, 181, 189);
-  doc.rect(izquierda, leyenda - 2.4, 3, 3, 'F');
-  doc.setTextColor(...COLOR.tinta);
-  doc.text('Venta real por semana', izquierda + 4.5, leyenda);
-  doc.setFillColor(...COLOR.marca);
-  doc.rect(izquierda + 42, leyenda - 2.4, 3, 3, 'F');
-  doc.text('Pronóstico, con su rango probable (80%)', izquierda + 46.5, leyenda);
-  return leyenda + 8;
-};
+const grafica = (doc, y, datos) => graficaDeBarras(doc, y, {
+  grupos: [
+    ...(datos.historial?.semanas || []).map((s) => ({ etiqueta: fechaCorta(s.desde), barras: [{ valor: s.total, color: COLOR_GRAFICA.real }] })),
+    ...datos.tienda.semanas.map((s) => ({ etiqueta: fechaCorta(s.desde), barras: [{ valor: s.esperado, bajo: s.bajo, alto: s.alto, color: COLOR_GRAFICA.marca }] })),
+  ],
+  leyenda: [
+    { texto: 'Venta real por semana', color: COLOR_GRAFICA.real },
+    { texto: 'Pronóstico, con su rango probable (80%)', color: COLOR_GRAFICA.marca },
+  ],
+});
 
 /*
  * El documento. `tienda`: los datos del encabezado (ver reportesPdf.nuevoReporte).

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { cantidad, construirReportePredictivo, pasoRedondo, rango, resumenDelPronostico } from './reportePredictivo';
-import { dinero, fechaLarga, rangoDeFechas } from './reportesPdf';
+import { cantidad, construirReportePredictivo, rango, resumenDelPronostico } from './reportePredictivo';
+import { dinero, fechaLarga, pasoRedondo, rangoDeFechas } from './reportesPdf';
 
 /*
  * El reporte predictivo con un pronóstico de ejemplo, con la forma que
