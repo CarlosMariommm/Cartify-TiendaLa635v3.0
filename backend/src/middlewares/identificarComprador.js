@@ -84,6 +84,8 @@ export const identificarComprador = async (req, res, next) => {
     const personal = leerToken(req.cookies?.authCookie);
     if (personal && PERSONAL.includes(personal.userType)) {
       req.compradorId = req.body?.clientId;
+      // Lo cobra la tienda misma: a su personal no se le avisa (avisosPersonal.js).
+      req.cobraPersonal = true;
       return next();
     }
 

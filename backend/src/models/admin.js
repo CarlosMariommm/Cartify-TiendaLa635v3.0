@@ -82,6 +82,10 @@ const adminSchema = new Schema(
       type: Date,
       default: null,
     },
+
+    // Los teléfonos donde suena cada pedido nuevo, mientras tenga la sesión
+    // abierta en la app. Ver utils/avisosPersonal.js.
+    pushTokens: { type: [String], default: [], select: false },
   },
   {
     timestamps: true,

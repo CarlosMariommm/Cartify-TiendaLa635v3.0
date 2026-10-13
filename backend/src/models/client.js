@@ -67,6 +67,17 @@ Campos:
  *             pedidoCerca:
  *               type: boolean
  *               default: false
+ *         avisosApp:
+ *           type: object
+ *           description: Los avisos del teléfono, aparte de los correos (notificationPrefs). Todos nacen en true.
+ *           properties:
+ *             promociones: { type: boolean, default: true }
+ *             favoritosEnOferta: { type: boolean, default: true }
+ *             nuevosProductos: { type: boolean, default: true }
+ *             pedidoPreparando: { type: boolean, default: true }
+ *             pedidoListo: { type: boolean, default: true }
+ *             pedidoEntregado: { type: boolean, default: true }
+ *             pedidoCancelado: { type: boolean, default: true }
  *         paymentMethods:
  *           type: array
  *           items:
@@ -254,13 +265,26 @@ Campos:
  *         - addresses
  *     ClientNotificationsInput:
  *       type: object
+ *       description: Solo hace falta lo que cambió. Las claves sueltas (promociones, nuevosProductos, pedidoCerca) son las de versiones viejas y cuentan como correo.
  *       properties:
- *         promociones:
- *           type: boolean
- *         nuevosProductos:
- *           type: boolean
- *         pedidoCerca:
- *           type: boolean
+ *         correo:
+ *           type: object
+ *           description: Los correos (notificationPrefs).
+ *           properties:
+ *             promociones: { type: boolean }
+ *             nuevosProductos: { type: boolean }
+ *             pedidoCerca: { type: boolean }
+ *         app:
+ *           type: object
+ *           description: Los avisos del teléfono (avisosApp).
+ *           properties:
+ *             promociones: { type: boolean }
+ *             favoritosEnOferta: { type: boolean }
+ *             nuevosProductos: { type: boolean }
+ *             pedidoPreparando: { type: boolean }
+ *             pedidoListo: { type: boolean }
+ *             pedidoEntregado: { type: boolean }
+ *             pedidoCancelado: { type: boolean }
  *     ClientPaymentMethodsInput:
  *       type: object
  *       description: Solo se guardan datos no sensibles (tipo, alias y últimos 4 dígitos).
@@ -340,7 +364,8 @@ const clientSchema = new Schema({
      * saldo baja. Nunca se toca con un valor que venga del navegador.
      */
     balance: { type: Number, default: 0, min: 0 },
-    // Preferencias de notificación del cliente (área "Mi Cuenta").
+    // Los CORREOS que quiere recibir (área "Mi Cuenta"). Los del teléfono van
+    // aparte, en `avisosApp`. Ver utils/preferenciasAvisos.js.
     /*
      * Ojo con `promociones`: el default es true por los clientes que ya
      * existían antes de que hubiera dónde elegir. Los que se registran DESDE
@@ -351,6 +376,20 @@ const clientSchema = new Schema({
       promociones:     { type: Boolean, default: true },
       nuevosProductos: { type: Boolean, default: true },
       pedidoCerca:     { type: Boolean, default: false },
+    },
+    /*
+     * Los avisos del TELÉFONO, uno por uno. Nacen encendidos: el permiso del
+     * sistema ya es el sí. Apagar un correo no apaga su aviso en la app, ni
+     * al revés.
+     */
+    avisosApp: {
+      promociones:       { type: Boolean, default: true },
+      favoritosEnOferta: { type: Boolean, default: true },
+      nuevosProductos:   { type: Boolean, default: true },
+      pedidoPreparando:  { type: Boolean, default: true },
+      pedidoListo:       { type: Boolean, default: true },
+      pedidoEntregado:   { type: Boolean, default: true },
+      pedidoCancelado:   { type: Boolean, default: true },
     },
     /*
      * LOS TELÉFONOS DONDE SUENA EL AVISO.

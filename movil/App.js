@@ -70,6 +70,7 @@ import { PedidoActivoProvider } from './src/context/PedidoActivoContext';
 import { navegarA } from './src/navigation/navigationRef';
 // Tocar un aviso lleva justo a lo que avisaba (el pedido, la promo…).
 import AvisosTocados from './src/components/UI/AvisosTocados';
+import RegistroAvisos from './src/components/UI/RegistroAvisos';
 import EnlacesEntrantes from './src/components/UI/EnlacesEntrantes';
 import { escucharErroresSueltos } from './src/utils/reportarError';
 
@@ -112,6 +113,7 @@ const LaTienda = () => (
             <PedidoActivoProvider>
               <BarraDeEstado />
               <AvisosTocados />
+              <RegistroAvisos />
               <EnlacesEntrantes />
               {/* Si una pantalla se rompe, Tiqui caída en vez de la app en blanco. */}
               <LimiteDeError>

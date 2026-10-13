@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bike, X, ChevronRight, Clock } from 'lucide-react';
+import { Bike, X, ChevronRight, Clock, Store } from 'lucide-react';
 import { usePedidoActivoCtx } from '../../context/PedidoActivoContext';
 import { useAuth } from '../../hooks/useAuth';
 import { useSeguimientoEnVivo } from '../../hooks/useSeguimientoEnVivo';
 import { pasosDe, indiceDePaso } from '../../utils/pasosPedido';
+import { pedidosEnCurso, pedidosNuevos } from '../../utils/pedidosEnCurso';
 import MapaSeguimiento from './MapaSeguimiento';
 import CodigoEntrega from './CodigoEntrega';
 import Mascota from '../UI/Mascota';
@@ -64,17 +65,29 @@ const BurbujaPedido = () => {
   const [encogidaEn, setEncogidaEn] = useState(null); // { id, estado }
 
   /*
-   * El pedido en curso: el más reciente que todavía no se entregó ni se
-   * canceló. Si tiene varios, se sigue el último — es el que acaba de hacer.
+   * Los pedidos en curso, del que más importa ahora al que menos: primero el
+   * que va en camino, después el listo para recoger (ver
+   * utils/pedidosEnCurso.js). Antes se seguía solo el más reciente, y un
+   * pedido para recoger hecho después tapaba al de domicilio que ya iba en
+   * camino: el cliente se quedaba sin mapa.
    *
-   * Se calcula ANTES de cualquier return porque el hook de seguimiento de
-   * abajo necesita su id, y los hooks no se pueden llamar a medias.
+   * Se sigue el que el cliente eligió en la tarjeta; si no eligió (o ese ya
+   * se cerró), el primero. Se calcula ANTES de cualquier return porque el
+   * hook de seguimiento de abajo necesita su id.
    */
-  const enCurso = user?.type === 'client'
-    ? (orders || [])
-        .filter((o) => ['pagado', 'preparando', 'en_camino', 'listo'].includes(o.status))
-        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0]
-    : null;
+  const lista = user?.type === 'client' ? pedidosEnCurso(orders) : [];
+  const [elegidoId, setElegidoId] = useState(null);
+  const enCurso = lista.find((o) => String(o._id) === elegidoId) || lista[0] || null;
+
+  // Un pedido NUEVO (recién hecho) vuelve a lo automático; cambiar de paso no.
+  const idsAbiertos = lista.map((o) => String(o._id)).join(',');
+  const idsAnterioresRef = useRef(idsAbiertos ? idsAbiertos.split(',') : []);
+  useEffect(() => {
+    const ahora = idsAbiertos ? idsAbiertos.split(',') : [];
+    const anteriores = idsAnterioresRef.current;
+    idsAnterioresRef.current = ahora;
+    if (anteriores.length && pedidosNuevos(anteriores, ahora).length) setElegidoId(null);
+  }, [idsAbiertos]);
 
   const seguimiento = useSeguimientoEnVivo(enCurso?._id, !!enCurso);
 
@@ -196,6 +209,47 @@ const BurbujaPedido = () => {
               <X size={16} />
             </button>
           </div>
+
+          {/*
+            Con más de un pedido abierto, todos aquí: el icono dice si es a
+            domicilio o para recoger, y el texto en qué paso va. Tocar uno lo
+            sigue en la tarjeta (con su mapa, si va en camino).
+          */}
+          {lista.length > 1 && (
+            <div role="tablist" aria-label={t('Tienes {n} pedidos en curso', { n: lista.length })} style={{ display: 'flex', flexWrap: 'wrap', gap: 6, padding: '10px 12px 0' }}>
+              {lista.map((o) => {
+                const esEste = String(o._id) === String(enCurso._id);
+                const Icono = o.deliveryType === 'delivery' ? Bike : Store;
+                const pasos = pasosDe(o.deliveryType);
+                const suPaso = pasos[indiceDePaso(pasos, esEste ? estado : o.status)] || pasos[0];
+                return (
+                  <button
+                    key={String(o._id)}
+                    type="button"
+                    role="tab"
+                    aria-selected={esEste}
+                    aria-label={`${t(o.deliveryType === 'delivery' ? 'Envío a domicilio' : 'Retiro en el local')}: ${t(suPaso.label)}`}
+                    onClick={() => setElegidoId(String(o._id))}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 5, maxWidth: '100%',
+                      padding: '5px 10px', borderRadius: 999, cursor: 'pointer',
+                      border: `1.5px solid ${esEste ? BROWN : 'var(--linea)'}`,
+                      background: esEste ? 'var(--marca-50)' : 'transparent',
+                      color: esEste ? 'var(--marca-texto)' : 'var(--tinta-suave)',
+                      fontSize: 12, fontWeight: 700,
+                    }}
+                  >
+                    <Icono size={13} strokeWidth={2.2} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {t(suPaso.label)}
+                      {/* El número: dos pedidos en el mismo paso se distinguen igual. */}
+                      <span style={{ fontWeight: 500, opacity: 0.75 }}> · #{String(o._id).slice(-6).toUpperCase()}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {/*
             El mapa solo aparece cuando de verdad hay alguien en camino con la
@@ -383,6 +437,19 @@ const BurbujaPedido = () => {
             está esperando, y hacerlo tocar para verla sería mezquino.
           */}
           {enCamino ? (seguimiento.yaCasi ? t('Ya casi llega') : seguimiento.espera) : t(paso.label)}
+          {/* Con más de un pedido abierto, cuántos: los demás están en la tarjeta. */}
+          {lista.length > 1 && (
+            <span
+              aria-label={t('Tienes {n} pedidos en curso', { n: lista.length })}
+              style={{
+                minWidth: 18, height: 18, padding: '0 5px', borderRadius: 9, background: '#fff',
+                color: seguimiento.yaCasi ? '#14663A' : BROWN, fontSize: 11, fontWeight: 800,
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              {lista.length}
+            </span>
+          )}
           {/* El puntito que respira: dice "esto sigue en curso" sin decir nada */}
           <span style={{
             width: 7, height: 7, borderRadius: '50%', background: '#8ee6a8',

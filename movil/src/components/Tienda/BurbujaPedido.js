@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Bike, X, ChevronRight, Clock } from 'lucide-react-native';
+import { Bike, X, ChevronRight, Clock, Store } from 'lucide-react-native';
 import { usePedidoActivoCtx } from '../../context/PedidoActivoContext';
 import { useAuth } from '../../hooks/useAuth';
 import { useTema } from '../../context/TemaContext';
@@ -10,6 +10,7 @@ import { useArranqueResuelto } from '../../navigation/navigationRef';
 import { useSeguimientoEnVivo } from '../../hooks/useSeguimientoEnVivo';
 import { useTiempoPorZona } from '../../hooks/useTiempoPorZona';
 import { pasosDe, indiceDePaso } from '../../utils/pasosPedido';
+import { pedidosEnCurso, pedidosNuevos } from '../../utils/pedidosEnCurso';
 import { AIRE_ABAJO_MINIMO, ALTURA_BARRA_FLOTANTE } from '../UI/BarraInferior';
 import CodigoEntrega from './CodigoEntrega';
 import Mascota from '../Tiqui/Mascota';
@@ -32,13 +33,12 @@ import { useIdioma } from '../../context/IdiomaContext';
  * así sigue ahí al cambiar de apartado o al abrir el carrito, en vez de
  * desaparecer y tener que ir a buscar el estado a mano.
  *
- * ── Qué NO trae, a propósito ──
- * La web muestra un mapita en miniatura con el repartidor acercándose
- * (MapaSeguimiento). Aquí no: el texto de la espera ("Llega en 10 min
- * aprox.", "Ya casi toca tu puerta") ya dice lo que importa, y meter un mapa
- * chico aquí es una WebView más corriendo todo el tiempo que la burbuja está
- * abierta. Si hace falta el mapa de verdad, es un siguiente paso, no parte
- * de este.
+ * ── Varios pedidos a la vez ──
+ * Si el cliente tiene más de uno abierto (uno a domicilio y otro para
+ * recoger), la burbuja muestra primero el que más importa ahora —el que va
+ * en camino, después el listo para recoger— y no el más reciente (ver
+ * utils/pedidosEnCurso.js). En la tarjeta abierta salen todos, para cambiar
+ * de uno a otro con un toque.
  *
  * Va abajo a la IZQUIERDA porque no hay nada propio de la app en esa
  * esquina (el asistente de voz y el carrito viven en la barra de arriba).
@@ -84,11 +84,14 @@ const BurbujaPedido = () => {
 
   const esCliente = user?.type === 'client';
 
-  const enCurso = esCliente
-    ? (orders || [])
-        .filter((o) => ['pagado', 'preparando', 'en_camino', 'listo'].includes(o.status))
-        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0]
-    : null;
+  /*
+   * Los pedidos abiertos, del que más importa al que menos (ver
+   * utils/pedidosEnCurso.js). Se sigue el que eligió el cliente en la
+   * tarjeta; si no eligió (o el que eligió ya se cerró), el primero.
+   */
+  const lista = esCliente ? pedidosEnCurso(orders) : [];
+  const [elegidoId, setElegidoId] = useState(null);
+  const enCurso = lista.find((o) => String(o._id) === elegidoId) || lista[0] || null;
 
   // Los hooks necesitan el id ANTES de cualquier return: no se llaman a medias.
   const seguimiento = useSeguimientoEnVivo(enCurso?._id, !!enCurso);
@@ -99,14 +102,16 @@ const BurbujaPedido = () => {
    * esté en la lista (al abrir la app desde el aviso, todavía se está
    * cargando).
    */
-  const idEnCurso = enCurso ? String(enCurso._id) : null;
+  const idsAbiertos = lista.map((o) => String(o._id)).join(',');
   useEffect(() => {
-    if (!pedidoASeguir || !idEnCurso || pedidoASeguir !== idEnCurso) return;
+    if (!pedidoASeguir || !idsAbiertos.split(',').includes(pedidoASeguir)) return;
+    // Con varios pedidos abiertos, se despliega justo ESE (el del aviso).
+    setElegidoId(pedidoASeguir);
     setEncogidaEn(null);
     setOculta(false);
     setAbierta(true);
     dejarDeSeguir();
-  }, [pedidoASeguir, idEnCurso, dejarDeSeguir]);
+  }, [pedidoASeguir, idsAbiertos, dejarDeSeguir]);
   const zona = useTiempoPorZona(
     !enCurso || seguimiento.enVivo ? null : enCurso.deliveryLat,
     !enCurso || seguimiento.enVivo ? null : enCurso.deliveryLng
@@ -236,28 +241,30 @@ const BurbujaPedido = () => {
   }, [abierta]);
 
   /*
-   * Si se hace un pedido nuevo mientras el anterior TODAVÍA sigue activo (no
-   * entregado) —el caso que describe el comentario de `orders` en
-   * PedidoActivoContext.js—, `enCurso` salta directo al pedido nuevo pero
-   * `hayPedidoActivo` sigue en `true` todo el tiempo: nunca pasa por `false`,
-   * así que el efecto de arriba (el que resetea `oculta` al aparecer un
-   * pedido) no se entera. Sin este aparte, la tarjeta o el detalle que se
-   * habían quedado abiertos viendo el pedido VIEJO seguían abiertos igual,
-   * ahora con los datos del pedido nuevo adentro — se veían "aparecer solos"
-   * encima de la pantalla de confirmación recién abierta.
+   * Si se hace un pedido NUEVO mientras otro TODAVÍA sigue activo (no
+   * entregado), `hayPedidoActivo` sigue en `true` todo el tiempo: nunca pasa
+   * por `false`, así que el efecto de arriba (el que resetea `oculta` al
+   * aparecer un pedido) no se entera. Sin este aparte, la tarjeta o el
+   * detalle que se habían quedado abiertos seguían abiertos igual — se veían
+   * "aparecer solos" encima de la pantalla de confirmación recién abierta.
+   *
+   * Solo cuenta un pedido que no estaba antes: cambiar de pedido en la
+   * tarjeta, o que uno avance de paso, no cierra nada.
    */
-  const idPedidoActivo = enCurso ? String(enCurso._id) : null;
-  const idPedidoAnteriorRef = useRef(idPedidoActivo);
+  const idsAnterioresRef = useRef(idsAbiertos ? idsAbiertos.split(',') : []);
   useEffect(() => {
-    if (idPedidoActivo && idPedidoActivo !== idPedidoAnteriorRef.current) {
+    const ahora = idsAbiertos ? idsAbiertos.split(',') : [];
+    const anteriores = idsAnterioresRef.current;
+    idsAnterioresRef.current = ahora;
+    if (anteriores.length && pedidosNuevos(anteriores, ahora).length) {
+      setElegidoId(null);
       setAbierta(false);
       cerrarPedidoAbierto();
       setMapaGrande(false);
       setOculta(false);
     }
-    idPedidoAnteriorRef.current = idPedidoActivo;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idPedidoActivo]);
+  }, [idsAbiertos]);
 
   if (!montada || !pedido) return null;
 
@@ -282,6 +289,14 @@ const BurbujaPedido = () => {
   };
 
   const irAPedidos = () => abrirPedido(pedido);
+
+  // El paso de cada pedido abierto, para el selector de la tarjeta.
+  const pasoDe = (o) => {
+    const pasos = pasosDe(o.deliveryType);
+    const actual = String(o._id) === String(pedido._id) ? estado : o.status;
+    return pasos[indiceDePaso(pasos, actual)] || pasos[0];
+  };
+  const variosPedidos = lista.length > 1;
 
   /*
    * Arriba de la píldora flotante, no encima. `ALTURA_BARRA_FLOTANTE` es el
@@ -405,6 +420,43 @@ const BurbujaPedido = () => {
               </Pressable>
             </View>
 
+            {/*
+              Con más de un pedido abierto, todos aquí: el icono dice si es a
+              domicilio o para recoger, y el texto en qué paso va. Tocar uno
+              lo sigue en la tarjeta (con su mapa, si va en camino).
+            */}
+            {variosPedidos && (
+              <View style={estilos.selectorPedidos} accessibilityRole="tablist">
+                {lista.map((o) => {
+                  const esEste = String(o._id) === String(pedido._id);
+                  const Icono = o.deliveryType === 'delivery' ? Bike : Store;
+                  const color = esEste ? colores.marcaTexto : COLORES.textoSuave;
+                  const etiqueta = pasoDe(o).label;
+                  return (
+                    <Pressable
+                      key={String(o._id)}
+                      onPress={() => setElegidoId(String(o._id))}
+                      accessibilityRole="tab"
+                      accessibilityState={{ selected: esEste }}
+                      accessibilityLabel={`${t(o.deliveryType === 'delivery' ? 'Envío a domicilio' : 'Retiro en el local')}: ${etiqueta}`}
+                      style={[
+                        estilos.opcionPedido,
+                        { borderColor: esEste ? colores.marca : COLORES.borde },
+                        esEste && { backgroundColor: colores.marcaTenue },
+                      ]}
+                    >
+                      <Icono size={14} color={color} strokeWidth={2.2} />
+                      <Text style={[estilos.opcionPedidoTexto, { color }]} numberOfLines={1}>
+                        {etiqueta}
+                        {/* El número: dos pedidos en el mismo paso se distinguen igual. */}
+                        <Text style={estilos.opcionPedidoNumero}> · #{String(o._id).slice(-6).toUpperCase()}</Text>
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            )}
+
             {enCamino && (
               <>
                 {/*
@@ -521,6 +573,12 @@ const BurbujaPedido = () => {
         <Text style={estilos.botonBurbujaTexto}>
           {enCamino ? (seguimiento.yaCasi ? t('Ya casi llega') : seguimiento.espera) : paso.label}
         </Text>
+        {/* Con más de un pedido abierto, cuántos: los demás están en la tarjeta. */}
+        {variosPedidos && (
+          <View style={estilos.cuenta} accessibilityLabel={t('Tienes {n} pedidos en curso', { n: lista.length })}>
+            <Text style={[estilos.cuentaTexto, { color: colores.marca }]}>{lista.length}</Text>
+          </View>
+        )}
         {/* El puntito que respira: dice "esto sigue en curso" sin decir nada */}
         <View style={estilos.pulsoContenedor}>
           <Animated.View
@@ -629,6 +687,33 @@ const crearEstilos = (COLORES) => StyleSheet.create({
     fontWeight: '800',
     color: '#FFFFFF',
   },
+  // Los pedidos abiertos, cuando hay más de uno: pastillas en una fila.
+  selectorPedidos: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingTop: 10,
+  },
+  opcionPedido: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1.5,
+    maxWidth: '100%',
+  },
+  opcionPedidoTexto: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    flexShrink: 1,
+  },
+  opcionPedidoNumero: {
+    fontWeight: '500',
+    opacity: 0.75,
+  },
   // El propio MapaSeguimiento ya recorta sus esquinas (ver su estilo
   // `marco`); esta vista solo le da el margen lateral que el resto de la
   // tarjeta trae por padding, ya que el mapa vive FUERA de estilos.cuerpo.
@@ -697,6 +782,20 @@ const crearEstilos = (COLORES) => StyleSheet.create({
     fontSize: 13.5,
     fontWeight: '700',
     color: '#FFFFFF',
+  },
+  // Cuántos pedidos abiertos hay, cuando son más de uno.
+  cuenta: {
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 5,
+    borderRadius: 9,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cuentaTexto: {
+    fontSize: 11,
+    fontWeight: '800',
   },
   pulsoContenedor: {
     width: 8,

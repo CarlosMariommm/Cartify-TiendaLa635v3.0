@@ -35,6 +35,8 @@
  */
 
 import clientModel from "../models/client.js";
+import adminModel from "../models/admin.js";
+import employeeModel from "../models/employee.js";
 
 const URL_EXPO = "https://exp.host/--/api/v2/push/send";
 
@@ -53,18 +55,17 @@ export const esTokenExpo = (token) =>
   typeof token === "string" && /^Expo(nent)?PushToken\[[^\]]+\]$/.test(token.trim());
 
 /*
- * Los teléfonos de quien tiene encendido ESTE aviso.
+ * Los teléfonos de quien tiene encendido ESTE aviso EN LA APP.
  *
- * Las mismas dos reglas que `destinatariosDe` en avisosCliente.js, y por las
- * mismas razones: `$ne: false` para los avisos que nacen encendidos (quien se
- * registró antes de que existieran las preferencias no tiene el campo), y
- * `true` exacto para `pedidoCerca`, que nace apagado y donde "no tengo el
- * campo" significa "no lo pedí".
+ * Mira `avisosApp`, no `notificationPrefs` (que son los correos): apagar el
+ * correo de las promociones no apaga su notificación, ni al revés. Ver
+ * utils/preferenciasAvisos.js. `$ne: false` porque nacen encendidos y quien
+ * no tiene el campo nunca lo apagó.
  */
-export const dispositivosDe = async (preferencia, exigirTrue = false) => {
+export const dispositivosDe = async (preferencia) => {
   const clientes = await clientModel
     .find({
-      [`notificationPrefs.${preferencia}`]: exigirTrue ? true : { $ne: false },
+      [`avisosApp.${preferencia}`]: { $ne: false },
       isActive: { $ne: false },
       pushTokens: { $exists: true, $ne: [] },
     })
@@ -79,14 +80,17 @@ export const dispositivosDe = async (preferencia, exigirTrue = false) => {
 /*
  * Saca de las cuentas los tokens que Expo ya dio por muertos. Va sin await
  * del lado de quien envía: limpiar es mantenimiento, no parte del aviso.
+ * De las tres: el personal también apunta su teléfono (avisosPersonal.js).
  */
 const olvidarTokens = async (tokens) => {
   if (!tokens.length) return;
   try {
-    await clientModel.updateMany(
-      { pushTokens: { $in: tokens } },
-      { $pull: { pushTokens: { $in: tokens } } }
-    );
+    await Promise.all([clientModel, adminModel, employeeModel].map((Modelo) =>
+      Modelo.updateMany(
+        { pushTokens: { $in: tokens } },
+        { $pull: { pushTokens: { $in: tokens } } }
+      )
+    ));
     console.log(`push: ${tokens.length} token(s) muerto(s) dados de baja`);
   } catch (error) {
     console.log("push: no se pudieron limpiar los tokens muertos: " + error.message);
@@ -105,8 +109,12 @@ const olvidarTokens = async (tokens) => {
  * `canal`: por dónde suena en Android. "pedidos" es el de prioridad alta (sale
  * como globo arriba de la pantalla: es lo que la persona está esperando);
  * "avisos", el de siempre, para promociones y productos nuevos, que no tienen
- * por qué interrumpir. Los dos los crea la app al arrancar.
+ * por qué interrumpir. Los dos los crea la app al arrancar. "tienda", también
+ * de prioridad alta, es el de los pedidos nuevos que le llegan al personal, y
+ * la app solo lo crea en el modo personal.
  */
+const CANALES_URGENTES = ["pedidos", "tienda"];
+
 export const enviarPush = async (tokens, { titulo, cuerpo, datos = {}, canal = "avisos" }) => {
   const destinos = [...new Set((tokens || []).filter(esTokenExpo))];
   if (!destinos.length) return { enviados: 0, fallidos: 0 };
@@ -127,9 +135,9 @@ export const enviarPush = async (tokens, { titulo, cuerpo, datos = {}, canal = "
       // El canal tiene que existir en el teléfono o Android manda el aviso a
       // uno por defecto sin sonido. Lo crea la app al arrancar.
       channelId: canal,
-      // Los del pedido van con prioridad alta: que lleguen al momento aunque
+      // Los de pedidos van con prioridad alta: que lleguen al momento aunque
       // el teléfono esté ahorrando batería.
-      priority: canal === "pedidos" ? "high" : "default",
+      priority: CANALES_URGENTES.includes(canal) ? "high" : "default",
     }));
 
     try {
