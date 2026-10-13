@@ -35,6 +35,8 @@
  */
 
 import clientModel from "../models/client.js";
+import adminModel from "../models/admin.js";
+import employeeModel from "../models/employee.js";
 
 const URL_EXPO = "https://exp.host/--/api/v2/push/send";
 
@@ -79,14 +81,17 @@ export const dispositivosDe = async (preferencia, exigirTrue = false) => {
 /*
  * Saca de las cuentas los tokens que Expo ya dio por muertos. Va sin await
  * del lado de quien envía: limpiar es mantenimiento, no parte del aviso.
+ * De las tres: el personal también apunta su teléfono (avisosPersonal.js).
  */
 const olvidarTokens = async (tokens) => {
   if (!tokens.length) return;
   try {
-    await clientModel.updateMany(
-      { pushTokens: { $in: tokens } },
-      { $pull: { pushTokens: { $in: tokens } } }
-    );
+    await Promise.all([clientModel, adminModel, employeeModel].map((Modelo) =>
+      Modelo.updateMany(
+        { pushTokens: { $in: tokens } },
+        { $pull: { pushTokens: { $in: tokens } } }
+      )
+    ));
     console.log(`push: ${tokens.length} token(s) muerto(s) dados de baja`);
   } catch (error) {
     console.log("push: no se pudieron limpiar los tokens muertos: " + error.message);
@@ -105,8 +110,12 @@ const olvidarTokens = async (tokens) => {
  * `canal`: por dónde suena en Android. "pedidos" es el de prioridad alta (sale
  * como globo arriba de la pantalla: es lo que la persona está esperando);
  * "avisos", el de siempre, para promociones y productos nuevos, que no tienen
- * por qué interrumpir. Los dos los crea la app al arrancar.
+ * por qué interrumpir. Los dos los crea la app al arrancar. "tienda", también
+ * de prioridad alta, es el de los pedidos nuevos que le llegan al personal, y
+ * la app solo lo crea en el modo personal.
  */
+const CANALES_URGENTES = ["pedidos", "tienda"];
+
 export const enviarPush = async (tokens, { titulo, cuerpo, datos = {}, canal = "avisos" }) => {
   const destinos = [...new Set((tokens || []).filter(esTokenExpo))];
   if (!destinos.length) return { enviados: 0, fallidos: 0 };
@@ -127,9 +136,9 @@ export const enviarPush = async (tokens, { titulo, cuerpo, datos = {}, canal = "
       // El canal tiene que existir en el teléfono o Android manda el aviso a
       // uno por defecto sin sonido. Lo crea la app al arrancar.
       channelId: canal,
-      // Los del pedido van con prioridad alta: que lleguen al momento aunque
+      // Los de pedidos van con prioridad alta: que lleguen al momento aunque
       // el teléfono esté ahorrando batería.
-      priority: canal === "pedidos" ? "high" : "default",
+      priority: CANALES_URGENTES.includes(canal) ? "high" : "default",
     }));
 
     try {

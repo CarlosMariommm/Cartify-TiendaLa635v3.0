@@ -16,6 +16,12 @@
  * useRepartoPersonal, y no dentro de su pantalla). El Panel se monta la
  * primera vez que se abre y desde ahí también se queda.
  *
+ * LOS PEDIDOS NUEVOS. Mientras la sesión esté abierta, cada pedido que entra
+ * suena en este teléfono (hooks/useAvisosPersonal.js). Al tocar el aviso: a
+ * domicilio, al Reparto; para recoger o impresión, a Pedidos del panel (el
+ * empleado, que no tiene panel, al Reparto). Al cerrar sesión se deja de
+ * recibirlos, y eso se dice en la pregunta de salir.
+ *
  * EL AVISO DEL PANEL. En el teléfono el panel funciona, pero tiene tablas y
  * formularios pensados para pantallas amplias: la primera vez que se abre en
  * la sesión se le avisa y se le recomienda una tablet o una computadora. En
@@ -27,7 +33,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Bike, Download, LayoutDashboard, LogOut, RotateCw, Sparkles } from 'lucide-react-native';
+import { BellOff, Bike, Download, LayoutDashboard, LogOut, RotateCw, Sparkles } from 'lucide-react-native';
 import { useColores, useEstilos } from '../../context/ModoContext';
 import { useTema } from '../../context/TemaContext';
 import { usePersonal } from '../../context/PersonalContext';
@@ -35,6 +41,8 @@ import { useRepartoPersonal } from '../../hooks/useRepartoPersonal';
 import { useMovimientoReducido } from '../../hooks/useMovimientoReducido';
 import { useDisposicion } from '../../hooks/useDisposicion';
 import { useActualizacionApp } from '../../hooks/useActualizacionApp';
+import { useAvisosPersonal } from '../../hooks/useAvisosPersonal';
+import { escucharLlegadas, escucharToques } from '../../utils/notificaciones';
 import { ALTURA_ESTADO } from '../../theme/pantalla';
 import ModalConfirmar from '../../components/UI/ModalConfirmar';
 import TiquiAdmin from './TiquiAdmin';
@@ -73,6 +81,8 @@ const ModoPersonal = () => {
   const { esTablet } = useDisposicion();
   const [panelAbierto, setPanelAbierto] = useState(false);
   const [avisoPanel, setAvisoPanel] = useState(false);
+  // La pantalla del panel con la que abre, si se llegó tocando un aviso.
+  const [inicioPanel, setInicioPanel] = useState(null);
   const panel = useRef(null);
 
   const elegir = (clave) => {
@@ -89,6 +99,53 @@ const ModoPersonal = () => {
     setPanelAbierto(true);
     setSeccion('panel');
   };
+
+  const cerrarAvisoPanel = () => {
+    setAvisoPanel(false);
+    setInicioPanel(null);
+  };
+
+  // Pedidos del panel: ya abierto, va directo; si no, abre por ahí (con el aviso en el teléfono).
+  const irAPedidosDelPanel = () => {
+    if (panelAbierto) {
+      panel.current?.irA('/pedidos');
+      setSeccion('panel');
+      return;
+    }
+    setInicioPanel('/pedidos');
+    if (esTablet) {
+      setPanelAbierto(true);
+      setSeccion('panel');
+    } else {
+      setAvisoPanel(true);
+    }
+  };
+
+  /*
+   * Los pedidos nuevos. Al llegar, el Reparto se pone al día sin esperar su
+   * vuelta; al tocarlo, se va a donde está ese pedido. Los oyentes se ponen
+   * una vez y leen lo de este momento por la referencia.
+   */
+  const avisos = useAvisosPersonal();
+  const alTocarAviso = useRef(null);
+  alTocarAviso.current = (datos) => {
+    if (datos?.tipo !== 'pedidoNuevo') return;
+    reparto.recargar();
+    if (!esAdmin || datos.entrega === 'delivery') setSeccion('reparto');
+    else irAPedidosDelPanel();
+  };
+  const alLlegarAviso = useRef(null);
+  alLlegarAviso.current = (datos) => {
+    if (datos?.tipo === 'pedidoNuevo') reparto.recargar();
+  };
+  useEffect(() => {
+    const dejarToques = escucharToques((datos) => alTocarAviso.current?.(datos));
+    const dejarLlegadas = escucharLlegadas((datos) => alLlegarAviso.current?.(datos));
+    return () => {
+      dejarToques();
+      dejarLlegadas();
+    };
+  }, []);
 
   /*
    * La píldora del selector: UNA sola vista que viaja de una opción a la otra,
@@ -255,6 +312,19 @@ const ModoPersonal = () => {
             </Text>
           </Pressable>
         )}
+
+        {avisos.estado === 'sin-permiso' && (
+          <Pressable
+            onPress={avisos.abrirAjustes}
+            accessibilityRole="button"
+            style={({ pressed }) => [estilos.avisoVersion, pressed && { opacity: 0.6 }]}
+          >
+            <BellOff size={17} color={colores.marcaTexto} strokeWidth={2} />
+            <Text style={[estilos.avisoVersionTexto, { color: colores.marcaTexto }]}>
+              Los avisos de pedidos nuevos están apagados en este teléfono. Toque aquí para activarlos.
+            </Text>
+          </Pressable>
+        )}
       </View>
 
       {esAdmin && (
@@ -267,7 +337,7 @@ const ModoPersonal = () => {
       </View>
       {esAdmin && panelAbierto && (
         <View style={actual === 'panel' ? estilos.flexible : estilos.oculta}>
-          <PanelWeb ref={panel} activo={actual === 'panel'} />
+          <PanelWeb ref={panel} activo={actual === 'panel'} inicio={inicioPanel} />
         </View>
       )}
 
@@ -278,7 +348,7 @@ const ModoPersonal = () => {
           textoConfirmar="Abrir el panel"
           textoCancelar="Ahora no"
           alConfirmar={abrirPanel}
-          alCerrar={() => setAvisoPanel(false)}
+          alCerrar={cerrarAvisoPanel}
         />
       )}
 
@@ -298,8 +368,8 @@ const ModoPersonal = () => {
           titulo="¿Salir del modo personal?"
           mensaje={
             reparto.enViaje.length
-              ? 'Está compartiendo su ubicación con un cliente: al salir se deja de compartir. La app vuelve a ser la tienda.'
-              : 'La app vuelve a ser la tienda. Para volver tendrá que entrar de nuevo con su cuenta y el código del correo.'
+              ? 'Está compartiendo su ubicación con un cliente: al salir se deja de compartir. Además, este teléfono dejará de avisarle de los pedidos nuevos. La app vuelve a ser la tienda.'
+              : 'Este teléfono dejará de avisarle de los pedidos nuevos. La app vuelve a ser la tienda, y para volver tendrá que entrar de nuevo con su cuenta y el código del correo.'
           }
           textoConfirmar="Salir"
           textoCancelar="Quedarme"

@@ -15,4 +15,8 @@ router.route("/foto")
   .put(upload.single("image"), perfilController.actualizarFoto)
   .delete(perfilController.quitarFoto);
 
+// La app apunta aquí el teléfono donde suenan los pedidos nuevos.
+router.route("/avisos")
+  .put(perfilController.apuntarTelefono);
+
 export default router;

@@ -176,6 +176,12 @@ const LoginPersonal = ({ alVolver, correoInicial = '' }) => {
             estilo={estilos.botonRedondo}
           />
 
+          {paso === 'credenciales' && (
+            <Text style={estilos.nota}>
+              Mientras tenga la sesión abierta, este teléfono le avisará de cada pedido nuevo. Si cierra sesión, dejarán de llegarle.
+            </Text>
+          )}
+
           {paso === 'codigo' && (
             <Text
               style={[estilos.pieEnlace, { color: colores.marcaTexto }]}
@@ -222,6 +228,7 @@ const crearEstilos = (COLORES) => StyleSheet.create({
   avisoTexto: { color: COLORES.peligro, fontSize: 13, lineHeight: 19 },
   botonRedondo: { borderRadius: 28, marginTop: 6 },
   pieEnlace: { textAlign: 'center', fontSize: 14, fontWeight: '600', marginTop: 20, paddingVertical: 6 },
+  nota: { textAlign: 'center', fontSize: 13, lineHeight: 19, color: COLORES.textoSuave, marginTop: 18 },
 });
 
 export default LoginPersonal;

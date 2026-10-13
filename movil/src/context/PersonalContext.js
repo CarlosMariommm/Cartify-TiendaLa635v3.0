@@ -18,8 +18,9 @@
  * ============================================================
  */
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { borrar, guardar, leer, llave } from '../utils/almacen';
+import { tokenActual } from '../utils/notificaciones';
 import { personalApi } from '../api/personalApi';
 
 const PersonalContext = createContext(null);
@@ -87,12 +88,24 @@ export const PersonalProvider = ({ children }) => {
     guardar(LLAVE_SESION, JSON.stringify(datos));
   }, []);
 
+  /*
+   * El token de avisos con el que este teléfono quedó apuntado (ver
+   * hooks/useAvisosPersonal.js). Al salir se manda para darlo de baja; si
+   * todavía no se había apuntado, se le pregunta al teléfono.
+   */
+  const tokenAvisos = useRef(null);
+  const recordarTokenAvisos = useCallback((token) => { tokenAvisos.current = token; }, []);
+
   const salir = useCallback(() => {
     setSesion(null);
     borrar(LLAVE_SESION);
     setPaletaPanel(null);
     borrar(LLAVE_PALETA);
-    personalApi.salir();
+    const apuntado = tokenAvisos.current;
+    tokenAvisos.current = null;
+    Promise.resolve(apuntado || tokenActual())
+      .catch(() => null)
+      .then((token) => personalApi.salir(token));
   }, []);
 
   const valor = useMemo(() => ({
@@ -103,7 +116,8 @@ export const PersonalProvider = ({ children }) => {
     salir,
     paletaPanel,
     cambiarPaletaPanel,
-  }), [sesion, cargando, iniciar, salir, paletaPanel, cambiarPaletaPanel]);
+    recordarTokenAvisos,
+  }), [sesion, cargando, iniciar, salir, paletaPanel, cambiarPaletaPanel, recordarTokenAvisos]);
 
   return <PersonalContext.Provider value={valor}>{children}</PersonalContext.Provider>;
 };

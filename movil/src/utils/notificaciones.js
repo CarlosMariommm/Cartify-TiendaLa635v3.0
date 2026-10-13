@@ -73,6 +73,7 @@ export const HAY_PUSH = !!PROJECT_ID;
 
 const CANAL = 'avisos';
 const CANAL_PEDIDOS = 'pedidos';
+const CANAL_TIENDA = 'tienda';
 
 /*
  * Los canales de Android, con la pinta de la tienda: la luz del aviso en
@@ -88,9 +89,23 @@ const CANAL_PEDIDOS = 'pedidos';
  * Android no deja cambiarle la prioridad a un canal ya creado: por eso el de
  * pedidos es uno nuevo y no el de avisos subido de nivel. El servidor dice
  * por cuál va cada aviso (backend/src/utils/pushExpo.js).
+ *
+ * Con `personal`, uno más: 'tienda', los pedidos nuevos que le llegan a quien
+ * trabaja en la tienda (backend/src/utils/avisosPersonal.js). Solo se crea en
+ * el modo personal: al cliente no le tiene que aparecer en los ajustes del
+ * teléfono un canal de "Pedidos nuevos de la tienda".
  */
-const prepararCanal = async () => {
+const prepararCanal = async ({ personal = false } = {}) => {
   if (Platform.OS !== 'android') return;
+  if (personal) {
+    await Notifications.setNotificationChannelAsync(CANAL_TIENDA, {
+      name: 'Pedidos nuevos de la tienda',
+      description: 'Cada pedido que entra, mientras tenga la sesión del personal abierta.',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#003049',
+    });
+  }
   await Notifications.setNotificationChannelAsync(CANAL_PEDIDOS, {
     name: 'Mi pedido',
     description: 'Cuando tu pedido se prepara, sale, está listo o llega.',
@@ -117,12 +132,12 @@ const prepararCanal = async () => {
  * tiene que ir a los ajustes del teléfono o si simplemente está en un
  * emulador.
  */
-export const registrarParaAvisos = async () => {
+export const registrarParaAvisos = async ({ personal = false } = {}) => {
   if (!HAY_PUSH) return { token: null, motivo: 'sin-proyecto' };
   if (!Device.isDevice) return { token: null, motivo: 'emulador' };
 
   try {
-    await prepararCanal();
+    await prepararCanal({ personal });
 
     const { status: yaEstaba } = await Notifications.getPermissionsAsync();
     let status = yaEstaba;
@@ -175,10 +190,26 @@ export const tokenActual = async () => {
  * use: sin quitarlos, cada recarga en caliente deja uno más escuchando y un
  * solo toque abre la pantalla tres veces.
  */
+/*
+ * Los toques ya atendidos. El último toque se le pregunta al sistema cada vez
+ * que alguien empieza a escuchar, y eso pasa más de una vez: al entrar y salir
+ * del modo personal se monta otra vez la tienda (o el modo personal), y sin
+ * esto el mismo aviso viejo volvía a abrir su pantalla.
+ */
+const atendidos = new Set();
+
+const atender = (respuesta, alTocar) => {
+  const id = respuesta?.notification?.request?.identifier;
+  if (id) {
+    if (atendidos.has(id)) return;
+    atendidos.add(id);
+  }
+  alTocar(respuesta?.notification?.request?.content?.data || {});
+};
+
 export const escucharToques = (alTocar) => {
   const sub = Notifications.addNotificationResponseReceivedListener((respuesta) => {
-    const datos = respuesta?.notification?.request?.content?.data || {};
-    alTocar(datos);
+    atender(respuesta, alTocar);
   });
 
   /*
@@ -186,11 +217,24 @@ export const escucharToques = (alTocar) => {
    * oyente de arriba —ya había ocurrido antes de que existiera— y hay que ir a
    * buscarlo. Sin esto, abrir la app desde el aviso te deja en la portada.
    */
-  Notifications.getLastNotificationResponseAsync().then((respuesta) => {
-    if (!respuesta) return;
-    alTocar(respuesta?.notification?.request?.content?.data || {});
-  });
+  Notifications.getLastNotificationResponseAsync()
+    .then((respuesta) => {
+      if (respuesta) atender(respuesta, alTocar);
+    })
+    .catch(() => null);
 
+  return () => sub.remove();
+};
+
+/*
+ * Un aviso que LLEGA con la app abierta (sin que nadie lo toque). Lo usa el
+ * modo personal para traer la lista del Reparto al momento, sin esperar a la
+ * próxima vuelta.
+ */
+export const escucharLlegadas = (alLlegar) => {
+  const sub = Notifications.addNotificationReceivedListener((aviso) => {
+    alLlegar(aviso?.request?.content?.data || {});
+  });
   return () => sub.remove();
 };
 
