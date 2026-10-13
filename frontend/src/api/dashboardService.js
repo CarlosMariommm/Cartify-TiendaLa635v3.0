@@ -16,4 +16,17 @@ export const dashboardService = {
     const response = await api.get('/dashboard/chart', { params: { periodo } });
     return response.data;
   },
+
+  /*
+   * El pronóstico del servicio de analítica (solo el administrador). Con
+   * espera larga: si el servicio estaba dormido en Render, despertar le toma
+   * cerca de un minuto, y el servidor de la tienda lo espera hasta 90 s.
+   */
+  getPronostico: async ({ forzar = false } = {}) => {
+    const response = await api.get('/dashboard/pronostico', {
+      params: forzar ? { forzar: 1 } : {},
+      timeout: 120000,
+    });
+    return response.data;
+  },
 };
