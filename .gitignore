@@ -7,6 +7,11 @@ node_modules/
 .env.*
 !.env.example
 
+# Python (el servicio de analítica): el entorno se arma con requirements.txt.
+.venv/
+__pycache__/
+.pytest_cache/
+
 # Compilados
 dist/
 build/

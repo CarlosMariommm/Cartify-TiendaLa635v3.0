@@ -1,0 +1,10 @@
+# El servicio de analítica: lo que necesita para correr en Render (Docker).
+# Versiones fijas, para que la imagen salga igual cada vez que se construye.
+fastapi==0.115.12
+uvicorn==0.34.2
+numpy==2.2.5
+pandas==2.2.3
+statsmodels==0.14.4
+# statsmodels la trae sola, pero la última (1.16 en adelante) ya no le acepta
+# un parámetro al optimizador y Holt-Winters falla al ajustar: se fija aquí.
+scipy==1.15.2

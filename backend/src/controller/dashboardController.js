@@ -2,6 +2,7 @@ import orderModel from "../models/order.js";
 import productModel from "../models/product.js";
 import supplierMovementModel from "../models/supplierMovement.js";
 import clientModel from "../models/client.js";
+import { obtenerPronostico } from "../utils/pronostico.js";
 
 /*
  * Dashboard del admin — arma TODO el resumen en una sola llamada.
@@ -393,6 +394,28 @@ dashboardController.getChart = async (req, res) => {
   } catch (error) {
     console.log("error " + error);
     return res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
+
+/*
+ * El pronóstico de ventas y la lista de compras, calculados por el servicio
+ * de analítica (Python). Cada falla dice qué pasó: no es lo mismo que el
+ * servicio no esté conectado a que esté despertando.
+ */
+const MENSAJES_PRONOSTICO = {
+  "sin-servicio": [503, "El pronóstico todavía no está conectado: falta configurar el servicio de analítica."],
+  lento: [504, "El servicio de pronóstico tardó demasiado; puede estar despertando. Intente de nuevo en un minuto."],
+  "sin-conexion": [502, "No se pudo conectar con el servicio de pronóstico. Intente de nuevo en un minuto."],
+};
+
+dashboardController.getPronostico = async (req, res) => {
+  try {
+    const datos = await obtenerPronostico({ forzar: req.query.forzar === "1" });
+    return res.status(200).json(datos);
+  } catch (error) {
+    const [estado, mensaje] = MENSAJES_PRONOSTICO[error?.codigo] || [502, "No se pudo calcular el pronóstico."];
+    console.log(`pronóstico: ${error?.codigo || "error"} ${error?.message || error}`);
+    return res.status(estado).json({ message: mensaje });
   }
 };
 
