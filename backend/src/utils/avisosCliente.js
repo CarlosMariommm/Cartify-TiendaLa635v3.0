@@ -28,6 +28,7 @@ import storeSettingsModel, { CLAVE_UNICA } from "../models/storeSettings.js";
 import { sendEmail } from "./sendMailMailjet.js";
 import { plantillaProductosNuevos, plantillaPedidoEnCamino, plantillaPedidoCancelado } from "./plantillasAviso.js";
 import { dispositivosDe, enviarPushEnSegundoPlano } from "./pushExpo.js";
+import { AVISO_DEL_ESTADO, quiereEnLaApp } from "./preferenciasAvisos.js";
 import { enlaceDeBaja, enlaceDeBajaUnClic } from "./tokenBaja.js";
 
 /*
@@ -143,8 +144,8 @@ const soltarLoteDeProductos = async () => {
   /*
    * El mismo aviso, empujado a los teléfonos. Va ANTES del corte de abajo a
    * propósito: quien tiene la app instalada y ningún correo verificado sigue
-   * siendo alguien a quien avisarle. Son dos canales para la misma
-   * preferencia, no dos listas distintas.
+   * siendo alguien a quien avisarle. Cada canal con su interruptor: el del
+   * teléfono es `avisosApp.nuevosProductos` (ver dispositivosDe).
    */
   const nombres = productos.map((p) => p.nombre).filter(Boolean);
   enviarPushEnSegundoPlano(await dispositivosDe("nuevosProductos"), {
@@ -204,10 +205,10 @@ export const anotarProductoNuevo = (producto) => {
 
 /*
  * Lo que le dice el teléfono a la dueña del pedido en cada paso. Son avisos
- * DE SERVICIO, no de publicidad: la persona está esperando su pedido, así que
- * le llegan siempre a los teléfonos donde tiene la app (el sistema del
- * teléfono igual le deja apagarlos). Antes solo existía "va en camino" y
- * nacía apagado: casi nadie se enteraba de nada.
+ * DE SERVICIO, no de publicidad: nacen encendidos, y cada paso se puede
+ * apagar aparte en Mi cuenta › Notificaciones (`avisosApp`: preparando;
+ * en camino o listo; entregado; cancelado). Antes solo existía "va en
+ * camino" y nacía apagado: casi nadie se enteraba de nada.
  *
  * Cada paso, una vez: el controlador solo llama en el SALTO de un estado a
  * otro. Los textos se repiten en movil/src/utils/simulacionPedido.js (el
@@ -264,7 +265,7 @@ const clienteDelPedido = async (pedido) => {
   if (!idCliente) return null;
   const cliente = await clientModel
     .findById(idCliente)
-    .select("email fullName notificationPrefs isActive +pushTokens")
+    .select("email fullName notificationPrefs avisosApp isActive +pushTokens")
     .lean();
   return cliente && cliente.isActive !== false ? cliente : null;
 };
@@ -285,6 +286,9 @@ export const avisarPasoDelPedido = async (pedido, estado) => {
   }
   const cliente = await clienteDelPedido(pedido);
   if (!cliente) return { enviados: 0, motivo: "sin cliente activo" };
+  if (!quiereEnLaApp(cliente, AVISO_DEL_ESTADO[estado])) {
+    return { enviados: 0, motivo: "apagó ese aviso en la app" };
+  }
 
   const tokens = cliente.pushTokens || [];
   enviarPushEnSegundoPlano(tokens, {

@@ -163,6 +163,22 @@ export const registrarParaAvisos = async ({ personal = false } = {}) => {
 };
 
 /*
+ * Si todavía se le puede preguntar al teléfono por el permiso: nunca se
+ * decidió, o Android deja volver a preguntar. Para pedirlo una sola vez por
+ * cuenta propia (ver components/UI/RegistroAvisos.js) sin insistirle a quien
+ * ya dijo que no.
+ */
+export const sePuedePreguntar = async () => {
+  if (!HAY_PUSH || !Device.isDevice) return false;
+  try {
+    const { status, canAskAgain } = await Notifications.getPermissionsAsync();
+    return status !== 'granted' && canAskAgain !== false;
+  } catch {
+    return false;
+  }
+};
+
+/*
  * El token que ya tiene este teléfono, sin pedir permiso ni molestar a nadie.
  * Sirve para dar de baja al cerrar sesión: ahí no se puede pedir permiso
  * (sería absurdo) pero sí hay que decirle al backend que deje de avisar aquí.
