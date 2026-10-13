@@ -8,6 +8,8 @@ import jsPDF from 'jspdf';
 import { descargarArchivo } from '../utils/descargar';
 import autoTable from 'jspdf-autotable';
 import StatCard from '../components/UI/StatCard';
+import DescargaPredictiva from '../components/Admin/DescargaPredictiva';
+import { useAuth } from '../hooks/useAuth';
 import { useDashboard } from '../hooks/useDashboard';
 import { useResumenCredito } from '../hooks/useCreditoProveedor';
 import { useTheme } from '../context/ThemeContext';
@@ -108,6 +110,9 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { data, grafica, loading, loadingGrafica, periodo, setPeriodo } = useDashboard();
   const { totales: creditoTotales } = useResumenCredito();
+  // El reporte predictivo es de compras y proveedores: solo el administrador (como su ruta).
+  const { user } = useAuth();
+  const esAdmin = user?.type === 'admin';
   const { palette } = useTheme();
   const c = palette.colors; // las barras y acentos siguen la paleta activa
   const [modal, setModal] = useState(null); // 'reponer' | 'caducar' | 'pdf'
@@ -680,6 +685,9 @@ const AdminDashboard = () => {
                   {descargandoInventario ? 'Generando…' : 'Descargar inventario'}
                 </button>
               </div>
+
+              {/* El pronóstico: compras y proveedores, solo el administrador */}
+              {esAdmin && <DescargaPredictiva alTerminar={() => setModal(null)} />}
             </div>
           </motion.div>
         </div>

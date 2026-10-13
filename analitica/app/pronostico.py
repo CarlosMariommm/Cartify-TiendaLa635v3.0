@@ -367,6 +367,17 @@ def pronosticar(solicitud: dict) -> dict:
     total = caminos.sum(axis=1)
     pasado = tienda[-horizonte:].sum() if len(tienda) >= horizonte else None
 
+    # Lo que de verdad se vendió en las últimas semanas completas (hasta 4),
+    # para ponerlo al lado del pronóstico en la gráfica del reporte.
+    semanas_anteriores = []
+    for k in range(min(4, len(tienda) // SEMANA), 0, -1):
+        tramo = slice(len(tienda) - SEMANA * k, len(tienda) - SEMANA * (k - 1))
+        semanas_anteriores.append({
+            "desde": dias[tramo.start].isoformat(),
+            "hasta": dias[tramo.stop - 1].isoformat(),
+            "total": _redondo(tienda[tramo].sum()),
+        })
+
     # ── Productos ──
     ventas_por_producto: dict[str, list] = {}
     for venta in solicitud.get("ventas", []):
@@ -485,6 +496,7 @@ def pronosticar(solicitud: dict) -> dict:
             "dias": len(dias),
             "pedidos": int(pedidos.sum()),
             "ventas": _redondo(tienda.sum()),
+            "semanas": semanas_anteriores,
         },
         "perfil_semana": [_redondo(f, 3) for f in perfil],  # lunes a domingo
         "tienda": {
