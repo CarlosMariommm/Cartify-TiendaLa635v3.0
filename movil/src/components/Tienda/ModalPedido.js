@@ -17,6 +17,9 @@ import ValoracionServicio from '../Cuenta/ValoracionServicio';
 import { useIdioma } from '../../context/IdiomaContext';
 import { foto, ANCHO } from '../../utils/fotos';
 import { hojaCentrada } from '../../theme/pantalla';
+import { useSeguimientoEnVivo } from '../../hooks/useSeguimientoEnVivo';
+import MapaSeguimiento from './MapaSeguimiento';
+import ModalMapaSeguimiento from './ModalMapaSeguimiento';
 
 /*
  * Una fila por producto, con su propio estado de "la imagen no cargó": cada
@@ -67,11 +70,12 @@ const FilaProducto = ({ item }) => {
  * ver esos dos archivos para el porqué de cada pieza del gesto, no se repite
  * aquí.
  *
- * A diferencia de la burbuja flotante, esto es una FOTO del pedido tal como
- * quedó la última vez que se refrescó la lista: no sondea el estado en vivo
- * con useSeguimientoEnVivo. Para eso ya está la burbuja mientras el pedido
- * sigue en curso; aquí se viene a revisar un pedido puntual del historial,
- * no a vigilarlo mientras se abre.
+ * Un pedido a domicilio que sigue abierto se sigue EN VIVO mientras se mira
+ * (useSeguimientoEnVivo): el paso al día y, si va en camino, el mapa con el
+ * repartidor y su ruta. Antes era solo una foto del pedido, porque para
+ * seguirlo estaba la burbuja; pero con dos pedidos abiertos (uno a domicilio
+ * y otro para recoger) la burbuja mostraba el otro y el que iba en camino se
+ * quedaba sin mapa en ningún lado.
  * ============================================================
  */
 
@@ -200,13 +204,22 @@ const ModalPedido = ({ pedido, alCerrar }) => {
     }
   };
 
+  // El seguimiento en vivo: solo un pedido a domicilio que sigue abierto.
+  const seguible = pedido?.deliveryType === 'delivery' && ['pagado', 'preparando', 'en_camino'].includes(pedido?.status);
+  // Sin aviso de "ya casi": ese lo da la burbuja, y saldría dos veces.
+  const seguimiento = useSeguimientoEnVivo(pedido?._id, seguible, { conAviso: false });
+  const [mapaGrande, setMapaGrande] = useState(false);
+
   if (!pedido) return null;
 
+  // El paso al día si se está siguiendo; si no, el de la lista.
+  const estadoActual = seguimiento.estado || pedido.status;
+  const enCamino = estadoActual === 'en_camino' && seguimiento.enVivo;
   const estados = estadosPedido(COLORES.oscuro);
-  const estado = estados[pedido.status] || estados.pagado;
+  const estado = estados[estadoActual] || estados.pagado;
   const numero = String(pedido._id || '').slice(-6).toUpperCase();
   const items = Array.isArray(pedido.items) ? pedido.items : [];
-  const esCancelado = pedido.status === 'cancelado';
+  const esCancelado = estadoActual === 'cancelado';
 
   /*
    * Los números del desglose. Los pedidos viejos (de antes de que existieran
@@ -266,8 +279,30 @@ const ModalPedido = ({ pedido, alCerrar }) => {
 
             {/* Tiqui cuenta en qué va el pedido, como en "Estado del pedido" de la web. */}
             <View style={estilos.tiquiEstado}>
-              <Mascota pose={poseDeEstado(pedido.status)} alto={120} />
+              <Mascota pose={poseDeEstado(estadoActual)} alto={120} />
             </View>
+
+            {/* Va en camino: dónde va el repartidor, su ruta y cuánto falta. */}
+            {enCamino && (
+              <View style={estilos.bloqueMapa}>
+                <MapaSeguimiento
+                  key={mapaGrande ? 'grande' : 'chica'}
+                  punto={seguimiento.punto}
+                  destino={seguimiento.destino}
+                  ruta={seguimiento.ruta}
+                  alto={170}
+                  colorMarca={colores.marca}
+                  alAgrandar={() => setMapaGrande(true)}
+                />
+                <Text style={[estilos.mapaTitulo, { color: seguimiento.yaCasi ? COLORES.exitoTexto : COLORES.infoTexto }]}>
+                  {seguimiento.yaCasi ? t('Ya casi toca tu puerta') : seguimiento.espera}
+                </Text>
+                <Text style={estilos.mapaDetalle}>
+                  {seguimiento.repartidor ? `${seguimiento.repartidor} · ` : ''}
+                  {seguimiento.distancia ? t('a {distancia} de tu dirección', { distancia: seguimiento.distancia }) : t('Te llevan tu pedido')}
+                </Text>
+              </View>
+            )}
 
             {/*
               Cancelado: por qué y lo que se le devolvió, igual que en la web.
@@ -293,7 +328,7 @@ const ModalPedido = ({ pedido, alCerrar }) => {
               </View>
             ) : (
               <View style={estilos.bloquePasos}>
-                <PasosPedido deliveryType={pedido.deliveryType} estado={pedido.status} />
+                <PasosPedido deliveryType={pedido.deliveryType} estado={estadoActual} />
               </View>
             )}
 
@@ -301,7 +336,7 @@ const ModalPedido = ({ pedido, alCerrar }) => {
               Cancelar: solo mientras está por preparar (el servidor también
               lo revisa), y nunca el pedido de prueba del simulador.
             */}
-            {pedido.status === 'pagado' && !pedido.simulado && (
+            {estadoActual === 'pagado' && !pedido.simulado && (
               !cancelando ? (
                 <Pressable
                   onPress={() => setCancelando(true)}
@@ -351,7 +386,7 @@ const ModalPedido = ({ pedido, alCerrar }) => {
               )
             )}
 
-            <CodigoEntrega codigo={pedido.deliveryCode} estado={pedido.status} compacto />
+            <CodigoEntrega codigo={pedido.deliveryCode} estado={estadoActual} compacto />
 
             <View style={estilos.tarjeta}>
               <Text style={estilos.tarjetaTitulo}>{t('Productos')}</Text>
@@ -449,6 +484,17 @@ const ModalPedido = ({ pedido, alCerrar }) => {
           </ScrollView>
         </Animated.View>
       </Animated.View>
+
+      {/* El mapa en grande, encima de todo el detalle (la capa ocupa la pantalla entera). */}
+      {mapaGrande && (
+        <ModalMapaSeguimiento
+          punto={seguimiento.punto}
+          destino={seguimiento.destino}
+          ruta={seguimiento.ruta}
+          colorMarca={colores.marca}
+          alCerrar={() => setMapaGrande(false)}
+        />
+      )}
     </View>
   );
 };
@@ -534,6 +580,20 @@ const crearEstilos = (COLORES) => StyleSheet.create({
   tiquiEstado: {
     alignItems: 'center',
     marginVertical: 10,
+  },
+  // El repartidor en vivo: el mapa y, debajo, cuánto falta.
+  bloqueMapa: {
+    marginBottom: 14,
+    gap: 6,
+  },
+  mapaTitulo: {
+    fontSize: 15,
+    fontWeight: '800',
+    marginTop: 4,
+  },
+  mapaDetalle: {
+    fontSize: 13,
+    color: COLORES.textoSuave,
   },
   chapa: {
     borderRadius: 999,

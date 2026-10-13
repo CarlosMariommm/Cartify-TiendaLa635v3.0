@@ -268,6 +268,8 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
   fnRef.current = { agregarAlCarrito, eliminarDelCarrito, actualizarCantidad, limpiarCarrito, mostrarProducto, irAPromociones };
 
   const activoRef = useRef(false);
+  // Despierta, pero con la persona en otra pantalla: no escucha (ver pausar).
+  const pausadoRef = useRef(false);
   const hablandoRef = useRef(false);
   const muteRef = useRef(false); muteRef.current = muteado;
   const rateRef = useRef(0.95); rateRef.current = VELOCIDADES[velIndex].v;
@@ -321,7 +323,8 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
   }, []);
 
   const arrancarReconocimiento = useCallback(() => {
-    if (!activoRef.current) return;
+    // Dormida, o despierta pero con la persona en otra pantalla (ver pausar).
+    if (!activoRef.current || pausadoRef.current) return;
     callarTiqui();
     Speech.stop();
     hablandoRef.current = false;
@@ -864,6 +867,7 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
     }
     // Estaba dormida: lo próximo que diga, lo dice recién despertada.
     recienDespiertaRef.current = true;
+    pausadoRef.current = false;
     activoRef.current = true;
     setActivo(true);
     arrancarReconocimiento();
@@ -882,6 +886,7 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
 
   const detener = useCallback(() => {
     activoRef.current = false;
+    pausadoRef.current = false;
     setActivo(false);
     setEscuchando(false);
     setEsperandoVoz(false);
@@ -901,6 +906,30 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
     });
     return () => sub.remove();
   }, [detener]);
+
+  /*
+   * La persona se fue de la pantalla de Tiqui (otra pestaña, el carrito, la
+   * presentación): ya no le está hablando a ella, así que deja de escuchar.
+   * Pero NO se duerme: sigue despierta, y al volver retoma sola, sin el
+   * bostezo de recién despertada. Si estaba hablando, termina lo que decía.
+   *
+   * Las pestañas no se desmontan al cambiar de una a otra: sin esto, el
+   * micrófono seguía abierto escuchando en la tienda.
+   */
+  const pausar = useCallback(() => {
+    if (!activoRef.current || pausadoRef.current) return;
+    pausadoRef.current = true;
+    finalTextoRef.current = '';
+    setEscuchando(false);
+    setTranscripcion('');
+    try { ExpoSpeechRecognitionModule.stop(); } catch { /* no estaba escuchando */ }
+  }, []);
+
+  const reanudar = useCallback(() => {
+    if (!pausadoRef.current) return;
+    pausadoRef.current = false;
+    if (activoRef.current && !hablandoRef.current) arrancarRef.current?.();
+  }, []);
 
   const toggleMute = useCallback(() => {
     setMuteado((m) => !m);
@@ -930,7 +959,7 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
   return {
     activo, escuchando, muteado, transcripcion, historial, pensando, hablando, esperandoVoz,
     velLabel: VELOCIDADES[velIndex].label,
-    iniciar, detener, toggleMute, cambiarVelocidad, hablar, interrumpir,
+    iniciar, detener, toggleMute, cambiarVelocidad, hablar, interrumpir, pausar, reanudar,
   };
 };
 

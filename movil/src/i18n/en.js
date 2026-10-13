@@ -252,6 +252,7 @@ const EN = {
   'Retiro en el local': 'Store pickup',
   'Sin costo de envío': 'No delivery fee',
   'Envío a domicilio': 'Home delivery',
+  'Tienes {n} pedidos en curso': 'You have {n} orders in progress',
   '+{costo} de envío': '+{costo} delivery',
   '{tiempo} a {lugar}': '{tiempo} at {lugar}',
   'tu dirección': 'your address',
