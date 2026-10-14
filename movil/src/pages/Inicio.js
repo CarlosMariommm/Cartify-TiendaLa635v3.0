@@ -45,6 +45,9 @@ import TarjetaProducto from '../components/Tienda/TarjetaProducto';
 import ModalProducto from '../components/Tienda/ModalProducto';
 import ModalPromo from '../components/Tienda/ModalPromo';
 import MenuPasillos from '../components/Tienda/MenuPasillos';
+import HojaFiltros from '../components/Tienda/HojaFiltros';
+import { SlidersHorizontal } from 'lucide-react-native';
+import { cuantosFiltros } from '../utils/filtrosTienda';
 import Boton from '../components/UI/Boton';
 import { Equis } from '../components/UI/Iconos';
 import { avisarActividad } from '../utils/actividadUsuario';
@@ -91,7 +94,15 @@ const Inicio = ({ irACarrito, irASeccion }) => {
     verPromoEnTienda,
     cantidadItems,
     agregarAlCarrito,
+    filtros,
+    cambiarFiltro,
+    limpiarFiltros,
+    marcasDisponibles,
   } = useTienda();
+
+  // Los filtros de la tienda (orden, precio, ofertas, marca). Ver HojaFiltros.
+  const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
+  const filtrosPuestos = cuantosFiltros(filtros);
 
   const [productoAbierto, setProductoAbierto] = useState(null);
   const { avisar } = useAviso();
@@ -228,9 +239,27 @@ const Inicio = ({ irACarrito, irASeccion }) => {
                 ? t('Todo en {pasillo}', { pasillo: t(nombrePasillo) })
                 : t('Todos los productos'))}
         </Text>
-        <Text style={estilos.conteo}>
-          {productosFiltrados.length} {t(productosFiltrados.length === 1 ? 'producto' : 'productos')}
-        </Text>
+        <View style={estilos.ladoConteo}>
+          <Text style={estilos.conteo}>
+            {productosFiltrados.length} {t(productosFiltrados.length === 1 ? 'producto' : 'productos')}
+          </Text>
+          <Pressable
+            onPress={() => setFiltrosAbiertos(true)}
+            accessibilityRole="button"
+            accessibilityLabel={filtrosPuestos ? t('Filtros ({n})', { n: filtrosPuestos }) : t('Filtros')}
+            hitSlop={6}
+            style={({ pressed }) => [
+              estilos.botonFiltros,
+              (filtrosPuestos > 0 || filtros.orden !== 'recomendados') && { borderColor: colores.marca, backgroundColor: colores.marcaSuave },
+              pressed && { opacity: 0.7 },
+            ]}
+          >
+            <SlidersHorizontal size={14} strokeWidth={2.2} color={colores.marcaTexto} />
+            <Text style={[estilos.botonFiltrosTexto, { color: colores.marcaTexto }]}>
+              {filtrosPuestos ? t('Filtros ({n})', { n: filtrosPuestos }) : t('Filtros')}
+            </Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -239,18 +268,25 @@ const Inicio = ({ irACarrito, irASeccion }) => {
     <View style={estilos.vacio}>
       {/* Como en Store.jsx de la web: buscando con su lupa si se filtró algo,
           perdida si la tienda de verdad está vacía. */}
-      <Mascota pose={terminoBusqueda || categoriaSeleccionada ? 'buscando' : 'perdida'} alto={130} />
+      <Mascota pose={terminoBusqueda || categoriaSeleccionada || filtrosPuestos ? 'buscando' : 'perdida'} alto={130} />
       {/*
         Una tienda recién montada está vacía hasta que le carguen productos.
         Decir 'No hay productos para ""' hacía parecer que la tienda estaba rota.
       */}
       <Text style={estilos.vacioTexto}>
-        {terminoBusqueda || categoriaSeleccionada
+        {filtrosPuestos > 0 && !terminoBusqueda
+          ? t('Ningún producto coincide con los filtros')
+          : terminoBusqueda || categoriaSeleccionada
           ? t('No hay productos para "{termino}"', { termino: terminoBusqueda || t(categoriaSeleccionada) })
           : nombrePasillo
             ? t('{pasillo} todavía no tiene productos', { pasillo: t(nombrePasillo) })
             : t('Todavía no hay productos en la tienda')}
       </Text>
+      {filtrosPuestos > 0 && (
+        <View style={estilos.botonError}>
+          <Boton texto={t('Quitar filtros')} alPresionar={limpiarFiltros} color={colores.marca} colorPresionado={colores.marcaOscuro} />
+        </View>
+      )}
     </View>
   );
 
@@ -360,6 +396,17 @@ const Inicio = ({ irACarrito, irASeccion }) => {
             setProductoAbierto(p);
           }}
           alAgregar={agregarAlCarrito}
+        />
+      )}
+
+      {filtrosAbiertos && (
+        <HojaFiltros
+          filtros={filtros}
+          alCambiar={cambiarFiltro}
+          alLimpiar={limpiarFiltros}
+          marcas={marcasDisponibles}
+          cantidad={productosFiltrados.length}
+          alCerrar={() => setFiltrosAbiertos(false)}
         />
       )}
 
@@ -496,7 +543,8 @@ const crearEstilos = (COLORES) => StyleSheet.create({
   },
   encabezadoCatalogo: {
     flexDirection: 'row',
-    alignItems: 'baseline',
+    // Centrado y no por la línea de base: ahora lleva el botón de Filtros.
+    alignItems: 'center',
     justifyContent: 'space-between',
     gap: 10,
     marginTop: 26,
@@ -507,6 +555,25 @@ const crearEstilos = (COLORES) => StyleSheet.create({
     fontSize: 12.5,
     fontWeight: '500',
     color: COLORES.subtitulo,
+  },
+  ladoConteo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  botonFiltros: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: COLORES.borde,
+  },
+  botonFiltrosTexto: {
+    fontSize: 13,
+    fontWeight: '700',
   },
   vacio: {
     alignItems: 'center',

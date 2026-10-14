@@ -9,6 +9,10 @@ import { printServiceService } from '../api/printServiceService';
 import { useMaterialesImpresion } from '../hooks/useMaterialesImpresion';
 import { numeroEnRango, bloquearTeclasNumero } from '../utils/validaciones';
 import { cmDesdePx, pxDesdeCm } from '../utils/pxImpresion';
+import { Search } from 'lucide-react';
+import FilterSelect from '../components/UI/FilterSelect';
+import OrdenSelect from '../components/UI/OrdenSelect';
+import { coincide, ordenarLista, ORDEN_INICIAL } from '../utils/listasPanel';
 
 /*
  * ServiciosImpresion (Admin) — catálogo de formatos de impresión con precio.
@@ -29,6 +33,10 @@ const ServiciosImpresion = () => {
   const [form, setForm] = useState(emptyForm);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [toDelete, setToDelete] = useState(null);
+  // Buscar, filtrar y ordenar los formatos (lo más reciente primero). Ver utils/listasPanel.js.
+  const [busqueda, setBusqueda] = useState('');
+  const [estado, setEstado] = useState('Todos');
+  const [orden, setOrden] = useState(ORDEN_INICIAL);
 
   // Los papeles cargados, para poder decir en qué se imprime cada formato.
   const { papeles } = useMaterialesImpresion();
@@ -107,8 +115,13 @@ const ServiciosImpresion = () => {
   );
 
   const columnasFormato = ['Formato', 'Tamaño', 'Precio/copia', 'Color', 'Estado', 'Acciones'];
-  const formatosBase = servicios.filter((s) => s.esBase);
-  const formatosPropios = servicios.filter((s) => !s.esBase);
+  const pasa = (s) =>
+    coincide(busqueda, s.name)
+    && (estado === 'Todos' || (estado === 'Activo' ? s.isActive !== false : estado === 'Inactivo' ? s.isActive === false : estado === 'Color' ? s.allowsColor : !s.allowsColor));
+  const extras = { precio: (a, b) => (Number(a.pricePerCopy) || 0) - (Number(b.pricePerCopy) || 0) };
+  const formatosBase = ordenarLista(servicios.filter((s) => s.esBase && pasa(s)), orden, { extras });
+  const formatosPropios = ordenarLista(servicios.filter((s) => !s.esBase && pasa(s)), orden, { extras });
+  const hayFiltro = Boolean(busqueda.trim()) || estado !== 'Todos';
 
   return (
     <div className="flex flex-col gap-6 w-full pb-8">
@@ -116,6 +129,32 @@ const ServiciosImpresion = () => {
         <h1 className="text-4xl font-extrabold text-[#066494]">Impresiones</h1>
         <button onClick={abrirNuevo} className="px-4 py-2 bg-[#003049] hover:bg-[#00283D] text-white rounded-full text-sm font-medium transition-colors shadow-sm">Agregar formato</button>
       </div>
+
+      {servicios.length > 0 && (
+        <div className="flex flex-wrap gap-3 items-center">
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar formato..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              className="pl-9 pr-4 py-2 bg-white border border-gray-300 rounded-full text-sm outline-none focus:border-[#003049] w-56 shadow-sm"
+            />
+          </div>
+          <FilterSelect
+            value={estado}
+            onChange={setEstado}
+            options={[
+              { value: 'Activo', label: 'Activos' },
+              { value: 'Inactivo', label: 'Inactivos' },
+              { value: 'Color', label: 'A color' },
+              { value: 'SoloBN', label: 'Solo blanco y negro' },
+            ]}
+          />
+          <OrdenSelect value={orden} onChange={setOrden} extras={[{ value: 'precio', label: 'Ordenar: Menor precio' }]} />
+        </div>
+      )}
 
       {loading ? (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -132,7 +171,9 @@ const ServiciosImpresion = () => {
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <h3 className="text-xl font-bold text-gray-800 mb-1">Formatos base</h3>
             <p className="text-xs text-gray-400 mb-6">De uso general — ya vienen cargados, revise sus precios antes de usarlos.</p>
-            {formatosBase.length === 0 ? (
+            {formatosBase.length === 0 && hayFiltro ? (
+              <p className="text-gray-400 text-sm">Ninguno coincide con la búsqueda o el filtro.</p>
+            ) : formatosBase.length === 0 ? (
               <p className="text-gray-400 text-sm">
                 Ninguno todavía. Corra <code className="bg-gray-100 px-1.5 py-0.5 rounded">node src/scripts/seedFormatosBaseImpresion.js</code> en el backend para cargarlos.
               </p>
@@ -145,7 +186,7 @@ const ServiciosImpresion = () => {
             <h3 className="text-xl font-bold text-gray-800 mb-1">Tus formatos</h3>
             <p className="text-xs text-gray-400 mb-6">Los que agregó usted, aparte de los de uso general.</p>
             {formatosPropios.length === 0 ? (
-              <p className="text-gray-400 text-sm">Todavía no agregó ningún formato propio.</p>
+              <p className="text-gray-400 text-sm">{hayFiltro ? 'Ninguno coincide con la búsqueda o el filtro.' : 'Todavía no agregó ningún formato propio.'}</p>
             ) : (
               <DataTable columns={columnasFormato} data={formatosPropios} renderRow={filaDeFormato} />
             )}

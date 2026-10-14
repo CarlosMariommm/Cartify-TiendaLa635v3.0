@@ -11,6 +11,9 @@ import ModalCodigoEntrega from '../components/Admin/ModalCodigoEntrega';
 import ModalCancelarPedido from '../components/Admin/ModalCancelarPedido';
 import toast from 'react-hot-toast';
 import { useComprobante } from '../hooks/useComprobante';
+import FilterSelect from '../components/UI/FilterSelect';
+import OrdenSelect from '../components/UI/OrdenSelect';
+import { ordenarLista, ORDEN_INICIAL } from '../utils/listasPanel';
 
 // Los que todavía se pueden cancelar: los entregados ya no, y los cancelados ya lo están.
 const SE_PUEDE_CANCELAR = ['pagado', 'preparando', 'en_camino', 'listo'];
@@ -130,6 +133,10 @@ const Orders = () => {
   };
   const [filtro, setFiltro] = useState('pagado');
   const [busqueda, setBusqueda] = useState('');
+  // Además del estado: cómo se entrega, cómo se pagó y el orden (lo más reciente primero).
+  const [entrega, setEntrega] = useState('Todos');
+  const [pago, setPago] = useState('Todos');
+  const [orden, setOrden] = useState(ORDEN_INICIAL);
 
   /*
    * ?estado=… y ?buscar=… en la dirección: así llega Tiqui del panel cuando le
@@ -200,13 +207,18 @@ const Orders = () => {
     { id: 'todos',      label: 'Total',          valor: counts.total,      color: '#6b7280' },
   ];
 
-  const visibles = orders.filter((o) => {
+  const filtrados = orders.filter((o) => {
     const nombre = (o.clientId?.fullName || '').toLowerCase();
     // Por cliente o por número de pedido (el #A1B2C3 de la tarjeta).
     const buscado = busqueda.toLowerCase().replace(/^#/, '').trim();
     const coincide = nombre.includes(buscado) || String(o._id).slice(-6).toLowerCase().includes(buscado);
+    if (entrega !== 'Todos' && (o.deliveryType || 'retiro') !== entrega) return false;
+    if (pago !== 'Todos' && (o.paymentMethod || 'efectivo') !== pago) return false;
     if (filtro === 'todos') return coincide;
     return coincide && o.status === filtro;
+  });
+  const visibles = ordenarLista(filtrados, orden, {
+    extras: { total: (a, b) => (Number(b.total) || 0) - (Number(a.total) || 0) },
   });
 
   return (
@@ -264,6 +276,21 @@ const Orders = () => {
             className="pl-9 pr-4 py-2 border border-gray-300 rounded-full text-sm outline-none focus:border-[#003049] w-full sm:w-56 shadow-sm"
           />
         </div>
+      </div>
+      <div className="flex flex-wrap gap-3 items-center">
+        <FilterSelect
+          value={entrega}
+          onChange={setEntrega}
+          defaultLabel="Domicilio y retiro"
+          options={[{ value: 'delivery', label: 'A domicilio' }, { value: 'retiro', label: 'Retiro en local' }]}
+        />
+        <FilterSelect
+          value={pago}
+          onChange={setPago}
+          defaultLabel="Todas las formas de pago"
+          options={[{ value: 'efectivo', label: 'Efectivo' }, { value: 'tarjeta', label: 'Tarjeta' }, { value: 'saldo', label: 'Saldo' }]}
+        />
+        <OrdenSelect value={orden} onChange={setOrden} conNombre={false} extras={[{ value: 'total', label: 'Ordenar: Mayor total' }]} />
       </div>
 
       {/* Lista de pedidos */}

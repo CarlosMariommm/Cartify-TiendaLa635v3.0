@@ -147,7 +147,8 @@ const ModoDelPersonal = () => {
   const paleta = useMemo(() => (esAdmin ? paletaDesdePanel(paletaPanel) : null), [esAdmin, paletaPanel]);
   return (
     <ConPaleta paleta={paleta}>
-      <TemaProvider marcaFija={paleta?.marca}>
+      {/* Sin temporada: la Navidad y los disfraces son para el cliente. */}
+      <TemaProvider marcaFija={paleta?.marca} sinTemporada>
         <BarraDeEstado />
         <LimiteDeError>
           <ModoPersonal />

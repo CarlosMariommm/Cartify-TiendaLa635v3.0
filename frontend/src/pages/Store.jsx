@@ -22,6 +22,7 @@ import { useModulos } from '../hooks/useModulos';
 import { useAjustesCtx } from '../context/AjustesContext';
 import { useAuth } from '../hooks/useAuth';
 import { bloqueDeSeccion } from '../utils/portada';
+import { cuantosFiltros, ORDENES_TIENDA, RANGOS_PRECIO } from '../utils/filtrosTienda';
 import { useIdioma } from '../hooks/useIdioma';
 // El <Toaster> global vive en App.jsx (uno solo, para que los avisos se cierren bien).
 
@@ -339,8 +340,40 @@ const FilterDropdown = styled.div`
   border-radius: 14px;
   padding: 16px 20px;
   z-index: 100;
-  min-width: 180px;
+  min-width: 240px;
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+`;
+
+/* Entre un grupo y el siguiente, una línea tenue. */
+const FilterGrupo = styled.div`
+  & + & { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.18); }
+`;
+
+const FilterMarca = styled.select`
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: none;
+  background: var(--papel);
+  color: var(--tinta);
+  font-size: 14px;
+  cursor: pointer;
+`;
+
+const FilterLimpiar = styled.button`
+  margin-top: 14px;
+  width: 100%;
+  padding: 8px 0;
+  border-radius: 30px;
+  border: 1.5px solid rgba(255,255,255,0.6);
+  background: none;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  &:hover { background: rgba(255,255,255,0.12); }
 `;
 
 const FilterDropTitle = styled.div`
@@ -619,8 +652,10 @@ const Store = () => {
     totalCarrito,
     cantidadItems,
     limpiarCarrito,
-    filtroPrecio,
-    setFiltroPrecio,
+    filtros,
+    cambiarFiltro,
+    limpiarFiltros,
+    marcasDisponibles,
     promoSeleccionada,
     setPromoSeleccionada,
     promoDetalle,
@@ -844,12 +879,8 @@ const Store = () => {
     else navigate({ pathname: '/', search }, { replace: true });
   };
 
-  const precioFiltros = [
-    { key: 'todos', label: 'Todos' },
-    { key: '0-4', label: 'Menos de $4' },
-    { key: '4-12', label: 'De $4 a $12' },
-    { key: '12+', label: 'Más de $12' },
-  ];
+  // Cuántos filtros hay puestos, para el botón y para el aviso de "nada coincide".
+  const filtrosPuestos = cuantosFiltros(filtros);
 
   // Display labels matching design
 
@@ -1142,23 +1173,58 @@ const Store = () => {
             </SectionTitle>
 
             <FilterBar ref={filterRef}>
-              <FilterBtn $open={filterOpen} onClick={() => setFilterOpen(o => !o)}>
-                <SlidersHorizontal size={15} strokeWidth={2.2} /> {t('Filtros')}
+              <FilterBtn $open={filterOpen} onClick={() => setFilterOpen(o => !o)} aria-expanded={filterOpen}>
+                <SlidersHorizontal size={15} strokeWidth={2.2} /> {filtrosPuestos ? t('Filtros ({n})', { n: filtrosPuestos }) : t('Filtros')}
               </FilterBtn>
 
+              {/*
+                Orden, precio, ofertas, disponibles y marca. Se queda abierto al
+                elegir: se suelen combinar varios. Ver utils/filtrosTienda.js
+                (la app filtra igual).
+              */}
               {filterOpen && (
-                <FilterDropdown>
-                  <FilterDropTitle>{t('Precio')}</FilterDropTitle>
-                  {precioFiltros.map(f => (
-                    <FilterOption
-                      key={f.key}
-                      $active={filtroPrecio === f.key}
-                      onClick={() => { setFiltroPrecio(f.key); setFilterOpen(false); }}
-                    >
-                      <FilterToggle $active={filtroPrecio === f.key} />
-                      {t(f.label)}
+                <FilterDropdown role="dialog" aria-label={t('Filtros')}>
+                  <FilterGrupo>
+                    <FilterDropTitle>{t('Ordenar')}</FilterDropTitle>
+                    {ORDENES_TIENDA.map((o) => (
+                      <FilterOption key={o.valor} $active={filtros.orden === o.valor} onClick={() => cambiarFiltro('orden', o.valor)} aria-pressed={filtros.orden === o.valor}>
+                        <FilterToggle $active={filtros.orden === o.valor} />
+                        {t(o.texto)}
+                      </FilterOption>
+                    ))}
+                  </FilterGrupo>
+                  <FilterGrupo>
+                    <FilterDropTitle>{t('Precio')}</FilterDropTitle>
+                    {RANGOS_PRECIO.map((r) => (
+                      <FilterOption key={r.valor} $active={filtros.precio === r.valor} onClick={() => cambiarFiltro('precio', r.valor)} aria-pressed={filtros.precio === r.valor}>
+                        <FilterToggle $active={filtros.precio === r.valor} />
+                        {t(r.texto)}
+                      </FilterOption>
+                    ))}
+                  </FilterGrupo>
+                  <FilterGrupo>
+                    <FilterDropTitle>{t('Mostrar')}</FilterDropTitle>
+                    <FilterOption $active={filtros.soloOferta} onClick={() => cambiarFiltro('soloOferta', !filtros.soloOferta)} aria-pressed={filtros.soloOferta}>
+                      <FilterToggle $active={filtros.soloOferta} />
+                      {t('Solo en oferta')}
                     </FilterOption>
-                  ))}
+                    <FilterOption $active={filtros.soloDisponibles} onClick={() => cambiarFiltro('soloDisponibles', !filtros.soloDisponibles)} aria-pressed={filtros.soloDisponibles}>
+                      <FilterToggle $active={filtros.soloDisponibles} />
+                      {t('Solo disponibles')}
+                    </FilterOption>
+                  </FilterGrupo>
+                  {marcasDisponibles.length > 1 && (
+                    <FilterGrupo>
+                      <FilterDropTitle>{t('Marca')}</FilterDropTitle>
+                      <FilterMarca value={filtros.marca} onChange={(e) => cambiarFiltro('marca', e.target.value)} aria-label={t('Marca')}>
+                        <option value="">{t('Todas las marcas')}</option>
+                        {marcasDisponibles.map((m) => <option key={m} value={m}>{m}</option>)}
+                      </FilterMarca>
+                    </FilterGrupo>
+                  )}
+                  {(filtrosPuestos > 0 || filtros.orden !== 'recomendados') && (
+                    <FilterLimpiar type="button" onClick={limpiarFiltros}>{t('Quitar filtros')}</FilterLimpiar>
+                  )}
                 </FilterDropdown>
               )}
             </FilterBar>
@@ -1201,9 +1267,11 @@ const Store = () => {
                 productos. Decir 'No hay productos para ""' hacía parecer que
                 la tienda estaba rota.
               */}
-              <Mascota pose={terminoBusqueda || categoriaSeleccionada ? 'buscando' : 'perdida'} alto={150} />
+              <Mascota pose={terminoBusqueda || categoriaSeleccionada || filtrosPuestos ? 'buscando' : 'perdida'} alto={150} />
               <strong>
-                {terminoBusqueda
+                {filtrosPuestos && !terminoBusqueda
+                  ? t('Ningún producto coincide con los filtros')
+                  : terminoBusqueda
                   ? t('No encontramos “{busqueda}”', { busqueda: terminoBusqueda })
                   : categoriaSeleccionada
                     ? t('No hay productos en “{categoria}”', { categoria: categoriaSeleccionada })
@@ -1212,12 +1280,17 @@ const Store = () => {
                       : t('Todavía no hay productos en la tienda')}
               </strong>
               <span>
-                {terminoBusqueda
-                  ? t('Revisa cómo lo escribiste o prueba con otra palabra.')
-                  : categoriaSeleccionada
-                    ? t('Prueba con otra categoría.')
-                    : t('Pronto van a ir llegando.')}
+                {filtrosPuestos && !terminoBusqueda
+                  ? t('Quita alguno para ver más productos.')
+                  : terminoBusqueda
+                    ? t('Revisa cómo lo escribiste o prueba con otra palabra.')
+                    : categoriaSeleccionada
+                      ? t('Prueba con otra categoría.')
+                      : t('Pronto van a ir llegando.')}
               </span>
+              {filtrosPuestos > 0 && (
+                <BotonReintentar type="button" onClick={limpiarFiltros}>{t('Quitar filtros')}</BotonReintentar>
+              )}
             </EmptyState>
           ) : (
             <ProductsGrid>

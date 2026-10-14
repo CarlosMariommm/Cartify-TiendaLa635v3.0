@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useAjustesCtx } from '../context/AjustesContext';
 import { useModo } from './useModo';
 import { temaActivo, aplicarTema } from '../utils/temporadas';
+import { areaDeRuta } from '../utils/sesion';
 
 /*
  * ============================================================
@@ -24,10 +25,14 @@ import { temaActivo, aplicarTema } from '../utils/temporadas';
  * ============================================================
  */
 
-// Las rutas del panel, que NO se repintan. Es la misma frontera que separa los
-// dos cajones de sesión; ver areaDeRuta en AuthContext.
-const esPanel = (pathname = '') =>
-  /^\/(admin|dashboard|inventario|pedidos|modulos|marcas|empleados|clientes|proveedores|categorias|fidelidad|promociones|servicios-impresion|tarjetas|personalizacion|cuenta)(\/|$)/.test(pathname);
+/*
+ * Las rutas del panel, que NO se repintan ni se decoran. Es la MISMA lista que
+ * separa los dos cajones de sesión (RUTAS_DEL_PANEL en utils/sesion.js, que
+ * una prueba compara con App.jsx). Antes había aquí una copia escrita a mano
+ * y le faltaban Pronóstico, Ayuda y Errores: ahí el panel salía con la
+ * Navidad puesta y Tiqui disfrazada.
+ */
+export const esPanel = (pathname = '') => areaDeRuta(pathname) === 'personal';
 
 /*
  * useTemaCalculado — SOLO datos: qué tema toca ahora mismo, sin tocar el DOM.
