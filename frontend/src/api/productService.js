@@ -23,6 +23,13 @@ export const productService = {
     return response.data;
   },
 
+  // 1a- Lo que se lleva junto con cada producto en un mismo pedido:
+  //     { productos: { id: [ids] } }. Público. Ver utils/tambienLlevan.js.
+  getTambienLlevan: async () => {
+    const response = await api.get('/product/tambien-llevan');
+    return response.data;
+  },
+
   // 1b- Obtener el inventario completo, con costo y proveedor. Pide sesión de
   //     personal: es lo que la tienda no le enseña a un cliente.
   getInventario: async () => {

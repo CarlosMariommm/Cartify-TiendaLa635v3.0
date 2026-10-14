@@ -3,6 +3,7 @@ import { anotarProductoNuevo } from "../utils/avisosCliente.js";
 import { v2 as cloudinary } from "cloudinary";
 import mongoose from "mongoose";
 import { CAMPOS_PUBLICOS_PRODUCTO } from "../utils/productoPublico.js";
+import { obtenerTambienLlevan } from "../utils/tambienLlevan.js";
 
 const productController = {};
 
@@ -89,6 +90,23 @@ productController.getProductById = async (req, res) => {
     return res.status(200).json(producto);
   } catch (error) {
     console.log("error " + error);
+    return res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
+
+/*
+ * Quien compra esto también lleva: { productos: { id: [ids] } } para TODO el
+ * catálogo de una vez, así la ficha de cada producto lo tiene al instante.
+ * Público como el catálogo: solo ids, ningún dato de quién compró. Ver
+ * utils/tambienLlevan.js.
+ */
+productController.getTambienLlevan = async (req, res) => {
+  try {
+    const productos = await obtenerTambienLlevan();
+    res.set("Cache-Control", "public, max-age=600");
+    return res.status(200).json({ productos });
+  } catch (error) {
+    console.log("error getTambienLlevan: " + error);
     return res.status(500).json({ message: "Error interno del servidor" });
   }
 };

@@ -22,6 +22,20 @@ import { soloAdmin, soloPersonal } from '../middlewares/validarSesion.js';
 
 /**
  * @swagger
+ * /product/tambien-llevan:
+ *   get:
+ *     summary: Lo que se lleva junto con cada producto en un mismo pedido (público)
+ *     description: De los pedidos de los últimos 180 días, sin cancelados. Solo ids de productos activos; un par sale si va junto en 2 pedidos de 2 personas distintas o más, y más de lo que tocaría por azar. Se calcula una vez por hora. Ver src/utils/tambienLlevan.js.
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: "{ productos: { idProducto: [ids, del que más se lleva junto al que menos] } }"
+ *       500:
+ *         description: Error interno del servidor.
+ */
+
+/**
+ * @swagger
  * /product:
  *   get:
  *     summary: Lista el catálogo con lo que ve un cliente (público)
@@ -165,6 +179,9 @@ router.route("/")
  * "/:id" para que "inventario" no se lea como el id de un producto.
  */
 router.get("/inventario", soloPersonal, productController.getInventario);
+
+// Lo que se lleva junto en un mismo pedido, para la ficha de cada producto. Público, como el catálogo.
+router.get("/tambien-llevan", productController.getTambienLlevan);
 
 router.route("/:id")
     .put(soloAdmin, upload.single('image'), productController.updateProduct)
