@@ -207,6 +207,8 @@ const EN = {
   'Por libra': 'By the pound',
   'Presentación': 'Package',
   'Sobre el producto': 'About this product',
+  'Quien compra esto también lleva': 'People who buy this also get',
+  'Lo que más se lleva en el mismo pedido.': 'What most often goes in the same order.',
   'Del mismo pasillo': 'From the same aisle',
   'Más de {categoria}, por si andaba viendo.': 'More {categoria}, in case you were looking.',
   'la tienda': 'the store',

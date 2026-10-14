@@ -21,6 +21,27 @@ export const tiendaApi = {
   getProductos: () => peticion('/product'),
 
   getPromociones: () => peticion('/promotion'),
+
+  // Lo que se lleva junto con cada producto en un mismo pedido: { productos: { id: [ids] } }.
+  getTambienLlevan: () => peticion('/product/tambien-llevan'),
+};
+
+/*
+ * "Quien compra esto también lleva", de toda la tienda, pedido UNA vez por
+ * uso de la app y compartido entre fichas. Si falla, vacío (la ficha sale sin
+ * esa fila) y la próxima ficha lo vuelve a intentar. Ver utils/tambienLlevan.js.
+ */
+let tambienLlevan = null;
+export const cargarTambienLlevan = () => {
+  if (!tambienLlevan) {
+    tambienLlevan = tiendaApi.getTambienLlevan()
+      .then((r) => (r && typeof r.productos === 'object' && r.productos) || {})
+      .catch(() => {
+        tambienLlevan = null;
+        return {};
+      });
+  }
+  return tambienLlevan;
 };
 
 /*
