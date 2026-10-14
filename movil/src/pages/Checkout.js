@@ -72,6 +72,7 @@ import { calcularEnvio } from '../utils/envio';
 import { calcularServicio } from '../utils/servicio';
 import { useIdioma } from '../context/IdiomaContext';
 import { foto, ANCHO } from '../utils/fotos';
+import { formatoCodigoTarjeta, LARGO_CODIGO_TARJETA } from '../utils/tarjetaRegalo';
 
 // Cuántas fotos de producto caben en la tira del resumen antes del "+3".
 const MINIATURAS = 6;
@@ -605,7 +606,9 @@ const Checkout = ({ alVolver, alConfirmar }) => {
           <View style={estilos.filaCanje}>
             <TextInput
               value={codigoTarjeta}
-              onChangeText={(v) => setCodigoTarjeta(v.toUpperCase())}
+              // Los guiones se ponen solos (ver utils/tarjetaRegalo.js).
+              onChangeText={(v) => setCodigoTarjeta(formatoCodigoTarjeta(v))}
+              maxLength={LARGO_CODIGO_TARJETA}
               placeholder={t('¿Tienes una tarjeta? 635-XXXX-XXXX')}
               placeholderTextColor={COLORES.marcador}
               keyboardAppearance={COLORES.oscuro ? 'dark' : 'light'}
