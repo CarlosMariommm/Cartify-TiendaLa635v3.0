@@ -4,6 +4,7 @@ import { useTheme } from '../../context/ThemeContext';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import TiquiPanel from '../Admin/TiquiPanel';
+import InvitacionProveedores from '../Admin/InvitacionProveedores';
 import { useMenuPanel } from '../../hooks/useMenuPanel';
 import { overlayTransition } from '../../utils/motion';
 
@@ -75,6 +76,9 @@ const AdminLayout = () => {
         Es otra asistente que la de la tienda. Ver TiquiPanel.
       */}
       <TiquiPanel />
+
+      {/* Al administrador: que diga por dónde se le pide a cada proveedor. */}
+      <InvitacionProveedores />
     </div>
     </MotionConfig>
   );

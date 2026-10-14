@@ -180,6 +180,34 @@ export const solicitudDeDemostracion = (ahora = new Date(), demo = leerDemo()) =
   };
 };
 
+/*
+ * Por dónde se le pide a cada proveedor de la compra sugerida (WhatsApp, una
+ * app como BEES o llamada; ver utils/pedidoProveedor.js), para el botón
+ * "Pedir" de la pantalla Pronóstico. Va aparte de lo que se guarda: si el
+ * administrador lo cambia, se ve al instante. La demostración lo trae en su
+ * archivo.
+ */
+const canalDe = (doc) => (doc ? {
+  canal: doc.pedidos?.canal || "",
+  whatsapp: doc.pedidos?.whatsapp || "",
+  app: doc.pedidos?.app || "",
+  enlace: doc.pedidos?.enlace || "",
+  telefono: doc.phoneNumber || "",
+} : null);
+
+export const conCanalesDePedido = async (datos, { demo = false } = {}) => {
+  if (!datos?.proveedores?.length) return datos;
+  let canales;
+  if (demo) {
+    canales = new Map(leerDemo().proveedores.map((p) => [p.id, p.pedido || null]));
+  } else {
+    const ids = datos.proveedores.map((g) => g.id).filter(Boolean);
+    const docs = await supplierModel.find({ _id: { $in: ids } }).select("pedidos phoneNumber").lean();
+    canales = new Map(docs.map((d) => [String(d._id), canalDe(d)]));
+  }
+  return { ...datos, proveedores: datos.proveedores.map((g) => ({ ...g, pedido: canales.get(g.id) || null })) };
+};
+
 /* ══════════ Lo calculado, guardado un rato ══════════ */
 
 // Cada uno por su lado: la tienda real y la demostración.

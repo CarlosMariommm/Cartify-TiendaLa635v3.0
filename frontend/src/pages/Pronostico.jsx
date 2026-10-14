@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Download, RotateCw, Search } from 'lucide-react';
+import { Download, ExternalLink, MessageCircle, Phone, RotateCw, Search } from 'lucide-react';
 import { BarChart, Bar, Cell, ErrorBar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import toast from 'react-hot-toast';
 import { dashboardService } from '../api/dashboardService';
@@ -9,6 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { dinero, fechaCorta, fechaLarga } from '../utils/reportesPdf';
 import { cantidad, rango, resumenDelPronostico } from '../utils/reportePredictivo';
 import { descargarReportePredictivo } from '../utils/descargarPredictivo';
+import { comoPedir, copiarTexto } from '../utils/pedidoProveedor';
 
 /*
  * ============================================================
@@ -86,8 +87,46 @@ const Cifra = ({ etiqueta, valor, detalle }) => (
   </div>
 );
 
+/*
+ * El pedido de un proveedor, con un toque: por WhatsApp con el mensaje escrito,
+ * en su app (BEES…) con la lista copiada, o llamándole. Si todavía no se dijo
+ * por dónde se le pide, lleva a Proveedores. Ver utils/pedidoProveedor.js.
+ */
+const ICONO_DEL_CANAL = { whatsapp: MessageCircle, app: ExternalLink, llamada: Phone };
+
+const BotonPedir = ({ grupo, tienda, demo }) => {
+  const accion = comoPedir(grupo.pedido, { tienda, productos: grupo.productos });
+  if (!accion) {
+    // En la demostración los proveedores no son de la tienda: no hay a dónde mandarlo.
+    if (demo) return null;
+    return (
+      <Link to="/proveedores" className="text-sm font-medium text-[#066494] hover:underline">
+        Indicar cómo se le pide
+      </Link>
+    );
+  }
+  const Icono = ICONO_DEL_CANAL[accion.tipo];
+  const alTocar = async () => {
+    if (!accion.copiar) return;
+    const copiado = await copiarTexto(accion.copiar);
+    if (copiado) toast.success('Lista copiada: péguela en el pedido.');
+  };
+  return (
+    <a
+      href={accion.href}
+      target={accion.tipo === 'llamada' ? undefined : '_blank'}
+      rel="noopener noreferrer"
+      onClick={alTocar}
+      className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium bg-[#003049] text-white hover:bg-[#00283D]"
+    >
+      <Icono className="w-4 h-4" /> {accion.texto}
+    </a>
+  );
+};
+
 const Pronostico = () => {
   const { ajustes } = useAjustesCtx();
+  const tienda = `${ajustes?.nombreLinea1 || ''} ${ajustes?.nombreLinea2 || ''}`.trim() || 'Tienda la 635';
   const { palette } = useTheme();
   const c = palette.colors;
   const [datos, setDatos] = useState(null);
@@ -308,9 +347,12 @@ const Pronostico = () => {
           >
             {datos.proveedores?.length ? datos.proveedores.map((g) => (
               <div key={g.id || 'sin-proveedor'} className="flex flex-col gap-2">
-                <h3 className="font-semibold text-gray-800">
-                  {g.nombre || 'Sin proveedor asignado'} <span className="font-normal text-gray-500">· se le compra cada {g.ciclo_dias} días</span>
-                </h3>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="font-semibold text-gray-800">
+                    {g.nombre || 'Sin proveedor asignado'} <span className="font-normal text-gray-500">· se le compra cada {g.ciclo_dias} días</span>
+                  </h3>
+                  {g.id && <BotonPedir grupo={g} tienda={tienda} demo={demo} />}
+                </div>
                 <Tabla
                   columnas={[['Producto'], ['Existencia', true], ['Pedir', true], ['Costo estimado', true]]}
                   pie={<tr><Celda>Total</Celda><Celda /><Celda /><Celda derecha>{dinero(g.costo_total)}</Celda></tr>}

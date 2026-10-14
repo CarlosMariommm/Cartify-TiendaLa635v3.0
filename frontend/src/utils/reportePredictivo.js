@@ -24,6 +24,7 @@ import {
   COLOR, COLOR_GRAFICA, MARGEN, asegurarEspacio, dinero, fechaCorta, fechaLarga, graficaDeBarras, hoyLocal,
   nuevoReporte, parrafo, pie, porciento, rangoDeFechas, seccion, tabla, vinetas,
 } from './reportesPdf';
+import { nombreDelCanal } from './pedidoProveedor';
 
 const DIAS_SEMANA = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
 const CONFIANZA = { alta: 'Alta', media: 'Media', baja: 'Baja' };
@@ -212,7 +213,8 @@ export const construirReportePredictivo = (datos, tienda, ahora = new Date()) =>
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
       doc.setTextColor(...COLOR.tinta);
-      doc.text(`${g.nombre || 'Sin proveedor asignado'}  ·  se le compra cada ${g.ciclo_dias} días`, MARGEN, y);
+      const canal = nombreDelCanal(g.pedido);
+      doc.text(`${g.nombre || 'Sin proveedor asignado'}  ·  se le compra cada ${g.ciclo_dias} días${canal ? `  ·  se le pide por ${canal}` : ''}`, MARGEN, y);
       y = tabla(doc, {
         y: y + 2,
         encabezado: ['Producto', 'Existencia', 'Pedir', 'Costo estimado'],

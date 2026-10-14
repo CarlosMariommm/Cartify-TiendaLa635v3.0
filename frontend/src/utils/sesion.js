@@ -38,7 +38,9 @@ export const LLAVE_MODO_TRABAJO = 'sesion:trabajando';
  * del personal, así que lo que se haga ahí (entrar, salir) tiene que caer en
  * el cajón del personal y no rozar la sesión de la tienda.
  *
- * OJO: toda ruta nueva del panel hay que agregarla aquí.
+ * OJO: toda ruta nueva del panel hay que agregarla aquí (sesion.test.js lo
+ * revisa contra App.jsx). Sin ella, la pantalla se toma por de la tienda y
+ * manda al personal al login.
  */
 export const RUTAS_DEL_PANEL = [
   '/admin',
@@ -53,6 +55,7 @@ export const RUTAS_DEL_PANEL = [
   '/categorias',
   '/fidelidad',
   '/promociones',
+  '/pronostico',
   '/servicios-impresion',
   '/tarjetas',
   '/personalizacion',

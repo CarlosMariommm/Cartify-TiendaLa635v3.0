@@ -85,6 +85,17 @@ const supplierSchema = new Schema({
      * dato en dos lugares, y tarde o temprano uno de los dos queda mal.
      */
     creditLimit: { type: Number, default: 0 },
+    /*
+     * Por dónde se le hacen los pedidos (WhatsApp, una app como BEES, o
+     * llamada), para pedirle con un toque desde la compra sugerida del
+     * pronóstico. Ver utils/pedidoProveedor.js.
+     */
+    pedidos: {
+      canal: { type: String, enum: ["whatsapp", "app", "llamada", ""], default: "" },
+      whatsapp: { type: String, default: "" },
+      app: { type: String, default: "" },
+      enlace: { type: String, default: "" },
+    },
 },
 {
     timestamps: true,

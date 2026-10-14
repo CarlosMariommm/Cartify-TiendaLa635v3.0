@@ -1,5 +1,6 @@
 import supplierModel from '../models/supplier.js';
 import mongoose from "mongoose";
+import { limpiarPedidos } from "../utils/pedidoProveedor.js";
 
 const supplierController = {};
 
@@ -21,6 +22,9 @@ supplierController.insertSupplier = async (req, res) => {
         console.log("Nombre de la DB actual:", mongoose.connection.name);
 
         const { name, phoneNumber, email, creditDays, brandIds, isActive } = req.body;
+        // Por dónde se le piden los pedidos (ver utils/pedidoProveedor.js).
+        const { pedidos, error: errorPedidos } = limpiarPedidos(req.body.pedidos);
+        if (errorPedidos) return res.status(400).json({ message: errorPedidos });
 
         if (!name || !name.trim()) {
             return res.status(400).json({ message: 'El nombre del proveedor es obligatorio' });
@@ -40,7 +44,7 @@ supplierController.insertSupplier = async (req, res) => {
             return res.status(400).json({ message: 'Ya existe un proveedor con ese nombre' });
         }
 
-        const newSupplier = new supplierModel({ name: name.trim(), phoneNumber, email: email.trim(), creditDays, brandIds: brandIds || [], isActive: isActive !== undefined ? isActive : true });
+        const newSupplier = new supplierModel({ name: name.trim(), phoneNumber, email: email.trim(), creditDays, brandIds: brandIds || [], isActive: isActive !== undefined ? isActive : true, ...(pedidos ? { pedidos } : {}) });
         await newSupplier.save();
         res.status(201).json({ message: 'Proveedor creado' });
     } catch (error) {
@@ -54,6 +58,8 @@ supplierController.updateSupplier = async (req, res) => {
     try {
         //1- Pedimos los datos para actualizar
         let { name, phoneNumber, email, creditDays, brandIds, isActive } = req.body;
+        const { pedidos, error: errorPedidos } = limpiarPedidos(req.body.pedidos);
+        if (errorPedidos) return res.status(400).json({ message: errorPedidos });
 
         //Valores requeridos
         if (!name || !phoneNumber || !email) {
@@ -68,6 +74,8 @@ supplierController.updateSupplier = async (req, res) => {
          */
         const cambios = { name, phoneNumber, email, brandIds, isActive };
         if (creditDays !== undefined) cambios.creditDays = creditDays;
+        // Igual que el plazo: solo si vino (otras pantallas guardan sin él).
+        if (pedidos !== undefined) cambios.pedidos = pedidos;
 
         const updateSupplier = await supplierModel.findByIdAndUpdate(
             req.params.id,

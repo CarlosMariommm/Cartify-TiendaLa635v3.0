@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 /*
@@ -19,12 +20,13 @@ vi.mock("../models/product.js", () => ({
     ]),
   },
 }));
-vi.mock("../models/supplier.js", () => ({ default: { find: () => conLean([{ _id: "s1", name: "Distribuidora" }]) } }));
+const proveedoresDeLaBase = vi.fn(() => [{ _id: "s1", name: "Distribuidora" }]);
+vi.mock("../models/supplier.js", () => ({ default: { find: (...a) => conLean(proveedoresDeLaBase(...a)) } }));
 vi.mock("../models/shoppings.js", () => ({
   default: { find: () => conLean([{ supplierId: "s1", date: new Date("2026-10-05T18:00:00Z") }]) },
 }));
 
-const { armarSolicitud, obtenerPronostico, olvidarPronostico, diaLocal, textoDelPronostico, pronosticoParaTiqui, solicitudDeDemostracion, hayDemostracion } = await import("./pronostico.js");
+const { armarSolicitud, obtenerPronostico, olvidarPronostico, diaLocal, textoDelPronostico, pronosticoParaTiqui, solicitudDeDemostracion, hayDemostracion, conCanalesDePedido } = await import("./pronostico.js");
 
 // Lunes 12 de octubre de 2026, 9 de la mañana en El Salvador.
 const AHORA = new Date("2026-10-12T15:00:00Z");
@@ -223,5 +225,35 @@ describe("la demostración del pronóstico", () => {
     const real = await obtenerPronostico({ ahora: AHORA });
     expect(real.demo).toBeUndefined();
     expect(fetch).toHaveBeenCalledTimes(2);
+  });
+});
+
+/* ── Por dónde se le pide a cada proveedor (el botón "Pedir" del panel) ── */
+
+describe("la compra sugerida con el canal de cada proveedor", () => {
+  const demoGuardada = JSON.parse(readFileSync(new URL("../datos/pronosticoDemo.json", import.meta.url), "utf8"));
+
+  it("de la tienda: lo lee de cada proveedor, con su teléfono; sin proveedor, nada", async () => {
+    proveedoresDeLaBase.mockReturnValueOnce([
+      { _id: "s1", phoneNumber: "7777-1234", pedidos: { canal: "whatsapp", whatsapp: "70001111", app: "", enlace: "" } },
+    ]);
+    const datos = await conCanalesDePedido({ proveedores: [{ id: "s1", productos: [] }, { id: null, productos: [] }] });
+    expect(datos.proveedores[0].pedido).toEqual({ canal: "whatsapp", whatsapp: "70001111", app: "", enlace: "", telefono: "7777-1234" });
+    expect(datos.proveedores[1].pedido).toBeNull();
+    expect(proveedoresDeLaBase.mock.lastCall[0]).toEqual({ _id: { $in: ["s1"] } });
+  });
+
+  it("de la demostración: sale del archivo, sin tocar la base", async () => {
+    proveedoresDeLaBase.mockClear();
+    const conCanal = demoGuardada.proveedores.find((p) => p.pedido);
+    const datos = await conCanalesDePedido({ proveedores: [{ id: conCanal.id, productos: [] }] }, { demo: true });
+    expect(datos.proveedores[0].pedido).toEqual(conCanal.pedido);
+    expect(proveedoresDeLaBase).not.toHaveBeenCalled();
+  });
+
+  it("sin compra sugerida no busca nada", async () => {
+    proveedoresDeLaBase.mockClear();
+    expect(await conCanalesDePedido({ vacio: true })).toEqual({ vacio: true });
+    expect(proveedoresDeLaBase).not.toHaveBeenCalled();
   });
 });
