@@ -36,8 +36,17 @@ const DIAS_DE_HISTORIAL = 180;
 const HORIZONTE = 28;
 // Lo que se guarda la respuesta antes de volver a calcular.
 const VIGENCIA_MS = 15 * 60 * 1000;
-// Si el servicio estaba dormido, despertar le toma cerca de un minuto.
-const ESPERA_MS = 90 * 1000;
+/*
+ * Cuánto se le espera al servicio. Antes era minuto y medio, y en Render
+ * gratis un cálculo con historia larga (Holt-Winters más la prueba de
+ * precisión) tarda más que eso: se cortaba, el cálculo se perdía y el
+ * siguiente intento empezaba de cero, así que nunca terminaba. Ahora se le
+ * da tiempo de sobra y el panel no se queda esperando: pregunta cada pocos
+ * segundos si ya está (ver dashboardController.getPronostico).
+ */
+const ESPERA_MS = 5 * 60 * 1000;
+// Un cálculo que falló se le dice al que pregunte durante este rato, en vez de reintentar en bucle.
+const RECUERDO_DEL_ERROR_MS = 60 * 1000;
 
 export class ErrorPronostico extends Error {
   constructor(codigo, mensaje) {
@@ -164,10 +173,14 @@ const leerDemo = () => {
   return demoLeida;
 };
 
+// Cuántos días hay que correr una fecha para que caiga en ayer.
+const diasHastaAyer = (ahora, hasta) =>
+  Math.round((Date.parse(`${sumarDias(diaLocal(ahora), -1)}T00:00:00Z`) - Date.parse(`${hasta}T00:00:00Z`)) / DIA);
+
 // La demostración, con todas sus fechas corridas para que termine ayer.
 export const solicitudDeDemostracion = (ahora = new Date(), demo = leerDemo()) => {
   const ayer = sumarDias(diaLocal(ahora), -1);
-  const corrimiento = Math.round((Date.parse(`${ayer}T00:00:00Z`) - Date.parse(`${demo.hasta}T00:00:00Z`)) / DIA);
+  const corrimiento = diasHastaAyer(ahora, demo.hasta);
   const correr = (dia) => (dia ? sumarDias(dia, corrimiento) : dia);
   return {
     ...demo,
@@ -178,6 +191,60 @@ export const solicitudDeDemostracion = (ahora = new Date(), demo = leerDemo()) =
     productos: demo.productos.map((p) => ({ ...p, creado: correr(p.creado) })),
     compras: demo.compras.map((c) => ({ ...c, dia: correr(c.dia) })),
   };
+};
+
+/*
+ * ── El resultado de la demostración, ya calculado ──
+ *
+ * La demostración son siempre las mismas ventas inventadas, así que su
+ * pronóstico no hace falta pedírselo al servicio cada vez: en Render gratis
+ * ese cálculo (105 días, Holt-Winters y la prueba de precisión) tardaba más
+ * de minuto y medio y el panel se quedaba sin nada. Se calcula UNA vez con
+ * scripts/calcularDemoPronostico.js y aquí solo se corren sus fechas, igual
+ * que las de la solicitud: sale al instante, el día que sea.
+ *
+ * Correr las fechas mueve también los días de la semana (lo que era sábado
+ * cae otro día), así que el perfil de la semana se gira lo mismo. Es lo que
+ * daría el servicio si calculara la historia corrida.
+ */
+const ARCHIVO_RESULTADO_DEMO = new URL("../datos/pronosticoDemoResultado.json", import.meta.url);
+let resultadoDemoLeido;
+
+const leerResultadoDemo = () => {
+  if (resultadoDemoLeido === undefined) {
+    try {
+      resultadoDemoLeido = JSON.parse(readFileSync(ARCHIVO_RESULTADO_DEMO, "utf8"));
+    } catch {
+      resultadoDemoLeido = null;
+    }
+  }
+  return resultadoDemoLeido;
+};
+
+const ES_FECHA = /^\d{4}-\d{2}-\d{2}$/;
+
+// Todas las fechas "AAAA-MM-DD" de un resultado, corridas `dias`, y el perfil de la semana girado.
+export const correrResultado = (resultado, dias) => {
+  const correr = (valor) => {
+    if (typeof valor === "string" && ES_FECHA.test(valor)) return sumarDias(valor, dias);
+    if (Array.isArray(valor)) return valor.map(correr);
+    if (valor && typeof valor === "object") return Object.fromEntries(Object.entries(valor).map(([k, v]) => [k, correr(v)]));
+    return valor;
+  };
+  const corrido = correr(resultado);
+  const perfil = resultado?.perfil_semana;
+  if (Array.isArray(perfil) && perfil.length === 7) {
+    // El día que era de la semana `i` ahora es `i + giro`: su factor se va con él.
+    const giro = ((dias % 7) + 7) % 7;
+    corrido.perfil_semana = perfil.map((_, i) => perfil[(i - giro + 7) % 7]);
+  }
+  return corrido;
+};
+
+// El resultado guardado, con sus fechas hasta ayer; null si no hay o no es de esta demostración.
+export const resultadoDeDemostracion = (ahora = new Date(), guardado = leerResultadoDemo(), demo = leerDemo()) => {
+  if (!guardado?.resultado || guardado.hasta !== demo.hasta) return null;
+  return correrResultado(guardado.resultado, diasHastaAyer(ahora, guardado.hasta));
 };
 
 /*
@@ -211,12 +278,16 @@ export const conCanalesDePedido = async (datos, { demo = false } = {}) => {
 /* ══════════ Lo calculado, guardado un rato ══════════ */
 
 // Cada uno por su lado: la tienda real y la demostración.
-const estado = { real: { guardado: null, enCamino: null }, demo: { guardado: null, enCamino: null } };
+const estado = {
+  real: { guardado: null, enCamino: null, errorSuelto: null },
+  demo: { guardado: null, enCamino: null, errorSuelto: null },
+};
 
 export const olvidarPronostico = () => {
   for (const e of Object.values(estado)) {
     e.guardado = null;
     e.enCamino = null;
+    e.errorSuelto = null;
   }
 };
 
@@ -232,6 +303,31 @@ export const obtenerPronostico = async ({ forzar = false, ahora = new Date(), de
   if (!forzar && e.enCamino) return e.enCamino;
   e.enCamino = calcular(ahora, demo).finally(() => { e.enCamino = null; });
   return e.enCamino;
+};
+
+/*
+ * Para el panel: espera el pronóstico hasta `ms`. Si para entonces no
+ * terminó, NO se corta: sigue calculándose en segundo plano (y se guarda al
+ * terminar) y esto devuelve null, para que el panel conteste "calculando" y
+ * vuelva a preguntar en unos segundos. Si ese cálculo de fondo falla, el
+ * error se le dice a la siguiente pregunta, una vez.
+ */
+const EN_CAMINO = Symbol("en camino");
+
+export const pronosticoSinEsperarDeMas = async (opciones = {}, ms = 20 * 1000) => {
+  const e = estado[opciones.demo ? "demo" : "real"];
+  if (e.errorSuelto) {
+    const { error, en } = e.errorSuelto;
+    e.errorSuelto = null;
+    if (Date.now() - en < RECUERDO_DEL_ERROR_MS && !opciones.forzar) throw error;
+  }
+  const calculo = obtenerPronostico(opciones);
+  let reloj;
+  const plazo = new Promise((listo) => { reloj = setTimeout(() => listo(EN_CAMINO), ms); });
+  const primero = await Promise.race([calculo, plazo]).finally(() => clearTimeout(reloj));
+  if (primero !== EN_CAMINO) return primero;
+  calculo.catch((error) => { e.errorSuelto = { error, en: Date.now() }; });
+  return null;
 };
 
 /*
@@ -254,11 +350,20 @@ export const calentarPronostico = () => {
 };
 
 const calcular = async (ahora, demo) => {
-  if (!config.analitica.url) {
-    throw new ErrorPronostico("sin-servicio", "El servicio de analítica no está configurado (ANALITICA_URL)");
-  }
   if (demo && !hayDemostracion()) {
     throw new ErrorPronostico("sin-demo", "No está el archivo de la demostración (datos/pronosticoDemo.json)");
+  }
+  // La demostración ya calculada: al instante y sin depender del servicio.
+  if (demo) {
+    const yaCalculado = resultadoDeDemostracion(ahora);
+    if (yaCalculado) {
+      const datos = { ...yaCalculado, generado: ahora.toISOString(), demo: true };
+      estado.demo.guardado = { datos, en: ahora.getTime() };
+      return datos;
+    }
+  }
+  if (!config.analitica.url) {
+    throw new ErrorPronostico("sin-servicio", "El servicio de analítica no está configurado (ANALITICA_URL)");
   }
 
   const solicitud = demo ? solicitudDeDemostracion(ahora) : await armarSolicitud(ahora);

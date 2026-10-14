@@ -205,7 +205,7 @@ export const TEMAS_AYUDA = [
     Icono: TrendingUp,
     resumen: 'Lo que se espera vender las próximas 4 semanas, qué se agotaría y qué conviene pedir a cada proveedor.',
     pasos: [
-      'Se calcula al abrirla, con el historial de ventas. Si el servicio de análisis estaba en reposo, la primera vez del día puede tardar hasta un minuto; después abre al instante.',
+      'Se calcula al abrirla, con el historial de ventas. Si el servicio de análisis estaba en reposo, la primera vez del día puede tardar un par de minutos; después abre al instante. La demostración abre siempre al instante.',
       'Arriba están la venta esperada de las próximas 4 semanas y de la próxima semana, cada una con su rango: lo más probable es que la venta caiga entre esos dos montos. Al lado, lo que de verdad se vendió en las 4 semanas anteriores.',
       'El resumen dice en palabras lo más importante. La gráfica pone las semanas que pasaron junto a las que vienen, con la línea del rango.',
       '“Productos que se agotarían” dice cuándo se acabaría cada uno con la venta esperada y lo antes que podría pasar.',

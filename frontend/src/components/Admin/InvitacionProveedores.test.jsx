@@ -6,9 +6,9 @@ import InvitacionProveedores, { CLAVE_AHORA_NO, CLAVE_NO_MOSTRAR } from './Invit
 import { supplierService } from '../../api/supplierService';
 
 /*
- * La invitación a decir por dónde se le pide a cada proveedor: solo al
- * administrador, solo si falta alguno, y respetando "Ahora no" y "No volver
- * a mostrar".
+ * El aviso de decir por dónde se le pide a cada proveedor: solo al
+ * administrador, solo en Proveedores, solo si falta alguno, y respetando
+ * "Entendido" y "No volver a mostrar".
  */
 
 vi.mock('../../api/supplierService', () => ({ supplierService: { getSuppliers: vi.fn() } }));
@@ -22,7 +22,7 @@ const PROVEEDORES = [
   { _id: '4', name: 'Uno que ya no se usa', isActive: false },
 ];
 
-const abrir = async (ruta = '/dashboard') => {
+const abrir = async (ruta = '/proveedores') => {
   render(
     <MemoryRouter initialEntries={[ruta]}>
       <InvitacionProveedores />
@@ -32,11 +32,11 @@ const abrir = async (ruta = '/dashboard') => {
       </Routes>
     </MemoryRouter>
   );
-  // La invitación espera un momento después de entrar.
+  // El aviso espera un momento después de entrar.
   await act(async () => { await vi.advanceTimersByTimeAsync(2000); });
 };
 
-describe('la invitación a enlazar los proveedores', () => {
+describe('el aviso de enlazar los proveedores', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     localStorage.clear();
@@ -46,21 +46,27 @@ describe('la invitación a enlazar los proveedores', () => {
   });
   afterEach(() => { cleanup(); vi.useRealTimers(); vi.clearAllMocks(); });
 
-  it('dice cuáles faltan (solo los activos) y lleva a Proveedores', async () => {
+  it('al abrir Proveedores dice cuáles faltan (solo los activos) y cómo se hace', async () => {
     await abrir();
     expect(screen.getByRole('dialog', { name: 'Enlace sus proveedores' })).toBeTruthy();
     expect(screen.getByText(/Faltan 2 proveedores: Bebidas del Pacífico, Panificadora San José\./)).toBeTruthy();
+    expect(screen.getByText(/Toque “Editar” en cada uno/)).toBeTruthy();
     expect(screen.getByText(/BEES no reciben pedidos de otros sistemas/)).toBeTruthy();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Enlazar mis proveedores' }));
-    expect(screen.getByText('Pantalla de proveedores')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Entendido' }));
     await act(async () => { await vi.advanceTimersByTimeAsync(500); });
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
-  it('"Ahora no" la guarda por esta sesión; "No volver a mostrar", para siempre', async () => {
+  it('en las demás pantallas del panel no sale', async () => {
+    await abrir('/dashboard');
+    expect(supplierService.getSuppliers).not.toHaveBeenCalled();
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('"Entendido" la guarda por esta sesión; "No volver a mostrar", para siempre', async () => {
     await abrir();
-    fireEvent.click(screen.getByRole('button', { name: 'Ahora no' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Entendido' }));
     expect(sessionStorage.getItem(CLAVE_AHORA_NO)).toBe('1');
     cleanup();
     supplierService.getSuppliers.mockClear();
@@ -75,7 +81,7 @@ describe('la invitación a enlazar los proveedores', () => {
     expect(localStorage.getItem(CLAVE_NO_MOSTRAR)).toBe('1');
   });
 
-  it('no sale al empleado, ni si ya están todos, ni estando en Proveedores', async () => {
+  it('no sale al empleado, ni si ya están todos', async () => {
     sesion.user = { type: 'employee' };
     await abrir();
     expect(supplierService.getSuppliers).not.toHaveBeenCalled();
@@ -84,11 +90,6 @@ describe('la invitación a enlazar los proveedores', () => {
     sesion.user = { type: 'admin' };
     supplierService.getSuppliers.mockResolvedValue([PROVEEDORES[0], PROVEEDORES[3]]);
     await abrir();
-    expect(screen.queryByRole('dialog')).toBeNull();
-    cleanup();
-
-    supplierService.getSuppliers.mockResolvedValue(PROVEEDORES);
-    await abrir('/proveedores');
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 });

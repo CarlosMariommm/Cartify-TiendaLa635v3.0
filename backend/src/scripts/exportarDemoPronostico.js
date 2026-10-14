@@ -10,8 +10,10 @@
  * publicado tiene su modo "Demostración" sin tocar la base de producción
  * (ver utils/pronostico.js, solicitudDeDemostracion).
  *
- * Se corre solo cuando cambia la demostración, desde backend/:
+ * Se corre solo cuando cambia la demostración, desde backend/, y después
+ * hay que volver a calcular su resultado (el panel lo usa ya calculado):
  *   node src/scripts/exportarDemoPronostico.js
+ *   node src/scripts/calcularDemoPronostico.js
  * ============================================================
  */
 

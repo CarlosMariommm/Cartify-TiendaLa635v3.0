@@ -59,7 +59,7 @@ describe('la pantalla Pronóstico', () => {
 
   it('mientras calcula avisa que puede tardar, y después muestra todo', async () => {
     abrir();
-    expect(screen.getByRole('status').textContent).toContain('puede tardar hasta un minuto');
+    expect(screen.getByRole('status').textContent).toContain('puede tardar un par de minutos');
     expect(await screen.findByText('$1,200.00')).toBeTruthy();
     expect(screen.getByText('entre $1,010.00 y $1,420.00')).toBeTruthy();
     expect(screen.getByText(/Se proyectan ventas por \$1,200\.00/)).toBeTruthy();
