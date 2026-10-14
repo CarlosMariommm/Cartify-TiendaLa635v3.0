@@ -1078,7 +1078,6 @@ const EN = {
   'Día del cariño — llévale algo a quien quieres': 'Valentine’s Day — bring something to someone you love',
 
   // ── App: sueltos ──
-  'Hola, {nombre} 👋': 'Hi, {nombre} 👋',
 
   // ── App: pasillos y categorías de la tienda ──
   'Bebidas': 'Drinks',
