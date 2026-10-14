@@ -5,6 +5,7 @@ import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import TiquiPanel from '../Admin/TiquiPanel';
 import InvitacionProveedores from '../Admin/InvitacionProveedores';
+import TutorialApartado from '../Admin/TutorialApartado';
 import { useMenuPanel } from '../../hooks/useMenuPanel';
 import { overlayTransition } from '../../utils/motion';
 
@@ -76,6 +77,9 @@ const AdminLayout = () => {
         Es otra asistente que la de la tienda. Ver TiquiPanel.
       */}
       <TiquiPanel />
+
+      {/* Al administrador, la primera vez en cada apartado: un recorrido corto. */}
+      <TutorialApartado />
 
       {/* Al administrador: que diga por dónde se le pide a cada proveedor. */}
       <InvitacionProveedores />

@@ -6,6 +6,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { supplierService } from '../../api/supplierService';
 import { modalTransition } from '../../utils/motion';
 import { sinCanalDePedido } from '../../utils/pedidoProveedor';
+import { useTurno } from '../../utils/turnoPanel';
 
 /*
  * ============================================================
@@ -63,8 +64,9 @@ const InvitacionProveedores = () => {
     return () => { vigente = false; clearTimeout(reloj); };
   }, [esAdmin]);
 
-  // Ya está en Proveedores: no hace falta invitarlo a ir.
-  const visible = abierta && pathname !== '/proveedores';
+  // Ya está en Proveedores: no hace falta invitarlo a ir. Y si el tutorial
+  // del apartado está abierto, espera a que se cierre (ver utils/turnoPanel.js).
+  const visible = useTurno('proveedores', abierta && pathname !== '/proveedores');
 
   const ahoraNo = () => {
     guardar(sessionStorage, CLAVE_AHORA_NO);
