@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { cantidad, construirReportePredictivo, faltanCuatroSemanas, pronosticoParaMostrar, rango, resumenDelPronostico } from './reportePredictivo';
 import { dinero, fechaLarga, pasoRedondo, rangoDeFechas } from './reportesPdf';
 
@@ -157,5 +157,32 @@ describe('mientras la tienda real no junta 4 semanas', () => {
   it('sin demostración en el servidor, se queda con la tienda real', async () => {
     const sola = await pronosticoParaMostrar(async () => ({ ...real(null), demoDisponible: false }));
     expect(sola.demo).toBeUndefined();
+  });
+
+  it('si el cálculo real tarda pero ya se sabe que faltan las 4 semanas, no lo espera', async () => {
+    const pedir = vi.fn(async (opciones, ajustes) => {
+      if (opciones.demo) return DEMO;
+      const calculando = { calculando: true, faltanCuatroSemanas: true, demoDisponible: true };
+      // El servicio de pedidos deja de esperar cuando `alcanza` lo dice.
+      expect(ajustes.alcanza(calculando)).toBe(true);
+      expect(ajustes.alcanza({ calculando: true, faltanCuatroSemanas: false, demoDisponible: true })).toBe(false);
+      return calculando;
+    });
+    const resultado = await pronosticoParaMostrar(pedir);
+    expect(resultado.demo).toBe(true);
+    expect(resultado.porFaltaDeHistoria).toBe(true);
+  });
+
+  it('si la tienda real no se pudo calcular, enseña la demostración y dice por qué', async () => {
+    const error = { response: { data: { message: 'El servicio de pronóstico contestó con un error.' } } };
+    const resultado = await pronosticoParaMostrar(async (opciones) => {
+      if (opciones.demo) return DEMO;
+      throw error;
+    });
+    expect(resultado.demo).toBe(true);
+    expect(resultado.realConError).toBe('El servicio de pronóstico contestó con un error.');
+
+    // Sin demostración tampoco, el error es el de la tienda real.
+    await expect(pronosticoParaMostrar(async () => { throw error; })).rejects.toBe(error);
   });
 });

@@ -142,6 +142,8 @@ const Pronostico = () => {
    * semanas de ventas (ver pronosticoParaMostrar). El aviso lo dice.
    */
   const [porFaltaDeHistoria, setPorFaltaDeHistoria] = useState(false);
+  // O porque la tienda real no se pudo calcular en ese momento: el porqué.
+  const [avisoReal, setAvisoReal] = useState('');
   // Si ya se decidió qué enseñar al abrir, y con qué modo están los datos en pantalla.
   const decidido = useRef(false);
   const modoCargado = useRef(null);
@@ -161,6 +163,10 @@ const Pronostico = () => {
         setPorFaltaDeHistoria(true);
         setDemo(true);
       }
+      if (respuesta?.realConError) {
+        setAvisoReal(respuesta.realConError);
+        setDemo(true);
+      }
     } catch (e) {
       setError(e?.response?.data?.message || 'No se pudo calcular el pronóstico. Intente de nuevo en un minuto.');
     } finally {
@@ -171,6 +177,7 @@ const Pronostico = () => {
   // Al cambiar de la tienda real a la demostración (o al revés), nada de la otra se queda en pantalla.
   const cambiarModo = (conDemo) => {
     if (conDemo === demo) return;
+    setAvisoReal('');
     setDatos(null);
     setDemo(conDemo);
   };
@@ -257,7 +264,9 @@ const Pronostico = () => {
           </div>
           {demo && (
             <p className="text-sm text-amber-700 max-w-2xl">
-              {porFaltaDeHistoria
+              {avisoReal
+                ? `En este momento no se pudo calcular la tienda real (${avisoReal.replace(/\.$/, '')}), así que se muestra una demostración: ventas inventadas de 3 meses y medio. Toque «Tienda real» para intentarlo de nuevo.`
+                : porFaltaDeHistoria
                 ? 'La tienda real todavía no junta 4 semanas de ventas, así que el pronóstico abre con una demostración: ventas inventadas de 3 meses y medio para mostrar todo lo que hace. La tienda real no cambia; puede verla en «Tienda real».'
                 : 'Está viendo una demostración: ventas inventadas de 3 meses y medio para mostrar todo lo que hace el pronóstico. La tienda real no cambia.'}
             </p>

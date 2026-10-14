@@ -47,6 +47,10 @@ const VIGENCIA_MS = 15 * 60 * 1000;
 const ESPERA_MS = 5 * 60 * 1000;
 // Un cálculo que falló se le dice al que pregunte durante este rato, en vez de reintentar en bucle.
 const RECUERDO_DEL_ERROR_MS = 60 * 1000;
+// Lo que contesta Render mientras el servicio despierta, y cuánto se espera antes de cada reintento.
+const DESPERTANDO = new Set([429, 502, 503, 504]);
+const REINTENTOS_MS = [3000, 6000, 10000, 15000, 20000, 30000];
+const esperar = (ms) => new Promise((listo) => setTimeout(listo, ms));
 
 export class ErrorPronostico extends Error {
   constructor(codigo, mensaje) {
@@ -142,6 +146,25 @@ export const armarSolicitud = async (ahora = new Date(), fuente = DE_LA_TIENDA) 
       .filter((c) => c.supplierId && c.date)
       .map((c) => ({ proveedor: String(c.supplierId), dia: diaLocal(c.date) })),
   };
+};
+
+/*
+ * ¿A la tienda real le faltan todavía 4 semanas de ventas? Se averigua en la
+ * base, sin el servicio (que solo llena "las 4 semanas anteriores" desde 28
+ * días de historia). Así, mientras el cálculo real tarda —Render despertando—,
+ * el panel ya sabe que va a abrir con la demostración y no la hace esperar.
+ */
+export const faltanCuatroSemanasEnLaBase = async (ahora = new Date(), pedidos = orderModel) => {
+  const [primero] = await pedidos
+    .find({ status: { $ne: "cancelado" } })
+    .sort({ createdAt: 1 })
+    .limit(1)
+    .select("createdAt")
+    .lean();
+  if (!primero?.createdAt) return true;
+  const hasta = sumarDias(diaLocal(ahora), -1);
+  const dias = Math.round((Date.parse(`${hasta}T00:00:00Z`) - Date.parse(`${diaLocal(primero.createdAt)}T00:00:00Z`)) / DIA) + 1;
+  return dias < HORIZONTE;
 };
 
 /* ══════════ La demostración ══════════ */
@@ -371,17 +394,32 @@ const calcular = async (ahora, demo) => {
     return { vacio: true, generado: ahora.toISOString() };
   }
 
+  /*
+   * Render gratis duerme el servicio, y mientras despierta su portero puede
+   * contestar 502/503 al instante o cortar la conexión: pasó el 14-10-2026 y
+   * el panel decía "No se pudo calcular" aunque un minuto después ya andaba.
+   * Esas fallas se reintentan con calma (el panel no espera: ve "calculando").
+   * Un error del cálculo mismo (un 500, la clave equivocada) no se reintenta.
+   */
   let respuesta;
-  try {
-    respuesta = await fetch(`${config.analitica.url}/pronostico`, {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-clave-analitica": config.analitica.clave },
-      body: JSON.stringify(solicitud),
-      signal: AbortSignal.timeout(ESPERA_MS),
-    });
-  } catch (error) {
-    const tardo = error?.name === "TimeoutError" || error?.name === "AbortError";
-    throw new ErrorPronostico(tardo ? "lento" : "sin-conexion", error?.message || "sin conexión");
+  for (let intento = 0; ; intento += 1) {
+    try {
+      respuesta = await fetch(`${config.analitica.url}/pronostico`, {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-clave-analitica": config.analitica.clave },
+        body: JSON.stringify(solicitud),
+        signal: AbortSignal.timeout(ESPERA_MS),
+      });
+    } catch (error) {
+      const tardo = error?.name === "TimeoutError" || error?.name === "AbortError";
+      if (tardo || intento >= REINTENTOS_MS.length) {
+        throw new ErrorPronostico(tardo ? "lento" : "sin-conexion", error?.message || "sin conexión");
+      }
+      await esperar(REINTENTOS_MS[intento]);
+      continue;
+    }
+    if (respuesta.ok || !DESPERTANDO.has(respuesta.status) || intento >= REINTENTOS_MS.length) break;
+    await esperar(REINTENTOS_MS[intento]);
   }
   if (!respuesta.ok) {
     throw new ErrorPronostico("fallo", `El servicio de analítica contestó ${respuesta.status}`);
