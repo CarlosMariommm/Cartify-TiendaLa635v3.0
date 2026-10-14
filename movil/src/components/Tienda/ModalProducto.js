@@ -3,10 +3,9 @@
  * DETALLE DE PRODUCTO
  * ============================================================
  * La foto en grande, el precio y de ahí al carrito. Es la versión corta de
- * `ProductDetailModal.jsx`: se dejaron fuera las reseñas y las
- * recomendaciones, que son dos apartados enteros (uno pega contra
- * /api/review y el otro arma similitudes entre productos) y no entran en esta
- * pantalla.
+ * `ProductDetailModal.jsx`: se dejaron fuera las reseñas y "Del mismo
+ * pasillo", que no entran en una hoja. Sí está "Quien compra esto también
+ * lleva", en una fila que se desliza de lado (ver utils/tambienLlevan.js).
  *
  * ── Una diferencia con la web, a propósito ──
  *
@@ -40,6 +39,9 @@ import { AIRE_ABAJO_MINIMO, ALTURA_BARRA_FLOTANTE } from '../UI/BarraInferior';
 import { useIdioma } from '../../context/IdiomaContext';
 import { foto, ANCHO } from '../../utils/fotos';
 import { hojaCentrada } from '../../theme/pantalla';
+import { useTienda } from '../../context/TiendaContext';
+import { cargarTambienLlevan } from '../../api/tiendaApi';
+import { elegirTambienLlevan } from '../../utils/tambienLlevan';
 
 /*
  * `conBarraFlotante`: true solo cuando quien abre este detalle vive DENTRO
@@ -49,16 +51,52 @@ import { hojaCentrada } from '../../theme/pantalla';
  * reemplazan el Tab entero, sin píldora detrás, y sumar el hueco ahí solo
  * dejaría un espacio muerto bajo el botón.
  */
-const ModalProducto = ({ producto, alCerrar, alAgregar, conBarraFlotante = false }) => {
+const ModalProducto = ({ producto: productoAbierto, alCerrar, alAgregar, conBarraFlotante = false }) => {
   const { t } = useIdioma();
   const [fallóImagen, setFallóImagen] = useState(false);
+  const [cantidad, setCantidad] = useState(() => pasoDe(productoAbierto));
+  /*
+   * El producto que se ve. Es el que se abrió, hasta que se toca uno de
+   * "Quien compra esto también lleva": ese se muestra aquí mismo, sin cerrar
+   * la hoja (cerrarla y abrir otra desde cada pantalla que usa esta ficha
+   * serían cinco cambios para lo mismo). Se guarda su id y no el objeto, para
+   * que con el catálogo al día la existencia también lo esté. Si quien la
+   * abrió manda otro producto, vuelve a ser ese.
+   */
+  const { productos: catalogo } = useTienda();
+  const [otroId, setOtroId] = useState(null);
+  const [abiertoId, setAbiertoId] = useState(productoAbierto?.id);
+  if (productoAbierto?.id !== abiertoId) {
+    setAbiertoId(productoAbierto?.id);
+    setOtroId(null);
+    setCantidad(pasoDe(productoAbierto));
+    setFallóImagen(false);
+  }
+  const producto = (otroId && catalogo.find((p) => p.id === otroId)) || productoAbierto;
   const { colores } = useTema();
   const COLORES = useColores();
   const estilos = useEstilos(crearEstilos);
   const { bottom } = useSafeAreaInsets();
   const paso = pasoDe(producto);
-  const [cantidad, setCantidad] = useState(paso);
   const marcoRef = useRef(null);
+  const scrollRef = useRef(null);
+
+  // Quien compra esto también lleva: la lista de toda la tienda, pedida una vez.
+  const [juntos, setJuntos] = useState({});
+  useEffect(() => {
+    let vigente = true;
+    cargarTambienLlevan().then((mapa) => { if (vigente) setJuntos(mapa); });
+    return () => { vigente = false; };
+  }, []);
+  const tambienLlevan = elegirTambienLlevan(juntos[producto?.id], catalogo, producto);
+
+  // Ver otro producto sin salir: de nuevo arriba, con su foto y su cantidad.
+  const verOtro = (otro) => {
+    setOtroId(otro.id);
+    setCantidad(pasoDe(otro));
+    setFallóImagen(false);
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
+  };
   /*
    * Defensa extra, no la puerta principal: la puerta es TarjetaProducto (ahí
    * se tapa la foto y no se llega hasta aquí). Pero esta ficha también se
@@ -245,7 +283,7 @@ ${url}`,
             </Pressable>
           </View>
 
-          <ScrollView contentContainerStyle={estilos.contenido} bounces={false}>
+          <ScrollView ref={scrollRef} contentContainerStyle={estilos.contenido} bounces={false}>
             {/* De aquí sale la foto que vuela al carrito, ver utils/volarAlCarrito.js. */}
             <View ref={marcoRef} style={estilos.marcoImagen}>
               {producto.imagen && !fallóImagen ? (
@@ -259,6 +297,10 @@ ${url}`,
                 <Paquete size={64} />
               )}
             </View>
+            {/* El crédito de una foto que no es de la tienda (Open Food Facts lo pide en su licencia). */}
+            {!!producto.fotoFuente && producto.imagen && !fallóImagen && (
+              <Text style={estilos.creditoFoto}>{t('Foto: {fuente}', { fuente: producto.fotoFuente })}</Text>
+            )}
 
             {!!producto.marca && <Text style={estilos.marca}>{producto.marca.toUpperCase()}</Text>}
 
@@ -346,6 +388,45 @@ ${url}`,
                     <Mas size={13} color={topeAlcanzado ? COLORES.marcador : COLORES.texto} />
                   </Pressable>
                 </View>
+              </>
+            )}
+
+            {/*
+              Lo que más se lleva con este en un mismo pedido. Sin tarjetas:
+              la foto sobre su fondo suave, el nombre y el precio. Tocar uno lo
+              muestra aquí mismo. Ver utils/tambienLlevan.js.
+            */}
+            {tambienLlevan.length > 0 && (
+              <>
+                <Text style={estilos.tituloSeccion}>{t('Quien compra esto también lleva')}</Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={estilos.filaJuntos}
+                  style={estilos.carrilJuntos}
+                >
+                  {tambienLlevan.map((otro) => (
+                    <Pressable
+                      key={otro.id}
+                      onPress={() => verOtro(otro)}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('Ver {nombre}', { nombre: otro.nombre })}
+                      style={({ pressed }) => [estilos.junto, pressed && { opacity: 0.6 }]}
+                    >
+                      <View style={estilos.juntoFoto}>
+                        {otro.imagen ? (
+                          <Image source={{ uri: foto(otro.imagen, ANCHO.miniatura) }} contentFit="contain" style={estilos.juntoImagen} />
+                        ) : (
+                          <Paquete size={28} />
+                        )}
+                      </View>
+                      <Text style={estilos.juntoNombre} numberOfLines={2}>{otro.nombre}</Text>
+                      <Text style={estilos.juntoPrecio}>
+                        ${Number(otro.precio).toFixed(2)}{esPorLibra(otro) ? '/lb' : ''}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
               </>
             )}
           </ScrollView>
@@ -606,6 +687,48 @@ const crearEstilos = (COLORES) => StyleSheet.create({
     paddingBottom: 26,
     borderTopWidth: 1,
     borderTopColor: COLORES.linea,
+  },
+  creditoFoto: {
+    alignSelf: 'flex-end',
+    marginTop: 4,
+    fontSize: 11,
+    color: COLORES.textoTenue,
+  },
+  // "Quien compra esto también lleva": una fila que se desliza de lado, sin tarjetas.
+  carrilJuntos: {
+    marginHorizontal: -20,
+  },
+  filaJuntos: {
+    paddingHorizontal: 20,
+    gap: 14,
+  },
+  junto: {
+    width: 104,
+  },
+  juntoFoto: {
+    width: 104,
+    height: 104,
+    borderRadius: 14,
+    backgroundColor: COLORES.papelGris,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  juntoImagen: {
+    width: '86%',
+    height: '86%',
+  },
+  juntoNombre: {
+    marginTop: 6,
+    fontSize: 12.5,
+    lineHeight: 16,
+    color: COLORES.texto,
+  },
+  juntoPrecio: {
+    marginTop: 2,
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORES.texto,
   },
   // Misma píldora de 28 que ya lleva "Iniciar sesión" (LoginClient.js) y
   // "Confirmar" del candado de edad: se pasa por `estilo`, sin tocar las

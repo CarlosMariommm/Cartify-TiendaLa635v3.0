@@ -103,6 +103,7 @@ export const TEMAS_AYUDA = [
       'Para marcarlo entregado hace falta el código de 4 dígitos que el cliente ve en su pedido: así se sabe que llegó a la persona correcta.',
       'Busque por el nombre del cliente o por el número del pedido, el que empieza con #.',
       'En los pedidos de impresiones, “Imprimir” abre el archivo que mandó el cliente, listo para la impresora.',
+      '“Comprobante” baja el PDF del pedido con los datos de la tienda, el detalle y los totales, para imprimirlo o mandárselo al cliente. Los cancelados no tienen.',
       'Para cancelar un pedido, toque “Cancelar” y escriba el motivo (o elija uno de los rápidos). Al cliente le llega tal cual. Los productos vuelven al inventario y, si pagó con su saldo o canjeó puntos, se le devuelven solos.',
     ],
     consejos: [
@@ -125,8 +126,10 @@ export const TEMAS_AYUDA = [
       'El código de barras se puede escanear. Si lo deja vacío, se genera uno interno.',
       'Marque “Solo para mayores de 18” en cerveza, cigarros y similares: la tienda pide confirmar la edad y al entregar se pide documento.',
       'Filtre por categoría o busque por nombre. Al tocar un producto lo ve completo, y desde ahí se edita o se elimina.',
+      '“Importar desde Excel” carga muchos productos de una vez: suba su .xlsx o .csv (basta con nombre y precio), revise qué columna es cuál y la IA completa la marca, el pasillo, la categoría, si va por libra o es +18, y busca la foto de cada uno. Antes de guardar ve la lista, quita lo que no quiera y lo que ya existe se omite solo.',
     ],
     consejos: [
+      'Con código de barras en el Excel, la foto sale exacta. Las fotos salen de Open Food Facts (una base abierta de productos) y la tienda menciona de dónde son; si no aparece, póngasela después con “Editar”.',
       'El máximo de cada producto sirve para saber cuándo reponer: con 25% o menos de su máximo, sale en “Por reponer”.',
       'Cargue siempre el costo: sin él no se puede saber la ganancia ni si una promoción deja pérdida.',
     ],

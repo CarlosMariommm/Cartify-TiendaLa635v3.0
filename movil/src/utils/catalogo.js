@@ -123,6 +123,9 @@ export const mapearProducto = (p, mapaPromo = {}) => {
     stock: Number(p.stock) || 0,
     stockMaximo: Number(p.maxQuantity) || 0,
     imagen: Array.isArray(p.image) ? p.image[0] : p.image,
+    // De dónde salió la foto si no es de la tienda (Open Food Facts, al importar
+    // desde Excel): la ficha da el crédito que pide su licencia.
+    fotoFuente: p.fotoFuente || '',
     fechaExpiracion: p.expirationDate,
     creadoEn: p.createdAt,
   };

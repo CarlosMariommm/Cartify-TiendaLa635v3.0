@@ -124,6 +124,9 @@ const mapearProducto = (p, mapaPromo = {}) => {
     // en relación a lo que normalmente tiene, no contra un número fijo.
     stockMaximo: Number(p.maxQuantity) || 0,
     imagen: Array.isArray(p.image) ? p.image[0] : p.image,
+    // De dónde salió la foto si no es de la tienda (Open Food Facts, al importar
+    // desde Excel): la ficha da el crédito que pide su licencia.
+    fotoFuente: p.fotoFuente || '',
     esMasVendido: false,
     fechaExpiracion: p.expirationDate,
     creadoEn: p.createdAt,

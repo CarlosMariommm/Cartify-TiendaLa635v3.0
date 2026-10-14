@@ -10,6 +10,8 @@ import "../models/brand.js";
 import promotionModel from "../models/promotion.js";
 import storeSettingsModel from "../models/storeSettings.js";
 import { getIA, generarConIA, generarConCobertura } from "../utils/iaClient.js";
+import { clasificarIntencion, DIRECTAS } from "../utils/intencionesTiqui.js";
+import { respuestaDirecta, UMBRAL_DIRECTO, UMBRAL_RESPALDO } from "../utils/respuestasTiqui.js";
 import {
   vozDisponible, comprobarVoz, paraDecir, frasePrevia, guardarFrase, pedirVoz,
   ANIMOS_IA, animoValido, conEmocion, modeloDeVoz,
@@ -675,7 +677,7 @@ const leerOfertas = async () => {
  * sabía aunque estuvieran guardados. Si están vacíos no se mencionan, y ella
  * no se los inventa (ver MODO_TIQUI).
  */
-let tiendaEnMemoria = { en: 0, texto: "" };
+let tiendaEnMemoria = { en: 0, texto: "", datos: {} };
 
 const leerTienda = async () => {
   if (tiendaEnMemoria.texto && Date.now() - tiendaEnMemoria.en < 5 * 60 * 1000) {
@@ -695,8 +697,25 @@ const leerTienda = async () => {
       ? `Envío a domicilio: ${plata(ajustes.envioBase)} base más ${plata(ajustes.envioPorKm ?? 0)} por kilómetro; también se puede retirar en la tienda.`
       : "",
   ].filter(Boolean).join(" ");
-  tiendaEnMemoria = { en: Date.now(), texto };
+  tiendaEnMemoria = {
+    en: Date.now(),
+    texto,
+    // Lo mismo, ordenado: para lo que Tiqui contesta sola (ver respuestasTiqui.js).
+    datos: {
+      direccion: ajustes.direccion || "",
+      horario: negocio.horario || "",
+      whatsapp: negocio.whatsapp || "",
+      telefono: negocio.telefono || "",
+      envioBase: ajustes.envioBase ?? null,
+      envioPorKm: ajustes.envioPorKm ?? null,
+    },
+  };
   return texto;
+};
+
+const leerDatosDeTienda = async () => {
+  await leerTienda();
+  return tiendaEnMemoria.datos;
 };
 
 /*
@@ -1168,6 +1187,53 @@ const fraseDeRespaldo = (acciones) => {
   return agregados.length ? `${partes.join(" ")} ¿Algo más?` : partes.join(" ");
 };
 
+/*
+ * ============================================================
+ * CONTESTAR SIN GEMINI — la IA propia de Tiqui
+ * ============================================================
+ * Antes de preguntarle a Gemini (4 segundos, y a veces saturado en la capa
+ * gratis), la IA propia (utils/intencionesTiqui.js, entrenada en
+ * analitica/intenciones) dice qué se quiere. Si es algo sencillo —saludar,
+ * el total, pagar, abrir los pedidos, las ofertas, el horario…— y lo
+ * reconoce con confianza, Tiqui contesta sola (utils/respuestasTiqui.js).
+ *
+ * Se le deja a Gemini, aunque la IA propia esté segura:
+ *   - lo que nombra un producto ("¿hay ofertas de Coca-Cola?"): eso se
+ *     contesta con el catálogo;
+ *   - la respuesta corta a una pregunta de Tiqui ("sí", "no, gracias"):
+ *     depende de lo que se venía hablando.
+ *
+ * Con `umbral` UMBRAL_DIRECTO va antes de Gemini; con UMBRAL_RESPALDO, cuando
+ * Gemini no contestó. Devuelve la respuesta lista, o null.
+ * ============================================================
+ */
+const contestarSinGemini = async ({ frase, charla, req, umbral }) => {
+  const idea = clasificarIntencion(frase);
+  if (!DIRECTAS.has(idea.intencion) || idea.confianza < umbral) return null;
+
+  const ultima = charla[charla.length - 1];
+  const respondeAPregunta = ultima?.quien === "Asistente" && /\?\s*$/.test(ultima.texto || "");
+  if (respondeAPregunta && aTextoPlano(frase).split(/\s+/).filter(Boolean).length <= 3) return null;
+
+  const catalogo = await leerCatalogo();
+  const dichas = new Set(palabrasClave(frase));
+  if (dichas.size && catalogo.some((p) => palabrasClave(`${p.nombre} ${p.marca || ""}`).some((w) => dichas.has(w)))) return null;
+
+  const [tienda, ofertas, nombre] = await Promise.all([leerDatosDeTienda(), leerOfertas(), nombreDelCliente(req)]);
+  const enOferta = catalogo
+    .filter((p) => p.stock > 0 && ofertas.porProducto.has(p.id))
+    .map((p) => ({ nombre: p.nombre, oferta: ofertas.porProducto.get(p.id) }));
+  const respuesta = respuestaDirecta(idea.intencion, { tienda, ofertas: enOferta, nombre });
+  if (!respuesta) return null;
+  return {
+    ...respuesta,
+    entendido: true,
+    origen: "tiqui",
+    intencion: idea.intencion,
+    confianza: Math.round(idea.confianza * 100) / 100,
+  };
+};
+
 aiController.asistente = async (req, res) => {
   try {
     // `productos` ya no se usa (el catálogo lo arma el servidor); se acepta
@@ -1178,12 +1244,18 @@ aiController.asistente = async (req, res) => {
       return res.status(400).json({ message: "Hace falta la frase" });
     }
 
+    const charla = conversacionReciente(historial);
+
+    // Lo sencillo lo contesta la IA propia, al instante. Ver CONTESTAR SIN GEMINI.
+    const directa = await contestarSinGemini({ frase, charla, req, umbral: UMBRAL_DIRECTO });
+    if (directa) return res.status(200).json(directa);
+
     const ia = getIA();
     if (!ia) {
-      return res.status(200).json({ acciones: [], respuesta: "", entendido: false, origen: "sin-ia" });
+      const respaldo = await contestarSinGemini({ frase, charla, req, umbral: UMBRAL_RESPALDO });
+      return res.status(200).json(respaldo || { acciones: [], respuesta: "", entendido: false, origen: "sin-ia" });
     }
 
-    const charla = conversacionReciente(historial);
     const [{ disponibles, agotados, categorias, ofertas }, tienda, nombre] = await Promise.all([
       // Lo que se está hablando decide qué productos van arriba: la frase y lo
       // último de la charla (un "sí" solo no dice nada; lo de antes, sí).
@@ -1328,6 +1400,9 @@ aiController.asistente = async (req, res) => {
       return res.status(200).json({ acciones, respuesta: dice, animo, entendido: true, origen: "ia" });
     } catch (errorIA) {
       console.log("IA no disponible para Tiqui: " + errorIA.message);
+      // Gemini saturado: si la IA propia entendió algo sencillo, contesta ella.
+      const respaldo = await contestarSinGemini({ frase, charla, req, umbral: UMBRAL_RESPALDO }).catch(() => null);
+      if (respaldo) return res.status(200).json({ ...respaldo, origen: "tiqui-respaldo" });
       return res.status(200).json({ acciones: [], respuesta: "", entendido: false, origen: "error" });
     }
   } catch (error) {

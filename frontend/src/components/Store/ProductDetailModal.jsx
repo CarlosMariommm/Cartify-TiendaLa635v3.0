@@ -245,6 +245,15 @@ const Foto = styled.img`
   filter: drop-shadow(0 14px 30px rgba(28, 22, 20, 0.16));
 `;
 
+// El crédito de una foto que no es de la tienda (Open Food Facts lo pide en su licencia).
+const CreditoFoto = styled.span`
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  font-size: 11px;
+  color: var(--tinta-tenue);
+`;
+
 const SinFoto = styled.div`
   color: var(--tinta-tenue);
   display: flex;
@@ -544,6 +553,7 @@ const ProductDetailModal = ({
     soloAdultos,
     agotado,
     ahorro,
+    tambienLlevan,
     recomendados,
     agregar,
     cerrar,
@@ -552,6 +562,24 @@ const ProductDetailModal = ({
   } = useDetalleProducto({ producto, onClose, onAgregarAlCarrito, todosLosProductos });
   const { t } = useIdioma();
   const { ajustes } = useAjustesCtx();
+
+  /*
+   * La MISMA tarjeta que la tienda. Antes los recomendados tenían su propio
+   * diseño —más chico, con el stock en inglés ("5 Left") y el click vacío,
+   * literalmente un comentario donde debía abrirse el producto—. Reusarla
+   * arregla las tres cosas de una y evita que dentro de la misma pantalla haya
+   * dos formas de mostrar un producto.
+   */
+  const tarjetas = (lista) => lista.map((p, i) => (
+    <ProductCard
+      key={p.id}
+      className="card-in"
+      style={{ '--i': i }}
+      producto={p}
+      onVerDetalle={onVerProducto || (() => {})}
+      onAgregarAlCarrito={onAgregarAlCarrito}
+    />
+  ));
 
   const compartir = async () => {
     const tienda = `${ajustes.nombreLinea1 || ''} ${ajustes.nombreLinea2 || ''}`.trim() || 'Tienda la 635';
@@ -656,7 +684,10 @@ const ProductDetailModal = ({
                 entender que había varias vistas cuando no las hay.
               */}
               {producto.imagen && !imgError ? (
-                <Foto data-foto-detalle src={foto(producto.imagen, ANCHO.ficha)} alt={producto.nombre} onError={marcarImagenRota} />
+                <>
+                  <Foto data-foto-detalle src={foto(producto.imagen, ANCHO.ficha)} alt={producto.nombre} onError={marcarImagenRota} />
+                  {producto.fotoFuente && <CreditoFoto>{t('Foto: {fuente}', { fuente: producto.fotoFuente })}</CreditoFoto>}
+                </>
               ) : (
                 <SinFoto><Package size={84} strokeWidth={1.1} /></SinFoto>
               )}
@@ -746,30 +777,20 @@ const ProductDetailModal = ({
             </Panel>
           </Ficha>
 
+          {/* Lo que más se lleva con este en un mismo pedido. Ver utils/tambienLlevan.js. */}
+          {tambienLlevan.length > 0 && (
+            <Recomendados aria-labelledby="titulo-tambien-llevan">
+              <TituloRecs id="titulo-tambien-llevan">{t('Quien compra esto también lleva')}</TituloRecs>
+              <PieRecs>{t('Lo que más se lleva en el mismo pedido.')}</PieRecs>
+              <CuadriculaRecs>{tarjetas(tambienLlevan)}</CuadriculaRecs>
+            </Recomendados>
+          )}
+
           {recomendados.length > 0 && (
-            <Recomendados>
-              <TituloRecs>{t('Del mismo pasillo')}</TituloRecs>
+            <Recomendados aria-labelledby="titulo-mismo-pasillo">
+              <TituloRecs id="titulo-mismo-pasillo">{t('Del mismo pasillo')}</TituloRecs>
               <PieRecs>{t('Más de {categoria}, por si andaba viendo.', { categoria: producto.categoria ? producto.categoria.toLowerCase() : t('la tienda') })}</PieRecs>
-              {/*
-                La MISMA tarjeta que la tienda. Antes esto tenía su propio
-                diseño —más chico, con el stock en inglés ("5 Left") y el click
-                vacío, literalmente un comentario donde debía abrirse el
-                producto—. Reusarla arregla las tres cosas de una y evita que
-                dentro de la misma pantalla haya dos formas de mostrar un
-                producto.
-              */}
-              <CuadriculaRecs>
-                {recomendados.map((p, i) => (
-                  <ProductCard
-                    key={p.id}
-                    className="card-in"
-                    style={{ '--i': i }}
-                    producto={p}
-                    onVerDetalle={onVerProducto || (() => {})}
-                    onAgregarAlCarrito={onAgregarAlCarrito}
-                  />
-                ))}
-              </CuadriculaRecs>
+              <CuadriculaRecs>{tarjetas(recomendados)}</CuadriculaRecs>
             </Recomendados>
           )}
         </Contenido>

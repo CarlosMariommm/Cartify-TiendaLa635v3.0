@@ -1,4 +1,7 @@
 # Para desarrollar y para las pruebas de GitHub: lo de producción más pytest.
 -r requirements.txt
 pytest==8.3.5
+# Solo para ENTRENAR la IA propia de Tiqui (intenciones/entrenar.py); el
+# servicio de Render no lo usa, por eso no va en requirements.txt.
+scikit-learn==1.6.1
 httpx==0.28.1

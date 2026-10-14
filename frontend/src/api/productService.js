@@ -23,6 +23,27 @@ export const productService = {
     return response.data;
   },
 
+  // 1a- Lo que se lleva junto con cada producto en un mismo pedido:
+  //     { productos: { id: [ids] } }. Público. Ver utils/tambienLlevan.js.
+  getTambienLlevan: async () => {
+    const response = await api.get('/product/tambien-llevan');
+    return response.data;
+  },
+
+  // 1c- Importar desde Excel, por tandas de 20 (solo el dueño). Ver utils/importarExcel.js.
+  importarColumnas: async (encabezados, ejemplos) => {
+    const response = await api.post('/product/importar/columnas', { encabezados, ejemplos });
+    return response.data;
+  },
+  analizarImportacion: async (filas) => {
+    const response = await api.post('/product/importar/analizar', { filas });
+    return response.data;
+  },
+  importarProductos: async (productos) => {
+    const response = await api.post('/product/importar', { productos });
+    return response.data;
+  },
+
   // 1b- Obtener el inventario completo, con costo y proveedor. Pide sesión de
   //     personal: es lo que la tienda no le enseña a un cliente.
   getInventario: async () => {

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useEdad } from '../context/EdadContext';
 import { useFavoritosCtx } from '../context/FavoritosContext';
 import { esPorLibra, esSoloAdultos } from '../utils/unidades';
+import { cargarTambienLlevan, elegirTambienLlevan } from '../utils/tambienLlevan';
 
 /*
  * ============================================================
@@ -9,7 +10,8 @@ import { esPorLibra, esSoloAdultos } from '../utils/unidades';
  * ============================================================
  * Todo lo que la ficha de producto necesita SABER, para que el componente
  * solo tenga que pintarlo: el candado del scroll, el "atrás" del navegador,
- * los recomendados, el candado +18 y el corazón de favoritos.
+ * lo que se lleva junto, los recomendados, el candado +18 y el corazón de
+ * favoritos.
  *
  * Vivía suelto dentro de ProductDetailModal, mezclado con doscientas líneas
  * de estilos. Aquí se lee de corrido y, sobre todo, se puede arreglar sin
@@ -155,16 +157,32 @@ export const useDetalleProducto = ({
   }, [producto?.precioAnterior, producto?.precio]);
 
   /*
-   * Los recomendados: del mismo pasillo, sin repetir el que ya se está
-   * viendo. Cinco es lo que cabe en una fila sin que la ficha se vuelva un
-   * catálogo.
+   * Quien compra esto también lleva: lo que más va con este producto en un
+   * mismo pedido, de los pedidos de verdad. La lista de toda la tienda se pide
+   * una vez y la comparten todas las fichas. Ver utils/tambienLlevan.js.
    */
-  const recomendados = useMemo(
-    () => todosLosProductos
-      .filter((p) => p.id !== producto?.id && p.categoria === producto?.categoria)
-      .slice(0, 5),
-    [todosLosProductos, producto?.id, producto?.categoria]
+  const [juntos, setJuntos] = useState({});
+  useEffect(() => {
+    let vigente = true;
+    cargarTambienLlevan().then((mapa) => { if (vigente) setJuntos(mapa); });
+    return () => { vigente = false; };
+  }, []);
+  const tambienLlevan = useMemo(
+    () => elegirTambienLlevan(juntos[producto?.id], todosLosProductos, producto),
+    [juntos, todosLosProductos, producto]
   );
+
+  /*
+   * Los recomendados: del mismo pasillo, sin repetir el que ya se está
+   * viendo ni lo que ya salió arriba. Cinco es lo que cabe en una fila sin
+   * que la ficha se vuelva un catálogo.
+   */
+  const recomendados = useMemo(() => {
+    const yaSalen = new Set(tambienLlevan.map((p) => p.id));
+    return todosLosProductos
+      .filter((p) => p.id !== producto?.id && p.categoria === producto?.categoria && !yaSalen.has(p.id))
+      .slice(0, 5);
+  }, [todosLosProductos, producto?.id, producto?.categoria, tambienLlevan]);
 
   // Candado +18 también aquí: agregar un producto restringido pasa antes por
   // la confirmación de edad. Normalmente ya se confirmó al abrir el detalle,
@@ -202,6 +220,7 @@ export const useDetalleProducto = ({
     soloAdultos,
     agotado,
     ahorro,
+    tambienLlevan,
     recomendados,
     agregar,
     cerrar,

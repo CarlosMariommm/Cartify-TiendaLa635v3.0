@@ -3,6 +3,7 @@ import { anotarProductoNuevo } from "../utils/avisosCliente.js";
 import { v2 as cloudinary } from "cloudinary";
 import mongoose from "mongoose";
 import { CAMPOS_PUBLICOS_PRODUCTO } from "../utils/productoPublico.js";
+import { obtenerTambienLlevan } from "../utils/tambienLlevan.js";
 
 const productController = {};
 
@@ -89,6 +90,23 @@ productController.getProductById = async (req, res) => {
     return res.status(200).json(producto);
   } catch (error) {
     console.log("error " + error);
+    return res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
+
+/*
+ * Quien compra esto también lleva: { productos: { id: [ids] } } para TODO el
+ * catálogo de una vez, así la ficha de cada producto lo tiene al instante.
+ * Público como el catálogo: solo ids, ningún dato de quién compró. Ver
+ * utils/tambienLlevan.js.
+ */
+productController.getTambienLlevan = async (req, res) => {
+  try {
+    const productos = await obtenerTambienLlevan();
+    res.set("Cache-Control", "public, max-age=600");
+    return res.status(200).json({ productos });
+  } catch (error) {
+    console.log("error getTambienLlevan: " + error);
     return res.status(500).json({ message: "Error interno del servidor" });
   }
 };
@@ -290,12 +308,15 @@ productController.updateProduct = async (req, res) => {
     // Si viene nueva imagen
     if (req.file) {
 
-      // Elimino imagen anterior
-      await cloudinary.uploader.destroy(productFound.public_id);
+      // Elimino imagen anterior. Un producto importado desde Excel puede no
+      // tener ninguna: sin este cuidado, ponerle su primera foto fallaba.
+      if (productFound.public_id) await cloudinary.uploader.destroy(productFound.public_id);
 
       // Guardo nueva imagen
       updatedData.image = req.file.path;
       updatedData.public_id = req.file.filename;
+      // La foto ya es de la tienda: deja de decir "Foto: Open Food Facts".
+      updatedData.$unset = { fotoFuente: "" };
     }
 
     await productModel.findByIdAndUpdate(
@@ -331,8 +352,8 @@ productController.deleteProduct = async (req, res) => {
       });
     }
 
-    // Eliminar imagen de Cloudinary
-    await cloudinary.uploader.destroy(productFound.public_id);
+    // Eliminar imagen de Cloudinary (un producto importado puede no tener)
+    if (productFound.public_id) await cloudinary.uploader.destroy(productFound.public_id);
 
     // Eliminar producto
     await productModel.findByIdAndDelete(req.params.id);

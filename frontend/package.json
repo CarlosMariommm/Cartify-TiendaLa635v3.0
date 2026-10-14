@@ -30,6 +30,7 @@
     "react-hook-form": "^7.77.0",
     "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.16.0",
+    "read-excel-file": "9.3.10",
     "recharts": "^3.8.1",
     "styled-components": "^6.4.2",
     "tailwind-merge": "^3.7.0"
