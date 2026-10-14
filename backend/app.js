@@ -39,8 +39,6 @@ import loginAdminRoutes from "./src/routes/loginAdmin.js";
 import descargasPanelRoutes from "./src/routes/descargasPanel.js";
 import logoutAdminRoutes from "./src/routes/logoutAdmin.js";
 import perfilRoutes from "./src/routes/perfil.js";
-import erroresRoutes from "./src/routes/errores.js";
-import { registrarError } from "./src/utils/registroErrores.js";
 
 //cosas
 const app = express();
@@ -69,28 +67,6 @@ app.use(
 );
 
 app.use(limiter);
-
-/*
- * Las respuestas 500 quedan anotadas (ver utils/registroErrores.js).
- *
- * La mayoría de los controladores atrapan su propio error, lo escriben en la
- * consola de Render —que se borra sola en horas— y contestan 500. Así al
- * menos queda constancia de QUÉ ruta falló y cuántas veces, para ir a buscar
- * el detalle. Los ids de la dirección se quitan para que "el pedido 1" y "el
- * pedido 2" cuenten como el mismo error.
- */
-app.use((req, res, next) => {
-    res.on("finish", () => {
-        if (res.statusCode < 500 || res.locals.errorAnotado) return;
-        const ruta = req.originalUrl.split("?")[0].replace(/[a-f0-9]{24}/gi, ":id");
-        registrarError({
-            origen: "servidor",
-            mensaje: `Respondió ${res.statusCode} en ${req.method} ${ruta}`,
-            donde: `${req.method} ${ruta}`,
-        });
-    });
-    next();
-});
 
 app.use(cookieParser());
 
@@ -142,8 +118,6 @@ app.use("/api/descargas", descargasPanelRoutes);
 app.use("/api/logoutAdmin", logoutAdminRoutes);
 // Foto de perfil del personal conectado (admin o empleado).
 app.use("/api/perfil", perfilRoutes);
-// Lo que falla en la web, la app y el servidor. Ver utils/registroErrores.js.
-app.use("/api/errores", erroresRoutes);
 
 //enpoint
 
@@ -158,7 +132,8 @@ app.use("/api/errores", erroresRoutes);
 app.use((err, req, res, next) => {
     if (res.headersSent) return next(err);
 
-    console.log("error no controlado: " + (err?.message || err));
+    // Queda en la consola de Render, con su pila, para ir a buscar el detalle.
+    console.log("error no controlado: " + (err?.stack || err?.message || err));
 
     // Archivo más pesado que el límite de multer.
     if (err?.code === "LIMIT_FILE_SIZE") {
@@ -176,14 +151,6 @@ app.use((err, req, res, next) => {
         });
     }
 
-    // Este sí trae el error de verdad: se anota completo, con su pila.
-    res.locals.errorAnotado = true;
-    registrarError({
-        origen: "servidor",
-        mensaje: String(err?.message || err || "Error sin mensaje"),
-        pila: String(err?.stack || ""),
-        donde: `${req.method} ${req.originalUrl.split("?")[0].replace(/[a-f0-9]{24}/gi, ":id")}`,
-    });
     return res.status(500).json({ message: "Ocurrió un error inesperado en el servidor" });
 });
 

@@ -602,7 +602,7 @@ const EN = {
   'Ya puedes seguir comprando.': 'You can keep shopping.',
   'Revisa tu internet. Tu carrito queda guardado.': 'Check your internet. Your cart is saved.',
   'Algo se nos rompió acá': 'Something broke on our end',
-  'No fue tu culpa. Esta pantalla no cargó bien; ya quedó anotado. Puedes volver a intentarlo o regresar a la tienda.': 'It wasn\'t your fault. This screen didn\'t load properly; we\'ve logged it. You can try again or go back to the store.',
+  'No fue tu culpa. Esta pantalla no cargó bien. Puedes volver a intentarlo o regresar a la tienda.': 'It wasn\'t your fault. This screen didn\'t load properly. You can try again or go back to the store.',
   'Volver a intentar': 'Try again',
 
   // ── Menú de Mi Cuenta ──
