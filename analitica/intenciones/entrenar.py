@@ -39,10 +39,31 @@ from .rasgos import rasgos
 
 DESTINO = Path(__file__).resolve().parents[2] / "backend" / "src" / "datos"
 DECIMALES = 3
+CUANTOS_RASGOS = 4000
+
+
+def elegir_rasgos(frases: list[str], cuantos: int = CUANTOS_RASGOS) -> list[str]:
+    """
+    Los rasgos que usa el modelo: los que aparecen en al menos 2 frases, los
+    más frecuentes primero y, entre los que empatan, por orden alfabético.
+
+    Antes los elegía `max_features` de scikit-learn, que desempata con un
+    ordenamiento de numpy que no siempre es igual: 629 rasgos empataban justo
+    en el corte, y en el Linux de GitHub entraban otros que en Windows. El
+    modelo no salía igual en dos máquinas y la prueba "al día" fallaba allá.
+    """
+    frecuencia, en_frases = Counter(), Counter()
+    for frase in frases:
+        r = rasgos(frase)
+        frecuencia.update(r)
+        en_frases.update(set(r))
+    candidatos = [r for r in frecuencia if en_frases[r] >= 2]
+    candidatos.sort(key=lambda r: (-frecuencia[r], r))
+    return sorted(candidatos[:cuantos])
 
 
 def entrenar(frases: list[str], intenciones: list[str]):
-    vectorizador = TfidfVectorizer(analyzer=rasgos, sublinear_tf=True, min_df=2, max_features=4000)
+    vectorizador = TfidfVectorizer(analyzer=rasgos, sublinear_tf=True, vocabulary=elegir_rasgos(frases))
     x = vectorizador.fit_transform(frases)
     modelo = LogisticRegression(C=8.0, max_iter=4000, class_weight="balanced")
     modelo.fit(x, intenciones)

@@ -37,6 +37,16 @@ def test_los_ejemplos_salen_siempre_iguales_y_alcanzan():
     assert not [f for lista in PRUEBA.values() for f in lista if f in vistas]
 
 
+def test_los_rasgos_se_eligen_igual_en_cualquier_maquina():
+    # Empates de frecuencia: se desempata por orden alfabético, no por cómo ordene numpy.
+    # "uno" y "dos" no comparten letras: todos sus rasgos aparecen igual de seguido.
+    frases = ["uno", "uno", "dos", "dos"]
+    assert entrenar.elegir_rasgos(frases, cuantos=2) == ["c: do", "c: dos"]
+    # Lo más frecuente gana aunque vaya después en el alfabeto.
+    assert entrenar.elegir_rasgos(["uno", "uno", "uno", "dos", "dos"], cuantos=1) == ["c: un"]
+    assert entrenar.elegir_rasgos(frases) == entrenar.elegir_rasgos(list(reversed(frases)))
+
+
 @pytest.fixture(scope="module")
 def resultado():
     return entrenar.principal(exportar_archivos=False)
@@ -67,5 +77,9 @@ def test_el_modelo_del_servidor_esta_al_dia(resultado):
     for frase in [f for lista in PRUEBA.values() for f in lista]:
         a = entrenar.predecir(del_servidor, frase)
         b = entrenar.predecir(nuevo, frase)
-        assert max(a, key=a.get) == max(b, key=b.get), frase
         assert max(abs(a[c] - b[c]) for c in a) < 0.02, frase
+        # La misma intención cuando hay una clara; en las dudosas (dos casi
+        # empatadas) los decimales de otra máquina pueden voltearlas.
+        primera, segunda = sorted(a.values(), reverse=True)[:2]
+        if primera - segunda > 0.05:
+            assert max(a, key=a.get) == max(b, key=b.get), frase
