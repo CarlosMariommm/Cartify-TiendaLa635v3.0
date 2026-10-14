@@ -103,6 +103,7 @@ export const TEMAS_AYUDA = [
       'Para marcarlo entregado hace falta el código de 4 dígitos que el cliente ve en su pedido: así se sabe que llegó a la persona correcta.',
       'Busque por el nombre del cliente o por el número del pedido, el que empieza con #.',
       'En los pedidos de impresiones, “Imprimir” abre el archivo que mandó el cliente, listo para la impresora.',
+      '“Comprobante” baja el PDF del pedido con los datos de la tienda, el detalle y los totales, para imprimirlo o mandárselo al cliente. Los cancelados no tienen.',
       'Para cancelar un pedido, toque “Cancelar” y escriba el motivo (o elija uno de los rápidos). Al cliente le llega tal cual. Los productos vuelven al inventario y, si pagó con su saldo o canjeó puntos, se le devuelven solos.',
     ],
     consejos: [
