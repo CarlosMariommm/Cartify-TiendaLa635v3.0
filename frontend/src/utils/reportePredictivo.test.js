@@ -106,6 +106,12 @@ describe('el PDF', () => {
     }
   });
 
+  it('al lado de cada proveedor dice por dónde se le pide, si se sabe', () => {
+    const conCanal = { ...PRONOSTICO, proveedores: [{ ...PRONOSTICO.proveedores[0], pedido: { canal: 'app', app: 'BEES' } }] };
+    expect(construirReportePredictivo(conCanal, TIENDA).output()).toContain('se le pide por BEES');
+    expect(construirReportePredictivo(PRONOSTICO, TIENDA).output()).not.toContain('se le pide por');
+  });
+
   it('sin compras ni productos por agotarse también sale', () => {
     const tranquilo = { ...PRONOSTICO, proveedores: [], productos: [producto({})], precision: { probado: false, motivo: 'Hacen falta al menos 28 días.' } };
     expect(() => construirReportePredictivo(tranquilo, TIENDA)).not.toThrow();

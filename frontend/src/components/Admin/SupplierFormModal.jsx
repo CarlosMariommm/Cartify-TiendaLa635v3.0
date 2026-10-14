@@ -8,6 +8,18 @@ import { Plus, Loader2 } from 'lucide-react';
 import { modalTransition } from '../../utils/motion';
 import { brandService } from '../../api/brandService';
 
+/*
+ * Por dónde se le hacen los pedidos a este proveedor: el botón "Pedir" de la
+ * compra sugerida (pantalla Pronóstico) sale por aquí. Ver utils/pedidoProveedor.js.
+ */
+const CANALES_DE_PEDIDO = [
+  ['', 'Sin definir'],
+  ['whatsapp', 'WhatsApp'],
+  ['app', 'App o sitio web (BEES…)'],
+  ['llamada', 'Llamada'],
+];
+const SIN_CANAL = { canal: '', whatsapp: '', app: '', enlace: '' };
+
 const SupplierFormModal = ({ isOpen, onClose, supplier, onSave, brands = [], onMarcaCreada }) => {
   const { register, handleSubmit, reset, watch, setValue, getValues } = useForm();
 
@@ -29,6 +41,7 @@ const SupplierFormModal = ({ isOpen, onClose, supplier, onSave, brands = [], onM
   
   const isEditing = !!supplier;
   const watchIsActive = watch('isActive');
+  const canalDePedido = watch('pedidos.canal') || '';
 
   useEffect(() => {
     if (isOpen) {
@@ -40,7 +53,8 @@ const SupplierFormModal = ({ isOpen, onClose, supplier, onSave, brands = [], onM
           // creditDays queda fuera a propósito: si el formulario lo enviara,
           // sobrescribiría el plazo configurado en el estado de cuenta.
           brandIds: supplier.brandIds || [],
-          isActive: supplier.isActive !== false 
+          isActive: supplier.isActive !== false,
+          pedidos: { ...SIN_CANAL, ...(supplier.pedidos || {}) },
         });
       } else {
         reset({ 
@@ -48,7 +62,8 @@ const SupplierFormModal = ({ isOpen, onClose, supplier, onSave, brands = [], onM
           phoneNumber: '',
           email: '',
           brandIds: [],
-          isActive: true 
+          isActive: true,
+          pedidos: { ...SIN_CANAL },
         });
       }
     }
@@ -116,7 +131,7 @@ const SupplierFormModal = ({ isOpen, onClose, supplier, onSave, brands = [], onM
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={modalTransition}
-        className="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col overflow-hidden relative z-10"
+        className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden relative z-10"
       >
         <div className="bg-[#00283D] text-white p-6">
           <h2 className="text-2xl font-bold text-center">
@@ -124,7 +139,7 @@ const SupplierFormModal = ({ isOpen, onClose, supplier, onSave, brands = [], onM
           </h2>
         </div>
 
-        <div className="p-6 bg-[#F1F6F9] flex-1 flex flex-col">
+        <div className="p-6 bg-[#F1F6F9] flex-1 flex flex-col overflow-y-auto">
           <form id="supplier-form" onSubmit={handleSubmit(onSubmit, onError)} className="space-y-6 flex-1">
             
             <div className="grid grid-cols-2 gap-4">
@@ -170,6 +185,71 @@ const SupplierFormModal = ({ isOpen, onClose, supplier, onSave, brands = [], onM
                   placeholder="contacto@proveedor.com"
                 />
               </div>
+            </div>
+
+            {/* Por dónde se le piden los pedidos: lo usa el botón "Pedir" del pronóstico */}
+            <div>
+              <p className="block text-sm font-bold text-gray-700 mb-1">Cómo se le hacen los pedidos</p>
+              <p className="text-xs text-gray-500 mb-3">
+                Desde la compra sugerida del pronóstico, el pedido sale por aquí con un toque.
+              </p>
+              <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Cómo se le hacen los pedidos">
+                {CANALES_DE_PEDIDO.map(([valor, texto]) => (
+                  <label
+                    key={valor || 'ninguno'}
+                    className={`cursor-pointer px-4 py-1.5 rounded-full text-sm font-medium border ${canalDePedido === valor ? 'bg-[#00283D] text-white border-[#00283D]' : 'bg-white text-gray-600 border-gray-300'}`}
+                  >
+                    <input type="radio" value={valor} {...register('pedidos.canal')} className="sr-only" />
+                    {texto}
+                  </label>
+                ))}
+              </div>
+
+              {canalDePedido === 'whatsapp' && (
+                <div className="mt-3">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={LARGO_TELEFONO}
+                    {...register('pedidos.whatsapp')}
+                    onKeyDown={bloquearNoDigitos}
+                    onInput={(e) => { e.target.value = formatearTelefono(e.target.value); }}
+                    aria-label="Número de WhatsApp para pedidos"
+                    className="w-full sm:w-1/2 bg-white border border-gray-300 text-gray-900 text-sm rounded-full px-4 py-2 focus:outline-none focus:border-[#00283D]"
+                    placeholder="7777-7777"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Si lo deja vacío, se usa el teléfono del proveedor. El mensaje con la lista va ya escrito.</p>
+                </div>
+              )}
+
+              {canalDePedido === 'app' && (
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    maxLength={30}
+                    {...register('pedidos.app')}
+                    aria-label="Nombre de la app"
+                    className="bg-white border border-gray-300 text-gray-900 text-sm rounded-full px-4 py-2 focus:outline-none focus:border-[#00283D]"
+                    placeholder="BEES"
+                  />
+                  <input
+                    type="url"
+                    {...register('pedidos.enlace', {
+                      validate: (v, todo) => todo?.pedidos?.canal !== 'app' || /^https?:\/\/\S+\.\S+/.test(v || '') || 'Escriba el enlace de la app o sitio donde se le pide (https://…)',
+                    })}
+                    aria-label="Enlace de la app o sitio"
+                    className="bg-white border border-gray-300 text-gray-900 text-sm rounded-full px-4 py-2 focus:outline-none focus:border-[#00283D]"
+                    placeholder="https://…"
+                  />
+                  <p className="text-xs text-gray-500 sm:col-span-2">
+                    Apps como BEES no permiten recibir pedidos de otro sistema: el botón abre la app y deja la lista copiada para pegarla en el carrito.
+                  </p>
+                </div>
+              )}
+
+              {canalDePedido === 'llamada' && (
+                <p className="text-xs text-gray-500 mt-3">Se marca el teléfono del proveedor, con la lista copiada para tenerla a mano.</p>
+              )}
             </div>
 
             <div className="pt-2">

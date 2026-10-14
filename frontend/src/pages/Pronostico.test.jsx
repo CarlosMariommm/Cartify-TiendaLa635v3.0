@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import Pronostico from './Pronostico';
 import { dashboardService } from '../api/dashboardService';
 import { descargarReportePredictivo } from '../utils/descargarPredictivo';
+import toast from 'react-hot-toast';
 
 /*
  * La pantalla Pronóstico del panel. El servidor (y el servicio de análisis
@@ -13,7 +14,7 @@ import { descargarReportePredictivo } from '../utils/descargarPredictivo';
 
 vi.mock('../api/dashboardService', () => ({ dashboardService: { getPronostico: vi.fn() } }));
 vi.mock('../utils/descargarPredictivo', () => ({ descargarReportePredictivo: vi.fn() }));
-vi.mock('react-hot-toast', () => ({ default: { error: vi.fn() } }));
+vi.mock('react-hot-toast', () => ({ default: { error: vi.fn(), success: vi.fn() } }));
 const AJUSTES = { nombreLinea1: 'Tienda', nombreLinea2: 'la 635' };
 vi.mock('../context/AjustesContext', () => ({ useAjustesCtx: () => ({ ajustes: AJUSTES }) }));
 vi.mock('../context/ThemeContext', () => ({
@@ -130,5 +131,54 @@ describe('la demostración en la pantalla Pronóstico', () => {
     abrir();
     await screen.findByText('$1,200.00');
     expect(screen.queryByRole('tab', { name: 'Demostración' })).toBeNull();
+  });
+});
+
+describe('pedirle al proveedor desde la compra sugerida', () => {
+  const conCanal = (pedido, extra = {}) => ({ ...PRONOSTICO, ...extra, proveedores: [{ ...PRONOSTICO.proveedores[0], pedido }] });
+  afterEach(() => { cleanup(); vi.clearAllMocks(); vi.unstubAllGlobals(); });
+
+  it('por WhatsApp: abre el chat con el mensaje y la lista ya escritos', async () => {
+    dashboardService.getPronostico.mockResolvedValue(conCanal({ canal: 'whatsapp', whatsapp: '70001111', app: '', enlace: '', telefono: '' }));
+    abrir();
+    const boton = await screen.findByRole('link', { name: /Pedir por WhatsApp/ });
+    const enlace = new URL(boton.getAttribute('href'));
+    expect(enlace.origin + enlace.pathname).toBe('https://wa.me/50370001111');
+    expect(enlace.searchParams.get('text')).toBe('Buenos días. Le escribimos de Tienda la 635. Quisiéramos hacerle este pedido:\n• Lays Barbacoa: 12\nMuchas gracias.');
+    expect(boton.getAttribute('target')).toBe('_blank');
+  });
+
+  it('en su app (BEES): la abre y deja la lista copiada para pegarla', async () => {
+    const writeText = vi.fn().mockResolvedValue();
+    vi.stubGlobal('navigator', { ...navigator, clipboard: { writeText } });
+    dashboardService.getPronostico.mockResolvedValue(conCanal({ canal: 'app', whatsapp: '', app: 'BEES', enlace: 'https://www.bees.com/', telefono: '' }));
+    abrir();
+    const boton = await screen.findByRole('link', { name: /Pedir en BEES/ });
+    expect(boton.getAttribute('href')).toBe('https://www.bees.com/');
+    fireEvent.click(boton);
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Lista copiada: péguela en el pedido.'));
+    expect(writeText).toHaveBeenCalledWith('• Lays Barbacoa: 12');
+  });
+
+  it('por llamada: marca su número, en la misma pestaña', async () => {
+    dashboardService.getPronostico.mockResolvedValue(conCanal({ canal: 'llamada', whatsapp: '', app: '', enlace: '', telefono: '2222-3333' }));
+    abrir();
+    const boton = await screen.findByRole('link', { name: /Llamar al 2222-3333/ });
+    expect(boton.getAttribute('href')).toBe('tel:22223333');
+    expect(boton.getAttribute('target')).toBeNull();
+  });
+
+  it('sin canal, lleva a Proveedores; en la demostración, nada', async () => {
+    dashboardService.getPronostico.mockResolvedValue(conCanal(null));
+    abrir();
+    expect((await screen.findByRole('link', { name: 'Indicar cómo se le pide' })).getAttribute('href')).toBe('/proveedores');
+    cleanup();
+
+    dashboardService.getPronostico.mockImplementation(async ({ demo }) => conCanal(null, { demoDisponible: true, ...(demo ? { demo: true } : {}) }));
+    abrir();
+    fireEvent.click(await screen.findByRole('tab', { name: 'Demostración' }));
+    await screen.findByText(/Está viendo una demostración/);
+    await screen.findByText('Distribuidora La Constancia');
+    expect(screen.queryByRole('link', { name: 'Indicar cómo se le pide' })).toBeNull();
   });
 });
