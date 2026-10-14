@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { cantidad, construirReportePredictivo, rango, resumenDelPronostico } from './reportePredictivo';
+import { cantidad, construirReportePredictivo, faltanCuatroSemanas, pronosticoParaMostrar, rango, resumenDelPronostico } from './reportePredictivo';
 import { dinero, fechaLarga, pasoRedondo, rangoDeFechas } from './reportesPdf';
 
 /*
@@ -125,5 +125,37 @@ describe('el PDF de la demostración', () => {
     expect(contenido).toContain('DEMOSTRACI');
     expect(contenido).toContain('ventas inventadas');
     expect(construirReportePredictivo(PRONOSTICO, TIENDA).output()).not.toContain('ventas inventadas');
+  });
+});
+
+describe('mientras la tienda real no junta 4 semanas', () => {
+  const real = (periodoAnterior) => ({ ...PRONOSTICO, demoDisponible: true, tienda: { ...PRONOSTICO.tienda, periodo_anterior: periodoAnterior } });
+  const DEMO = { ...PRONOSTICO, demo: true, demoDisponible: true };
+
+  it('sabe cuándo faltan: sin las 4 semanas anteriores o sin ventas', () => {
+    expect(faltanCuatroSemanas(real(null))).toBe(true);
+    expect(faltanCuatroSemanas({ vacio: true })).toBe(true);
+    expect(faltanCuatroSemanas(real(1120))).toBe(false);
+  });
+
+  it('enseña la demostración y lo marca; con 4 semanas, la tienda real', async () => {
+    const pedidos = [];
+    const pedir = (sinHistoria) => async (opciones) => {
+      pedidos.push(opciones);
+      return opciones.demo ? DEMO : real(sinHistoria ? null : 1120);
+    };
+    const corta = await pronosticoParaMostrar(pedir(true));
+    expect(corta.demo).toBe(true);
+    expect(corta.porFaltaDeHistoria).toBe(true);
+    expect(pedidos).toEqual([{ forzar: false }, { forzar: false, demo: true }]);
+
+    const completa = await pronosticoParaMostrar(pedir(false), { forzar: true });
+    expect(completa.demo).toBeUndefined();
+    expect(completa.porFaltaDeHistoria).toBeUndefined();
+  });
+
+  it('sin demostración en el servidor, se queda con la tienda real', async () => {
+    const sola = await pronosticoParaMostrar(async () => ({ ...real(null), demoDisponible: false }));
+    expect(sola.demo).toBeUndefined();
   });
 });

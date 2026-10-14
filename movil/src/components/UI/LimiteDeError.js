@@ -19,7 +19,6 @@ import { useTema } from '../../context/TemaContext';
 import Mascota from '../Tiqui/Mascota';
 import Boton from './Boton';
 import { useIdioma } from '../../context/IdiomaContext';
-import { reportarError } from '../../utils/reportarError';
 
 const PantallaDeError = ({ alReintentar }) => {
   const { t } = useIdioma();
@@ -52,11 +51,6 @@ class LimiteDeError extends Component {
   componentDidCatch(error, info) {
     // Para quien depura con Metro abierto; al cliente no le sirve el detalle.
     console.error('La app se rompió dibujando:', error, info?.componentStack);
-    // Y queda anotado para el panel (Sistema → Errores), con la pieza que se rompió.
-    reportarError(error, {
-      donde: 'pantalla',
-      extra: info?.componentStack ? `Componentes:${info.componentStack.slice(0, 1500)}` : '',
-    });
   }
 
   render() {
