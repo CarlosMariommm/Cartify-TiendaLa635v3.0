@@ -52,6 +52,17 @@ export const navegarA = (nombre, params) => {
   }
 };
 
+/*
+ * La ficha de un producto, como su propia página (pages/Producto.js), igual
+ * que en la web. Va por id: la pila distingue una página de otra por él
+ * (RootNavigator, getId), así que abrir un recomendado apila su página
+ * encima y tocar dos veces el mismo no abre dos.
+ */
+export const abrirProducto = (producto) => {
+  const id = producto?.id ?? producto;
+  if (id != null) navegarA('Producto', { id: String(id) });
+};
+
 // A dónde cae quien acaba de autenticarse: al apartado pendiente si lo había,
 // o a la tienda. `Carrito` es un caso aparte porque no es un apartado de la
 // barra de abajo, sino una pantalla suelta encima de ella.

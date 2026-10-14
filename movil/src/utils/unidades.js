@@ -25,6 +25,8 @@ import { tAhora } from './idioma';
 export const UNIDADES = [
   {
     clave: 'unidad',
+    // Cómo se vende, dicho para el cliente ("Se vende: Por unidad"), igual que la web.
+    nombre: 'Por unidad',
     existencia: 'Unidades',
     corto: 'u',
     // Media botella no se vende; media libra de queso, todos los días.
@@ -33,6 +35,7 @@ export const UNIDADES = [
   },
   {
     clave: 'libra',
+    nombre: 'Por libra',
     existencia: 'Libras',
     corto: 'lb',
     fraccionable: true,

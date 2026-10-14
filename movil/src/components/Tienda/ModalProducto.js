@@ -2,6 +2,11 @@
  * ============================================================
  * DETALLE DE PRODUCTO
  * ============================================================
+ * Hoy solo la abre Tiqui (Asistente.js, "muéstrame las manzanas"): ahí la
+ * persona está hablando con ella y cambiar de pantalla le cortaría la charla.
+ * En el resto de la tienda un producto es su propia página, como en la web
+ * (pages/Producto.js).
+ *
  * La foto en grande, el precio y de ahí al carrito. Es la versión corta de
  * `ProductDetailModal.jsx`: se dejaron fuera las reseñas y "Del mismo
  * pasillo", que no entran en una hoja. Sí está "Quien compra esto también

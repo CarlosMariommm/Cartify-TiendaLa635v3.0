@@ -636,7 +636,7 @@ const crearEstilos = (COLORES) => StyleSheet.create({
     marginBottom: 12,
   },
   // Píldora completa, a juego con el resto de botones principales de la
-  // app (Checkout, ModalPromo...) — el Boton base trae 8 de esquina, pensado
+  // app (Checkout, ModalProducto...) — el Boton base trae 8 de esquina, pensado
   // para otros usos.
   botonRedondo: {
     borderRadius: 28,
