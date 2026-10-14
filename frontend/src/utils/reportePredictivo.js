@@ -52,6 +52,30 @@ const contar = (n, singular, plural) => `${n} ${n === 1 ? singular : plural}`;
 
 const semanasDe = (datos) => Math.round((datos.tienda?.dias?.length || 28) / 7);
 
+/*
+ * ¿La tienda real todavía no junta 4 semanas de ventas? El servicio solo
+ * llena "las 4 semanas anteriores" (`periodo_anterior`) desde 28 días de
+ * historial; sin ventas (`vacio`) tampoco hay nada que mostrar.
+ *
+ * Mientras tanto el panel abre el pronóstico con la DEMOSTRACIÓN (si el
+ * servidor la tiene): así quien entra ve lo que hace, sin meter ventas
+ * inventadas en la base real. Ver pages/Pronostico.jsx y DescargaPredictiva.
+ */
+export const faltanCuatroSemanas = (datos) =>
+  !datos || Boolean(datos.vacio) || datos.tienda?.periodo_anterior == null;
+
+/*
+ * El pronóstico que conviene ENSEÑAR: el de la tienda real si ya tiene sus
+ * 4 semanas; si no, y hay demostración, el de la demostración, marcado con
+ * `porFaltaDeHistoria` para que la pantalla lo diga.
+ */
+export const pronosticoParaMostrar = async (pedir, { forzar = false } = {}) => {
+  const real = await pedir({ forzar });
+  if (!real?.demoDisponible || !faltanCuatroSemanas(real)) return real;
+  const demo = await pedir({ forzar, demo: true });
+  return { ...demo, porFaltaDeHistoria: true };
+};
+
 // Los productos que no llegan al final del periodo: lo agotado primero.
 const queSeAgotan = (datos) => datos.productos.filter((p) => p.se_acaba?.agotado || p.se_acaba?.probable);
 

@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { dashboardService } from '../../api/dashboardService';
 import { useAjustesCtx } from '../../context/AjustesContext';
 import { descargarReportePredictivo } from '../../utils/descargarPredictivo';
+import { pronosticoParaMostrar } from '../../utils/reportePredictivo';
 
 /*
  * ============================================================
@@ -25,7 +26,9 @@ const DescargaPredictiva = ({ alTerminar }) => {
   const descargar = async () => {
     setCalculando(true);
     try {
-      const datos = await dashboardService.getPronostico();
+      // Con la misma regla que la pantalla Pronóstico: si la tienda real todavía
+      // no junta 4 semanas, sale el de la demostración (el PDF lo dice).
+      const datos = await pronosticoParaMostrar(dashboardService.getPronostico);
       if (datos?.vacio) {
         toast('Todavía no hay ventas de las que aprender: el reporte sale con la primera venta.');
         return;

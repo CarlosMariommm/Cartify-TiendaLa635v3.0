@@ -14,7 +14,11 @@ import toast from 'react-hot-toast';
 
 vi.mock('../../api/dashboardService', () => ({ dashboardService: { getPronostico: vi.fn() } }));
 vi.mock('../../utils/descargar', () => ({ descargarArchivo: vi.fn() }));
-vi.mock('../../utils/reportePredictivo', () => ({ construirReportePredictivo: vi.fn() }));
+// Solo el PDF es de mentira: la regla de las 4 semanas (pronosticoParaMostrar) es la de verdad.
+vi.mock('../../utils/reportePredictivo', async (importOriginal) => ({
+  ...(await importOriginal()),
+  construirReportePredictivo: vi.fn(),
+}));
 vi.mock('react-hot-toast', () => {
   const toast = vi.fn();
   toast.error = vi.fn();
@@ -44,6 +48,16 @@ describe('descargar el reporte predictivo', () => {
     expect(tienda).toMatchObject({ nombre: 'Tienda la 635', telefono: '2222-0635', nit: '0614', logo: null });
     expect(descargarArchivo.mock.calls[0][1]).toMatch(/^reporte-predictivo-la635-\d{4}-\d{2}-\d{2}\.pdf$/);
     expect(alTerminar).toHaveBeenCalled();
+  });
+
+  it('si la tienda real no junta 4 semanas, descarga el de la demostración', async () => {
+    dashboardService.getPronostico.mockImplementation(async ({ demo } = {}) =>
+      demo ? { demo: true, productos: [], tienda: { periodo_anterior: 900 } } : { demoDisponible: true, productos: [], tienda: { periodo_anterior: null } });
+    render(<DescargaPredictiva />);
+    fireEvent.click(screen.getByRole('button'));
+    await waitFor(() => expect(descargarArchivo).toHaveBeenCalled());
+    expect(dashboardService.getPronostico).toHaveBeenLastCalledWith({ forzar: false, demo: true });
+    expect(descargarArchivo.mock.calls[0][1]).toMatch(/^reporte-predictivo-demostracion-la635-/);
   });
 
   it('sin ventas todavía, avisa y no descarga nada', async () => {

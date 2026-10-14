@@ -126,6 +126,22 @@ describe('la demostración en la pantalla Pronóstico', () => {
     await waitFor(() => expect(descargarReportePredictivo).toHaveBeenCalledWith(expect.objectContaining({ demo: true }), AJUSTES));
   });
 
+  it('si la tienda real no junta 4 semanas, abre con la demostración y dice por qué', async () => {
+    const corta = { ...PRONOSTICO, demoDisponible: true, tienda: { ...PRONOSTICO.tienda, periodo: { esperado: 90, bajo: 50, alto: 130 }, periodo_anterior: null } };
+    dashboardService.getPronostico.mockImplementation(async ({ demo } = {}) => (demo ? { ...PRONOSTICO, demoDisponible: true, demo: true } : corta));
+    abrir();
+    expect(await screen.findByText('$1,200.00')).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Demostración' }).getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByText(/todavía no junta 4 semanas de ventas/)).toBeTruthy();
+    // La real y la demostración, una vez cada una: nada de pedidos de más.
+    expect(dashboardService.getPronostico).toHaveBeenCalledTimes(2);
+
+    // La tienda real sigue a un toque.
+    fireEvent.click(screen.getByRole('tab', { name: 'Tienda real' }));
+    expect(await screen.findByText('$90.00')).toBeTruthy();
+    expect(dashboardService.getPronostico).toHaveBeenLastCalledWith({ forzar: false, demo: false });
+  });
+
   it('sin demostración en el servidor, no se ofrece', async () => {
     dashboardService.getPronostico.mockResolvedValue({ ...PRONOSTICO, demoDisponible: false });
     abrir();
