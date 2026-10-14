@@ -6,8 +6,8 @@
  * tienda?" (pages/personal/LoginPersonal.js), y la app deja de ser la tienda:
  * pasa a ser su herramienta de trabajo (pages/personal/ModoPersonal.js).
  *
- *   - El administrador ve a Tiqui del panel (le pregunta cómo va el negocio y
- *     le pide cambios) y el Reparto.
+ *   - El administrador ve el Reparto y el panel web (ahí está Tiqui del
+ *     panel, para preguntarle cómo va el negocio y pedirle cambios).
  *   - El empleado ve solo el Reparto.
  *
  * Es lo que antes era "Estoy trabajando" en Mi cuenta de la web, que mezclaba

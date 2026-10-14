@@ -24,6 +24,7 @@ import { useAjustesCtx } from '../../context/AjustesContext';
 import { enlaceWhatsApp } from '../../utils/tienda';
 import { useIdioma } from '../../hooks/useIdioma';
 import { foto, ANCHO } from '../../utils/fotos';
+import { formatoCodigoTarjeta, LARGO_CODIGO_TARJETA } from '../../utils/tarjetaRegalo';
 
 // Productos por página en el resumen del pedido confirmado.
 const POR_PAGINA = 4;
@@ -1727,7 +1728,12 @@ const ShoppingCart = ({
                   <form onSubmit={onCanjearEnCheckout} style={{ display: 'flex', gap: 8, marginTop: 12 }}>
                     <input
                       value={codigoTarjeta}
-                      onChange={(e) => setCodigoTarjeta(e.target.value.toUpperCase())}
+                      // Los guiones se ponen solos (ver utils/tarjetaRegalo.js).
+                      onChange={(e) => setCodigoTarjeta(formatoCodigoTarjeta(e.target.value))}
+                      maxLength={LARGO_CODIGO_TARJETA}
+                      autoCapitalize="characters"
+                      autoComplete="off"
+                      spellCheck={false}
                       placeholder={t('¿Tienes una tarjeta de regalo? 635-XXXX-XXXX')}
                       aria-label={t('Código de tarjeta de regalo')}
                       style={{
