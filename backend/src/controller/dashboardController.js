@@ -2,7 +2,7 @@ import orderModel from "../models/order.js";
 import productModel from "../models/product.js";
 import supplierMovementModel from "../models/supplierMovement.js";
 import clientModel from "../models/client.js";
-import { conCanalesDePedido, hayDemostracion, obtenerPronostico } from "../utils/pronostico.js";
+import { conCanalesDePedido, hayDemostracion, pronosticoSinEsperarDeMas } from "../utils/pronostico.js";
 
 /*
  * Dashboard del admin — arma TODO el resumen en una sola llamada.
@@ -413,11 +413,20 @@ const MENSAJES_PRONOSTICO = {
  * `?demo=1`: con la demostración (ventas inventadas de varios meses, para
  * mostrar el pronóstico sin tocar la tienda real; ver utils/pronostico.js).
  * `demoDisponible` le dice al panel si puede ofrecer ese modo.
+ *
+ * Si el cálculo pasa de 20 segundos (Render gratis, con historia larga), se
+ * contesta 202 `{ calculando: true }` y el cálculo SIGUE: el panel vuelve a
+ * preguntar en unos segundos y, cuando termina, lo recibe guardado. Antes se
+ * esperaba minuto y medio, se cortaba y el cálculo se perdía.
  */
+const ESPERA_DEL_PANEL_MS = 20 * 1000;
+
 dashboardController.getPronostico = async (req, res) => {
   try {
     const demo = req.query.demo === "1";
-    const datos = await conCanalesDePedido(await obtenerPronostico({ forzar: req.query.forzar === "1", demo }), { demo });
+    const calculado = await pronosticoSinEsperarDeMas({ forzar: req.query.forzar === "1", demo }, ESPERA_DEL_PANEL_MS);
+    if (!calculado) return res.status(202).json({ calculando: true, demoDisponible: hayDemostracion() });
+    const datos = await conCanalesDePedido(calculado, { demo });
     return res.status(200).json({ ...datos, demoDisponible: hayDemostracion() });
   } catch (error) {
     const [estado, mensaje] = MENSAJES_PRONOSTICO[error?.codigo] || [502, "No se pudo calcular el pronóstico."];

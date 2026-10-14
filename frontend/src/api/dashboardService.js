@@ -23,11 +23,28 @@ export const dashboardService = {
    * cerca de un minuto, y el servidor de la tienda lo espera hasta 90 s.
    */
   // `demo`: con la demostración (ventas inventadas de varios meses), no con la tienda real.
-  getPronostico: async ({ forzar = false, demo = false } = {}) => {
-    const response = await api.get('/dashboard/pronostico', {
-      params: { ...(forzar ? { forzar: 1 } : {}), ...(demo ? { demo: 1 } : {}) },
-      timeout: 120000,
-    });
-    return response.data;
+  /*
+   * Si el cálculo tarda (Render gratis con historia larga), el servidor
+   * contesta "calculando" y lo sigue haciendo: aquí se vuelve a preguntar
+   * cada pocos segundos hasta que esté. Solo la primera pregunta fuerza a
+   * recalcular; las demás esperan ESE cálculo, no empiezan otro.
+   */
+  getPronostico: async ({ forzar = false, demo = false } = {}, { cada = 4000, maximo = 6 * 60 * 1000 } = {}) => {
+    const inicio = Date.now();
+    let conForzar = forzar;
+    for (;;) {
+      const response = await api.get('/dashboard/pronostico', {
+        params: { ...(conForzar ? { forzar: 1 } : {}), ...(demo ? { demo: 1 } : {}) },
+        timeout: 120000,
+      });
+      if (!response.data?.calculando) return response.data;
+      conForzar = false;
+      if (Date.now() - inicio > maximo) {
+        throw Object.assign(new Error('El pronóstico tarda demasiado'), {
+          response: { data: { message: 'El pronóstico está tardando más de lo normal. Intente de nuevo en unos minutos.' } },
+        });
+      }
+      await new Promise((listo) => setTimeout(listo, cada));
+    }
   },
 };

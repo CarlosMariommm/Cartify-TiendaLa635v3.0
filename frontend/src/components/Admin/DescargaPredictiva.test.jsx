@@ -42,7 +42,7 @@ describe('descargar el reporte predictivo', () => {
     render(<DescargaPredictiva alTerminar={alTerminar} />);
     fireEvent.click(screen.getByRole('button', { name: 'Descargar reporte predictivo' }));
 
-    expect(await screen.findByRole('status')).toBeTruthy(); // "puede tardar hasta un minuto"
+    expect(await screen.findByRole('status')).toBeTruthy(); // "puede tardar un par de minutos"
     await waitFor(() => expect(descargarArchivo).toHaveBeenCalled());
     const [, tienda] = construirReportePredictivo.mock.calls[0];
     expect(tienda).toMatchObject({ nombre: 'Tienda la 635', telefono: '2222-0635', nit: '0614', logo: null });

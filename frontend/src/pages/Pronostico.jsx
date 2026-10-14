@@ -268,7 +268,7 @@ const Pronostico = () => {
       {cargando && !datos ? (
         <div className="py-16 text-center" role="status">
           <p className="font-semibold text-gray-800">Calculando el pronóstico…</p>
-          <p className="text-sm text-gray-500 mt-1">Si el servicio de análisis estaba en reposo, puede tardar hasta un minuto.</p>
+          <p className="text-sm text-gray-500 mt-1">Si el servicio de análisis estaba en reposo, puede tardar un par de minutos.</p>
         </div>
       ) : error && !datos ? (
         <div className="py-16 text-center">
