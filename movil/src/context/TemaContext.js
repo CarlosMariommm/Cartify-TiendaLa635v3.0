@@ -58,8 +58,12 @@ export const PALETA_BASE = {
  * la temporada. Lo usa el modo del personal cuando el administrador eligió una
  * paleta en el panel (ver utils/paletaPanel.js): sus botones y pestañas van
  * del color del panel, no de la Navidad de la tienda.
+ *
+ * `sinTemporada`: ni colores, ni decoración, ni disfraz de temporada. Lo usa
+ * el modo del personal: la temporada es para el cliente; el personal trabaja
+ * con la app de siempre, igual que en el panel web.
  */
-export const TemaProvider = ({ children, marcaFija }) => {
+export const TemaProvider = ({ children, marcaFija, sinTemporada = false }) => {
   // En modo oscuro la temporada (o la marca, si no hay) se pinta con su
   // versión para fondo oscuro. Por eso TemaProvider va DENTRO de ModoProvider.
   const { oscuro } = useModo();
@@ -109,6 +113,7 @@ export const TemaProvider = ({ children, marcaFija }) => {
    * noviembre al 1 de diciembre, se pinta de Navidad la próxima vez que abra.
    */
   const tema = useMemo(() => {
+    if (sinTemporada) return null;
     const base = temaActivo(temporada);
     if (!base || base.propio) return base;
     /*
@@ -117,7 +122,7 @@ export const TemaProvider = ({ children, marcaFija }) => {
      */
     const propio = (temporada?.saludos?.[base.clave] || '').trim();
     return propio ? { ...base, decoracion: { ...base.decoracion, saludo: propio } } : base;
-  }, [temporada]);
+  }, [temporada, sinTemporada]);
 
   const valor = useMemo(() => {
     // La paleta ya resuelta: siempre completa, haya temporada o no.
@@ -139,11 +144,11 @@ export const TemaProvider = ({ children, marcaFija }) => {
       // El saludo de los días sin temporada. En blanco no sale cinta.
       saludoNormal: (temporada?.saludoNormal || '').trim(),
       // Los disfraces que el dueño le armó a Tiqui en el panel, por temporada.
-      disfraces: temporada?.disfraces || null,
+      disfraces: sinTemporada ? null : temporada?.disfraces || null,
       // Para jalar para recargar: vuelve a traer la temporada.
       recargarAjustes,
     };
-  }, [tema, decoracionEncendida, temporada, oscuro, recargarAjustes, marcaFija]);
+  }, [tema, decoracionEncendida, temporada, oscuro, recargarAjustes, marcaFija, sinTemporada]);
 
   return <TemaContext.Provider value={valor}>{children}</TemaContext.Provider>;
 };

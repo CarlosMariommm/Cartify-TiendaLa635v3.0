@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { promotionService } from '../api/promotionService';
 import { alCambiarTiqui, TIPOS_PROMOCIONES } from '../utils/cambiosDeTiqui';
@@ -6,6 +7,19 @@ import PromotionFormModal from '../components/Admin/PromotionFormModal';
 import GenericConfirmModal from '../components/Admin/GenericConfirmModal';
 import { etiquetaPromo, textoVencimiento, promoVencida } from '../utils/promos';
 import PromoCard from '../components/Store/PromoCard';
+import FilterSelect from '../components/UI/FilterSelect';
+import OrdenSelect from '../components/UI/OrdenSelect';
+import { coincide, ordenarLista, ORDEN_INICIAL } from '../utils/listasPanel';
+
+const TIPOS = [
+  { value: 'descuento', label: 'Descuento %' },
+  { value: 'precio_fijo', label: 'Precio fijo' },
+  { value: 'nxm', label: 'NxM (2x1)' },
+  { value: 'anuncio', label: 'Solo anunciar' },
+];
+
+// En qué está cada una, como lo dice su tarjeta.
+const estadoDe = (promo) => (promoVencida(promo) ? 'Vencidas' : promo.isActive ? 'Activas' : 'Inactivas');
 
 /*
  * Promociones (Admin) — banners/anuncios de la tienda. El gerente sube una
@@ -23,6 +37,20 @@ const Promociones = () => {
   const [current, setCurrent] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [toDelete, setToDelete] = useState(null);
+  // Buscar, filtrar y ordenar (lo más reciente primero). Ver utils/listasPanel.js.
+  const [busqueda, setBusqueda] = useState('');
+  const [estado, setEstado] = useState('Todos');
+  const [tipo, setTipo] = useState('Todos');
+  const [orden, setOrden] = useState(ORDEN_INICIAL);
+
+  const visibles = ordenarLista(
+    promos.filter((promo) =>
+      (estado === 'Todos' || (estado === 'SinAnuncio' ? promo.showBanner === false : estadoDe(promo) === estado))
+      && (tipo === 'Todos' || promo.type === tipo)
+      && coincide(busqueda, promo.title, promo.promoDescription, promo.etiqueta, ...(promo.items || []).map((i) => i.productId?.name || i.categoryName))),
+    orden,
+    { nombre: (promo) => promo.title || promo.promoDescription },
+  );
 
   const cargar = async () => {
     try {
@@ -80,6 +108,33 @@ const Promociones = () => {
         </button>
       </div>
 
+      {promos.length > 0 && (
+        <div className="flex flex-wrap gap-3 items-center">
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar promoción o producto..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              className="pl-9 pr-4 py-2 bg-white border border-gray-300 rounded-full text-sm outline-none focus:border-[#003049] w-64 shadow-sm"
+            />
+          </div>
+          <FilterSelect
+            value={estado}
+            onChange={setEstado}
+            options={[
+              { value: 'Activas', label: 'Activas' },
+              { value: 'Inactivas', label: 'Inactivas' },
+              { value: 'Vencidas', label: 'Vencidas' },
+              { value: 'SinAnuncio', label: 'Sin anuncio' },
+            ]}
+          />
+          <FilterSelect value={tipo} onChange={setTipo} defaultLabel="Todos los tipos" options={TIPOS} />
+          <OrdenSelect value={orden} onChange={setOrden} />
+        </div>
+      )}
+
       {loading ? (
         <p className="text-gray-500">Cargando promociones...</p>
       ) : promos.length === 0 ? (
@@ -87,9 +142,14 @@ const Promociones = () => {
           <p className="text-gray-800 font-semibold mb-1">No hay promociones todavía</p>
           <p className="text-gray-500 text-sm">Crea la primera: elige los productos o una categoría completa, ponle precio y listo — el banner se dibuja solo.</p>
         </div>
+      ) : visibles.length === 0 ? (
+        <div className="text-center py-10">
+          <p className="text-gray-800 font-semibold mb-1">Ninguna promoción coincide</p>
+          <p className="text-gray-500 text-sm">Pruebe con otra búsqueda o quite algún filtro.</p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {promos.map((promo, i) => (
+          {visibles.map((promo, i) => (
             <div key={promo._id} style={{ '--i': i }} className="card-in bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               {/*
                 La MISMA tarjeta que ve el cliente. Antes esto pintaba la

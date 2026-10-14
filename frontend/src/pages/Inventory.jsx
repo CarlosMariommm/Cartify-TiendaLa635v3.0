@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useInventory } from '../hooks/useInventory';
-import { Plus, Search, ArrowDownUp, FileSpreadsheet } from 'lucide-react';
+import { Plus, Search, FileSpreadsheet } from 'lucide-react';
 import FilterSelect from '../components/UI/FilterSelect';
+import OrdenSelect from '../components/UI/OrdenSelect';
+import { ordenarLista, ORDEN_INICIAL } from '../utils/listasPanel';
 import CategoryPills from '../components/Inventory/CategoryPills';
 import ProductCard from '../components/Inventory/ProductCard';
 import ProductFormModal from '../components/Inventory/ProductFormModal';
@@ -49,7 +51,10 @@ const Inventory = () => {
     if (params.has('buscar')) setSearchTerm(params.get('buscar') || '');
   }
   const [stockFilter, setStockFilter] = useState('Todos');
-  const [orden, setOrden] = useState('nombre'); // 'nombre' | 'stock' | 'precio'
+  // Lo más reciente primero: lo que se acaba de agregar (o importar). Ver utils/listasPanel.js.
+  const [orden, setOrden] = useState(ORDEN_INICIAL);
+  // Además del stock (las tarjetas del resumen): activos, inactivos, sin foto…
+  const [filtro, setFiltro] = useState('Todos');
 
   /*
    * "Stock bajo" es relativo al máximo de CADA producto, no un número fijo:
@@ -70,7 +75,17 @@ const Inventory = () => {
   const bajos = products.filter(esBajo).length;
   const valorInventario = products.reduce((a, p) => a + (p.stock || 0) * (p.salePrice || 0), 0);
 
-  const filteredProducts = products
+  const pasaFiltro = (p) => {
+    if (filtro === 'Activos') return p.isActive !== false;
+    if (filtro === 'Inactivos') return p.isActive === false;
+    if (filtro === 'SinFoto') return !(Array.isArray(p.image) ? p.image[0] : p.image);
+    if (filtro === 'PorLibra') return p.unidadVenta === 'libra';
+    if (filtro === 'Adultos') return Boolean(p.soloAdultos);
+    return true;
+  };
+
+  const filtrados = products
+    .filter(pasaFiltro)
     .filter(product => {
       const searchString = searchTerm.toLowerCase();
       const matchesSearch = product.name?.toLowerCase().includes(searchString) ||
@@ -82,12 +97,13 @@ const Inventory = () => {
       if (stockFilter === 'Agotados') return matchesSearch && (!product.stock || product.stock === 0);
 
       return matchesSearch;
-    })
-    .sort((a, b) => {
-      if (orden === 'stock') return (a.stock || 0) - (b.stock || 0);   // lo que urge, primero
-      if (orden === 'precio') return (b.salePrice || 0) - (a.salePrice || 0);
-      return (a.name || '').localeCompare(b.name || '');
     });
+  const filteredProducts = ordenarLista(filtrados, orden, {
+    extras: {
+      stock: (a, b) => (Number(a.stock) || 0) - (Number(b.stock) || 0), // lo que urge, primero
+      precio: (a, b) => (b.salePrice || 0) - (a.salePrice || 0),
+    },
+  });
 
   const handleAddProduct = () => {
     setCurrentProduct(null);
@@ -157,12 +173,20 @@ const Inventory = () => {
             que además dicen cuántos son antes de que uno filtre).
           */}
           <FilterSelect
+            value={filtro}
+            onChange={setFiltro}
+            options={[
+              { value: 'Activos', label: 'Activos' },
+              { value: 'Inactivos', label: 'Inactivos' },
+              { value: 'SinFoto', label: 'Sin foto' },
+              { value: 'PorLibra', label: 'Por libra' },
+              { value: 'Adultos', label: 'Solo +18' },
+            ]}
+          />
+          <OrdenSelect
             value={orden}
             onChange={setOrden}
-            defaultValue="nombre"
-            defaultLabel="Ordenar: Nombre"
-            icon={ArrowDownUp}
-            options={[
+            extras={[
               { value: 'stock', label: 'Ordenar: Menos stock' },
               { value: 'precio', label: 'Ordenar: Mayor precio' },
             ]}

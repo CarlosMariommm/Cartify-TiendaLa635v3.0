@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import FilterSelect from '../UI/FilterSelect';
+import OrdenSelect from '../UI/OrdenSelect';
+import { ordenarLista, ORDEN_INICIAL } from '../../utils/listasPanel';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Pencil, AlertTriangle } from 'lucide-react';
 import { useMaterialesImpresion, hayMaterial, vaQuedandoPoco } from '../../hooks/useMaterialesImpresion';
@@ -32,6 +35,14 @@ const MaterialesImpresion = () => {
   const [form, setForm] = useState(VACIO);
   const [editId, setEditId] = useState(null);
   const [abierto, setAbierto] = useState(false);
+  // Filtrar y ordenar (lo más reciente primero). Ver utils/listasPanel.js.
+  const [filtro, setFiltro] = useState('Todos');
+  const [orden, setOrden] = useState(ORDEN_INICIAL);
+  const visibles = ordenarLista(
+    materiales.filter((m) => filtro === 'Todos'
+      || (filtro === 'agotados' ? !hayMaterial(m) : filtro === 'poco' ? vaQuedandoPoco(m) : (m.tipo || 'papel') === filtro)),
+    orden,
+  );
 
   const abrirNuevo = () => { setForm(VACIO); setEditId(null); setAbierto(true); };
   const abrirEdicion = (m) => {
@@ -69,6 +80,22 @@ const MaterialesImpresion = () => {
         en vez de pagar y enterarse en el mostrador.
       </p>
 
+      {materiales.length > 0 && (
+        <div className="flex flex-wrap gap-3 items-center mb-4">
+          <FilterSelect
+            value={filtro}
+            onChange={setFiltro}
+            options={[
+              { value: 'papel', label: 'Papel' },
+              { value: 'tinta', label: 'Tinta' },
+              { value: 'poco', label: 'Se están acabando' },
+              { value: 'agotados', label: 'Agotados' },
+            ]}
+          />
+          <OrdenSelect value={orden} onChange={setOrden} />
+        </div>
+      )}
+
       {cargando ? (
         <p className="text-gray-500">Cargando materiales...</p>
       ) : materiales.length === 0 ? (
@@ -80,7 +107,8 @@ const MaterialesImpresion = () => {
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {materiales.map((m, i) => {
+          {visibles.length === 0 && <p className="text-sm text-gray-500">Ninguno coincide con el filtro.</p>}
+          {visibles.map((m, i) => {
             const agotado = !hayMaterial(m);
             const poco = vaQuedandoPoco(m);
             return (

@@ -7,6 +7,7 @@ import { promotionService } from '../api/promotionService';
 import { promoVigente } from '../utils/promos';
 import { familiasQueCoinciden } from '../utils/familias';
 import { familiaDeProducto } from '../utils/similitud';
+import { aplicarFiltros, FILTROS_VACIOS, marcasDe } from '../utils/filtrosTienda';
 import { cantidadConUnidad } from '../utils/unidades';
 import { useAuth } from './useAuth';
 import { tAhora } from '../utils/idioma';
@@ -239,7 +240,13 @@ export const useStore = ({ moduloInicial = null, busquedaInicial = '', promoInic
    * vender. Ahora se sabe y se puede reintentar.
    */
   const [errorCarga, setErrorCarga] = useState(false);
-  const [filtroPrecio, setFiltroPrecio] = useState('todos');
+  /*
+   * Los filtros que elige el cliente: orden, precio, solo ofertas, solo lo
+   * disponible y marca. Ver utils/filtrosTienda.js (la app filtra igual).
+   */
+  const [filtros, setFiltros] = useState(FILTROS_VACIOS);
+  const cambiarFiltro = useCallback((clave, valor) => setFiltros((f) => ({ ...f, [clave]: valor })), []);
+  const limpiarFiltros = useCallback(() => setFiltros(FILTROS_VACIOS), []);
   const [promoSeleccionada, setPromoSeleccionada] = useState(null);
   // Promo abierta en la ventana de detalle (el click al banner del carrusel).
   const [promoDetalle, setPromoDetalle] = useState(null);
@@ -326,6 +333,8 @@ export const useStore = ({ moduloInicial = null, busquedaInicial = '', promoInic
   if (pasilloVisto !== moduloSeleccionado) {
     setPasilloVisto(moduloSeleccionado);
     setCategoriaSeleccionada(null);
+    // Y la marca: puede no existir en el pasillo nuevo.
+    setFiltros((f) => (f.marca ? { ...f, marca: '' } : f));
   }
 
   const categorias = useMemo(() => {
@@ -368,16 +377,11 @@ export const useStore = ({ moduloInicial = null, busquedaInicial = '', promoInic
       );
     }
 
-    if (filtroPrecio === '0-4') {
-      filtrados = filtrados.filter((p) => p.precio <= 4);
-    } else if (filtroPrecio === '4-12') {
-      filtrados = filtrados.filter((p) => p.precio > 4 && p.precio <= 12);
-    } else if (filtroPrecio === '12+') {
-      filtrados = filtrados.filter((p) => p.precio > 12);
-    }
+    return aplicarFiltros(filtrados, filtros);
+  }, [productosDelPasillo, categoriaSeleccionada, terminoBusqueda, filtros, promoSeleccionada]);
 
-    return filtrados;
-  }, [productosDelPasillo, categoriaSeleccionada, terminoBusqueda, filtroPrecio, promoSeleccionada]);
+  // Las marcas del pasillo, para el filtro.
+  const marcasDisponibles = useMemo(() => marcasDe(productosDelPasillo), [productosDelPasillo]);
 
   const productosDestacados = useMemo(() => productosDelPasillo.slice(0, 6), [productosDelPasillo]);
 
@@ -667,8 +671,10 @@ export const useStore = ({ moduloInicial = null, busquedaInicial = '', promoInic
     cargando,
     errorCarga,
     reintentarCarga,
-    filtroPrecio,
-    setFiltroPrecio,
+    filtros,
+    cambiarFiltro,
+    limpiarFiltros,
+    marcasDisponibles,
     promoSeleccionada,
     setPromoSeleccionada,
     promoDetalle,

@@ -25,6 +25,7 @@
  */
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { aplicarFiltros, FILTROS_VACIOS, marcasDe } from '../utils/filtrosTienda';
 import { cargarTienda } from '../api/tiendaApi';
 import { getModulos } from '../api/moduleApi';
 import { mapearCatalogo, idsDePromo, totalDeLinea } from '../utils/catalogo';
@@ -201,7 +202,18 @@ export const TiendaProvider = ({ children }) => {
   // dice nada dentro de "Farmacia", y dejarla puesta filtraría a cero.
   useEffect(() => {
     setCategoriaSeleccionada(null);
+    // Y la marca: puede no existir en el pasillo nuevo.
+    setFiltros((f) => (f.marca ? { ...f, marca: '' } : f));
   }, [moduloSeleccionado]);
+
+  /*
+   * Los filtros que elige el cliente: orden, precio, solo ofertas, solo lo
+   * disponible y marca. Igual que la web: ver utils/filtrosTienda.js.
+   */
+  const [filtros, setFiltros] = useState(FILTROS_VACIOS);
+  const cambiarFiltro = useCallback((clave, valor) => setFiltros((f) => ({ ...f, [clave]: valor })), []);
+  const limpiarFiltros = useCallback(() => setFiltros(FILTROS_VACIOS), []);
+  const marcasDisponibles = useMemo(() => marcasDe(productosDelPasillo), [productosDelPasillo]);
 
   const nombrePasillo = useMemo(
     () => pasillos.find((m) => String(m._id) === String(moduloSeleccionado))?.name || '',
@@ -236,8 +248,8 @@ export const TiendaProvider = ({ children }) => {
       );
     }
 
-    return filtrados;
-  }, [productosDelPasillo, categoriaSeleccionada, terminoBusqueda, promoSeleccionada]);
+    return aplicarFiltros(filtrados, filtros);
+  }, [productosDelPasillo, categoriaSeleccionada, terminoBusqueda, promoSeleccionada, filtros]);
 
   const productosDestacados = useMemo(() => productosDelPasillo.slice(0, 6), [productosDelPasillo]);
 
@@ -572,6 +584,10 @@ export const TiendaProvider = ({ children }) => {
       terminoBusqueda,
       setTerminoBusqueda,
       productosFiltrados,
+      filtros,
+      cambiarFiltro,
+      limpiarFiltros,
+      marcasDisponibles,
       productosDestacados,
       secciones,
       promosDelCarrusel,
@@ -600,6 +616,7 @@ export const TiendaProvider = ({ children }) => {
       promoSeleccionada, promoDetalle, productosDePromo, abrirPromo, cerrarPromo,
       verPromoEnTienda, carrito, totalCarrito, cantidadItems, agregarAlCarrito,
       eliminarDelCarrito, actualizarCantidad, limpiarCarrito, vaciarTrasPedido,
+      filtros, cambiarFiltro, limpiarFiltros, marcasDisponibles,
     ]
   );
 

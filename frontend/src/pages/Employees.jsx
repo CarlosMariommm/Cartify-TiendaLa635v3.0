@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import FilterSelect from '../components/UI/FilterSelect';
+import OrdenSelect from '../components/UI/OrdenSelect';
+import { ordenarLista, ORDEN_INICIAL } from '../utils/listasPanel';
 import DataTable from '../components/UI/DataTable';
 import { employeeService } from '../api/employeeService';
 import toast from 'react-hot-toast';
@@ -21,6 +23,8 @@ const Employees = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Todos');
+  // Lo más reciente primero: lo que se acaba de agregar. Ver utils/listasPanel.js.
+  const [orden, setOrden] = useState(ORDEN_INICIAL);
 
   // 1- Filtrado de empleados basado en la búsqueda y el estado
   const filteredEmployees = employees.filter(emp => {
@@ -127,6 +131,7 @@ const Employees = () => {
                 { value: 'Inactivo', label: 'Inactivos' },
               ]}
             />
+            <OrdenSelect value={orden} onChange={setOrden} />
             <button className="px-4 py-2 bg-white border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 text-sm font-medium transition-colors shadow-sm">
               Descargar todo
             </button>
@@ -144,7 +149,7 @@ const Employees = () => {
         ) : (
           <DataTable 
             columns={columns}
-            data={filteredEmployees}
+            data={ordenarLista(filteredEmployees, orden, { nombre: (e) => e.fullName || e.name })}
             renderRow={(item) => (
               <>
                 <td className="py-4 px-4 text-sm text-gray-800">

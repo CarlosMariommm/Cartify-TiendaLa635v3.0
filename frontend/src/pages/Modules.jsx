@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import FilterSelect from '../components/UI/FilterSelect';
+import OrdenSelect from '../components/UI/OrdenSelect';
+import { ordenarLista, ORDEN_INICIAL } from '../utils/listasPanel';
 import DataTable from '../components/UI/DataTable';
 import { moduleService } from '../api/moduleService';
 import toast from 'react-hot-toast';
@@ -20,6 +22,8 @@ const Modules = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Todos');
+  // Lo más reciente primero: lo que se acaba de agregar. Ver utils/listasPanel.js.
+  const [orden, setOrden] = useState(ORDEN_INICIAL);
 
   const filteredModules = modules.filter(mod => {
     const searchString = searchTerm.toLowerCase();
@@ -121,6 +125,7 @@ const Modules = () => {
                 { value: 'Inactivo', label: 'Inactivos' },
               ]}
             />
+            <OrdenSelect value={orden} onChange={setOrden} />
             <button 
               onClick={handleAddModule}
               className="px-4 py-2 bg-[#003049] hover:bg-[#00283D] text-white rounded-full text-sm font-medium transition-colors shadow-sm"
@@ -135,7 +140,7 @@ const Modules = () => {
         ) : (
           <DataTable 
             columns={columns}
-            data={filteredModules}
+            data={ordenarLista(filteredModules, orden)}
             renderRow={(item) => (
               <>
                 <td className="py-4 px-4 text-sm text-gray-800">{item.name}</td>
