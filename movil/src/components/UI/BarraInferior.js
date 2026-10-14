@@ -258,6 +258,15 @@ const crearEstilos = (COLORES) => StyleSheet.create({
     bottom: 0,
     paddingHorizontal: 20,
     paddingTop: AIRE_ARRIBA,
+    /*
+     * El envoltorio cruza la pantalla de orilla a orilla, pero lo único que
+     * se ve —y lo único que se toca— es la píldora. Sin esto, sus márgenes
+     * transparentes (a los lados, arriba y en la franja de gestos) se
+     * quedaban con el toque: el "+" de una tarjeta que pasaba por ahí se veía
+     * perfecto y no respondía. `box-none` deja pasar todo lo que no caiga
+     * sobre la píldora a lo que está debajo.
+     */
+    pointerEvents: 'box-none',
   },
   barra: {
     flexDirection: 'row',

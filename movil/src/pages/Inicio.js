@@ -34,7 +34,6 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useColores, useEstilos } from '../context/ModoContext';
 import { useTienda } from '../context/TiendaContext';
 import { useTema } from '../context/TemaContext';
-import { useAuth } from '../hooks/useAuth';
 import BarraTienda from '../components/Tienda/BarraTienda';
 import CintaTemporada from '../components/Tienda/CintaTemporada';
 import DecoracionTemporada from '../components/Tienda/DecoracionTemporada';
@@ -56,14 +55,13 @@ import { useAviso } from '../context/AvisoContext';
 import { useIdioma } from '../context/IdiomaContext';
 import { soltarProductoPedido, useProductoPedido } from '../utils/enlaces';
 import { useDisposicion } from '../hooks/useDisposicion';
+import { useAireBarraFlotante } from '../components/UI/BarraInferior';
 
 const Inicio = ({ irACarrito, irASeccion }) => {
   const { t } = useIdioma();
   const { colores, recargarAjustes } = useTema();
   const COLORES = useColores();
   const estilos = useEstilos(crearEstilos);
-  const { isAuthenticated, user } = useAuth();
-  const nombre = user?.fullName || user?.userName;
   const {
     productos,
     cargando,
@@ -102,6 +100,12 @@ const Inicio = ({ irACarrito, irASeccion }) => {
   const { avisar } = useAviso();
   // En la tablet caben más columnas (ver hooks/useDisposicion.js).
   const { columnas, anchoCelda } = useDisposicion();
+  /*
+   * Lo que mide la barra de abajo, que flota ENCIMA de la lista. Sin este
+   * aire al final, la última fila de productos se quedaba debajo de la
+   * barra para siempre y su "+" no se alcanzaba. Ver useAireBarraFlotante.
+   */
+  const aireAbajo = useAireBarraFlotante();
 
   /*
    * Jalar para recargar: los productos Y la temporada (si el dueño la cambió
@@ -146,12 +150,6 @@ const Inicio = ({ irACarrito, irASeccion }) => {
         para nada.
       */}
       <CintaTemporada />
-
-      {/* Saludo con el nombre real de quien tiene sesión. Sin sesión no hay
-          a quién saludar: la portada se ve igual que para cualquier visita. */}
-      {isAuthenticated && !!nombre && (
-        <Text style={estilos.saludo}>{t('Hola, {nombre} 👋', { nombre })}</Text>
-      )}
 
       <PastillasCategoria
         categorias={categorias}
@@ -349,7 +347,7 @@ const Inicio = ({ irACarrito, irASeccion }) => {
           ListHeaderComponent={encabezado}
           ListEmptyComponent={vacio}
           columnWrapperStyle={estilos.fila}
-          contentContainerStyle={estilos.lista}
+          contentContainerStyle={[estilos.lista, { paddingBottom: aireAbajo + 16 }]}
           onScrollBeginDrag={avisarActividad}
           renderItem={({ item, index }) => (
             /*
@@ -399,13 +397,6 @@ const crearEstilos = (COLORES) => StyleSheet.create({
   pantalla: {
     flex: 1,
     backgroundColor: COLORES.fondo,
-  },
-  saludo: {
-    fontSize: 15.5,
-    fontWeight: '700',
-    color: COLORES.tituloFuerte,
-    paddingHorizontal: 16,
-    paddingTop: 12,
   },
   centro: {
     flex: 1,
