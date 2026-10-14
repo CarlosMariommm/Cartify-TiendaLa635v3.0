@@ -142,6 +142,17 @@ describe('la demostración en la pantalla Pronóstico', () => {
     expect(dashboardService.getPronostico).toHaveBeenLastCalledWith({ forzar: false, demo: false });
   });
 
+  it('si la tienda real no se pudo calcular, abre la demostración y lo dice', async () => {
+    dashboardService.getPronostico.mockImplementation(async ({ demo } = {}) => {
+      if (demo) return { ...PRONOSTICO, demoDisponible: true, demo: true };
+      throw { response: { data: { message: 'El servicio de pronóstico contestó con un error.' } } };
+    });
+    abrir();
+    expect(await screen.findByText('$1,200.00')).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Demostración' }).getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByText(/no se pudo calcular la tienda real \(El servicio de pronóstico contestó con un error\)/)).toBeTruthy();
+  });
+
   it('sin demostración en el servidor, no se ofrece', async () => {
     dashboardService.getPronostico.mockResolvedValue({ ...PRONOSTICO, demoDisponible: false });
     abrir();

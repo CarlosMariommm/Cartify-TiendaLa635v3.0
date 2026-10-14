@@ -25,6 +25,13 @@ describe('pedir el pronóstico', () => {
     expect(api.get.mock.calls[2][1].params).toEqual({ demo: 1 });
   });
 
+  it('con un "calculando" que ya alcanza, deja de esperar', async () => {
+    api.get.mockResolvedValue({ data: { calculando: true, faltanCuatroSemanas: true, demoDisponible: true } });
+    const datos = await dashboardService.getPronostico({}, { cada: 1, alcanza: (d) => d.faltanCuatroSemanas });
+    expect(datos.calculando).toBe(true);
+    expect(api.get).toHaveBeenCalledTimes(1);
+  });
+
   it('si no termina nunca, se rinde con un mensaje claro', async () => {
     api.get.mockResolvedValue({ data: { calculando: true } });
     await expect(dashboardService.getPronostico({}, { cada: 1, maximo: 5 }))

@@ -62,15 +62,35 @@ const semanasDe = (datos) => Math.round((datos.tienda?.dias?.length || 28) / 7);
  * inventadas en la base real. Ver pages/Pronostico.jsx y DescargaPredictiva.
  */
 export const faltanCuatroSemanas = (datos) =>
-  !datos || Boolean(datos.vacio) || datos.tienda?.periodo_anterior == null;
+  !datos || Boolean(datos.vacio) || datos.faltanCuatroSemanas === true || datos.tienda?.periodo_anterior == null;
 
 /*
  * El pronóstico que conviene ENSEÑAR: el de la tienda real si ya tiene sus
  * 4 semanas; si no, y hay demostración, el de la demostración, marcado con
  * `porFaltaDeHistoria` para que la pantalla lo diga.
+ *
+ * Mientras el cálculo real tarda (Render despertando), el servidor contesta
+ * "calculando" y ya dice si a la tienda le faltan sus 4 semanas: en ese caso
+ * no se le espera, se va directo a la demostración. Y si la tienda real no se
+ * pudo calcular en este momento, también se enseña la demostración
+ * (`realConError` lleva el porqué) en vez de dejar la pantalla con un error.
  */
+const yaSeSabeQueFalta = (datos) => Boolean(datos?.demoDisponible && datos?.faltanCuatroSemanas);
+
 export const pronosticoParaMostrar = async (pedir, { forzar = false } = {}) => {
-  const real = await pedir({ forzar });
+  let real;
+  try {
+    real = await pedir({ forzar }, { alcanza: yaSeSabeQueFalta });
+  } catch (error) {
+    let demo = null;
+    try {
+      demo = await pedir({ forzar, demo: true });
+    } catch {
+      // Tampoco hay demostración: el error que importa es el de la tienda real.
+    }
+    if (!demo?.demo) throw error;
+    return { ...demo, realConError: error?.response?.data?.message || 'No se pudo calcular la tienda real.' };
+  }
   if (!real?.demoDisponible || !faltanCuatroSemanas(real)) return real;
   const demo = await pedir({ forzar, demo: true });
   return { ...demo, porFaltaDeHistoria: true };
