@@ -2,7 +2,7 @@ import orderModel from "../models/order.js";
 import productModel from "../models/product.js";
 import supplierMovementModel from "../models/supplierMovement.js";
 import clientModel from "../models/client.js";
-import { conCanalesDePedido, hayDemostracion, pronosticoSinEsperarDeMas } from "../utils/pronostico.js";
+import { conCanalesDePedido, faltanCuatroSemanasEnLaBase, hayDemostracion, pronosticoSinEsperarDeMas } from "../utils/pronostico.js";
 
 /*
  * Dashboard del admin — arma TODO el resumen en una sola llamada.
@@ -405,6 +405,7 @@ dashboardController.getChart = async (req, res) => {
 const MENSAJES_PRONOSTICO = {
   "sin-servicio": [503, "El pronóstico todavía no está conectado: falta configurar el servicio de analítica."],
   lento: [504, "El servicio de pronóstico tardó demasiado; puede estar despertando. Intente de nuevo en un minuto."],
+  fallo: [502, "El servicio de pronóstico contestó con un error. Intente de nuevo en un minuto."],
   "sin-conexion": [502, "No se pudo conectar con el servicio de pronóstico. Intente de nuevo en un minuto."],
   "sin-demo": [404, "La demostración del pronóstico no está disponible."],
 };
@@ -414,18 +415,25 @@ const MENSAJES_PRONOSTICO = {
  * mostrar el pronóstico sin tocar la tienda real; ver utils/pronostico.js).
  * `demoDisponible` le dice al panel si puede ofrecer ese modo.
  *
- * Si el cálculo pasa de 20 segundos (Render gratis, con historia larga), se
+ * Si el cálculo pasa de 8 segundos (Render gratis despertando, o historia larga), se
  * contesta 202 `{ calculando: true }` y el cálculo SIGUE: el panel vuelve a
  * preguntar en unos segundos y, cuando termina, lo recibe guardado. Antes se
  * esperaba minuto y medio, se cortaba y el cálculo se perdía.
  */
-const ESPERA_DEL_PANEL_MS = 20 * 1000;
+const ESPERA_DEL_PANEL_MS = 8 * 1000;
 
 dashboardController.getPronostico = async (req, res) => {
   try {
     const demo = req.query.demo === "1";
     const calculado = await pronosticoSinEsperarDeMas({ forzar: req.query.forzar === "1", demo }, ESPERA_DEL_PANEL_MS);
-    if (!calculado) return res.status(202).json({ calculando: true, demoDisponible: hayDemostracion() });
+    if (!calculado) {
+      /*
+       * Con la tienda real todavía sin sus 4 semanas, el panel no tiene que
+       * esperar este cálculo: va a mostrar la demostración. Se le dice ya.
+       */
+      const faltanCuatroSemanas = demo ? false : await faltanCuatroSemanasEnLaBase().catch(() => false);
+      return res.status(202).json({ calculando: true, faltanCuatroSemanas, demoDisponible: hayDemostracion() });
+    }
     const datos = await conCanalesDePedido(calculado, { demo });
     return res.status(200).json({ ...datos, demoDisponible: hayDemostracion() });
   } catch (error) {

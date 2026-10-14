@@ -29,7 +29,7 @@ vi.mock("../models/shoppings.js", () => ({
 const {
   armarSolicitud, obtenerPronostico, olvidarPronostico, diaLocal, textoDelPronostico, pronosticoParaTiqui,
   solicitudDeDemostracion, hayDemostracion, conCanalesDePedido, correrResultado, resultadoDeDemostracion,
-  pronosticoSinEsperarDeMas,
+  pronosticoSinEsperarDeMas, faltanCuatroSemanasEnLaBase,
 } = await import("./pronostico.js");
 
 // Lunes 12 de octubre de 2026, 9 de la mañana en El Salvador.
@@ -286,13 +286,46 @@ describe("el pronóstico que tarda", () => {
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 
+  it("si el servicio está despertando (502/503), reintenta con calma y termina", async () => {
+    vi.useFakeTimers();
+    try {
+      vi.stubGlobal("fetch", vi.fn()
+        .mockResolvedValueOnce({ ok: false, status: 503 })
+        .mockRejectedValueOnce(new Error("se cortó la conexión"))
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ productos: [], listo: true }) }));
+      const calculo = obtenerPronostico({ ahora: AHORA });
+      await vi.advanceTimersByTimeAsync(10_000);
+      await expect(calculo).resolves.toMatchObject({ listo: true });
+      expect(fetch).toHaveBeenCalledTimes(3);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("un error del cálculo mismo (500) no se reintenta", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false, status: 500 })));
+    await expect(obtenerPronostico({ ahora: AHORA })).rejects.toMatchObject({ codigo: "fallo" });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("sabe por la base si a la tienda le faltan sus 4 semanas", async () => {
+    const pedidosDesde = (fecha) => ({
+      find: () => ({ sort: () => ({ limit: () => ({ select: () => ({ lean: async () => (fecha ? [{ createdAt: new Date(fecha) }] : []) }) }) }) }),
+    });
+    // AHORA es el 12 de octubre: la historia llega hasta el 11.
+    expect(await faltanCuatroSemanasEnLaBase(AHORA, pedidosDesde("2026-09-28T15:00:00Z"))).toBe(true); // 14 días
+    expect(await faltanCuatroSemanasEnLaBase(AHORA, pedidosDesde("2026-09-14T15:00:00Z"))).toBe(false); // 28 días
+    expect(await faltanCuatroSemanasEnLaBase(AHORA, pedidosDesde(null))).toBe(true); // sin ventas
+  });
+
   it("si el cálculo de fondo falla, se le dice a la siguiente pregunta", async () => {
     let fallar;
-    vi.stubGlobal("fetch", vi.fn(() => new Promise((_, mal) => { fallar = () => mal(new Error("se cayó")); })));
+    // Un error del cálculo mismo (500): ese no se reintenta.
+    vi.stubGlobal("fetch", vi.fn(() => new Promise((listo) => { fallar = () => listo({ ok: false, status: 500 }); })));
     expect(await pronosticoSinEsperarDeMas({}, 20)).toBeNull();
     fallar();
     await new Promise((r) => setTimeout(r, 0));
-    await expect(pronosticoSinEsperarDeMas({}, 20)).rejects.toMatchObject({ codigo: "sin-conexion" });
+    await expect(pronosticoSinEsperarDeMas({}, 20)).rejects.toMatchObject({ codigo: "fallo" });
   });
 });
 

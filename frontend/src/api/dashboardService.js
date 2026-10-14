@@ -29,7 +29,8 @@ export const dashboardService = {
    * cada pocos segundos hasta que esté. Solo la primera pregunta fuerza a
    * recalcular; las demás esperan ESE cálculo, no empiezan otro.
    */
-  getPronostico: async ({ forzar = false, demo = false } = {}, { cada = 4000, maximo = 6 * 60 * 1000 } = {}) => {
+  // `alcanza(datos)`: con un "calculando" que ya basta (ver pronosticoParaMostrar), se deja de esperar.
+  getPronostico: async ({ forzar = false, demo = false } = {}, { cada = 4000, maximo = 6 * 60 * 1000, alcanza = null } = {}) => {
     const inicio = Date.now();
     let conForzar = forzar;
     for (;;) {
@@ -37,7 +38,7 @@ export const dashboardService = {
         params: { ...(conForzar ? { forzar: 1 } : {}), ...(demo ? { demo: 1 } : {}) },
         timeout: 120000,
       });
-      if (!response.data?.calculando) return response.data;
+      if (!response.data?.calculando || alcanza?.(response.data)) return response.data;
       conForzar = false;
       if (Date.now() - inicio > maximo) {
         throw Object.assign(new Error('El pronóstico tarda demasiado'), {
