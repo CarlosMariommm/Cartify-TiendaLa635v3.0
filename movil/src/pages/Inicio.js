@@ -42,8 +42,7 @@ import PastillasCategoria from '../components/Tienda/PastillasCategoria';
 import CarruselPromos from '../components/Tienda/CarruselPromos';
 import FilaProductos from '../components/Tienda/FilaProductos';
 import TarjetaProducto from '../components/Tienda/TarjetaProducto';
-import ModalProducto from '../components/Tienda/ModalProducto';
-import ModalPromo from '../components/Tienda/ModalPromo';
+import { abrirProducto } from '../navigation/navigationRef';
 import MenuPasillos from '../components/Tienda/MenuPasillos';
 import HojaFiltros from '../components/Tienda/HojaFiltros';
 import { SlidersHorizontal } from 'lucide-react-native';
@@ -87,11 +86,7 @@ const Inicio = ({ irACarrito, irASeccion }) => {
     promosDelCarrusel,
     promoSeleccionada,
     setPromoSeleccionada,
-    promoDetalle,
-    productosDePromo,
     abrirPromo,
-    cerrarPromo,
-    verPromoEnTienda,
     cantidadItems,
     agregarAlCarrito,
     filtros,
@@ -104,7 +99,6 @@ const Inicio = ({ irACarrito, irASeccion }) => {
   const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
   const filtrosPuestos = cuantosFiltros(filtros);
 
-  const [productoAbierto, setProductoAbierto] = useState(null);
   const { avisar } = useAviso();
   // En la tablet caben más columnas (ver hooks/useDisposicion.js).
   const { columnas, anchoCelda } = useDisposicion();
@@ -120,7 +114,11 @@ const Inicio = ({ irACarrito, irASeccion }) => {
   }, [refrescarCatalogo, recargarAjustes, avisar, t]);
   const [menuPasillosAbierto, setMenuPasillosAbierto] = useState(false);
 
-  const verDetalle = useCallback((producto) => setProductoAbierto(producto), []);
+  /*
+   * Un producto se mira en su propia página (pages/Producto.js), como en la
+   * web; antes era una hoja que subía encima de la tienda.
+   */
+  const verDetalle = abrirProducto;
 
   /*
    * Un producto que llegó por enlace (ver components/UI/EnlacesEntrantes.js).
@@ -131,7 +129,7 @@ const Inicio = ({ irACarrito, irASeccion }) => {
   useEffect(() => {
     if (!productoPedido || cargando) return;
     const producto = (productos || []).find((p) => String(p.id) === productoPedido);
-    if (producto) setProductoAbierto(producto);
+    if (producto) abrirProducto(producto);
     else avisar(t('Ese producto ya no está en la tienda'), 'info');
     soltarProductoPedido();
   }, [productoPedido, cargando, productos, avisar, t]);
@@ -372,31 +370,6 @@ const Inicio = ({ irACarrito, irASeccion }) => {
         />
         )}
         </JalarParaRecargar>
-      )}
-
-      {productoAbierto && (
-        <ModalProducto
-          producto={productoAbierto}
-          alCerrar={() => setProductoAbierto(null)}
-          alAgregar={agregarAlCarrito}
-          conBarraFlotante
-        />
-      )}
-
-      {promoDetalle && (
-        <ModalPromo
-          promo={promoDetalle}
-          productos={productosDePromo}
-          alCerrar={cerrarPromo}
-          alVerEnTienda={() => verPromoEnTienda(promoDetalle)}
-          alVerProducto={(p) => {
-            // Cerrar la promo antes de abrir el producto: dos hojas encima de
-            // la otra dejan la de abajo imposible de cerrar.
-            cerrarPromo();
-            setProductoAbierto(p);
-          }}
-          alAgregar={agregarAlCarrito}
-        />
       )}
 
       {filtrosAbiertos && (

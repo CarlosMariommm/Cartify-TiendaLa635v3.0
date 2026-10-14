@@ -32,6 +32,8 @@ import { mapearCatalogo, idsDePromo, totalDeLinea } from '../utils/catalogo';
 import { modulosVisibles, flujoDeModulo } from '../utils/modulos';
 import { armarSecciones } from '../utils/secciones';
 import { promosVisibles, promoEnModulo } from '../utils/promos';
+import { ordenarAnuncios } from '../utils/anillo';
+import { navegarA } from '../navigation/navigationRef';
 import { cantidadConUnidad } from '../utils/unidades';
 import { guardar, leer, borrar, llave } from '../utils/almacen';
 import { volarAlCarrito } from '../utils/volarAlCarrito';
@@ -103,9 +105,9 @@ export const TiendaProvider = ({ children }) => {
 
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
   const [terminoBusqueda, setTerminoBusqueda] = useState('');
-  // La promo que está filtrando la lista, y la que se está mirando en detalle.
+  // La promo que está filtrando la lista. (La que se mira en detalle es su
+  // propia página, pages/Promo.js: ver abrirPromo.)
   const [promoSeleccionada, setPromoSeleccionada] = useState(null);
-  const [promoDetalle, setPromoDetalle] = useState(null);
 
   // Las líneas guardadas: [{ id, cantidad }].
   const [lineas, setLineasEstado] = useState([]);
@@ -261,35 +263,31 @@ export const TiendaProvider = ({ children }) => {
 
   // Las que de verdad se anuncian en el carrusel, y solo las de ESTE pasillo
   // — igual que la web (PromoBanners con moduloId). Sin pasillo elegido
-  // (toda la tienda) salen todas.
+  // (toda la tienda) salen todas. Las más nuevas primero y hasta nueve, en el
+  // mismo orden que la web (ver utils/anillo.js).
   const promosDelCarrusel = useMemo(
-    () => promosVisibles(promociones).filter((p) => promoEnModulo(p, moduloSeleccionado)),
+    () => ordenarAnuncios(promosVisibles(promociones)).filter((p) => promoEnModulo(p, moduloSeleccionado)),
     [promociones, moduloSeleccionado]
   );
 
   /*
-   * Los productos de la promo abierta salen del catálogo ya mapeado, no de
-   * promo.items, para que se vean con su precio de oferta y su stock real —
-   * los mismos que verá en la tienda.
+   * Una promoción se mira en su propia página (pages/Promo.js), como en la
+   * web: antes era una hoja encima de la tienda. Se navega por su id; la
+   * página saca la promo y sus productos de aquí, al día.
    */
-  const productosDePromo = useMemo(() => {
-    if (!promoDetalle) return [];
-    const ids = idsDePromo(promoDetalle);
-    return productos.filter((p) => ids.includes(p.id));
-  }, [productos, promoDetalle]);
-
-  const abrirPromo = useCallback((promo) => setPromoDetalle(promo), []);
-  const cerrarPromo = useCallback(() => setPromoDetalle(null), []);
+  const abrirPromo = useCallback((promo) => {
+    if (promo?._id) navegarA('Promo', { id: String(promo._id) });
+  }, []);
 
   /*
-   * "Ver todos en la tienda": cierra el detalle y deja la lista filtrada a esa
-   * promo, limpiando categoría y búsqueda para que no se peleen entre filtros.
+   * "Ver todos en la tienda": deja la lista filtrada a esa promo, limpiando
+   * categoría y búsqueda para que no se peleen entre filtros. Quien lo llama
+   * (la página de la promo) vuelve a la tienda.
    */
   const verPromoEnTienda = useCallback((promo) => {
     setPromoSeleccionada(promo);
     setCategoriaSeleccionada(null);
     setTerminoBusqueda('');
-    setPromoDetalle(null);
   }, []);
 
   /* ══════════════ EL CARRITO ══════════════ */
@@ -595,10 +593,7 @@ export const TiendaProvider = ({ children }) => {
       promociones,
       promoSeleccionada,
       setPromoSeleccionada,
-      promoDetalle,
-      productosDePromo,
       abrirPromo,
-      cerrarPromo,
       verPromoEnTienda,
       carrito,
       totalCarrito,
@@ -613,7 +608,7 @@ export const TiendaProvider = ({ children }) => {
       productos, cargando, errorCarga, traerCatalogo, refrescarCatalogo, pasillos, todosLosModulos, moduloSeleccionado,
       nombrePasillo, productosDelPasillo, categorias, categoriaSeleccionada,
       terminoBusqueda, productosFiltrados, productosDestacados, secciones, promosDelCarrusel, promociones,
-      promoSeleccionada, promoDetalle, productosDePromo, abrirPromo, cerrarPromo,
+      promoSeleccionada, abrirPromo,
       verPromoEnTienda, carrito, totalCarrito, cantidadItems, agregarAlCarrito,
       eliminarDelCarrito, actualizarCantidad, limpiarCarrito, vaciarTrasPedido,
       filtros, cambiarFiltro, limpiarFiltros, marcasDisponibles,

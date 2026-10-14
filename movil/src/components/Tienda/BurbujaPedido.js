@@ -300,7 +300,7 @@ const BurbujaPedido = () => {
 
   /*
    * Arriba de la píldora flotante, no encima. `ALTURA_BARRA_FLOTANTE` es el
-   * mismo alto que ModalPromo.js ya usa para no tapar su botón de guardar —
+   * mismo alto que usan las hojas para no tapar su botón de abajo —
    * ver components/UI/BarraInferior.js. Se suma siempre, aunque en las
    * pantallas sueltas (Carrito, Checkout...) esa píldora no exista: ahí la
    * burbuja queda con un poco más de aire abajo de lo estrictamente

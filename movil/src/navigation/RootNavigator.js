@@ -31,7 +31,7 @@ import { useModo } from '../context/ModoContext';
 import { useTienda } from '../context/TiendaContext';
 import { useSplashTimer } from '../hooks/useSplashTimer';
 import { leer, guardar, llave } from '../utils/almacen';
-import { arranqueResuelto, destinoPendiente, irATabs, marcarArranqueResuelto, navegarA, navigationRef } from './navigationRef';
+import { abrirProducto, arranqueResuelto, destinoPendiente, irATabs, marcarArranqueResuelto, navegarA, navigationRef } from './navigationRef';
 import PantallaCarga from '../pages/PantallaCarga';
 import Onboarding from '../pages/Onboarding';
 import LoginClient from '../pages/LoginClient';
@@ -44,7 +44,8 @@ import Confirmacion from '../pages/Confirmacion';
 import Seccion from '../pages/Seccion';
 import Impresiones from '../pages/Impresiones';
 import ConoceATiqui, { LLAVE_TIQUI_PRESENTADO } from '../pages/ConoceATiqui';
-import ModalProducto from '../components/Tienda/ModalProducto';
+import Producto from '../pages/Producto';
+import Promo from '../pages/Promo';
 import TabMenu from './TabMenu';
 
 const Stack = createNativeStackNavigator();
@@ -202,28 +203,17 @@ const ConfirmacionRoute = ({ route, navigation }) => (
   />
 );
 
-// Mismo par pantalla+hoja que antes armaba `PantallaSeccion` en App.js: la
-// sección lleva su propio detalle de producto abierto.
+// Un producto de la sección abre su propia página encima (pages/Producto.js).
 const SeccionRoute = ({ route, navigation }) => {
   const { agregarAlCarrito } = useTienda();
-  const [productoAbierto, setProductoAbierto] = useState(null);
 
   return (
-    <>
-      <Seccion
-        seccion={route.params?.seccion}
-        alVolver={() => navigation.goBack()}
-        alVerDetalle={setProductoAbierto}
-        alAgregar={agregarAlCarrito}
-      />
-      {productoAbierto && (
-        <ModalProducto
-          producto={productoAbierto}
-          alCerrar={() => setProductoAbierto(null)}
-          alAgregar={agregarAlCarrito}
-        />
-      )}
-    </>
+    <Seccion
+      seccion={route.params?.seccion}
+      alVolver={() => navigation.goBack()}
+      alVerDetalle={abrirProducto}
+      alAgregar={agregarAlCarrito}
+    />
   );
 };
 
@@ -285,6 +275,14 @@ const RootNavigator = () => {
         <Stack.Screen name="Checkout" component={CheckoutRoute} />
         <Stack.Screen name="Confirmacion" component={ConfirmacionRoute} />
         <Stack.Screen name="Seccion" component={SeccionRoute} />
+        {/*
+          Un producto y una promoción son páginas, como en la web: se apilan
+          y se vuelve con "‹ Volver", el botón atrás o el gesto. `getId` las
+          distingue por id: un recomendado abre SU página encima, y tocar
+          dos veces el mismo no abre dos.
+        */}
+        <Stack.Screen name="Producto" component={Producto} getId={({ params }) => params?.id} />
+        <Stack.Screen name="Promo" component={Promo} getId={({ params }) => params?.id} />
         <Stack.Screen name="Impresiones" component={ImpresionesRoute} />
         <Stack.Screen name="ConoceATiqui" component={ConoceATiquiRoute} options={{ animation: 'fade_from_bottom' }} />
       </Stack.Navigator>

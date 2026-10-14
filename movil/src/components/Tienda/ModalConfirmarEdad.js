@@ -11,7 +11,7 @@
  *
  * Quien decide CUÁNDO se abre esto es EdadContext, no esta pantalla: aquí
  * solo se pinta y se valida. Montarla o no (en vez de un `if (!abierto)`
- * como en la web) es lo que ya hacen ModalProducto y ModalPromo en esta
+ * como en la web) es lo que ya hacen ModalProducto y MenuPasillos en esta
  * app, y de paso regala la animación de apertura sin pedirla dos veces.
  * ============================================================
  */

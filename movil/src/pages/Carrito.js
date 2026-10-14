@@ -43,7 +43,7 @@ import { useTienda } from '../context/TiendaContext';
 import { useTema } from '../context/TemaContext';
 import Boton from '../components/UI/Boton';
 import { ChevronIzquierda, Mas, Menos, Paquete } from '../components/UI/Iconos';
-import ModalProducto from '../components/Tienda/ModalProducto';
+import { abrirProducto } from '../navigation/navigationRef';
 import { totalDeLinea } from '../utils/catalogo';
 import { ajustarCantidad, cantidadConUnidad, esPorLibra, pasoDe } from '../utils/unidades';
 import { iconoDeModulo } from '../utils/modulos';
@@ -162,7 +162,7 @@ const LineaCarrito = ({ item, pasillos, alActualizar, alEliminar, alAbrir, color
 
 const Carrito = ({ irAInicio, irAPagar }) => {
   const { t } = useIdioma();
-  const { carrito, totalCarrito, cantidadItems, actualizarCantidad, eliminarDelCarrito, limpiarCarrito, agregarAlCarrito, pasillos } =
+  const { carrito, totalCarrito, cantidadItems, actualizarCantidad, eliminarDelCarrito, limpiarCarrito, pasillos } =
     useTienda();
   const { colores } = useTema();
   const COLORES = useColores();
@@ -170,8 +170,6 @@ const Carrito = ({ irAInicio, irAPagar }) => {
   // Igual que BarraInferior: sin esto "Ir a pagar" queda debajo de la franja
   // de gestos de Android, porque app.json trae edgeToEdgeEnabled.
   const { bottom } = useSafeAreaInsets();
-  // El artículo que se tocó para ver su ficha (no el que se está editando).
-  const [productoAbierto, setProductoAbierto] = useState(null);
 
   const vacio = carrito.length === 0;
 
@@ -247,19 +245,12 @@ const Carrito = ({ irAInicio, irAPagar }) => {
                 pasillos={pasillos}
                 alActualizar={actualizarCantidad}
                 alEliminar={eliminarDelCarrito}
-                alAbrir={setProductoAbierto}
+                // Su ficha es su propia página: al volver, se está otra vez aquí.
+                alAbrir={abrirProducto}
                 colores={colores}
               />
             )}
           />
-
-          {productoAbierto && (
-            <ModalProducto
-              producto={productoAbierto}
-              alCerrar={() => setProductoAbierto(null)}
-              alAgregar={agregarAlCarrito}
-            />
-          )}
 
           {/*
             El resumen vive FUERA de la lista: es el número por el que se abrió

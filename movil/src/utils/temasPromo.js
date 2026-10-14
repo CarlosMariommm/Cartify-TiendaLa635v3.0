@@ -80,3 +80,42 @@ export const coloresDePromo = (promo) => {
 
   return { ...tema, flecha: promo.colorFlecha || tema.acento };
 };
+
+/*
+ * ── El color del fondo en un punto del degradado ──
+ * Para difuminar una foto contra el fondo de la promo. La web lo hace con
+ * `maskImage` (la foto se vuelve transparente); React Native no tiene
+ * máscaras, así que se pinta ENCIMA de la foto un degradado del color del
+ * fondo. Como el fondo también es un degradado, hay que saber qué color hay
+ * justo ahí: con el último color a secas quedaba un corte visible.
+ *
+ * `t` va de 0 (primer color) a 1 (último). Devuelve el color opaco y el mismo
+ * color transparente: difuminar hacia 'transparent' (negro sin opacidad)
+ * agrisa el medio en algunos teléfonos.
+ */
+const aRgb = (hex) => {
+  const h = String(hex || '').replace('#', '');
+  const completo = h.length === 3 ? h.split('').map((c) => c + c).join('') : h.slice(0, 6);
+  if (!/^[0-9a-f]{6}$/i.test(completo)) return null;
+  const n = parseInt(completo, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+};
+
+export const difuminadoDelFondo = (colores, t) => {
+  const lista = Array.isArray(colores) && colores.length ? colores : ['#000000'];
+  const a = aRgb(lista[0]);
+  const b = aRgb(lista[lista.length - 1]);
+  if (!a || !b) return [lista[lista.length - 1], 'transparent'];
+  const [r, g, az] = a.map((v, i) => Math.round(v + (b[i] - v) * Math.max(0, Math.min(1, t))));
+  return [`rgba(${r},${g},${az},1)`, `rgba(${r},${g},${az},0)`];
+};
+
+/*
+ * En qué punto del degradado diagonal (de la esquina de arriba a la izquierda
+ * a la de abajo a la derecha) cae (x, y), con x e y de 0 a 1 y una caja
+ * `proporcion` veces más ancha que alta.
+ */
+export const puntoEnDiagonal = (x, y, proporcion = 1) => {
+  const p2 = proporcion * proporcion;
+  return (x * p2 + y) / (p2 + 1);
+};

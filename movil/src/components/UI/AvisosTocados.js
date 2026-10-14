@@ -83,7 +83,8 @@ const AvisosTocados = () => {
         return;
       }
       irATabs('inicio');
-      if (promo) abrirPromo(promo);
+      // Después de armar las pestañas, encima la página de la promo.
+      if (promo) setTimeout(() => abrirPromo(promo), 0);
       listo();
       return;
     }

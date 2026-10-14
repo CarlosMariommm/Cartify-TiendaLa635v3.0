@@ -25,7 +25,7 @@
  * ============================================================
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import Mascota, { CargandoMascota } from '../../components/Tiqui/Mascota';
 import { useEstilos } from '../../context/ModoContext';
@@ -34,7 +34,7 @@ import { useTienda } from '../../context/TiendaContext';
 import { useFavoritos } from '../../context/FavoritosContext';
 import BarraCuenta from '../../components/Cuenta/BarraCuenta';
 import TarjetaProducto from '../../components/Tienda/TarjetaProducto';
-import ModalProducto from '../../components/Tienda/ModalProducto';
+import { abrirProducto } from '../../navigation/navigationRef';
 import { avisarActividad } from '../../utils/actividadUsuario';
 import { useIdioma } from '../../context/IdiomaContext';
 import { useDisposicion } from '../../hooks/useDisposicion';
@@ -48,8 +48,6 @@ const Favoritos = ({ alVolver }) => {
   const estilos = useEstilos(crearEstilos);
   const { productos, cargando, agregarAlCarrito } = useTienda();
   const { esFavorito } = useFavoritos();
-
-  const [productoAbierto, setProductoAbierto] = useState(null);
 
   const marcados = useMemo(
     () => productos.filter((p) => esFavorito(p.id)),
@@ -95,7 +93,7 @@ const Favoritos = ({ alVolver }) => {
             <View style={[estilos.celda, { maxWidth: anchoCelda }]}>
               <TarjetaProducto
                 producto={item}
-                alVerDetalle={setProductoAbierto}
+                alVerDetalle={abrirProducto}
                 alAgregar={agregarAlCarrito}
                 indice={index}
               />
@@ -104,14 +102,6 @@ const Favoritos = ({ alVolver }) => {
         />
       )}
 
-      {productoAbierto && (
-        <ModalProducto
-          producto={productoAbierto}
-          alCerrar={() => setProductoAbierto(null)}
-          alAgregar={agregarAlCarrito}
-          conBarraFlotante
-        />
-      )}
     </View>
   );
 };
