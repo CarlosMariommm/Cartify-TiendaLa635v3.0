@@ -9,6 +9,8 @@ import { EASE_OUT, DUR, stagger } from '../utils/motion';
 import { useOrders } from '../hooks/useOrders';
 import ModalCodigoEntrega from '../components/Admin/ModalCodigoEntrega';
 import ModalCancelarPedido from '../components/Admin/ModalCancelarPedido';
+import toast from 'react-hot-toast';
+import { useComprobante } from '../hooks/useComprobante';
 
 // Los que todavía se pueden cancelar: los entregados ya no, y los cancelados ya lo están.
 const SE_PUEDE_CANCELAR = ['pagado', 'preparando', 'en_camino', 'listo'];
@@ -122,6 +124,10 @@ const urlDescarga = (order) => {
 
 const Orders = () => {
   const { orders, loading, cambiarEstado } = useOrders();
+  const { descargar, descargando: descargandoComprobante } = useComprobante();
+  const bajarComprobante = async (pedido) => {
+    if (!(await descargar(pedido))) toast.error('No se pudo descargar el comprobante. Intente de nuevo.');
+  };
   const [filtro, setFiltro] = useState('pagado');
   const [busqueda, setBusqueda] = useState('');
 
@@ -426,6 +432,22 @@ const Orders = () => {
                     </span>
 
                     <div className="flex flex-wrap items-center gap-2">
+                    {/*
+                      El comprobante en PDF, para imprimirlo o mandárselo al
+                      cliente si lo pide (él no lo baja por su cuenta). Sin
+                      relleno: es una consulta, no el paso siguiente. Uno
+                      cancelado no tiene.
+                    */}
+                    {order.status !== 'cancelado' && (
+                      <button
+                        onClick={() => bajarComprobante(order)}
+                        disabled={descargandoComprobante === order._id}
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-semibold transition-colors hover:bg-black/5 disabled:opacity-50"
+                        style={{ color: 'var(--theme-text-secondary)' }}
+                      >
+                        <Download className="w-4 h-4" /> {descargandoComprobante === order._id ? 'Preparando…' : 'Comprobante'}
+                      </button>
+                    )}
                     {/*
                       Cancelar va de segundo y sin relleno: es la salida, no el
                       paso siguiente, y no tiene que competir con él.
