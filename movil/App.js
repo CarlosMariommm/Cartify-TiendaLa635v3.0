@@ -72,10 +72,6 @@ import { navegarA } from './src/navigation/navigationRef';
 import AvisosTocados from './src/components/UI/AvisosTocados';
 import RegistroAvisos from './src/components/UI/RegistroAvisos';
 import EnlacesEntrantes from './src/components/UI/EnlacesEntrantes';
-import { escucharErroresSueltos } from './src/utils/reportarError';
-
-// Lo que se escapa de todas las pantallas también se anota. Ver utils/reportarError.js.
-escucharErroresSueltos();
 import RootNavigator from './src/navigation/RootNavigator';
 import LimiteDeError from './src/components/UI/LimiteDeError';
 import BurbujaPedido from './src/components/Tienda/BurbujaPedido';

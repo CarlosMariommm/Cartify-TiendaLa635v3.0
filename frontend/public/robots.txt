@@ -19,7 +19,6 @@ Disallow: /promociones
 Disallow: /servicios-impresion
 Disallow: /tarjetas
 Disallow: /personalizacion
-Disallow: /errores
 Disallow: /cuenta
 Disallow: /ayuda
 Disallow: /mi-cuenta

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Download, ExternalLink, MessageCircle, Phone, RotateCw, Search } from 'lucide-react';
 import { BarChart, Bar, Cell, ErrorBar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -7,7 +7,7 @@ import { dashboardService } from '../api/dashboardService';
 import { useAjustesCtx } from '../context/AjustesContext';
 import { useTheme } from '../context/ThemeContext';
 import { dinero, fechaCorta, fechaLarga } from '../utils/reportesPdf';
-import { cantidad, rango, resumenDelPronostico } from '../utils/reportePredictivo';
+import { cantidad, pronosticoParaMostrar, rango, resumenDelPronostico } from '../utils/reportePredictivo';
 import { descargarReportePredictivo } from '../utils/descargarPredictivo';
 import { comoPedir, copiarTexto } from '../utils/pedidoProveedor';
 
@@ -137,14 +137,30 @@ const Pronostico = () => {
   // La tienda real o la demostración; el servidor dice si hay demostración.
   const [demo, setDemo] = useState(false);
   const [hayDemo, setHayDemo] = useState(false);
+  /*
+   * Se abrió con la demostración porque la tienda real todavía no junta 4
+   * semanas de ventas (ver pronosticoParaMostrar). El aviso lo dice.
+   */
+  const [porFaltaDeHistoria, setPorFaltaDeHistoria] = useState(false);
+  // Si ya se decidió qué enseñar al abrir, y con qué modo están los datos en pantalla.
+  const decidido = useRef(false);
+  const modoCargado = useRef(null);
 
   const cargar = useCallback(async (forzar = false) => {
     setCargando(true);
     setError('');
     try {
-      const respuesta = await dashboardService.getPronostico({ forzar, demo });
+      const respuesta = decidido.current
+        ? await dashboardService.getPronostico({ forzar, demo })
+        : await pronosticoParaMostrar(dashboardService.getPronostico, { forzar });
+      decidido.current = true;
+      modoCargado.current = Boolean(respuesta?.demo);
       setDatos(respuesta);
       setHayDemo(Boolean(respuesta?.demoDisponible));
+      if (respuesta?.porFaltaDeHistoria) {
+        setPorFaltaDeHistoria(true);
+        setDemo(true);
+      }
     } catch (e) {
       setError(e?.response?.data?.message || 'No se pudo calcular el pronóstico. Intente de nuevo en un minuto.');
     } finally {
@@ -159,7 +175,12 @@ const Pronostico = () => {
     setDemo(conDemo);
   };
 
-  useEffect(() => { cargar(); }, [cargar]);
+  // Se carga al abrir y al cambiar de modo; no si los datos en pantalla ya son de ese modo
+  // (pasa cuando la primera carga eligió la demostración por su cuenta).
+  useEffect(() => {
+    if (modoCargado.current === demo) return;
+    cargar();
+  }, [cargar, demo]);
 
   const descargar = async () => {
     setDescargando(true);
@@ -236,7 +257,9 @@ const Pronostico = () => {
           </div>
           {demo && (
             <p className="text-sm text-amber-700 max-w-2xl">
-              Está viendo una demostración: ventas inventadas de 3 meses y medio para mostrar todo lo que hace el pronóstico. La tienda real no cambia.
+              {porFaltaDeHistoria
+                ? 'La tienda real todavía no junta 4 semanas de ventas, así que el pronóstico abre con una demostración: ventas inventadas de 3 meses y medio para mostrar todo lo que hace. La tienda real no cambia; puede verla en «Tienda real».'
+                : 'Está viendo una demostración: ventas inventadas de 3 meses y medio para mostrar todo lo que hace el pronóstico. La tienda real no cambia.'}
             </p>
           )}
         </div>

@@ -29,7 +29,7 @@ import { areaDeRuta } from '../utils/sesion';
  * Las rutas del panel, que NO se repintan ni se decoran. Es la MISMA lista que
  * separa los dos cajones de sesión (RUTAS_DEL_PANEL en utils/sesion.js, que
  * una prueba compara con App.jsx). Antes había aquí una copia escrita a mano
- * y le faltaban Pronóstico, Ayuda y Errores: ahí el panel salía con la
+ * y le faltaban Pronóstico y Ayuda: ahí el panel salía con la
  * Navidad puesta y Tiqui disfrazada.
  */
 export const esPanel = (pathname = '') => areaDeRuta(pathname) === 'personal';
