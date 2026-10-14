@@ -3,6 +3,8 @@ import { Search, Wallet, AlertTriangle } from 'lucide-react';
 import { useResumenCredito } from '../hooks/useCreditoProveedor';
 import CuentaProveedorModal from '../components/Admin/CuentaProveedorModal';
 import FilterSelect from '../components/UI/FilterSelect';
+import OrdenSelect from '../components/UI/OrdenSelect';
+import { ordenarLista, ORDEN_INICIAL } from '../utils/listasPanel';
 import DataTable from '../components/UI/DataTable';
 import { supplierService } from '../api/supplierService';
 import { brandService } from '../api/brandService';
@@ -30,6 +32,8 @@ const Suppliers = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Todos');
+  // Lo más reciente primero: lo que se acaba de agregar. Ver utils/listasPanel.js.
+  const [orden, setOrden] = useState(ORDEN_INICIAL);
 
   const filteredSuppliers = suppliers.filter(supplier => {
     const searchString = searchTerm.toLowerCase();
@@ -155,6 +159,7 @@ const Suppliers = () => {
                 { value: 'Inactivo', label: 'Inactivos' },
               ]}
             />
+            <OrdenSelect value={orden} onChange={setOrden} />
             <button 
               onClick={handleAddSupplier}
               className="px-4 py-2 bg-[#003049] hover:bg-[#00283D] text-white rounded-full text-sm font-medium transition-colors shadow-sm"
@@ -169,7 +174,7 @@ const Suppliers = () => {
         ) : (
           <DataTable 
             columns={columns}
-            data={filteredSuppliers}
+            data={ordenarLista(filteredSuppliers, orden)}
             renderRow={(item) => (
               <>
                 <td className="py-4 px-4 text-sm text-gray-800 font-medium">{item.name}</td>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { ordenarLista, ORDEN_INICIAL } from '../utils/listasPanel';
 import { customerService } from '../api/customerService';
 import { direccionesEnTexto, formatearDui, formatearTelefono } from '../utils/mascaras';
 
@@ -63,6 +64,8 @@ export const useClientes = () => {
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState('');
   const [estado, setEstado] = useState('Todos');
+  // Lo más reciente primero: quien se acaba de registrar. Ver utils/listasPanel.js.
+  const [orden, setOrden] = useState(ORDEN_INICIAL);
 
   const cargar = useCallback(async () => {
     try {
@@ -131,12 +134,18 @@ export const useClientes = () => {
     });
   }, [clientes, busqueda, estado]);
 
+  const ordenados = useMemo(() => ordenarLista(filtrados, orden, {
+    nombre: (c) => c.fullName,
+    extras: { puntos: (a, b) => (b.puntos || 0) - (a.puntos || 0) },
+  }), [filtrados, orden]);
+
   return {
-    clientes: filtrados,
+    clientes: ordenados,
     resumen,
     cargando,
     busqueda, setBusqueda,
     estado, setEstado,
+    orden, setOrden,
     recargar: cargar,
     eliminar,
     // Para distinguir "no hay clientes" de "la búsqueda no encontró nada":

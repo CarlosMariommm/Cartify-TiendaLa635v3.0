@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import FilterSelect from '../components/UI/FilterSelect';
+import OrdenSelect from '../components/UI/OrdenSelect';
 import ModalEliminarCliente from '../components/Admin/ModalEliminarCliente';
 import { useClientes, ESTADOS } from '../hooks/useClientes';
 import { DUR, EASE_OUT, stagger } from '../utils/motion';
@@ -233,7 +234,7 @@ const TarjetaCliente = ({ cliente, indice, onEliminar }) => {
 const Customers = () => {
   const {
     clientes, resumen, cargando,
-    busqueda, setBusqueda, estado, setEstado, hayClientes, eliminar,
+    busqueda, setBusqueda, estado, setEstado, orden, setOrden, hayClientes, eliminar,
   } = useClientes();
 
   // El cliente que se está por eliminar; null = el modal está cerrado.
@@ -319,6 +320,7 @@ const Customers = () => {
               options={ESTADOS.filter((e) => e.valor !== 'Todos')
                 .map((e) => ({ value: e.valor, label: e.etiqueta }))}
             />
+            <OrdenSelect value={orden} onChange={setOrden} extras={[{ value: 'puntos', label: 'Ordenar: Más puntos' }]} />
           </div>
         </div>
 

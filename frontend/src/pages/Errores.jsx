@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
+import FilterSelect from '../components/UI/FilterSelect';
+import OrdenSelect from '../components/UI/OrdenSelect';
+import { coincide, ordenarLista, ORDEN_INICIAL } from '../utils/listasPanel';
 import { ChevronDown, CheckCircle2, RotateCcw, Globe, Smartphone, Server } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { errorService } from '../api/errorService';
@@ -42,6 +45,23 @@ const Errores = () => {
   const [abiertos, setAbiertos] = useState(0);
   const [cargando, setCargando] = useState(true);
   const [abierto, setAbierto] = useState(null);
+  // Buscar, filtrar por origen y ordenar: de entrada, lo que pasó más recién.
+  const [busqueda, setBusqueda] = useState('');
+  const [origen, setOrigen] = useState('Todos');
+  const [orden, setOrden] = useState(ORDEN_INICIAL);
+
+  const visibles = ordenarLista(
+    errores.filter((e) => (origen === 'Todos' || (e.origen || 'web') === origen) && coincide(busqueda, e.mensaje, e.donde)),
+    orden,
+    {
+      extras: {
+        // Un error vuelve a ser reciente cada vez que vuelve a pasar.
+        recientes: (a, b) => new Date(b.ultimaVez) - new Date(a.ultimaVez),
+        antiguos: (a, b) => new Date(a.ultimaVez) - new Date(b.ultimaVez),
+        veces: (a, b) => (b.veces || 0) - (a.veces || 0),
+      },
+    },
+  );
 
   const cargar = useCallback(async () => {
     setCargando(true);
@@ -93,13 +113,32 @@ const Errores = () => {
         </p>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2 items-center">
         {pestaña('abiertos', `Por revisar${abiertos ? ` (${abiertos})` : ''}`)}
         {pestaña('resueltos', 'Resueltos')}
+        <div className="flex flex-wrap gap-3 items-center sm:ml-auto">
+          <input
+            type="text"
+            placeholder="Buscar en los errores..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            aria-label="Buscar en los errores"
+            className="px-4 py-2 bg-white border border-gray-300 rounded-full text-sm outline-none focus:border-[#003049] w-56 shadow-sm"
+          />
+          <FilterSelect
+            value={origen}
+            onChange={setOrigen}
+            defaultLabel="Todos los orígenes"
+            options={Object.entries(ORIGENES).map(([value, { texto }]) => ({ value, label: texto }))}
+          />
+          <OrdenSelect value={orden} onChange={setOrden} conNombre={false} extras={[{ value: 'veces', label: 'Ordenar: Más repetidos' }]} />
+        </div>
       </div>
 
       {cargando ? (
         <p className="text-gray-500">Cargando…</p>
+      ) : visibles.length === 0 && errores.length > 0 ? (
+        <p className="text-gray-500">Ninguno coincide con la búsqueda o el filtro.</p>
       ) : errores.length === 0 ? (
         <div className="py-12 text-center">
           <CheckCircle2 className="w-10 h-10 mx-auto text-green-500" />
@@ -112,7 +151,7 @@ const Errores = () => {
         </div>
       ) : (
         <ul className="divide-y divide-gray-200 border-y border-gray-200">
-          {errores.map((e) => {
+          {visibles.map((e) => {
             const { texto, Icono } = ORIGENES[e.origen] || ORIGENES.web;
             const expandido = abierto === e._id;
             return (

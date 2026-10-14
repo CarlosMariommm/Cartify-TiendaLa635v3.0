@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import FilterSelect from '../components/UI/FilterSelect';
+import OrdenSelect from '../components/UI/OrdenSelect';
+import { ordenarLista, ORDEN_INICIAL } from '../utils/listasPanel';
 import DataTable from '../components/UI/DataTable';
 import { productTypeService } from '../api/productTypeService';
 import { moduleService } from '../api/moduleService';
@@ -24,6 +26,8 @@ const Categories = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Todos');
+  // Lo más reciente primero: lo que se acaba de agregar. Ver utils/listasPanel.js.
+  const [orden, setOrden] = useState(ORDEN_INICIAL);
 
   const filteredCategories = categories.filter(category => {
     const searchString = searchTerm.toLowerCase();
@@ -137,6 +141,7 @@ const Categories = () => {
                 { value: 'Inactivo', label: 'Inactivos' },
               ]}
             />
+            <OrdenSelect value={orden} onChange={setOrden} />
             <button 
               onClick={handleAddCategory}
               className="px-4 py-2 bg-[#003049] hover:bg-[#00283D] text-white rounded-full text-sm font-medium transition-colors shadow-sm"
@@ -151,7 +156,7 @@ const Categories = () => {
         ) : (
           <DataTable 
             columns={columns}
-            data={filteredCategories}
+            data={ordenarLista(filteredCategories, orden, { nombre: (c) => c.type })}
             renderRow={(item) => (
               <>
                 <td className="py-4 px-4 text-sm text-gray-800 font-medium">{item.type}</td>
