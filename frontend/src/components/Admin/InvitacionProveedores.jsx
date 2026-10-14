@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Truck } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -12,14 +12,16 @@ import { useTurno } from '../../utils/turnoPanel';
  * ============================================================
  * ENLAZAR LOS PROVEEDORES — InvitacionProveedores.jsx
  * ============================================================
- * Al entrar al panel, el administrador ve esta invitación si algún proveedor
+ * Al abrir Proveedores, el administrador ve este aviso si algún proveedor
  * activo todavía no tiene dicho por dónde se le hacen los pedidos (WhatsApp,
  * una app como BEES o llamada). Con eso, la compra sugerida del pronóstico
  * sale con un toque. Ver utils/pedidoProveedor.js.
  *
- *   "Enlazar mis proveedores"  lleva a Proveedores.
- *   "Ahora no"                 no vuelve a salir en esta sesión del navegador.
- *   "No volver a mostrar"      no vuelve a salir en este equipo.
+ * Sale SOLO en Proveedores, que es donde se arregla. Antes salía al entrar
+ * al panel, en cualquier pantalla, y se volvía un estorbo.
+ *
+ *   "Entendido"            no vuelve a salir en esta sesión del navegador.
+ *   "No volver a mostrar"  no vuelve a salir en este equipo.
  *
  * BEES no tiene una API pública: no se "conecta" la cuenta, se guarda el
  * enlace de la app y el botón la abre con la lista copiada. Se dice así.
@@ -28,6 +30,7 @@ import { useTurno } from '../../utils/turnoPanel';
 
 export const CLAVE_AHORA_NO = 'cartify:proveedores-ahora-no';
 export const CLAVE_NO_MOSTRAR = 'cartify:proveedores-no-mostrar';
+export const RUTA_PROVEEDORES = '/proveedores';
 // Un momento después de entrar, para no taparle la pantalla mientras carga.
 const ESPERA_MS = 1500;
 
@@ -41,13 +44,13 @@ const guardar = (almacen, clave) => {
 const InvitacionProveedores = () => {
   const { user } = useAuth();
   const { pathname } = useLocation();
-  const navegar = useNavigate();
   const [pendientes, setPendientes] = useState([]);
   const [abierta, setAbierta] = useState(false);
   const esAdmin = user?.type === 'admin';
+  const enProveedores = pathname === RUTA_PROVEEDORES;
 
   useEffect(() => {
-    if (!esAdmin) return undefined;
+    if (!esAdmin || !enProveedores) return undefined;
     if (leer(localStorage, CLAVE_NO_MOSTRAR) || leer(sessionStorage, CLAVE_AHORA_NO)) return undefined;
     let vigente = true;
     const reloj = setTimeout(async () => {
@@ -58,28 +61,23 @@ const InvitacionProveedores = () => {
           setAbierta(true);
         }
       } catch {
-        // Sin la lista de proveedores no se invita; ya saldrá la próxima vez.
+        // Sin la lista de proveedores no se avisa; ya saldrá la próxima vez.
       }
     }, ESPERA_MS);
     return () => { vigente = false; clearTimeout(reloj); };
-  }, [esAdmin]);
+  }, [esAdmin, enProveedores]);
 
-  // Ya está en Proveedores: no hace falta invitarlo a ir. Y si el tutorial
-  // del apartado está abierto, espera a que se cierre (ver utils/turnoPanel.js).
-  const visible = useTurno('proveedores', abierta && pathname !== '/proveedores');
+  // Solo en Proveedores. Y si el tutorial del apartado está abierto, espera a
+  // que se cierre (ver utils/turnoPanel.js).
+  const visible = useTurno('proveedores', abierta && enProveedores);
 
-  const ahoraNo = () => {
+  const entendido = () => {
     guardar(sessionStorage, CLAVE_AHORA_NO);
     setAbierta(false);
   };
   const noMostrar = () => {
     guardar(localStorage, CLAVE_NO_MOSTRAR);
     setAbierta(false);
-  };
-  const enlazar = () => {
-    guardar(sessionStorage, CLAVE_AHORA_NO);
-    setAbierta(false);
-    navegar('/proveedores');
   };
 
   const nombres = pendientes.slice(0, 3).map((p) => p.name).join(', ');
@@ -94,7 +92,7 @@ const InvitacionProveedores = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 bg-black/50"
-            onClick={ahoraNo}
+            onClick={entendido}
           />
           <motion.div
             role="dialog"
@@ -112,7 +110,8 @@ const InvitacionProveedores = () => {
             </h2>
             <p className="text-gray-700">
               Indique por dónde le hace los pedidos a cada proveedor: WhatsApp, una app como BEES o llamada.
-              Así, la compra sugerida del pronóstico se le pide con un toque.
+              Toque “Editar” en cada uno y elíjalo en “Cómo se le hacen los pedidos”. Así, la compra sugerida
+              del pronóstico se le pide con un toque.
             </p>
             <p className="text-sm text-gray-500">
               {pendientes.length === 1 ? 'Falta 1 proveedor' : `Faltan ${pendientes.length} proveedores`}: {nombres}
@@ -123,16 +122,10 @@ const InvitacionProveedores = () => {
             </p>
             <div className="flex flex-col sm:flex-row-reverse gap-2 pt-2">
               <button
-                onClick={enlazar}
+                onClick={entendido}
                 className="px-5 py-2 rounded-full text-sm font-medium bg-[#003049] text-white hover:bg-[#00283D]"
               >
-                Enlazar mis proveedores
-              </button>
-              <button
-                onClick={ahoraNo}
-                className="px-5 py-2 rounded-full text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-100"
-              >
-                Ahora no
+                Entendido
               </button>
               <button
                 onClick={noMostrar}

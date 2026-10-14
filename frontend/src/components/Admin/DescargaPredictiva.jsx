@@ -58,7 +58,7 @@ const DescargaPredictiva = ({ alTerminar }) => {
       </button>
       {calculando && (
         <p className="text-xs text-gray-500 mt-2" role="status">
-          Si el servicio de análisis estaba en reposo, puede tardar hasta un minuto.
+          Si el servicio de análisis estaba en reposo, puede tardar un par de minutos.
         </p>
       )}
     </div>

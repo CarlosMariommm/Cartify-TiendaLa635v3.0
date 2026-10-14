@@ -26,7 +26,11 @@ vi.mock("../models/shoppings.js", () => ({
   default: { find: () => conLean([{ supplierId: "s1", date: new Date("2026-10-05T18:00:00Z") }]) },
 }));
 
-const { armarSolicitud, obtenerPronostico, olvidarPronostico, diaLocal, textoDelPronostico, pronosticoParaTiqui, solicitudDeDemostracion, hayDemostracion, conCanalesDePedido } = await import("./pronostico.js");
+const {
+  armarSolicitud, obtenerPronostico, olvidarPronostico, diaLocal, textoDelPronostico, pronosticoParaTiqui,
+  solicitudDeDemostracion, hayDemostracion, conCanalesDePedido, correrResultado, resultadoDeDemostracion,
+  pronosticoSinEsperarDeMas,
+} = await import("./pronostico.js");
 
 // Lunes 12 de octubre de 2026, 9 de la mañana en El Salvador.
 const AHORA = new Date("2026-10-12T15:00:00Z");
@@ -211,20 +215,84 @@ describe("la demostración del pronóstico", () => {
     expect(demo.hasta).toBe("2026-10-12"); // la original no se toca
   });
 
-  it("no toca la base, va marcada como demostración y se guarda aparte de la real", async () => {
+  it("sale ya calculada, sin tocar la base ni esperar al servicio, y aparte de la real", async () => {
     expect(hayDemostracion()).toBe(true);
     const datos = await obtenerPronostico({ ahora: AHORA, demo: true });
     expect(datos.demo).toBe(true);
+    expect(datos.historial.hasta).toBe("2026-10-11"); // el día antes de AHORA
+    expect(datos.tienda.dias[0].dia).toBe("2026-10-12"); // y el pronóstico empieza hoy
+    expect(datos.productos.length).toBeGreaterThan(20);
     expect(aggregate).not.toHaveBeenCalled();
-    const enviada = JSON.parse(fetch.mock.calls[0][1].body);
-    expect(enviada.hasta).toBe("2026-10-11"); // el día antes de AHORA
-    expect(enviada.tienda.length).toBeGreaterThan(90);
+    expect(fetch).not.toHaveBeenCalled();
 
-    // La real sigue siendo otra cuenta: pide a la base y al servicio otra vez.
+    // Ni siquiera hace falta que el servicio esté configurado.
+    olvidarPronostico();
+    config.analitica.url = "";
+    expect((await obtenerPronostico({ ahora: AHORA, demo: true })).demo).toBe(true);
+    config.analitica.url = "http://analitica.test";
+
+    // La real sigue siendo otra cuenta: pide a la base y al servicio.
     conVentas();
     const real = await obtenerPronostico({ ahora: AHORA });
     expect(real.demo).toBeUndefined();
-    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("al correr las fechas, el perfil de la semana se gira con ellas", () => {
+    const resultado = {
+      perfil_semana: [1, 2, 3, 4, 5, 6, 7], // lunes a domingo
+      historial: { desde: "2026-10-05", hasta: "2026-10-11", semanas: [{ desde: "2026-10-05", total: 10 }] },
+      productos: [{ se_acaba: { probable: "2026-10-20", pronto: null } }],
+      precision: { motivo: "Hacen falta al menos 28 días." },
+    };
+    const corrido = correrResultado(resultado, 2);
+    expect(corrido.historial).toEqual({ desde: "2026-10-07", hasta: "2026-10-13", semanas: [{ desde: "2026-10-07", total: 10 }] });
+    expect(corrido.productos[0].se_acaba).toEqual({ probable: "2026-10-22", pronto: null });
+    expect(corrido.precision.motivo).toBe("Hacen falta al menos 28 días.");
+    // Lo que era lunes (1) ahora cae miércoles.
+    expect(corrido.perfil_semana).toEqual([6, 7, 1, 2, 3, 4, 5]);
+    expect(correrResultado(resultado, 14).perfil_semana).toEqual(resultado.perfil_semana);
+    expect(resultado.historial.desde).toBe("2026-10-05"); // el original no se toca
+  });
+
+  it("un resultado guardado de otra demostración no se usa", () => {
+    const demo = { hasta: "2026-10-12" };
+    expect(resultadoDeDemostracion(AHORA, { hasta: "2026-09-01", resultado: {} }, demo)).toBeNull();
+    expect(resultadoDeDemostracion(AHORA, null, demo)).toBeNull();
+    expect(resultadoDeDemostracion(AHORA, { hasta: "2026-10-12", resultado: { historial: { hasta: "2026-10-12" } } }, demo).historial.hasta).toBe("2026-10-11");
+  });
+});
+
+/* ── El panel no se queda esperando a Render ── */
+
+describe("el pronóstico que tarda", () => {
+  beforeEach(() => {
+    olvidarPronostico();
+    config.analitica.url = "http://analitica.test";
+    conVentas();
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("si tarda más del plazo, dice 'calculando', sigue en segundo plano y después lo entrega", async () => {
+    let terminar;
+    vi.stubGlobal("fetch", vi.fn(() => new Promise((listo) => { terminar = () => listo({ ok: true, json: async () => ({ productos: [], listo: true }) }); })));
+    expect(await pronosticoSinEsperarDeMas({}, 20)).toBeNull();
+    expect(await pronosticoSinEsperarDeMas({}, 20)).toBeNull(); // sigue el mismo cálculo, no otro
+    expect(fetch).toHaveBeenCalledTimes(1);
+
+    terminar();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(await pronosticoSinEsperarDeMas({}, 20)).toMatchObject({ listo: true });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("si el cálculo de fondo falla, se le dice a la siguiente pregunta", async () => {
+    let fallar;
+    vi.stubGlobal("fetch", vi.fn(() => new Promise((_, mal) => { fallar = () => mal(new Error("se cayó")); })));
+    expect(await pronosticoSinEsperarDeMas({}, 20)).toBeNull();
+    fallar();
+    await new Promise((r) => setTimeout(r, 0));
+    await expect(pronosticoSinEsperarDeMas({}, 20)).rejects.toMatchObject({ codigo: "sin-conexion" });
   });
 });
 

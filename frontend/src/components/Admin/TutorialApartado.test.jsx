@@ -153,12 +153,12 @@ describe('el tutorial de cada apartado', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
-  it('con la invitación de proveedores, sale primero el tutorial y la invitación después', async () => {
+  it('en Proveedores, sale primero su tutorial y el aviso de enlazarlos después', async () => {
     supplierService.getSuppliers.mockResolvedValue([{ _id: '2', name: 'Bebidas del Pacífico', isActive: true }]);
-    await abrir('/pedidos', { conInvitacion: true });
+    await abrir('/proveedores', { conInvitacion: true });
     await esperar(1500);
     expect(screen.getAllByRole('dialog')).toHaveLength(1);
-    expect(screen.getByRole('dialog', { name: 'Pedidos' })).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: 'Proveedores' })).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: 'Saltar' }));
     await esperar(500);
