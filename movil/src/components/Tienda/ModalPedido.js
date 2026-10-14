@@ -65,10 +65,9 @@ const FilaProducto = ({ item }) => {
  * DETALLE DE PEDIDO — ModalPedido.js
  * ============================================================
  * Qué llevaba, en qué va y cómo se paga un pedido del historial. Se abre al
- * tocar su tarjeta en "Mis pedidos" — mismo patrón que ModalProducto y
- * ModalPromo (hoja que sube desde abajo, con asa para arrastrar y cerrar);
- * ver esos dos archivos para el porqué de cada pieza del gesto, no se repite
- * aquí.
+ * tocar su tarjeta en "Mis pedidos" — mismo patrón que ModalProducto (hoja
+ * que sube desde abajo, con asa para arrastrar y cerrar); ver ese archivo
+ * para el porqué de cada pieza del gesto, no se repite aquí.
  *
  * Un pedido a domicilio que sigue abierto se sigue EN VIVO mientras se mira
  * (useSeguimientoEnVivo): el paso al día y, si va en camino, el mapa con el

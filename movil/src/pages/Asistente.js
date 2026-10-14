@@ -36,9 +36,13 @@ const Asistente = () => {
   const { bottom } = useSafeAreaInsets();
   const {
     productos, carrito, totalCarrito, agregarAlCarrito, eliminarDelCarrito, actualizarCantidad, limpiarCarrito,
-    setCategoriaSeleccionada, setTerminoBusqueda, setPromoSeleccionada, cerrarPromo,
+    setCategoriaSeleccionada, setTerminoBusqueda, setPromoSeleccionada,
   } = useTienda();
-  // Lo que pidió VER por voz ("muéstrame las manzanas"), no lo que agregó.
+  /*
+   * Lo que pidió VER por voz ("muéstrame las manzanas"), no lo que agregó.
+   * Aquí SÍ sigue siendo una hoja y no la página del producto: la persona
+   * está hablando con Tiqui, y cambiar de pantalla le cortaría la charla.
+   */
   const [productoAbierto, setProductoAbierto] = useState(null);
 
   /*
@@ -65,7 +69,6 @@ const Asistente = () => {
      */
     irAPromociones: () => {
       setProductoAbierto(null);
-      cerrarPromo?.();
       setPromoSeleccionada?.(null);
       setCategoriaSeleccionada?.(null);
       setTerminoBusqueda?.('');

@@ -22,11 +22,9 @@
  * ── El difuminado de la foto que acompaña ──
  *
  * Igual que la web, la foto se funde hacia la izquierda con el fondo. La web lo
- * hace con `maskImage`; aquí con MaskedView, que pinta la imagen SOLO donde su
- * máscara es opaca. La máscara es un degradado horizontal de transparente
- * (izquierda) a opaco (46%), así que por los huecos transparentes asoma el
- * degradado del fondo que ya está pintado detrás — y se funde con cualquier
- * tema, sea cual sea su color.
+ * hace con `maskImage`; aquí, con un degradado del color del fondo pintado
+ * ENCIMA de la foto (opaco a la izquierda, transparente al 46%). Antes era una
+ * máscara (MaskedView), que en algunos casos dejaba un bloque negro.
  * ============================================================
  */
 
@@ -37,18 +35,34 @@ import { StyleSheet, Text, View } from 'react-native';
 // .webp desde Cloudinary.
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-// Para difuminar la foto que acompaña hacia el fondo, como la web con maskImage.
-import MaskedView from '@react-native-masked-view/masked-view';
-import { coloresDePromo } from '../../utils/temasPromo';
+import { coloresDePromo, difuminadoDelFondo, puntoEnDiagonal } from '../../utils/temasPromo';
 import { glifoDePromo, MaterialCommunityIcons } from '../../utils/iconosPromo';
 import { Flecha, Reloj } from '../UI/Iconos';
 import { useIdioma } from '../../context/IdiomaContext';
 import { foto, ANCHO } from '../../utils/fotos';
 
 // La misma proporción que la web (2.2:1), para que el texto respire igual.
-const PROPORCION = 2.2;
+export const PROPORCION = 2.2;
 
-const TarjetaPromo = ({ promo, etiqueta, vencimiento, ancho }) => {
+// Lo que en CSS es clamp(min, valor, max).
+const entre = (min, valor, max) => Math.max(min, Math.min(valor, max));
+
+/*
+ * El color del fondo justo donde empieza la foto (54% del ancho, a media
+ * altura). El degradado de la tarjeta va en diagonal, así que ahí ya no es
+ * ni el primer color ni el último: con el último a secas quedaba un corte
+ * visible a la izquierda de la foto. Ver difuminadoDelFondo.
+ */
+const T_BORDE_FOTO = puntoEnDiagonal(0.54, 0.5, PROPORCION);
+
+/*
+ * Hasta este ancho la tarjeta es "angosta": la web lo decide con una consulta
+ * @container de 380 px (index.css, .promo-titulo). Ahí la descripción se va,
+ * los sellos no se parten en dos filas y el título le deja lugar a la flecha.
+ */
+const ANGOSTA = 380;
+
+const TarjetaPromo = ({ promo, etiqueta, vencimiento, ancho, mostrarFlecha = true }) => {
   const { t } = useIdioma();
   const [fallóImagen, setFallóImagen] = useState(false);
   const colores = coloresDePromo(promo);
@@ -70,6 +84,20 @@ const TarjetaPromo = ({ promo, etiqueta, vencimiento, ancho }) => {
    */
   const marcaDeAgua = !!glifo && !hayImagen;
   const alto = ancho / PROPORCION;
+
+  /*
+   * La letra se mide contra el ancho de ESTA tarjeta, con las mismas cuentas
+   * que la web (cqw = 1% del ancho). En el carrusel la tarjeta es angosta y
+   * con las letras fijas de antes el texto se salía por abajo.
+   */
+  const angosta = ancho <= ANGOSTA;
+  const medidas = {
+    relleno: entre(16, ancho * 0.045, 40),
+    sello: entre(10, ancho * 0.03, 16),
+    vence: entre(9, ancho * 0.024, 13),
+    titulo: angosta ? entre(15, ancho * 0.066, 22) : entre(14, ancho * 0.06, 32),
+    descripcion: entre(11, ancho * 0.03, 16),
+  };
 
   // Los dos colores del degradado, o el gris de respaldo cuando la promo trae
   // su banner completo y el degradado no se ve.
@@ -119,28 +147,17 @@ const TarjetaPromo = ({ promo, etiqueta, vencimiento, ancho }) => {
       )}
 
       {/*
-        La foto se pinta a través de una máscara de degradado: opaca a la
-        derecha y desvaneciéndose hacia la izquierda, así se funde con el fondo
-        en vez de cortarse con un borde duro. Es el equivalente del `maskImage`
-        de la web. Por los huecos transparentes de la máscara se ve el degradado
-        del fondo, que ya está pintado detrás.
+        La foto va a la derecha y ENCIMA, un degradado del color del fondo que
+        va de opaco (a la izquierda de la foto) a transparente (al 46%): así se
+        funde con la tarjeta en vez de cortarse con un borde duro, como el
+        `maskImage` de la web.
+
+        Antes era una máscara (MaskedView), y donde la máscara no se pinta —el
+        modo web, algunos teléfonos— la foto salía con un bloque negro encima.
+        El degradado encima se pinta siempre.
       */}
       {acompaña && (
-        <MaskedView
-          style={estilos.imagenAcompana}
-          pointerEvents="none"
-          maskElement={
-            <LinearGradient
-              // Transparente al 0% y opaco al 46%, igual que la web
-              // (`linear-gradient(to right, transparent 0%, #000 46%)`).
-              colors={['transparent', '#000']}
-              locations={[0, 0.46]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={StyleSheet.absoluteFill}
-            />
-          }
-        >
+        <View style={estilos.imagenAcompana} pointerEvents="none">
           <Image
             source={{ uri: foto(promo.image, ANCHO.promo) }}
             contentFit="cover"
@@ -148,7 +165,14 @@ const TarjetaPromo = ({ promo, etiqueta, vencimiento, ancho }) => {
             onError={() => setFallóImagen(true)}
             accessible={false}
           />
-        </MaskedView>
+          <LinearGradient
+            colors={difuminadoDelFondo(degradado, T_BORDE_FOTO)}
+            locations={[0, 0.46]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={StyleSheet.absoluteFill}
+          />
+        </View>
       )}
 
       {aSangre ? (
@@ -160,12 +184,20 @@ const TarjetaPromo = ({ promo, etiqueta, vencimiento, ancho }) => {
           accessibilityLabel={promo.title || promo.promoDescription || t('Promoción')}
         />
       ) : (
-        <View style={estilos.contenido}>
+        <View style={[estilos.contenido, { padding: medidas.relleno }]}>
           {(!!etiqueta || !!vencimiento) && (
-            <View style={estilos.filaSellos}>
+            /*
+             * Angosta, los sellos van en UNA fila: si se partían en dos le
+             * quitaban un renglón al título. La fecha es la que se recorta.
+             */
+            <View style={[estilos.filaSellos, angosta && estilos.filaSellosAngosta]}>
               {!!etiqueta && (
                 <View style={[estilos.sello, { backgroundColor: colores.acento }]}>
-                  <Text style={[estilos.selloTexto, { color: textoSobreAcento }]} numberOfLines={1}>
+                  {/* El mismo icono, en chiquito: acompaña al ahorro. */}
+                  {!!glifo && (
+                    <MaterialCommunityIcons name={glifo} size={medidas.sello} color={textoSobreAcento} />
+                  )}
+                  <Text style={[estilos.selloTexto, { color: textoSobreAcento, fontSize: medidas.sello }]} numberOfLines={1}>
                     {etiqueta}
                   </Text>
                 </View>
@@ -173,9 +205,12 @@ const TarjetaPromo = ({ promo, etiqueta, vencimiento, ancho }) => {
 
               {/* La urgencia va junto al ahorro: es la mitad del argumento. */}
               {!!vencimiento && (
-                <View style={[estilos.vence, { borderColor: colores.acento }]}>
-                  <Reloj size={11} color={colores.texto} grosor={1.3} />
-                  <Text style={[estilos.venceTexto, { color: colores.texto }]} numberOfLines={1}>
+                <View style={[estilos.vence, { borderColor: colores.acento }, angosta && estilos.venceAngosta]}>
+                  {!angosta && <Reloj size={11} color={colores.texto} grosor={1.3} />}
+                  <Text
+                    style={[estilos.venceTexto, { color: colores.texto, fontSize: medidas.vence }, angosta && estilos.venceTextoAngosta]}
+                    numberOfLines={1}
+                  >
                     {vencimiento}
                   </Text>
                 </View>
@@ -184,7 +219,17 @@ const TarjetaPromo = ({ promo, etiqueta, vencimiento, ancho }) => {
           )}
 
           <Text
-            style={[estilos.titulo, { color: colores.texto, maxWidth: acompaña ? '62%' : '100%' }]}
+            style={[
+              estilos.titulo,
+              {
+                color: colores.texto,
+                maxWidth: acompaña ? '62%' : '100%',
+                fontSize: medidas.titulo,
+                lineHeight: Math.round(medidas.titulo * 1.12),
+              },
+              // La flecha redonda vive abajo a la derecha: el título no se le mete.
+              angosta && mostrarFlecha && !acompaña && { paddingRight: 40 },
+            ]}
             // Tope de dos líneas: un título largo empujaba la descripción fuera
             // de la tarjeta en vez de cortarse.
             numberOfLines={2}
@@ -192,11 +237,17 @@ const TarjetaPromo = ({ promo, etiqueta, vencimiento, ancho }) => {
             {promo?.title || t('Su promoción se verá aquí')}
           </Text>
 
-          {!!promo?.promoDescription && (
+          {/* En la tarjeta angosta no cabe: la web también la esconde. */}
+          {!!promo?.promoDescription && !angosta && (
             <Text
               style={[
                 estilos.descripcion,
-                { color: colores.texto, maxWidth: acompaña ? '58%' : '78%' },
+                {
+                  color: colores.texto,
+                  maxWidth: acompaña ? '58%' : '78%',
+                  fontSize: medidas.descripcion,
+                  lineHeight: Math.round(medidas.descripcion * 1.35),
+                },
               ]}
               numberOfLines={2}
             >
@@ -206,14 +257,17 @@ const TarjetaPromo = ({ promo, etiqueta, vencimiento, ancho }) => {
         </View>
       )}
 
-      <View
-        style={[
-          estilos.flecha,
-          { backgroundColor: aSangre ? 'rgba(255,255,255,0.94)' : colores.flecha },
-        ]}
-      >
-        <Flecha size={16} color={aSangre ? '#2A1A0E' : textoSobreAcento} />
-      </View>
+      {/* Las de los lados del carrusel no la llevan: tocarlas las trae al centro. */}
+      {mostrarFlecha && (
+        <View
+          style={[
+            estilos.flecha,
+            { backgroundColor: aSangre ? 'rgba(255,255,255,0.94)' : colores.flecha },
+          ]}
+        >
+          <Flecha size={16} color={aSangre ? '#2A1A0E' : textoSobreAcento} />
+        </View>
+      )}
     </View>
   );
 };
@@ -259,25 +313,30 @@ const estilos = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  contenido: {
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-  },
+  // El relleno y los tamaños de letra los pone `medidas`, según el ancho.
+  contenido: {},
   filaSellos: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 9,
+    marginBottom: 10,
     flexWrap: 'wrap',
   },
+  filaSellosAngosta: {
+    flexWrap: 'nowrap',
+    gap: 6,
+    marginBottom: 8,
+  },
   sello: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
     paddingVertical: 4,
     paddingHorizontal: 11,
     borderRadius: 999,
   },
   selloTexto: {
     fontWeight: '800',
-    fontSize: 12.5,
     letterSpacing: 0.3,
   },
   vence: {
@@ -289,21 +348,24 @@ const estilos = StyleSheet.create({
     paddingHorizontal: 9,
     borderRadius: 999,
   },
+  // Angosta, la fecha cede el lugar: se recorta con "…" antes que empujar.
+  venceAngosta: {
+    flexShrink: 1,
+    minWidth: 0,
+  },
   venceTexto: {
     fontWeight: '600',
-    fontSize: 10.5,
     opacity: 0.92,
+  },
+  venceTextoAngosta: {
+    flexShrink: 1,
   },
   titulo: {
     fontWeight: '800',
-    fontSize: 20,
-    lineHeight: 23,
     letterSpacing: -0.4,
   },
   descripcion: {
-    fontSize: 12.5,
-    lineHeight: 17,
-    marginTop: 5,
+    marginTop: 6,
     opacity: 0.85,
   },
   flecha: {
