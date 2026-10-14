@@ -10,12 +10,13 @@ import toast from 'react-hot-toast';
 import SupplierFormModal from '../components/Admin/SupplierFormModal';
 import GenericConfirmModal from '../components/Admin/GenericConfirmModal';
 import TableActions from '../components/UI/TableActions';
+import { nombreDelCanal } from '../utils/pedidoProveedor';
 
 const Suppliers = () => {
   const [suppliers, setSuppliers] = useState([]);
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(false);
-  const columns = ['Nombre', 'Teléfono', 'Deuda', 'Estado', 'Acciones'];
+  const columns = ['Nombre', 'Teléfono', 'Se le pide por', 'Deuda', 'Estado', 'Acciones'];
 
   // Deuda de cada proveedor, para verla sin abrir el estado de cuenta.
   const { proveedores: creditos, totales, recargar: recargarCredito } = useResumenCredito();
@@ -173,6 +174,10 @@ const Suppliers = () => {
               <>
                 <td className="py-4 px-4 text-sm text-gray-800 font-medium">{item.name}</td>
                 <td className="py-4 px-4 text-sm text-gray-600">{item.phoneNumber}</td>
+                {/* Por dónde se le hacen los pedidos (el botón "Pedir" del pronóstico) */}
+                <td className="py-4 px-4 text-sm text-gray-600">
+                  {nombreDelCanal(item.pedidos) || <span className="text-gray-300">—</span>}
+                </td>
                 {/* La deuda abre el estado de cuenta; lo vencido va en rojo */}
                 <td className="py-4 px-4 text-sm">
                   {(() => {

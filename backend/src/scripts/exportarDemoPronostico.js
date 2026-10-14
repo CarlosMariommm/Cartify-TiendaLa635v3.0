@@ -4,7 +4,8 @@
  * ============================================================
  * Resume la base LOCAL de demostración (cartify_demo, la que siembra
  * videos-tutoriales/demo/datos-demo.mjs) en src/datos/pronosticoDemo.json:
- * lo vendido por día y por producto, existencias, proveedores y compras.
+ * lo vendido por día y por producto, existencias, proveedores (con por dónde
+ * se les pide) y compras.
  * Nada de clientes. Con ese archivo, la pantalla Pronóstico del panel
  * publicado tiene su modo "Demostración" sin tocar la base de producción
  * (ver utils/pronostico.js, solicitudDeDemostracion).
@@ -27,6 +28,13 @@ if (!ultimo) throw new Error("La base de demostración no tiene pedidos: correr 
 const ahora = new Date(`${diaLocal(ultimo.createdAt)}T12:00:00-06:00`);
 
 const solicitud = await armarSolicitud(ahora, fuenteDeBase(c.db));
+// Por dónde se le pide a cada proveedor de la demostración (para el botón "Pedir").
+const proveedores = await c.db.collection("Suppliers").find({}, { projection: { pedidos: 1, phoneNumber: 1 } }).toArray();
+const canal = new Map(proveedores.map((p) => [String(p._id), p]));
+solicitud.proveedores = solicitud.proveedores.map((p) => {
+  const doc = canal.get(p.id);
+  return { ...p, pedido: doc?.pedidos?.canal ? { ...doc.pedidos, telefono: doc.phoneNumber || "" } : null };
+});
 await c.close();
 
 const destino = new URL("../datos/pronosticoDemo.json", import.meta.url);

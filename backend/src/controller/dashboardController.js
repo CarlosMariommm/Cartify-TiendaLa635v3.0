@@ -2,7 +2,7 @@ import orderModel from "../models/order.js";
 import productModel from "../models/product.js";
 import supplierMovementModel from "../models/supplierMovement.js";
 import clientModel from "../models/client.js";
-import { hayDemostracion, obtenerPronostico } from "../utils/pronostico.js";
+import { conCanalesDePedido, hayDemostracion, obtenerPronostico } from "../utils/pronostico.js";
 
 /*
  * Dashboard del admin — arma TODO el resumen en una sola llamada.
@@ -416,7 +416,8 @@ const MENSAJES_PRONOSTICO = {
  */
 dashboardController.getPronostico = async (req, res) => {
   try {
-    const datos = await obtenerPronostico({ forzar: req.query.forzar === "1", demo: req.query.demo === "1" });
+    const demo = req.query.demo === "1";
+    const datos = await conCanalesDePedido(await obtenerPronostico({ forzar: req.query.forzar === "1", demo }), { demo });
     return res.status(200).json({ ...datos, demoDisponible: hayDemostracion() });
   } catch (error) {
     const [estado, mensaje] = MENSAJES_PRONOSTICO[error?.codigo] || [502, "No se pudo calcular el pronóstico."];

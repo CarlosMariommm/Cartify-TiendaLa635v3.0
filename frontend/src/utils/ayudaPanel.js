@@ -207,6 +207,7 @@ export const TEMAS_AYUDA = [
       'El resumen dice en palabras lo más importante. La gráfica pone las semanas que pasaron junto a las que vienen, con la línea del rango.',
       '“Productos que se agotarían” dice cuándo se acabaría cada uno con la venta esperada y lo antes que podría pasar.',
       '“Compra sugerida” separa por proveedor cuánto pedir para llegar a la próxima compra y cuánto costaría.',
+      'Junto a cada proveedor está el botón para pedírselo: “Pedir por WhatsApp” abre WhatsApp con el mensaje y la lista ya escritos; “Pedir en BEES” (o la app que sea) abre la app con la lista copiada para pegarla; “Llamar” marca su número. Si dice “Indicar cómo se le pide”, falta decirlo en Proveedores.',
       '“Actualizar” lo vuelve a calcular con las ventas más recientes; “Descargar PDF” saca el reporte predictivo para imprimir o compartir.',
       'Arriba puede elegir “Tienda real” o “Demostración”. La demostración muestra el pronóstico con 3 meses y medio de ventas inventadas, para ver todo lo que hace cuando hay historia; la tienda real no cambia, y el PDF dice que es una demostración.',
     ],
@@ -329,15 +330,17 @@ export const TEMAS_AYUDA = [
     soloAdmin: true,
     titulo: 'Proveedores',
     Icono: Truck,
-    resumen: 'A quién le compra la tienda y cuánto se le debe a cada uno.',
+    resumen: 'A quién le compra la tienda, por dónde se le pide y cuánto se le debe a cada uno.',
     pasos: [
       '“Agregar proveedor” con sus datos de contacto.',
       'En “Estado de cuenta” registre cada compra al crédito y cada pago. El número de factura (F-0001) o de recibo (R-0001) se pone solo; si el papel trae otro, escríbalo encima.',
       'Ponga el límite de crédito y el plazo en días: la fecha de pago de cada factura se calcula sola.',
       'Lo vencido sale arriba, en rojo. Las facturas por pagar se pueden mandar al calendario del teléfono con “Calendario” o con el código QR.',
+      'En “Cómo se le hacen los pedidos” elija WhatsApp (con su número), una app o sitio como BEES (con su enlace) o llamada. Con eso, la compra sugerida del Pronóstico se le pide con un toque.',
     ],
     consejos: [
       'Si paga de más, la diferencia queda a favor para la próxima factura.',
+      'BEES y apps parecidas no reciben pedidos de otros sistemas: el botón abre la app con la lista copiada, y usted la pega en el carrito.',
     ],
   },
   {
