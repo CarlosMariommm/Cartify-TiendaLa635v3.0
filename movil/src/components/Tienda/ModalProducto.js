@@ -297,6 +297,10 @@ ${url}`,
                 <Paquete size={64} />
               )}
             </View>
+            {/* El crédito de una foto que no es de la tienda (Open Food Facts lo pide en su licencia). */}
+            {!!producto.fotoFuente && producto.imagen && !fallóImagen && (
+              <Text style={estilos.creditoFoto}>{t('Foto: {fuente}', { fuente: producto.fotoFuente })}</Text>
+            )}
 
             {!!producto.marca && <Text style={estilos.marca}>{producto.marca.toUpperCase()}</Text>}
 
@@ -683,6 +687,12 @@ const crearEstilos = (COLORES) => StyleSheet.create({
     paddingBottom: 26,
     borderTopWidth: 1,
     borderTopColor: COLORES.linea,
+  },
+  creditoFoto: {
+    alignSelf: 'flex-end',
+    marginTop: 4,
+    fontSize: 11,
+    color: COLORES.textoTenue,
   },
   // "Quien compra esto también lleva": una fila que se desliza de lado, sin tarjetas.
   carrilJuntos: {

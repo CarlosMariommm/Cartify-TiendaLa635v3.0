@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useInventory } from '../hooks/useInventory';
-import { Plus, Search, ArrowDownUp } from 'lucide-react';
+import { Plus, Search, ArrowDownUp, FileSpreadsheet } from 'lucide-react';
 import FilterSelect from '../components/UI/FilterSelect';
 import CategoryPills from '../components/Inventory/CategoryPills';
 import ProductCard from '../components/Inventory/ProductCard';
 import ProductFormModal from '../components/Inventory/ProductFormModal';
 import ProductViewModal from '../components/Inventory/ProductViewModal';
 import ConfirmActionModal from '../components/Inventory/ConfirmActionModal';
+import ImportarExcel from '../components/Inventory/ImportarExcel';
+import ConsejoImportar from '../components/Inventory/ConsejoImportar';
 // El <Toaster> global vive en App.jsx (uno solo, para que los avisos se cierren bien).
 
 const Inventory = () => {
@@ -21,8 +23,12 @@ const Inventory = () => {
     selectedCategory, 
     setSelectedCategory,
     saveProduct,
-    deleteProduct
+    deleteProduct,
+    recargar
   } = useInventory();
+
+  // Importar desde Excel: la IA completa y busca las fotos. Ver ImportarExcel.
+  const [importando, setImportando] = useState(false);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
@@ -162,6 +168,13 @@ const Inventory = () => {
             ]}
           />
           <button
+            onClick={() => setImportando(true)}
+            className="flex flex-none items-center gap-2 px-5 py-2 rounded-full text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-100 transition-colors"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            Importar desde Excel
+          </button>
+          <button
             onClick={handleAddProduct}
             className="flex flex-none items-center gap-2 px-5 sm:px-6 py-2 bg-[#003049] hover:bg-[#00283D] text-white rounded-full text-sm font-medium transition-colors shadow-sm"
           >
@@ -170,6 +183,8 @@ const Inventory = () => {
           </button>
         </div>
       </div>
+
+      <ConsejoImportar onImportar={() => setImportando(true)} />
 
       {/*
         Resumen del inventario: contexto antes de la lista, y de paso el filtro.
@@ -274,6 +289,12 @@ const Inventory = () => {
         suppliers={suppliers}
         categories={categories}
       />
+      <ImportarExcel
+        isOpen={importando}
+        onClose={() => setImportando(false)}
+        onImportado={recargar}
+      />
+
       <ProductViewModal 
         isOpen={isViewOpen}
         onClose={() => setIsViewOpen(false)}

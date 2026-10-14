@@ -245,6 +245,15 @@ const Foto = styled.img`
   filter: drop-shadow(0 14px 30px rgba(28, 22, 20, 0.16));
 `;
 
+// El crédito de una foto que no es de la tienda (Open Food Facts lo pide en su licencia).
+const CreditoFoto = styled.span`
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  font-size: 11px;
+  color: var(--tinta-tenue);
+`;
+
 const SinFoto = styled.div`
   color: var(--tinta-tenue);
   display: flex;
@@ -675,7 +684,10 @@ const ProductDetailModal = ({
                 entender que había varias vistas cuando no las hay.
               */}
               {producto.imagen && !imgError ? (
-                <Foto data-foto-detalle src={foto(producto.imagen, ANCHO.ficha)} alt={producto.nombre} onError={marcarImagenRota} />
+                <>
+                  <Foto data-foto-detalle src={foto(producto.imagen, ANCHO.ficha)} alt={producto.nombre} onError={marcarImagenRota} />
+                  {producto.fotoFuente && <CreditoFoto>{t('Foto: {fuente}', { fuente: producto.fotoFuente })}</CreditoFoto>}
+                </>
               ) : (
                 <SinFoto><Package size={84} strokeWidth={1.1} /></SinFoto>
               )}

@@ -1,5 +1,6 @@
 import express from 'express';
 import productController from '../controller/product.js';
+import importarController from '../controller/importarController.js';
 import upload from '../utils/cloudinaryConfig.js';
 
 
@@ -18,6 +19,25 @@ import { soloAdmin, soloPersonal } from '../middlewares/validarSesion.js';
  * tags:
  *   name: Products
  *   description: Gestión del catálogo de productos.
+ */
+
+/**
+ * @swagger
+ * /product/importar/columnas:
+ *   post:
+ *     summary: La IA dice qué columna del Excel es cuál (solo el dueño)
+ *     description: 'Recibe { encabezados, ejemplos } y devuelve { mapa: { nombre: 0, precio: 3, … } }. 503 si la IA no está disponible.'
+ *     tags: [Products]
+ * /product/importar/analizar:
+ *   post:
+ *     summary: Vista previa de hasta 20 filas del Excel (solo el dueño)
+ *     description: La IA completa marca, pasillo, categoría, unidad, +18 y descripción; se busca la foto en Open Food Facts (por código de barras, o por nombre si coincide casi entero) y se marca lo que ya existe. No guarda nada. Ver src/utils/importarProductos.js.
+ *     tags: [Products]
+ * /product/importar:
+ *   post:
+ *     summary: Crea hasta 20 productos ya revisados (solo el dueño)
+ *     description: Crea los pasillos, categorías, marcas y proveedores que falten y sube la foto a Cloudinary. Lo que ya existe se omite. No avisa a los clientes de productos nuevos.
+ *     tags: [Products]
  */
 
 /**
@@ -182,6 +202,11 @@ router.get("/inventario", soloPersonal, productController.getInventario);
 
 // Lo que se lleva junto en un mismo pedido, para la ficha de cada producto. Público, como el catálogo.
 router.get("/tambien-llevan", productController.getTambienLlevan);
+
+// Importar el inventario desde un Excel, por tandas de 20. Solo el dueño. Ver utils/importarProductos.js.
+router.post("/importar/columnas", soloAdmin, importarController.columnas);
+router.post("/importar/analizar", soloAdmin, importarController.analizar);
+router.post("/importar", soloAdmin, importarController.importar);
 
 router.route("/:id")
     .put(soloAdmin, upload.single('image'), productController.updateProduct)
