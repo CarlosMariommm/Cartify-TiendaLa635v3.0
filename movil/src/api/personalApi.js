@@ -3,12 +3,12 @@
  * EL PERSONAL DE LA TIENDA — personalApi.js
  * ============================================================
  * Lo que habla la app cuando entra alguien del personal: su inicio de sesión
- * (el mismo del panel web, con el código que llega al correo), Tiqui del panel
- * (/api/tiqui-panel, solo el administrador) y el Reparto (los pedidos a
- * domicilio, moverlos de estado y mandar la ubicación del repartidor).
+ * (el mismo del panel web, con el código que llega al correo), el pase del
+ * panel web y el Reparto (los pedidos a domicilio, moverlos de estado y
+ * mandar la ubicación del repartidor).
  *
- * Tiqui del panel es OTRA asistente que la de la tienda (asistenteApi): no
- * comparten sesión ni charla.
+ * Tiqui del panel ya no tiene pantalla propia en la app: vive en el panel web,
+ * que la app abre en su sección "Panel" (ver PanelWeb.js).
  *
  * El token del personal va en cada llamada, a mano, y NO se instala como el
  * token de la app (establecerToken): ese es el del cliente, y mezclarlos haría
@@ -16,22 +16,11 @@
  * ============================================================
  */
 
-import { peticion, URL_API } from './api';
+import { peticion } from './api';
 
 const conToken = (token) => ({ Authorization: `Bearer ${token}` });
 
-/*
- * Por qué no se pudo: 'sesion' cierra el modo personal; 'lento' es el servidor
- * de Render despertándose (se duerme sin tráfico y la primera pregunta puede
- * tardar medio minuto), que no es culpa del internet.
- */
-export const origenDe = (error) =>
-  error?.estado === 401 ? 'sesion'
-    : error?.estado === 429 ? 'tope'
-    : error?.estado === 0 && /tard/.test(error?.message || '') ? 'lento'
-    : 'sin-red';
-
-// Lo que se le aguanta al servidor: si está despertando, tarda más que la IA.
+// Lo que se le aguanta al servidor: si está despertando, puede tardar medio minuto.
 const ESPERA_MS = 30000;
 
 export const personalApi = {
@@ -68,47 +57,6 @@ export const personalApi = {
       cabeceras: conToken(token),
       tiempoMaximo: 45000,
     }),
-
-  // ── Tiqui del panel (solo el administrador) ──
-
-  despertar: async (token) => {
-    try {
-      const datos = await peticion('/tiqui-panel/listo', { cabeceras: conToken(token), tiempoMaximo: 45000 });
-      return { voz: Boolean(datos?.voz) };
-    } catch (error) {
-      return { voz: false, origen: origenDe(error) };
-    }
-  },
-
-  // pantalla 'app': el servidor sabe que aquí no hay pantallas del panel que abrir.
-  conversar: async (token, { frase, historial }) => {
-    try {
-      return await peticion('/tiqui-panel', {
-        metodo: 'POST',
-        cuerpo: { frase, historial, pantalla: 'app' },
-        cabeceras: conToken(token),
-        tiempoMaximo: ESPERA_MS,
-      });
-    } catch (error) {
-      return { acciones: [], respuesta: '', entendido: false, origen: origenDe(error) };
-    }
-  },
-
-  confirmar: async (token, propuesta) => {
-    try {
-      return await peticion('/tiqui-panel/confirmar', {
-        metodo: 'POST',
-        cuerpo: { token: propuesta },
-        cabeceras: conToken(token),
-        tiempoMaximo: ESPERA_MS,
-      });
-    } catch (error) {
-      return { ok: false, respuesta: '', origen: origenDe(error) };
-    }
-  },
-
-  // La voz es la misma de la tienda: convertir texto en audio no sabe de ninguna asistente.
-  urlVoz: (texto) => `${URL_API}/ai/voz?t=${encodeURIComponent(texto)}`,
 
   // ── El panel web dentro de la app (solo el administrador) ──
 

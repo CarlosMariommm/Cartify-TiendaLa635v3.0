@@ -83,6 +83,7 @@ import {
   vencimientoEnTexto,
 } from '../../utils/tarjetas';
 import { contenidoCentrado } from '../../theme/pantalla';
+import { formatoCodigoTarjeta, LARGO_CODIGO_TARJETA } from '../../utils/tarjetaRegalo';
 
 const FORM_VACIO = { tipo: 'credito', numero: '', titular: '', vencimiento: '', alias: '' };
 
@@ -324,7 +325,9 @@ const Pagos = ({ alVolver }) => {
             <View style={estilos.filaCanje}>
               <TextInput
                 value={codigoTarjeta}
-                onChangeText={(v) => setCodigoTarjeta(v.toUpperCase())}
+                // Los guiones se ponen solos (ver utils/tarjetaRegalo.js).
+                onChangeText={(v) => setCodigoTarjeta(formatoCodigoTarjeta(v))}
+                maxLength={LARGO_CODIGO_TARJETA}
                 placeholder={t('¿Tienes una tarjeta? 635-XXXX-XXXX')}
                 placeholderTextColor={COLORES.marcador}
                 keyboardAppearance={COLORES.oscuro ? 'dark' : 'light'}

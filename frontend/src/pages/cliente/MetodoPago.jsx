@@ -7,6 +7,7 @@ import { usePaymentMethods } from '../../hooks/usePaymentMethods';
 import { useSaldo } from '../../hooks/useSaldo';
 import MarcaTarjeta from '../../components/Cuenta/MarcaTarjeta';
 import VistaTarjeta from '../../components/Cuenta/VistaTarjeta';
+import { formatoCodigoTarjeta, LARGO_CODIGO_TARJETA } from '../../utils/tarjetaRegalo';
 import Mascota, { CargandoMascota } from '../../components/UI/Mascota';
 import {
   NOMBRE_MARCA,
@@ -173,7 +174,12 @@ const MetodoPago = () => {
           <div>
             <input
               value={codigo}
-              onChange={(e) => setCodigo(e.target.value.toUpperCase())}
+              // Los guiones se ponen solos (ver utils/tarjetaRegalo.js).
+              onChange={(e) => setCodigo(formatoCodigoTarjeta(e.target.value))}
+              maxLength={LARGO_CODIGO_TARJETA}
+              autoCapitalize="characters"
+              autoComplete="off"
+              spellCheck={false}
               placeholder="635-XXXX-XXXX"
               aria-label={t('Código de la tarjeta de regalo')}
               className="px-3 py-2.5 rounded-xl border outline-none font-mono tracking-wider w-48"
