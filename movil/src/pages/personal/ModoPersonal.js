@@ -4,17 +4,19 @@
  * ============================================================
  * Lo que ve quien entró por "¿Trabajas en la tienda?". Depende de su cuenta:
  *
- *   - El ADMINISTRADOR tiene tres secciones: Tiqui del panel (le pregunta cómo
- *     va el negocio y le pide cambios), el Reparto (lo que antes era "Estoy
- *     trabajando" en la web) y el Panel, el mismo de la web dentro de la app
- *     (PanelWeb.js). Cambia entre ellas arriba.
+ *   - El ADMINISTRADOR tiene dos secciones: el Reparto (lo que antes era
+ *     "Estoy trabajando" en la web) y el Panel, el mismo de la web dentro de
+ *     la app (PanelWeb.js). Cambia entre ellas arriba.
  *   - El EMPLEADO ve solo el Reparto.
  *
- * Las secciones se quedan montadas aunque no se vean: cambiar a Reparto no
- * borra la charla con Tiqui, y cambiar a Tiqui no corta la ubicación que se
- * está compartiendo con un cliente (el reparto vive aquí arriba, en
- * useRepartoPersonal, y no dentro de su pantalla). El Panel se monta la
- * primera vez que se abre y desde ahí también se queda.
+ * Tiqui del panel ya no tiene sección propia: vive en el Panel, igual que en
+ * la computadora (su burbuja en la esquina). Tener las dos era la misma
+ * asistente repetida.
+ *
+ * Las secciones se quedan montadas aunque no se vean: cambiar al Panel no
+ * corta la ubicación que se está compartiendo con un cliente (el reparto vive
+ * aquí arriba, en useRepartoPersonal, y no dentro de su pantalla). El Panel
+ * se monta la primera vez que se abre y desde ahí también se queda.
  *
  * LOS PEDIDOS NUEVOS. Mientras la sesión esté abierta, cada pedido que entra
  * suena en este teléfono (hooks/useAvisosPersonal.js). Al tocar el aviso: a
@@ -33,7 +35,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { BellOff, Bike, Download, LayoutDashboard, LogOut, RotateCw, Sparkles } from 'lucide-react-native';
+import { BellOff, Bike, Download, LayoutDashboard, LogOut, RotateCw } from 'lucide-react-native';
 import { useColores, useEstilos } from '../../context/ModoContext';
 import { useTema } from '../../context/TemaContext';
 import { usePersonal } from '../../context/PersonalContext';
@@ -45,12 +47,10 @@ import { useAvisosPersonal } from '../../hooks/useAvisosPersonal';
 import { escucharLlegadas, escucharToques } from '../../utils/notificaciones';
 import { ALTURA_ESTADO } from '../../theme/pantalla';
 import ModalConfirmar from '../../components/UI/ModalConfirmar';
-import TiquiAdmin from './TiquiAdmin';
 import Reparto from './Reparto';
 import PanelWeb from './PanelWeb';
 
 const SECCIONES = [
-  { clave: 'tiqui', nombre: 'Tiqui', Icono: Sparkles },
   { clave: 'reparto', nombre: 'Reparto', Icono: Bike },
   { clave: 'panel', nombre: 'Panel', Icono: LayoutDashboard },
 ];
@@ -72,8 +72,8 @@ const ModoPersonal = () => {
   const { colores } = useTema();
   const { sesion, esAdmin, salir } = usePersonal();
   const reparto = useRepartoPersonal();
-  // El administrador abre con Tiqui; el empleado solo tiene el Reparto.
-  const [seccion, setSeccion] = useState(esAdmin ? 'tiqui' : 'reparto');
+  // Todos abren en el Reparto; el administrador tiene además el Panel.
+  const [seccion, setSeccion] = useState('reparto');
   const actual = esAdmin ? seccion : 'reparto';
   const indiceActivo = SECCIONES.findIndex((s) => s.clave === actual);
 
@@ -327,11 +327,6 @@ const ModoPersonal = () => {
         )}
       </View>
 
-      {esAdmin && (
-        <View style={actual === 'tiqui' ? estilos.flexible : estilos.oculta}>
-          <TiquiAdmin />
-        </View>
-      )}
       <View style={actual === 'reparto' ? estilos.flexible : estilos.oculta}>
         <Reparto reparto={reparto} />
       </View>

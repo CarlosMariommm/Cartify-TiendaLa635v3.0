@@ -305,8 +305,8 @@ const LoginClient = ({ irARegistro, irATienda, irAPersonal }) => {
           </Text>
 
           {/*
-            La puerta del personal: el administrador entra a Tiqui del panel y
-            al Reparto; el empleado, al Reparto (ver pages/personal). Discreta a
+            La puerta del personal: el administrador entra al Reparto y al panel
+            web; el empleado, al Reparto (ver pages/personal). Discreta a
             propósito: la pantalla es de los clientes.
           */}
           {irAPersonal ? (

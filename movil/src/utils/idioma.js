@@ -11,7 +11,7 @@ import { leer, guardar, llave } from './almacen';
  * llave rara en pantalla— y en desarrollo la consola avisa cuál falta.
  *
  * Solo español e inglés, y solo la tienda y Mi Cuenta: el modo del personal
- * (Reparto, Tiqui del panel) sigue en español, igual que el panel en la web.
+ * (el Reparto y el panel) sigue en español, igual que el panel en la web.
  *
  * Se guarda en este teléfono, como el modo claro u oscuro (ver utils/modo.js).
  * ============================================================

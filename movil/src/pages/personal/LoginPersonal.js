@@ -8,7 +8,7 @@
  * la contraseña podría mover pedidos y precios desde cualquier teléfono.
  *
  * Lo que ve después depende de su cuenta (ver ModoPersonal):
- *   - el administrador, a Tiqui del panel y el Reparto;
+ *   - el administrador, el Reparto y el panel web (con Tiqui del panel adentro);
  *   - el empleado, el Reparto.
  *
  * Reemplaza al "Estoy trabajando" de Mi cuenta en la web, que mezclaba la
@@ -106,7 +106,7 @@ const LoginPersonal = ({ alVolver, correoInicial = '' }) => {
             <>
               <Text style={estilos.titulo} accessibilityRole="header">¿Trabajas en la tienda?</Text>
               <Text style={estilos.subtitulo}>
-                Entre con la misma cuenta del panel. El equipo ve el reparto; el administrador, además, a Tiqui del panel para preguntarle cómo va la tienda y pedirle cambios.
+                Entre con la misma cuenta del panel. El equipo ve el reparto; el administrador, además, el panel de la tienda, con Tiqui para preguntarle cómo va y pedirle cambios.
               </Text>
 
               <CampoTexto
