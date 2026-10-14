@@ -22,6 +22,9 @@
  *   - stock: el tope del carrito y el "quedan X".
  *   - maxQuantity: la fila "se está acabando" mide el stock contra él.
  *   - familia: las filas temáticas de la portada.
+ *   - fotoFuente: de dónde salió la foto si no es de la tienda ("Open Food
+ *     Facts", al importar desde Excel); la ficha da el crédito que pide su
+ *     licencia.
  *   - createdAt: la fila de lo nuevo.
  * La app ya instalada lee exactamente esto (movil/src/utils/catalogo.js); si
  * se quita algo de aquí, se le rompe a quien no ha actualizado.
@@ -32,4 +35,4 @@
  */
 export const CAMPOS_PUBLICOS_PRODUCTO =
   "name image salePrice unidadVenta piezas description soloAdultos isActive " +
-  "typeId brandId moduleId stock maxQuantity familia createdAt";
+  "typeId brandId moduleId stock maxQuantity familia fotoFuente createdAt";

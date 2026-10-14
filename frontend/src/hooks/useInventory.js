@@ -116,6 +116,8 @@ export const useInventory = () => {
     setSelectedCategory,
     isLoading,
     saveProduct,
-    deleteProduct
+    deleteProduct,
+    // Para volver a leer todo después de importar desde Excel.
+    recargar: fetchData
   };
 };

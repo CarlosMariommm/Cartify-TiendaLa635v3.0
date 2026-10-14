@@ -308,12 +308,15 @@ productController.updateProduct = async (req, res) => {
     // Si viene nueva imagen
     if (req.file) {
 
-      // Elimino imagen anterior
-      await cloudinary.uploader.destroy(productFound.public_id);
+      // Elimino imagen anterior. Un producto importado desde Excel puede no
+      // tener ninguna: sin este cuidado, ponerle su primera foto fallaba.
+      if (productFound.public_id) await cloudinary.uploader.destroy(productFound.public_id);
 
       // Guardo nueva imagen
       updatedData.image = req.file.path;
       updatedData.public_id = req.file.filename;
+      // La foto ya es de la tienda: deja de decir "Foto: Open Food Facts".
+      updatedData.$unset = { fotoFuente: "" };
     }
 
     await productModel.findByIdAndUpdate(
@@ -349,8 +352,8 @@ productController.deleteProduct = async (req, res) => {
       });
     }
 
-    // Eliminar imagen de Cloudinary
-    await cloudinary.uploader.destroy(productFound.public_id);
+    // Eliminar imagen de Cloudinary (un producto importado puede no tener)
+    if (productFound.public_id) await cloudinary.uploader.destroy(productFound.public_id);
 
     // Eliminar producto
     await productModel.findByIdAndDelete(req.params.id);

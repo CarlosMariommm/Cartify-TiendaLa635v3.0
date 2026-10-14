@@ -125,8 +125,10 @@ export const TEMAS_AYUDA = [
       'El código de barras se puede escanear. Si lo deja vacío, se genera uno interno.',
       'Marque “Solo para mayores de 18” en cerveza, cigarros y similares: la tienda pide confirmar la edad y al entregar se pide documento.',
       'Filtre por categoría o busque por nombre. Al tocar un producto lo ve completo, y desde ahí se edita o se elimina.',
+      '“Importar desde Excel” carga muchos productos de una vez: suba su .xlsx o .csv (basta con nombre y precio), revise qué columna es cuál y la IA completa la marca, el pasillo, la categoría, si va por libra o es +18, y busca la foto de cada uno. Antes de guardar ve la lista, quita lo que no quiera y lo que ya existe se omite solo.',
     ],
     consejos: [
+      'Con código de barras en el Excel, la foto sale exacta. Las fotos salen de Open Food Facts (una base abierta de productos) y la tienda menciona de dónde son; si no aparece, póngasela después con “Editar”.',
       'El máximo de cada producto sirve para saber cuándo reponer: con 25% o menos de su máximo, sale en “Por reponer”.',
       'Cargue siempre el costo: sin él no se puede saber la ganancia ni si una promoción deja pérdida.',
     ],
