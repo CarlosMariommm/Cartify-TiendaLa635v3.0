@@ -1205,9 +1205,14 @@ const fraseDeRespaldo = (acciones) => {
  *
  * Con `umbral` UMBRAL_DIRECTO va antes de Gemini; con UMBRAL_RESPALDO, cuando
  * Gemini no contestó. Devuelve la respuesta lista, o null.
+ *
+ * APAGADA de entrada (config.tiqui.iaPropia, TIQUI_IA_PROPIA=1 la enciende):
+ * se quedaba con frases de agregar o de recomendar que eran de Gemini.
  * ============================================================
  */
 const contestarSinGemini = async ({ frase, charla, req, umbral }) => {
+  // Apagada (como viene): no contesta nada y todo va a Gemini. Ver config.tiqui.
+  if (!config.tiqui?.iaPropia) return null;
   const idea = clasificarIntencion(frase);
   if (!DIRECTAS.has(idea.intencion) || idea.confianza < umbral) return null;
 

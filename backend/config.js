@@ -83,5 +83,12 @@ export const config = {
   analitica: {
     url: (process.env.ANALITICA_URL || "").replace(/\/+$/, ""),
     clave: process.env.ANALITICA_CLAVE || ""
+  },
+  // La IA propia de Tiqui (el clasificador entrenado en Python; ver
+  // src/utils/intencionesTiqui.js). APAGADA de entrada desde el 15-10-2026:
+  // se quedaba con frases de agregar o de recomendar y contestaba otra cosa.
+  // Apagada, todo va a Gemini como antes. Para encenderla: TIQUI_IA_PROPIA=1.
+  tiqui: {
+    iaPropia: process.env.TIQUI_IA_PROPIA === "1"
   }
 };
