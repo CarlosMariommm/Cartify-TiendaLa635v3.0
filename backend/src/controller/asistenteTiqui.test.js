@@ -6,7 +6,9 @@ import jsonwebtoken from "jsonwebtoken";
  * instante; lo demás sigue yendo a Gemini. La base y Gemini son de mentira.
  */
 
-vi.mock("../../config.js", () => ({ config: { JWT: { secret: "secreto-de-prueba" } } }));
+// La IA propia viene apagada; estas pruebas la encienden, y la última la apaga.
+const config = { JWT: { secret: "secreto-de-prueba" }, tiqui: { iaPropia: true } };
+vi.mock("../../config.js", () => ({ config }));
 
 const cadena = (datos) => {
   const c = { populate: () => c, sort: () => c, select: () => c, lean: async () => datos };
@@ -50,6 +52,7 @@ const preguntar = async (frase, { historial = [], token } = {}) => {
 
 describe("Tiqui con su IA propia", () => {
   beforeEach(() => {
+    config.tiqui.iaPropia = true;
     gemini.activa = true;
     gemini.contestar.mockReset().mockResolvedValue({
       functionCalls: [
@@ -107,5 +110,16 @@ describe("Tiqui con su IA propia", () => {
   it("si Gemini falla con algo que no es sencillo, se dice que falló", async () => {
     gemini.contestar.mockRejectedValue(new Error("503"));
     expect(await preguntar("dame dos coca colas")).toMatchObject({ entendido: false, origen: "error" });
+  });
+
+  it("apagada (como viene), todo va a Gemini, también lo sencillo", async () => {
+    config.tiqui.iaPropia = false;
+    const r = await preguntar("¿cuánto llevo?");
+    expect(r.origen).toBe("ia");
+    expect(gemini.contestar).toHaveBeenCalledTimes(1);
+
+    // Y si Gemini falla, ya no contesta ella: se dice que falló.
+    gemini.contestar.mockRejectedValue(new Error("503"));
+    expect(await preguntar("quiero pagar")).toMatchObject({ entendido: false, origen: "error" });
   });
 });
