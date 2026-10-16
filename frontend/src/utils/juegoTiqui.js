@@ -58,13 +58,6 @@ export const PREGUNTAS = [
     dato: 'Cartify es todo el sistema: la tienda web, la app del teléfono y el panel del negocio.',
   },
   {
-    id: 'sin-pasarela', tema: 'La tienda',
-    pregunta: '¿Cuál de estas cosas todavía NO hace la tienda?',
-    voz: '¿Cuál de estas cosas todavía no hace la tienda?',
-    opciones: ['Cobrar la tarjeta en línea', 'Tomar pedidos por voz', 'Mostrar la entrega en un mapa'],
-    dato: 'Todavía no hay pasarela de pago: el efectivo o la tarjeta se pagan al recibir el pedido o en la tienda.',
-  },
-  {
     id: 'saldo', tema: 'La tienda',
     pregunta: 'Al pagar puedes usar "saldo". ¿De dónde sale ese saldo?',
     opciones: ['De las tarjetas de regalo', 'De los puntos de cada compra', 'De un préstamo de la tienda'],
