@@ -213,7 +213,7 @@ export const sonarDulce = () => tocar((c) => {
   aplauso(c, 0.2, 1.6);
 });
 
-// El premio secreto: fanfarria larga, brillo arriba y aplausos fuertes.
+// El premio mayor: fanfarria larga, brillo arriba y aplausos fuertes.
 export const sonarSecreto = () => tocar((c) => {
   [60, 64, 67, 72, 67, 72, 76].forEach((m, i) => nota(c, hz(m), 0.15 + i * 0.1, 0.4, { tipo: 'triangle', volumen: 0.18 }));
   nota(c, hz(79), 0.9, 1.1, { tipo: 'triangle', volumen: 0.16 });

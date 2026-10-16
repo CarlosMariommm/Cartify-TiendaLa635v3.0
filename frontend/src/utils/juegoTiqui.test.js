@@ -9,7 +9,7 @@ import {
 
 /*
  * El reto de Tiqui del stand: lo que no se puede probar a ojo en la Expo.
- * Sobre todo la ruleta: que el premio secreto salga con la probabilidad que
+ * Sobre todo la ruleta: que el premio mayor salga con la probabilidad que
  * se ve, y que nunca salga si ya no queda.
  */
 
@@ -141,7 +141,7 @@ describe('la ruleta', () => {
     expect(secretos / veces).toBeLessThan(0.17);
   });
 
-  it('sin premios secretos, nunca cae en el secreto', () => {
+  it('sin premios mayores, nunca cae en el secreto', () => {
     const r = armarRuleta({ porcentajeSecreto: 15, quedanSecretos: 0 });
     expect(r.find((p) => p.tipo === 'secreto').agotado).toBe(true);
     const azar = azarFijo(3);
