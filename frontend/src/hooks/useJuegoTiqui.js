@@ -27,10 +27,10 @@ import {
  *   respuesta  se marca la buena, Tiqui reacciona y sale el dato
  *   ruleta     ganó: a girar
  *   girando    la ruleta da vueltas
- *   premio     dulce o premio secreto
+ *   premio     dulce o premio mayor
  *   fin        no llegó a la ruleta
  *
- * Lo que tiene que sobrevivir a recargar la página (cuántos premios secretos
+ * Lo que tiene que sobrevivir a recargar la página (cuántos premios mayores
  * quedan, los contadores del día, el mazo) se guarda en esta laptop.
  * ============================================================
  */

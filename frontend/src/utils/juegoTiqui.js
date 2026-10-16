@@ -9,7 +9,7 @@
  *      (se pidió así): todo es lo que alguien ve al usarla.
  *   2. Con 3 aciertos antes de 2 errores, se gira la ruleta. Perdona un
  *      error: con uno solo, una pregunta difícil sacaba a casi todos.
- *   3. La ruleta da dulce o premio secreto. Lo decide el ángulo donde cae, y
+ *   3. La ruleta da dulce o premio mayor. Lo decide el ángulo donde cae, y
  *      cada porción mide lo mismo que su probabilidad (15 % secreto = 54°):
  *      lo que se ve es exactamente lo que pasa.
  *
@@ -290,7 +290,7 @@ export const FRASES = {
     { id: 'dulce-2', animo: 'alegre', texto: '¡Te toca un dulce! Bien merecido.' },
   ],
   secreto: [
-    { id: 'secreto', animo: 'asombrada', texto: '¡No lo puedo creer! ¡Te ganaste el premio secreto!' },
+    { id: 'secreto', animo: 'asombrada', texto: '¡No lo puedo creer! ¡Te ganaste el premio mayor!' },
   ],
 };
 
@@ -403,16 +403,16 @@ export const PORCIONES_DE_DULCE = 6;
 
 /*
  * Las porciones, en grados y en el sentido del reloj desde arriba (0° es
- * donde está la flecha). El premio secreto mide lo mismo que su probabilidad
+ * donde está la flecha). El premio mayor mide lo mismo que su probabilidad
  * y va entre los dulces, no pegado a la flecha al arrancar.
  *
- * Sin premios secretos en bodega, su porción se queda (gris, "Agotado") pero
+ * Sin premios mayores en bodega, su porción se queda (gris, "Agotado") pero
  * la ruleta ya no cae ahí: eso es más honesto que esconderla.
  */
 /*
- * La probabilidad del premio secreto, en %.
+ * La probabilidad del premio mayor, en %.
  *
- * Automática: la de sacar un premio secreto de la bolsa de premios que
+ * Automática: la de sacar un premio mayor de la bolsa de premios que
  * quedan. Con 10 secretos y 60 dulces, 10 de 70 = 14 %. Cada premio que se
  * entrega la mueve: si salen muchos dulces seguidos sube, si sale un secreto
  * baja, y así los dos se acaban más o menos parejo a lo largo del día.
@@ -498,10 +498,10 @@ export const porcionEnLaFlecha = (porciones, giro) => {
 // ── Lo que se guarda en la laptop ──
 
 export const AJUSTES_INICIALES = {
-  secretos: 10,          // premios secretos que quedan
+  secretos: 10,          // premios mayores que quedan
   dulces: 60,            // dulces que quedan
   modo: 'auto',          // 'auto': la probabilidad sale de los premios; 'fija': la de `porcentaje`
-  porcentaje: 15,        // probabilidad fija del premio secreto
+  porcentaje: 15,        // probabilidad fija del premio mayor
   segundos: 30,          // tiempo por pregunta (0 = sin tiempo)
   voz: true,
   sonidos: true,
