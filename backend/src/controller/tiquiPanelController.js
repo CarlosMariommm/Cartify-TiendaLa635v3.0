@@ -405,7 +405,7 @@ tiquiPanelController.conversar = async (req, res) => {
           toolConfig: { functionCallingConfig: { mode: FunctionCallingConfigMode.ANY, allowedFunctionNames: ["responder"] } },
           temperature: 0.3,
         },
-      }, { plazoTotal: 9000 });
+      }, { plazoTotal: 20000 }); // el panel espera la respuesta 30 s (tiquiPanelService)
 
       const llamada = (respuesta.functionCalls || []).find((l) => l.name === "responder");
       if (!llamada) throw new Error("La IA no llamó 'responder'");

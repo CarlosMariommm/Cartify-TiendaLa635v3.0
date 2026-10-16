@@ -57,6 +57,16 @@ export const MODELO_IA_RESPALDO = process.env.GEMINI_MODEL_RESPALDO || "gemini-f
 export const MODELO_ASISTENTE_RESPALDO = process.env.GEMINI_MODEL_ASISTENTE_RESPALDO || "gemma-4-26b-a4b-it";
 
 /*
+ * Un tercero en la carrera del asistente, entre lite y Gemma. Medido el
+ * 16-10-2026, con Google saturado: lite tardaba 7,5–13 s, Gemma 27 s y
+ * "flash-latest" daba 503; "gemini-3.5-flash" contestó en 3 y 8 s. Tiqui
+ * esperaba 7 s entre los dos que tenía y le decía a todos "me distraje".
+ * Con un modelo más (otra capacidad, la congestión es por modelo) es más
+ * probable que alguno llegue a tiempo. Se cambia con GEMINI_MODEL_ASISTENTE_SEGUNDO.
+ */
+export const MODELO_ASISTENTE_SEGUNDO = process.env.GEMINI_MODEL_ASISTENTE_SEGUNDO || "gemini-3.5-flash";
+
+/*
  * ============================================================
  * REINTENTOS — el 503 de Google no tiene por qué llegar al cliente
  * ============================================================
@@ -195,7 +205,11 @@ export const generarConIA = async (peticion, { intentos = 3, tiempoMaximo, plazo
  */
 export const generarConCobertura = (
   peticion,
-  { modelos = [MODELO_IA, MODELO_ASISTENTE_RESPALDO], cobertura = 1500, plazoTotal = 7000 } = {}
+  /*
+   * 13 s de plazo: la web y la app esperan la respuesta 15 s. Con 7 s, en
+   * los días en que Google tarda 8 s, Tiqui se rendía antes de que llegara.
+   */
+  { modelos = [MODELO_IA, MODELO_ASISTENTE_SEGUNDO, MODELO_ASISTENTE_RESPALDO], cobertura = 1500, plazoTotal = 13000 } = {}
 ) => {
   const ia = getIA();
   if (!ia) return Promise.reject(new Error("La IA no está configurada"));
