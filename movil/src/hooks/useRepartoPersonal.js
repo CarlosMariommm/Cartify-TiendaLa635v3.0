@@ -122,6 +122,22 @@ export const useRepartoPersonal = () => {
           enviar(punto);
         }
       );
+      /*
+       * La primera señal precisa puede tardar más de un minuto adentro de la
+       * tienda, y mientras tanto el cliente no ve al repartidor. La última
+       * ubicación que el teléfono ya conoce (de hace poco y no muy gruesa) sale
+       * al instante; el GPS fino la corrige en cuanto agarra señal.
+       */
+      if (!posicionRef.current) {
+        const conocida = await Location.getLastKnownPositionAsync({ maxAge: 2 * 60 * 1000, requiredAccuracy: 150 })
+          .catch(() => null);
+        if (conocida && !posicionRef.current) {
+          const punto = { lat: conocida.coords.latitude, lng: conocida.coords.longitude };
+          posicionRef.current = punto;
+          setPosicion(punto);
+          enviar(punto, true);
+        }
+      }
     } catch {
       setErrorGps('No se pudo leer su ubicación. Revise que el GPS esté encendido.');
     }

@@ -34,6 +34,9 @@ import Mapa from '../Mapa/Mapa';
  * @param ruta    - la línea por las calles que le falta ([{lat,lng}…]), o null.
  *                  Con ella, el encuadre abarca la ruta entera: puede dar la
  *                  vuelta por fuera del rectángulo entre los dos puntos.
+ * @param origen  - la tienda ({lat,lng}), o null. Solo cuando el GPS del
+ *                  repartidor no llega y la ruta es la aproximada desde ahí:
+ *                  una gota gris, para que se lea de dónde sale la línea.
  * @param alto    - alto del mapa en px.
  * @param borde   - color del borde; 'transparent' cuando ya lo pone el padre.
  * @param interactivo - si se puede arrastrar y hacer zoom.
@@ -43,14 +46,15 @@ import Mapa from '../Mapa/Mapa';
  * intentar desplazar la página con el dedo se moviera el mapa en su lugar y la
  * página se quedara quieta. En un mapa de ese tamaño no hay nada que explorar.
  */
-const MapaSeguimiento = ({ punto, destino, ruta, alto = 200, borde, interactivo = true }) => {
+const MapaSeguimiento = ({ punto, destino, ruta, origen, alto = 200, borde, interactivo = true }) => {
   // Sin ningún punto no hay mapa que valga la pena: ver el encabezado.
-  if (!punto && !destino) return null;
+  if (!punto && !destino && !origen) return null;
 
-  const centro = punto || destino;
+  const centro = punto || destino || origen;
 
-  // La casa es la gota de la marca; el repartidor, el punto azul que late.
+  // La casa es la gota de la marca; el repartidor, el punto azul que late; la tienda, una gota gris.
   const pines = [
+    origen && { id: 'tienda', lat: origen.lat, lng: origen.lng, tipo: 'gota', tamano: 16, color: '#64748B' },
     destino && { id: 'casa', lat: destino.lat, lng: destino.lng, tipo: 'gota', tamano: 20 },
     punto && { id: 'repartidor', lat: punto.lat, lng: punto.lng, tipo: 'repartidor', tamano: 16 },
   ].filter(Boolean);
@@ -69,7 +73,7 @@ const MapaSeguimiento = ({ punto, destino, ruta, alto = 200, borde, interactivo 
           zoom={15}
           pines={pines}
           ruta={ruta}
-          encuadrar={ruta?.length > 1 ? [punto, destino, ...ruta] : [punto, destino]}
+          encuadrar={[punto, origen, destino, ...(ruta?.length > 1 ? ruta : [])]}
           interactivo={interactivo}
         />
       </div>

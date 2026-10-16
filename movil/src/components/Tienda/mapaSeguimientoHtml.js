@@ -26,7 +26,12 @@ import { MAPLIBRE_CSS, MAPLIBRE_JS, JS_PLEGAR_CREDITO, cssComun, estiloMapa } fr
 
 const esCoord = (p) => !!p && Number.isFinite(Number(p.lat)) && Number.isFinite(Number(p.lng));
 
-export const crearHtmlSeguimiento = ({ punto, destino, ruta, colorMarca, interactivo = false, oscuro = false }) => `<!DOCTYPE html>
+/*
+ * `origen` es la tienda: solo llega cuando el GPS del repartidor no llega y la
+ * ruta es la aproximada desde ahí. Va como una gota gris, más chica que la de
+ * la casa, para que se lea de dónde sale la línea.
+ */
+export const crearHtmlSeguimiento = ({ punto, destino, ruta, origen, colorMarca, interactivo = false, oscuro = false }) => `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8" />
@@ -42,10 +47,11 @@ export const crearHtmlSeguimiento = ({ punto, destino, ruta, colorMarca, interac
 
     var punto = ${punto ? JSON.stringify(punto) : 'null'};
     var destino = ${destino ? JSON.stringify(destino) : 'null'};
+    var origen = ${esCoord(origen) ? JSON.stringify({ lat: Number(origen.lat), lng: Number(origen.lng) }) : 'null'};
     var ruta = ${Array.isArray(ruta) && ruta.filter(esCoord).length > 1
       ? JSON.stringify(ruta.filter(esCoord).map((p) => [Number(p.lng), Number(p.lat)]))
       : 'null'};
-    var centro = punto || destino;
+    var centro = punto || destino || origen;
     var interactivo = ${!!interactivo};
 
     var mapa = new maplibregl.Map({
@@ -77,6 +83,17 @@ export const crearHtmlSeguimiento = ({ punto, destino, ruta, colorMarca, interac
       return caja;
     }
 
+    if (origen) {
+      // Más chica por tamaño y no con scale(): MapLibre mueve el pin con transform.
+      var tienda = pin('pin-gota');
+      tienda.style.width = '22px';
+      tienda.style.height = '22px';
+      tienda.firstChild.style.width = '16px';
+      tienda.firstChild.style.height = '16px';
+      tienda.firstChild.style.background = '#64748B';
+      new maplibregl.Marker({ element: tienda, anchor: 'bottom' })
+        .setLngLat([origen.lng, origen.lat]).addTo(mapa);
+    }
     if (destino) {
       new maplibregl.Marker({ element: pin('pin-gota'), anchor: 'bottom' })
         .setLngLat([destino.lng, destino.lat]).addTo(mapa);
@@ -105,8 +122,12 @@ export const crearHtmlSeguimiento = ({ punto, destino, ruta, colorMarca, interac
     // los dos (y la ruta entera, que puede dar la vuelta por fuera de ese
     // rectángulo), y se va cerrando solo conforme el repartidor se acerca a la
     // casa. En la versión grande el cliente puede alejarlo a mano después.
-    if (punto && destino) {
-      var todos = [[punto.lng, punto.lat], [destino.lng, destino.lat]].concat(ruta || []);
+    // Sin GPS del repartidor, lo mismo con la tienda en su lugar.
+    var todos = [punto, origen, destino]
+      .filter(function (p) { return p; })
+      .map(function (p) { return [p.lng, p.lat]; })
+      .concat(ruta || []);
+    if (todos.length > 1) {
       var lngs = todos.map(function (p) { return p[0]; });
       var lats = todos.map(function (p) { return p[1]; });
       mapa.fitBounds(

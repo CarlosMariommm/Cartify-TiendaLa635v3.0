@@ -273,7 +273,8 @@ const BurbujaPedido = () => {
   const pasoActual = indiceDePaso(PASOS, estado);
   const paso = PASOS[pasoActual] || PASOS[0];
   const estaEnCamino = estado === 'en_camino';
-  const enCamino = estaEnCamino && seguimiento.enVivo;
+  // Con el punto fresco del repartidor, o con la ruta aproximada desde la tienda.
+  const enCamino = estaEnCamino && (seguimiento.enVivo || seguimiento.estimado);
 
   const novedad = `${estado}|${enCamino ? 'en-camino' : ''}`;
   const encogida = encogidaEn?.id === String(pedido._id) && encogidaEn?.novedad === novedad;
@@ -478,6 +479,7 @@ const BurbujaPedido = () => {
                     punto={seguimiento.punto}
                     destino={seguimiento.destino}
                     ruta={seguimiento.ruta}
+                    origen={seguimiento.origen}
                     alto={132}
                     colorMarca={colores.marca}
                     alAgrandar={() => setMapaGrande(true)}
@@ -507,7 +509,9 @@ const BurbujaPedido = () => {
                     ]}
                   >
                     {seguimiento.repartidor ? `${seguimiento.repartidor} · ` : ''}
-                    {seguimiento.distancia ? t('a {distancia} de tu dirección', { distancia: seguimiento.distancia }) : t('Te llevan tu pedido')}
+                    {seguimiento.estimado
+                      ? t('Calculado desde que salió de la tienda')
+                      : seguimiento.distancia ? t('a {distancia} de tu dirección', { distancia: seguimiento.distancia }) : t('Te llevan tu pedido')}
                   </Text>
                 </View>
               </>
@@ -623,6 +627,7 @@ const BurbujaPedido = () => {
         punto={seguimiento.punto}
         destino={seguimiento.destino}
         ruta={seguimiento.ruta}
+        origen={seguimiento.origen}
         colorMarca={colores.marca}
         alCerrar={() => setMapaGrande(false)}
       />

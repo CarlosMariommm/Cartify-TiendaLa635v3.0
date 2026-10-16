@@ -136,6 +136,12 @@ export const useSeguimientoEnVivo = (pedidoId, activo = true) => {
            * Null sin servicio de rutas: el mapa queda con sus dos puntos.
            */
           ruta: data?.ruta?.puntos?.length > 1 ? data.ruta : null,
+          /*
+           * Sin punto fresco del repartidor, el servidor manda la ruta desde la
+           * tienda y cuánto falta desde que salió (estimadoDesdeLaTienda, en el
+           * mismo archivo). Null si la tienda no guardó su ubicación.
+           */
+          estimado: data?.estimado?.desde ? data.estimado : null,
         });
       } catch {
         /*
@@ -173,6 +179,10 @@ export const useSeguimientoEnVivo = (pedidoId, activo = true) => {
     : null;
 
   const senalFria = desdeUltimoDato != null && desdeUltimoDato > SENAL_FRIA_MS;
+  // Solo se considera "en vivo" si hay punto Y la señal está fresca.
+  const enVivo = !!punto && !senalFria;
+  // Sin eso, lo aproximado desde la tienda (si el servidor lo mandó).
+  const estimado = enVivo ? null : actual?.estimado || null;
 
   /*
    * Con la ruta por las calles, lo que falta es lo que mide ESA línea y la
@@ -180,25 +190,37 @@ export const useSeguimientoEnVivo = (pedidoId, activo = true) => {
    * velocidad medida. Una ruta con la señal fría no se muestra: sería dibujar
    * el camino desde un punto donde el repartidor ya no está.
    */
-  const ruta = punto && !senalFria ? actual?.ruta : null;
+  const ruta = enVivo ? actual?.ruta : null;
+  const puntosDeLinea = ruta?.puntos || estimado?.puntos || null;
+  // La misma línea llega como objeto nuevo en cada consulta: se compara por
+  // contenido para no volver a dibujarla cada 10 segundos si no cambió.
+  const claveDeLinea = puntosDeLinea?.length > 1 ? JSON.stringify(puntosDeLinea) : '';
   const lineaDeRuta = useMemo(
-    () => (ruta ? ruta.puntos.map(([lng, lat]) => ({ lat, lng })) : null),
-    [ruta]
+    () => (claveDeLinea ? JSON.parse(claveDeLinea).map(([lng, lat]) => ({ lat, lng })) : null),
+    [claveDeLinea]
   );
 
-  const metrosFaltantes = ruta?.metros
-    ?? (punto && actual?.destino ? distanciaMetros(punto, actual.destino) : null);
-  const minutos = ruta?.segundos != null
-    ? Math.max(1, Math.round(ruta.segundos / 60))
-    : minutosDeViaje(metrosFaltantes, actual?.velocidad);
+  const metrosFaltantes = !enVivo ? null : ruta?.metros
+    ?? (actual?.destino ? distanciaMetros(punto, actual.destino) : null);
+  const minutos = estimado
+    ? Math.max(1, Math.round(estimado.segundos / 60))
+    : ruta?.segundos != null
+      ? Math.max(1, Math.round(ruta.segundos / 60))
+      : minutosDeViaje(metrosFaltantes, actual?.velocidad);
 
   return {
-    // Solo se considera "en vivo" si hay punto Y la señal está fresca.
-    enVivo: !!punto && !senalFria,
+    enVivo,
+    /*
+     * Sin GPS del repartidor: la ruta y el tiempo son aproximados, desde la
+     * tienda (`origen`). Las pantallas lo dicen así y no pintan su punto.
+     */
+    estimado: !!estimado,
+    origen: estimado?.desde || null,
     estado: actual?.status || null,
-    punto,
+    // Un punto con la señal fría no se dibuja como si fuera de ahorita.
+    punto: enVivo ? punto : null,
     destino: actual?.destino || null,
-    // La línea por las calles que le falta, como [{lat,lng}…], o null.
+    // La línea por las calles que le falta (o la de la tienda), como [{lat,lng}…], o null.
     ruta: lineaDeRuta,
     repartidor: courier?.name || '',
     senalFria,
@@ -207,6 +229,6 @@ export const useSeguimientoEnVivo = (pedidoId, activo = true) => {
     espera: textoDeEspera(minutos, t),
     minutos,
     // Últimas dos cuadras: la UI lo usa para ponerse en modo "levántese ya".
-    yaCasi: metrosFaltantes != null && metrosFaltantes <= YA_CASI_M,
+    yaCasi: enVivo && metrosFaltantes != null && metrosFaltantes <= YA_CASI_M,
   };
 };
