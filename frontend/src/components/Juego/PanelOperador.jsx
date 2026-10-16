@@ -7,7 +7,7 @@ import { Minus, Plus, X, Maximize, RotateCcw, Play } from 'lucide-react';
  * Lo que maneja quien atiende el stand, escondido de los visitantes: se abre
  * tocando 5 veces seguidas el nombre de arriba a la izquierda.
  *
- * Cuántos premios secretos y dulces quedan (al llegar a 0 los secretos, la
+ * Cuántos premios mayores y dulces quedan (al llegar a 0 los secretos, la
  * ruleta ya no cae ahí), la probabilidad del secreto —que puede salir sola de
  * esos números—, el tiempo por pregunta, la voz, la música y los efectos, y
  * cómo va el día. Todo queda guardado en la laptop (ver useJuegoTiqui).
@@ -97,21 +97,21 @@ const Premios = ({ ajustes, probabilidad, cambiarAjuste }) => {
   const auto = modo === 'auto';
 
   let explicacion;
-  if (secretos <= 0) explicacion = 'Se acabaron los premios secretos: la ruleta solo da dulces.';
+  if (secretos <= 0) explicacion = 'Se acabaron los premios mayores: la ruleta solo da dulces.';
   else if (!auto) explicacion = 'Fija: no cambia aunque se vayan acabando los premios.';
-  else if (dulces <= 0) explicacion = `Sin dulces, el secreto queda en ${porcentaje}, lo máximo: súmale los dulces que tengas.`;
+  else if (dulces <= 0) explicacion = `Sin dulces, el premio mayor queda en ${porcentaje}, lo máximo: súmale los dulces que tengas.`;
   else if (probabilidad <= 1 && (100 * secretos) / total < 1) explicacion = `${secretos} de ${total} premios daría menos de 1 %: queda en 1 % para que la porción se vea.`;
-  else explicacion = `${secretos} premios secretos entre ${total} premios. Se ajusta sola cada vez que alguien gana.`;
+  else explicacion = `${secretos} premios mayores entre ${total} premios. Se ajusta sola cada vez que alguien gana.`;
 
   return (
     <>
       <p className="text-xs font-semibold tracking-[0.14em] uppercase pt-2 pb-1" style={{ color: '#6fb3d9' }}>Premios</p>
 
       <Fila
-        titulo="Premios secretos que quedan"
+        titulo="Premios mayores que quedan"
         detalle={secretos > 0 ? 'Cada vez que sale uno, baja solo.' : 'Agotados: la ruleta solo da dulces.'}
       >
-        <Contador etiqueta="premios secretos" valor={secretos} min={0} max={999} alCambiar={(v) => cambiarAjuste('secretos', v)} />
+        <Contador etiqueta="premios mayores" valor={secretos} min={0} max={999} alCambiar={(v) => cambiarAjuste('secretos', v)} />
       </Fila>
 
       <Fila
@@ -121,7 +121,7 @@ const Premios = ({ ajustes, probabilidad, cambiarAjuste }) => {
         <Contador etiqueta="dulces" valor={dulces} min={0} max={9999} alCambiar={(v) => cambiarAjuste('dulces', v)} />
       </Fila>
 
-      <Fila titulo="Probabilidad del premio secreto" detalle={auto ? 'Sale de cuántos premios quedan.' : 'La eliges tú.'}>
+      <Fila titulo="Probabilidad del premio mayor" detalle={auto ? 'Sale de cuántos premios quedan.' : 'La eliges tú.'}>
         <Boton activo={auto} onClick={() => cambiarAjuste('modo', 'auto')}>Según los premios</Boton>
         <Boton activo={!auto} onClick={() => cambiarAjuste('modo', 'fija')}>Fija</Boton>
       </Fila>
@@ -138,7 +138,7 @@ const Premios = ({ ajustes, probabilidad, cambiarAjuste }) => {
           <div className="text-5xl font-extrabold tabular-nums" style={{ color: secretos > 0 ? '#FFC23D' : 'rgba(255,255,255,0.35)' }}>
             {secretos > 0 ? porcentaje : '0 %'}
           </div>
-          <div className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>de probabilidad del premio secreto</div>
+          <div className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>de probabilidad del premio mayor</div>
         </div>
         {secretos > 0 && (
           <div className="pb-1">
@@ -212,7 +212,7 @@ const PanelOperador = ({
           ['Jugaron', contadores.jugaron],
           ['Llegaron a la ruleta', contadores.ruleta],
           ['Dulces', contadores.dulces],
-          ['Premios secretos', contadores.secretos],
+          ['Premios mayores', contadores.secretos],
         ].map(([texto, n]) => (
           <div key={texto}>
             <div className="text-3xl font-bold tabular-nums">{n}</div>

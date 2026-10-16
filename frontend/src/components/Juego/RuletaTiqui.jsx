@@ -8,7 +8,7 @@ import { sonarTic } from '../../utils/sonidosJuego';
  * LA RULETA DEL RETO DE TIQUI — RuletaTiqui.jsx
  * ============================================================
  * Dibuja las porciones que le pasan (utils/juegoTiqui.js → armarRuleta) con
- * el ancho que tienen de verdad: el premio secreto se ve tan chico como es
+ * el ancho que tienen de verdad: el premio mayor se ve tan chico como es
  * de difícil.
  *
  * El giro corre en JavaScript, cuadro a cuadro, y no con una transición de
@@ -175,7 +175,7 @@ const RuletaTiqui = ({ porciones, girando = false, premio = null, alParar, lento
                   ) : (
                     <text textAnchor="middle" fill="#FFC23D" fontSize="13.5" fontWeight="800" letterSpacing="1">
                       <tspan x="0" y={-R + 84}>PREMIO</tspan>
-                      <tspan x="0" y={-R + 101}>SECRETO</tspan>
+                      <tspan x="0" y={-R + 101}>MAYOR</tspan>
                     </text>
                   )
                 )}

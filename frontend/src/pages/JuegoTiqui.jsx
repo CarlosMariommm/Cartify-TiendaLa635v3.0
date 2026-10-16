@@ -15,7 +15,7 @@ import { despertarAudio, sonarPasar } from '../utils/sonidosJuego';
  * ============================================================
  * La dinámica del stand de la Expo, en la laptop y a pantalla completa:
  * Tiqui hace preguntas sobre el proyecto; con 3 aciertos antes de 2 errores
- * se gira la ruleta, que da dulce o premio secreto.
+ * se gira la ruleta, que da dulce o premio mayor.
  *
  * Solo pinta: lo que pasa vive en useJuegoTiqui y las reglas en
  * utils/juegoTiqui.js. Se juega con el mouse, tocando la pantalla o con el
@@ -165,7 +165,7 @@ const Inicio = ({ juego, tiqui }) => {
         <p className="mt-5 max-w-xl leading-snug" style={{ fontSize: 'clamp(18px, 1.8vw, 28px)', color: SUAVE }}>
           Tiqui te pregunta sobre su tienda. Acierta <b className="text-white">3</b> antes de fallar 2 y gira la ruleta.{' '}
           {quedanSecretos
-            ? <>Puedes ganar un dulce… o el <b style={{ color: '#FFC23D' }}>premio secreto</b>.</>
+            ? <>Puedes ganar un dulce… o el <b style={{ color: '#FFC23D' }}>premio mayor</b>.</>
             : <>¡Puedes ganar un dulce!</>}
         </p>
         <button
@@ -347,7 +347,7 @@ const Ruleta = ({ juego, tiqui, qr }) => {
             </p>
             {secreto ? (
               <h2 className="mt-2 font-extrabold leading-none" style={{ fontSize: 'clamp(40px, 5vw, 80px)' }}>
-                <span className="juego-dorado">¡PREMIO<br />SECRETO!</span>
+                <span className="juego-dorado">¡PREMIO<br />MAYOR!</span>
               </h2>
             ) : (
               <h2 className="mt-2 font-extrabold leading-[1.02] flex items-center gap-4 justify-center md:justify-start" style={{ fontSize: 'clamp(34px, 4.2vw, 68px)' }}>
