@@ -16,7 +16,7 @@ import { construirMapaPromo, precioDeRenglon } from "../utils/precioPedido.js";
 import { generarCodigoEntrega } from "../utils/codigoEntrega.js";
 import { cambiarEstadoDePedido } from "../utils/estadoPedido.js";
 import storeSettingsModel, { CLAVE_UNICA } from "../models/storeSettings.js";
-import { rutaDelRepartidor, olvidarRuta } from "../utils/rutaReparto.js";
+import { rutaDelRepartidor, olvidarRuta, estimadoDesdeLaTienda } from "../utils/rutaReparto.js";
 import { avisarPedidoNuevoEnSegundoPlano } from "../utils/avisosPersonal.js";
 import { config } from "../../config.js";
 
@@ -860,6 +860,10 @@ orderController.updateCourierPosition = async (req, res) => {
  * consulta cada pocos segundos y sería un desperdicio arrastrar los productos
  * y los datos del cliente en cada vuelta.
  */
+// Un punto con más de esto ya no es "ahorita" (la misma cuenta que
+// frontend/src/hooks/useSeguimientoEnVivo.js).
+const SENAL_FRIA_MS = 90 * 1000;
+
 orderController.getCourierPosition = async (req, res) => {
   try {
     /*
@@ -873,7 +877,7 @@ orderController.getCourierPosition = async (req, res) => {
 
     const pedido = await orderModel
       .findById(req.params.id)
-      .select("courier status deliveryType deliveryLat deliveryLng clientId");
+      .select("courier status deliveryType deliveryLat deliveryLng clientId enCaminoAt");
 
     if (!pedido) {
       return res.status(404).json({ message: "Pedido no encontrado" });
@@ -902,11 +906,29 @@ orderController.getCourierPosition = async (req, res) => {
      * viaje se olvida. Ver utils/rutaReparto.js.
      */
     let ruta = null;
-    if (pedido.status === "en_camino" && courier?.lat != null && destino) {
+    /*
+     * Sin punto fresco del repartidor (nunca llegó, o lleva más de minuto y
+     * medio callado), lo que sí se sabe: la ruta desde la tienda y cuánto
+     * falta desde que salió. Ver estimadoDesdeLaTienda en utils/rutaReparto.js.
+     */
+    let estimado = null;
+    const puntoFresco = courier?.lat != null && courier.updatedAt
+      && Date.now() - new Date(courier.updatedAt).getTime() <= SENAL_FRIA_MS;
+
+    if (pedido.status === "en_camino" && destino && puntoFresco) {
       ruta = await rutaDelRepartidor({
         pedidoId: pedido._id,
         desde: { lat: courier.lat, lng: courier.lng },
         hacia: destino,
+        llave: config.rutas.llave,
+      });
+    } else if (pedido.status === "en_camino" && destino) {
+      const ajustes = await storeSettingsModel.findOne({ clave: CLAVE_UNICA }).select("ubicacionTienda").lean();
+      estimado = await estimadoDesdeLaTienda({
+        pedidoId: pedido._id,
+        tienda: ajustes?.ubicacionTienda,
+        hacia: destino,
+        salio: pedido.enCaminoAt,
         llave: config.rutas.llave,
       });
     } else {
@@ -919,6 +941,7 @@ orderController.getCourierPosition = async (req, res) => {
       destino,
       courier,
       ruta,
+      estimado,
     });
 
   } catch (error) {

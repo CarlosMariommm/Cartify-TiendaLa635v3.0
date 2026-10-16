@@ -34,7 +34,8 @@ const SeguimientoConfirmacion = ({ orderId, esDomicilio }) => {
   const estado = seg.estado || 'pagado';
   const PASOS = pasosDe(esDomicilio ? 'delivery' : 'retiro');
   const pasoActual = indiceDePaso(PASOS, estado);
-  const enCamino = esDomicilio && seg.enVivo;
+  // Con el punto fresco del repartidor, o con la ruta aproximada desde la tienda.
+  const enCamino = esDomicilio && (seg.enVivo || seg.estimado);
   const tieneDestino = esDomicilio && seg.destino?.lat != null && seg.destino?.lng != null;
 
   return (
@@ -70,6 +71,7 @@ const SeguimientoConfirmacion = ({ orderId, esDomicilio }) => {
             punto={enCamino ? seg.punto : null}
             destino={seg.destino}
             ruta={enCamino ? seg.ruta : null}
+            origen={enCamino ? seg.origen : null}
             alto={200}
             borde="transparent"
           />
@@ -80,7 +82,7 @@ const SeguimientoConfirmacion = ({ orderId, esDomicilio }) => {
             background: 'var(--papel)',
           }}>
             {enCamino
-              ? <><Bike size={15} strokeWidth={2.4} /> {seg.yaCasi ? t('Ya casi toca tu puerta') : seg.espera}{seg.distancia ? ` · ${t('a {distancia}', { distancia: seg.distancia })}` : ''}</>
+              ? <><Bike size={15} strokeWidth={2.4} /> {seg.yaCasi ? t('Ya casi toca tu puerta') : seg.espera}{seg.distancia ? ` · ${t('a {distancia}', { distancia: seg.distancia })}` : ''}{seg.estimado ? ` · ${t('calculado desde la tienda')}` : ''}</>
               : (estado === 'entregado'
                   ? <><Check size={15} strokeWidth={2.4} /> {t('Entregado en tu dirección')}</>
                   : <>{t('Aquí te llevaremos tu pedido. En cuanto el repartidor salga, verás su punto moverse.')}</>)}

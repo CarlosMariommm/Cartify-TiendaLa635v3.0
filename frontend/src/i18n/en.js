@@ -387,6 +387,8 @@ const EN = {
   'Encoger el seguimiento': 'Minimize tracking',
   'a {distancia} de tu dirección': '{distancia} from your address',
   'Te llevan tu pedido': 'Your order is on its way',
+  'Calculado desde que salió de la tienda': 'Estimated from when it left the store',
+  'calculado desde la tienda': 'estimated from the store',
   'Tu pedido va en camino. La última novedad del repartidor fue hace {n} min.': 'Your order is on its way. The driver\'s last update was {n} min ago.',
   'Te lo llevamos a: {direccion}': 'We\'re taking it to: {direccion}',
   'Ver el pedido': 'See the order',

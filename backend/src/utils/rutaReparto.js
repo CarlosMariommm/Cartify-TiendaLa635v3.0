@@ -19,6 +19,9 @@
  *
  * Vive en memoria, no en la base: es del viaje en curso y se olvida al
  * terminar. Igual que el punto del repartidor, no es un historial.
+ *
+ * Si el GPS del repartidor no llega, el cliente ve la ruta desde la tienda y
+ * un tiempo aproximado: ver estimadoDesdeLaTienda, al final.
  * ============================================================
  */
 
@@ -35,7 +38,9 @@ const OLVIDO_MS = 30 * 60 * 1000;
 
 const R = 6371000;
 const rad = (g) => (g * Math.PI) / 180;
-const valido = (p) => !!p && Number.isFinite(Number(p.lat)) && Number.isFinite(Number(p.lng));
+// Ojo: Number(null) es 0, y una ubicación sin llenar ({ lat: null }) no es el punto 0,0.
+const valido = (p) => !!p && p.lat != null && p.lng != null
+  && Number.isFinite(Number(p.lat)) && Number.isFinite(Number(p.lng));
 const comoPunto = ([lng, lat]) => ({ lat, lng });
 // Cinco decimales son ~1 metro: de sobra para dibujar, y la respuesta pesa menos.
 const redondear = (n) => Math.round(n * 1e5) / 1e5;
@@ -107,12 +112,17 @@ export const pedirRutaORS = async ({ desde, hacia, llave }) => {
 };
 
 const rutas = new Map(); // pedidoId → { hacia, puntos, metros, segundos, cuando, intento }
+const desdeLaTienda = new Map(); // pedidoId → { desde, hacia, ruta, intento, visto }
 
 const olvidarViejas = (ahora) => {
   for (const [id, r] of rutas) if (ahora - r.intento > OLVIDO_MS) rutas.delete(id);
+  for (const [id, r] of desdeLaTienda) if (ahora - r.visto > OLVIDO_MS) desdeLaTienda.delete(id);
 };
 
-export const olvidarRuta = (pedidoId) => rutas.delete(String(pedidoId));
+export const olvidarRuta = (pedidoId) => {
+  rutas.delete(String(pedidoId));
+  desdeLaTienda.delete(String(pedidoId));
+};
 
 // Lo que se le manda al cliente: la línea que falta, los metros y el tiempo.
 const respuesta = (base, recorte) => ({
@@ -159,4 +169,63 @@ export const rutaDelRepartidor = async ({ pedidoId, desde, hacia, llave, pedir =
   }
 
   return recorte ? respuesta(guardada, recorte) : null;
+};
+
+/*
+ * ── MIENTRAS NO LLEGA EL GPS DEL REPARTIDOR ──
+ * El pedido ya salió, pero el teléfono del repartidor no ha mandado su punto:
+ * lo pusieron en camino desde el panel web (que no comparte ubicación), el GPS
+ * no agarra señal adentro de la casa, o la app se cerró en la calle. Antes el
+ * cliente se quedaba sin mapa ni tiempo toda la entrega.
+ *
+ * Ahora ve lo que sí se sabe: la ruta de la TIENDA a su casa y cuánto falta,
+ * contado desde que salió (`enCaminoAt`). Es un aproximado y en pantalla se
+ * dice así. No se inventa un punto del repartidor avanzando por la línea: un
+ * punto falso es peor que no tener punto (ver useSeguimientoEnVivo.js).
+ *
+ * La tienda no se mueve, así que la ruta se pide UNA vez por pedido. Sin llave
+ * del servicio de rutas, la línea no sale y el tiempo se saca de la línea
+ * recta, con la misma moto de barrio que usa la web (frontend/src/utils/geo.js).
+ * Devuelve { desde, puntos ([[lng, lat]…] o null), metros, segundos que faltan },
+ * o null sin la ubicación de la tienda (Personalización › Envío) o sin destino.
+ */
+const VELOCIDAD_SIN_RUTA_MS = 18000 / 3600; // 18 km/h
+const RODEO_DE_CALLES = 1.35;
+
+export const estimadoDesdeLaTienda = async ({ pedidoId, tienda, hacia, salio, llave, pedir = pedirRutaORS, ahora = Date.now() }) => {
+  if (!valido(tienda) || !valido(hacia)) return null;
+  const desde = { lat: Number(tienda.lat), lng: Number(tienda.lng) };
+  const id = String(pedidoId);
+  olvidarViejas(ahora);
+
+  let guardada = desdeLaTienda.get(id);
+  // Se corrigió la dirección o se movió la tienda: la ruta guardada ya no sirve.
+  if (guardada && (distanciaMetros(guardada.hacia, hacia) > 5 || distanciaMetros(guardada.desde, desde) > 5)) {
+    desdeLaTienda.delete(id);
+    guardada = null;
+  }
+  if (llave && !guardada?.ruta && (!guardada || ahora - guardada.intento >= ESPERA_ENTRE_CONSULTAS_MS)) {
+    let ruta = null;
+    try {
+      ruta = await pedir({ desde, hacia, llave });
+    } catch (error) {
+      console.log("No se pudo calcular la ruta desde la tienda:", error.message);
+    }
+    guardada = { desde, hacia, ruta, intento: ahora };
+  }
+  if (guardada) desdeLaTienda.set(id, { ...guardada, visto: ahora });
+
+  const ruta = guardada?.ruta || null;
+  const metros = ruta?.metros || Math.round(distanciaMetros(desde, hacia) * RODEO_DE_CALLES);
+  const total = ruta?.segundos || metros / VELOCIDAD_SIN_RUTA_MS;
+  const salida = salio ? new Date(salio).getTime() : NaN;
+  const pasaron = Number.isFinite(salida) ? Math.max(0, (ahora - salida) / 1000) : 0;
+
+  return {
+    desde,
+    // Arranca en el pin de la tienda, igual que la del repartidor arranca en él.
+    puntos: ruta ? [[redondear(desde.lng), redondear(desde.lat)], ...ruta.puntos] : null,
+    metros: Math.round(metros),
+    segundos: Math.max(0, Math.round(total - pasaron)),
+  };
 };

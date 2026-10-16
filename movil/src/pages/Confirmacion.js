@@ -172,7 +172,8 @@ const Confirmacion = ({ respuesta, alCerrar }) => {
    * criterio que `SeguimientoConfirmacion.jsx` en la web.
    */
   const esDomicilio = pedido.deliveryType === 'delivery';
-  const enCamino = esDomicilio && seguimiento.enVivo;
+  // Con el punto fresco del repartidor, o con la ruta aproximada desde la tienda.
+  const enCamino = esDomicilio && (seguimiento.enVivo || seguimiento.estimado);
   const tieneDestino = esDomicilio && seguimiento.destino?.lat != null && seguimiento.destino?.lng != null;
 
   // Los últimos seis del id, en mayúsculas: el mismo número corto que enseña
@@ -236,6 +237,7 @@ const Confirmacion = ({ respuesta, alCerrar }) => {
               punto={enCamino ? seguimiento.punto : null}
               destino={seguimiento.destino}
               ruta={enCamino ? seguimiento.ruta : null}
+              origen={enCamino ? seguimiento.origen : null}
               alto={180}
               colorMarca={colores.marca}
               alAgrandar={() => setMapaGrande(true)}
@@ -252,6 +254,7 @@ const Confirmacion = ({ respuesta, alCerrar }) => {
                   >
                     {seguimiento.yaCasi ? t('Ya casi toca tu puerta') : seguimiento.espera}
                     {seguimiento.distancia ? t(' · a {distancia}', { distancia: seguimiento.distancia }) : ''}
+                    {seguimiento.estimado ? ` · ${t('calculado desde la tienda')}` : ''}
                   </Text>
                 </>
               ) : estado === 'entregado' ? (
@@ -356,6 +359,7 @@ const Confirmacion = ({ respuesta, alCerrar }) => {
           punto={enCamino ? seguimiento.punto : null}
           destino={seguimiento.destino}
           ruta={enCamino ? seguimiento.ruta : null}
+          origen={enCamino ? seguimiento.origen : null}
           colorMarca={colores.marca}
           alCerrar={() => setMapaGrande(false)}
         />
