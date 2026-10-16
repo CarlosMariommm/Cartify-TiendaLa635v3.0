@@ -1,141 +1,268 @@
-# 🛒 Cartify - Tienda La 635 (E-commerce & POS System)
+# 🛒 Cartify - Tienda La 635
 
-**Cartify** es una plataforma moderna de E-commerce y Punto de Venta (POS) diseñada a la medida para "Tienda La 635". Este proyecto está construido con el stack MERN (MongoDB, Express, React, Node.js) y se enfoca en ofrecer una experiencia de usuario sumamente pulida, dinámica y segura.
+**Cartify** es la plataforma de "Tienda La 635", una tienda de barrio en El Salvador: tienda en línea, panel de administración, app Android y un servicio de pronóstico de ventas. La mascota y asistente de la tienda es **Tiqui**.
 
-El sistema administra dos grandes áreas (Módulos): **Tienda** (productos físicos) e **Impresiones** (servicios o productos digitales), con lógicas de negocio diferentes que se adaptan en tiempo real.
-
----
-
-## Características Principales
-
-### Gestión de Inventario Dinámico (Cascada)
-- **Módulos**: Clasificación principal (Tienda vs. Impresiones) que cambia el comportamiento del sistema.
-- **Categorías (Product Types)**: Dependientes directamente del módulo seleccionado.
-- **Proveedores y Marcas**: Los proveedores distribuyen marcas específicas. Al seleccionar un proveedor, solo se muestran sus marcas.
-- **Formulario Inteligente**: El formulario de creación/edición de productos se adapta; por ejemplo, la asignación de Proveedor es obligatoria para "Tienda", pero opcional para "Impresiones".
-
-### Productos
-- Control completo del **Stock** y cálculo automático de `maxQuantity` como límite inicial.
-- Generación automática de **Códigos de Barras**.
-- Integración con **Cloudinary** para subir y gestionar las imágenes de los productos en la nube de forma optimizada.
-- Previsualizaciones en vivo de la imagen cargada y validación de campos obligatorios.
-
-### Administración Completa (CRUD)
-- Gestión de **Proveedores** (Suppliers) con múltiples marcas asociadas.
-- Gestión de **Marcas** (Brands).
-- Gestión de **Categorías** (Product Types) asignadas a módulos específicos.
-- Gestión de **Empleados** y **Clientes**.
-- Generación de **Reportes PDF** profesionales del Dashboard usando `jsPDF` y `jspdf-autotable`.
-- Notificaciones en tiempo real en operaciones CRUD mediante `react-hot-toast`.
-- Validaciones en backend (duplicidad, correos, etc.) y manejo de errores visible para el usuario.
-- Opción universal de activación/inactivación (`isActive`) en todos los catálogos.
-
-### Autenticación y Seguridad
-- Inicio de sesión con validación de roles (**Admin** vs **Employee**).
-- Persistencia de sesión segura y lógica de cierre de sesión global.
-- Diseño preparado para **Autenticación en Dos Pasos (2FA)** mediante envío de códigos por correo electrónico.
-- Diferenciación clara entre accesos de **Administración / Empleados** y el E-commerce para **Clientes**.
+El sistema maneja dos grandes áreas (Módulos): **Tienda** (productos físicos) e **Impresiones** (servicios de impresión). Cada una tiene sus propias reglas de negocio.
 
 ---
 
-## Tecnologías Utilizadas
+## Qué hay en el repositorio
 
-### Frontend (Cliente)
-- **React.js**: Biblioteca principal para la construcción de interfaces interactivas.
-- **Vite**: Entorno de desarrollo ultrarrápido y empaquetador.
-- **Tailwind CSS**: Framework de utilidad para un diseño visual completamente a medida y responsivo.
-- **Framer Motion**: Biblioteca de animaciones para transiciones fluidas de páginas, animaciones de entrada/salida en modales y microinteracciones.
-- **React Router DOM**: Enrutamiento para crear una Single Page Application (SPA).
-- **React Hook Form**: Manejo eficiente y optimizado de formularios complejos.
-- **Axios**: Para la comunicación HTTP con el backend.
-- **jsPDF & AutoTable**: Para la generación dinámica de reportes en PDF.
-- **Lucide React**: Biblioteca de iconos consistentes y modernos.
-- **React Hot Toast**: Notificaciones amigables y no intrusivas en pantalla.
+| Carpeta | Qué es | Dónde corre |
+| --- | --- | --- |
+| `backend/` | API REST con Node.js, Express y MongoDB | Render |
+| `frontend/` | Tienda web y panel de administración (React + Vite) | Vercel |
+| `movil/` | App Android (Expo SDK 54): la tienda y el modo personal para el reparto | EAS / Google Play |
+| `analitica/` | Servicio de pronóstico en Python (FastAPI + statsmodels), en Docker | Render (Docker) |
 
-### Backend (Servidor)
-- **Node.js + Express**: Servidor rápido y escalable.
-- **MongoDB + Mongoose**: Base de datos NoSQL y ODM para modelar relaciones y referencias (ObjectId) entre colecciones.
-- **Cloudinary (SDK)**: Carga y almacenamiento en la nube de imágenes para ahorrar espacio y ancho de banda en el servidor local.
-- **Multer**: Middleware para el manejo de archivos `multipart/form-data` (subida de imágenes).
-- **Nodemon**: Para el reinicio automático del servidor en desarrollo.
+La web en Vercel manda todo lo que empieza con `/api` al backend en Render (ver `frontend/vercel.json`). El backend le pide el pronóstico al servicio de `analitica/`.
 
 ---
 
-## Arquitectura de la Base de Datos
+## Características principales
 
-El proyecto se sustenta en un esquema relacional dentro de un entorno NoSQL para permitir consultas avanzadas:
+### Tienda en línea (web y app)
+- **Catálogo** por secciones, con búsqueda, filtros y promociones (descuento y NxM) en un carrusel que avanza solo.
+- **Carrito y pago** con entrega a domicilio o retiro en la tienda. El envío se cobra con una base más un monto por kilómetro desde la ubicación de la tienda. Métodos de pago: efectivo, tarjeta (Wompi) y saldo.
+- **Tarjetas de regalo** con código `635-XXXX-XXXX`; los guiones se ponen solos al escribirlo.
+- **Puntos de fidelidad** que se ganan con cada compra y se canjean después.
+- **Seguimiento del pedido con mapa** (MapLibre + mapas de CARTO):
+  - Con el GPS del repartidor: su punto en vivo, la ruta por las calles (OpenRouteService) y cuánto falta.
+  - Sin ese GPS: la ruta aproximada desde la tienda y los minutos desde que salió.
+  - El cliente recibe un código de entrega para dictárselo al repartidor.
+- **"Quien compra esto también lleva"**: recomendaciones a partir de los productos que se compran juntos.
+- **Mi cuenta**: pedidos, favoritos, direcciones, métodos de pago, puntos, recibos, avisos por canal (app o correo) y preferencias (modo oscuro e idioma español/inglés).
+- **Tiqui, asistente por voz**:
+  - Agrega productos, recomienda, cuenta las ofertas y abre secciones.
+  - Usa Gemini, con Gemma de respaldo cuando Gemini se satura, y habla con la voz de ElevenLabs.
+- **Kiosco**: una pantalla en la tienda que se vincula con el teléfono del cliente por un código QR.
+- **Juego del stand** (`/juego`): preguntas sobre el proyecto, con ruleta de premios.
+- Inicio de sesión con Google, verificación por correo y recuperación de contraseña.
+- La tienda cambia de colores según la temporada, y Tiqui se disfraza.
 
-1. **Modules**: Configuración principal de la interfaz (`Tienda`, `Impresiones`).
-2. **ProductTypes (Categorías)**: Contienen la referencia a `moduleId` y a los `supplierIds` que las surten.
-3. **Brands (Marcas)**: Marcas existentes en el sistema.
-4. **Suppliers (Proveedores)**: Contienen su información de contacto y referencias múltiples a `brandIds` (las marcas que distribuyen).
-5. **Products**: Unifica todas las entidades y contiene campos como `stock`, `maxQuantity`, `barCode`, `priceCost`, `salePrice`, `expirationDate`, y URLs de imagen.
+### Panel de administración
+- **Dashboard** con gráficas (Recharts) y reportes PDF (`jsPDF` y `jspdf-autotable`).
+- **Inventario**:
+  - Productos con imágenes en Cloudinary y código de barras automático.
+  - Importar desde Excel: la IA acomoda las columnas y completa datos; las fotos salen de Open Food Facts.
+  - Control de stock y de `maxQuantity` (tope inicial).
+- **Pedidos**: estados (pagado, preparando, en camino, listo, entregado) y comprobante PDF.
+- **Catálogos** de módulos, categorías, marcas, empleados y clientes, cada uno con activación/inactivación (`isActive`). Las listas se pueden buscar y filtrar.
+- **Proveedores**:
+  - Marcas que surte cada uno, compras, crédito y movimientos.
+  - Botón "Pedir" (WhatsApp o llamada) desde la compra sugerida.
+- **Pronóstico de demanda** (servicio `analitica/`): ventas de las próximas semanas con su rango, compra sugerida y reporte PDF. Mientras la tienda no junte 4 semanas de ventas, muestra una demostración.
+- **Promociones, fidelidad, tarjetas de regalo y servicios de impresión.**
+- **Personalización**:
+  - Nombre, lema, dirección y horario.
+  - Ubicación de la tienda y costos de envío.
+  - Apariencia de la tienda.
+- **Tiqui del panel**: asistente para el administrador, separada de la Tiqui de la tienda. Consulta datos, y solo los cambia con una confirmación.
+- **Mini tutorial** la primera vez que el administrador entra a cada apartado.
+
+### App móvil (Android)
+- La misma tienda que la web, con notificaciones push del estado del pedido y de las ofertas.
+- **Modo personal** para el administrador y los empleados:
+  - **Reparto**: los pedidos a domicilio. "Salí a repartir" marca el pedido en camino y comparte el GPS con el cliente.
+  - **Panel web dentro de la app**, solo para el administrador.
+  - El personal recibe un aviso con cada pedido nuevo.
+- Se actualiza por internet con `expo-updates`, sin reinstalar la APK.
+
+### Autenticación y seguridad
+- Sesión con JWT en cookies `httpOnly` y roles: **Administrador**, **Empleado** y **Cliente**.
+- **Verificación en dos pasos (2FA)** por correo para el personal.
+- Límite de peticiones (`express-rate-limit`) en todo el API, con topes propios para los asistentes.
+- Validaciones en el backend: duplicados, correos y permisos (cada cliente solo ve sus pedidos).
 
 ---
 
-## Convenciones de Nomenclatura
+## Tecnologías utilizadas
 
-Para mantener la consistencia y legibilidad del código a lo largo del proyecto, se han establecido las siguientes convenciones de nomenclatura:
+### Frontend (`frontend/`)
+- **React 19 + Vite**, **Tailwind CSS 4** y **React Router DOM**.
+- **Framer Motion** para animaciones y transiciones.
+- **React Hook Form** para los formularios y **Axios** para hablar con el backend.
+- **MapLibre GL** (con componentes de mapcn) y mapas de **CARTO**: sin llave de Google Maps.
+- **Recharts**, **jsPDF + AutoTable**, **read-excel-file** y **qrcode**.
+- **Lucide React** (iconos), **React Hot Toast** (avisos), **@react-oauth/google** y **Vercel Analytics**.
+- **Vitest + Testing Library** y **ESLint**.
 
-### Frontend (React)
-- **Archivos de Componentes y Páginas**: Se utiliza **PascalCase** (ej. `TopBar.jsx`, `AdminDashboard.jsx`). Esto aplica a cualquier archivo que exporte un componente de React.
-- **Funciones y Variables**: Se utiliza **camelCase** (ej. `handleOpenModal`, `fetchProducts`, `productData`).
-- **Hooks Personalizados**: Se utiliza **camelCase** iniciando con `use` (ej. `useAuth`, `useFetch`).
+### Backend (`backend/`)
+- **Node.js 22 + Express 5**, **MongoDB + Mongoose**.
+- **jsonwebtoken**, **bcryptjs**, **cookie-parser** y **express-rate-limit**.
+- **Cloudinary + Multer** para las imágenes.
+- **Mailjet** para los correos: usa su API por HTTPS porque Render bloquea SMTP en el plan gratis.
+- **@google/genai** (Gemini y Gemma), **ElevenLabs** (voz de Tiqui) y **OpenRouteService** (rutas por calle).
+- **Swagger** con la documentación del API en `/api-docs`.
+- **Vitest** para las pruebas y **Nodemon** en desarrollo.
 
-### Backend (Node.js)
-- **Archivos y Carpetas**: Se utiliza **camelCase** (ej. `productType.js`, `routes/`, `models/`).
-- **Controladores, Modelos y Rutas**: Las funciones y variables internas utilizan **camelCase** (ej. `createProduct`, `getAllProducts`).
-- **Modelos de Mongoose**: La definición del modelo suele utilizar **PascalCase** internamente (ej. `const Product = mongoose.model(...)`).
-- **Variables de Entorno**: Se utiliza **UPPER_SNAKE_CASE** (ej. `MONGODB_URI`, `CLOUDINARY_API_KEY`).
+### App móvil (`movil/`)
+- **Expo SDK 54 + React Native** con **React Navigation**.
+- `expo-location`, `expo-notifications`, `expo-updates`, `expo-speech-recognition` y `expo-audio`.
+- Mapas en un **WebView con MapLibre**, los mismos de la web.
+- Inicio de sesión con Google y **Vitest** para las pruebas.
+
+### Servicio de análisis (`analitica/`)
+- **Python 3.12**, **FastAPI** y **Uvicorn**, empaquetado con **Docker**.
+- **Pronóstico de la tienda**: Holt-Winters (statsmodels), con pandas, numpy y scipy.
+- **Pronóstico por producto**: TSB, hecho para ventas intermitentes.
+- **pytest** para las pruebas.
+- `analitica/intenciones/` tiene un clasificador propio de Tiqui (scikit-learn). Viene **apagado**: Tiqui usa Gemini, y se enciende con `TIQUI_IA_PROPIA=1`.
 
 ---
 
-## Instalación y Configuración Local
+## Arquitectura de la base de datos
 
-Si deseas correr este proyecto en tu entorno local, sigue estos pasos:
+El proyecto usa referencias (`ObjectId`) entre colecciones de MongoDB para hacer consultas relacionadas:
 
-### 1. Clonar o descargar el repositorio
-Asegúrate de tener ambas carpetas: `frontend/` y `backend/`.
+1. **Modules**: las dos áreas principales (`Tienda`, `Impresiones`).
+2. **ProductTypes (Categorías)**: tienen la referencia a `moduleId` y a los `supplierIds` que las surten.
+3. **Brands (Marcas)** y **Suppliers (Proveedores)**: cada proveedor guarda los `brandIds` que distribuye.
+4. **Products**: `stock`, `maxQuantity`, `barCode`, `priceCost`, `salePrice`, `expirationDate`, imágenes y sus referencias.
+5. **Clients**, **Admins** y **Employees**: las cuentas de cada rol.
+6. **Orders**: productos, entrega (dirección y coordenadas), pago, estado y quién lo cambió, código de entrega y el último punto del repartidor. No se guarda el historial de su recorrido.
+7. **Promotions**, **Reviews**, **GiftCards**, **LoyaltyConfig** y **LoyaltyLedger** (movimientos de puntos).
+8. **Shoppings** (compras a proveedores) y **SupplierMovements** (facturas y pagos del crédito).
+9. **PrintServices** y **PrintMaterials** (módulo de Impresiones) y **KioskSessions** (kiosco).
+10. **StoreSettings**: la personalización de la tienda. **Ojo:** el documento que vale es el que tiene `clave: "tienda"`, así que siempre hay que filtrar por esa clave.
 
-### 2. Configurar el Backend
+---
+
+## Convenciones
+
+### Nombres
+- **Frontend (React)**:
+  - **PascalCase** para componentes y páginas (ej. `BurbujaPedido.jsx`).
+  - **camelCase** para funciones y variables.
+  - Los hooks empiezan con `use` (ej. `useSeguimientoEnVivo`).
+- **Backend (Node.js)**:
+  - **camelCase** en archivos, carpetas, funciones y variables (ej. `productType.js`, `rutaReparto.js`).
+  - Las variables de entorno van en **UPPER_SNAKE_CASE**, salvo algunas antiguas que conservan su nombre (`JWT_secret_key`, `apikeymail`).
+- El código y los comentarios están en español.
+
+### Textos
+- Todo lo que lee el cliente (web, app, notificaciones y correos) va en **tú** y sin género.
+- El panel de administración y los textos legales van en **usted**.
+- Tiqui habla de sí misma en femenino y en primera persona.
+- Las traducciones al inglés están en `frontend/src/i18n/en.js` y `movil/src/i18n/en.js`. Una frase nueva necesita su clave en los dos.
+
+### Git
+- Las ramas salen de `develop` y vuelven a `develop` con un pull request. `main` recibe a `develop` cuando se publica.
+- Nombres de rama descriptivos: `feat/...`, `fix/...`, `docs/...`.
+- Formato de los commits: `Tipo(ambito): descripcion`, con el detalle en una lista (ej. `Fix(backend,web): ...`).
+
+---
+
+## Instalación y configuración local
+
+### Requisitos
+- **Node.js 22** y **MongoDB** (local o Atlas).
+- **Python 3.12**, o **Docker**, solo para el servicio de pronóstico.
+- Para la app: **Expo Go**, un emulador de Android o una APK de desarrollo.
+
+### 1. Backend
 ```bash
 cd backend
 npm install
 ```
-Crea un archivo `.env` en la carpeta raíz del backend con las siguientes variables (ajusta los valores según tus credenciales):
+Crea un archivo `.env` en `backend/`. Lo mínimo para arrancar:
 ```env
 PORT=4000
-MONGODB_URI=tu_cadena_de_conexion_mongodb
-CLOUDINARY_CLOUD_NAME=tu_cloud_name
-CLOUDINARY_API_KEY=tu_api_key
-CLOUDINARY_API_SECRET=tu_api_secret
+DB_URI=mongodb://127.0.0.1:27017/cartify
+JWT_secret_key=una_clave_larga_y_secreta
 ```
-Inicia el servidor backend:
+Lo demás es opcional: sin su variable, esa función se apaga sola y el resto sigue funcionando.
+
+| Variables | Para qué |
+| --- | --- |
+| `CORS_ORIGINS` | Orígenes permitidos, separados por coma (por defecto `localhost:5173` y `5174`) |
+| `COOKIES_ENTRE_DOMINIOS=true` | En producción, cuando la web y el API viven en dominios distintos |
+| `TIENDA_URL`, `TIENDA_NOMBRE` | Enlaces y nombre que salen en los correos |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Imágenes de los productos |
+| `apikeymail`, `apisecretmail`, `MAILJET_FROM_EMAIL`, `MAILJET_FROM_NAME` | Correos (Mailjet) |
+| `GOOGLE_CLIENT_ID` | Inicio de sesión con Google (el mismo valor que en el frontend) |
+| `GRANT_TYPE`, `AUDIENCE`, `CLIENT_ID`, `CLIENT_SECRET` | Pagos con tarjeta (Wompi) |
+| `GEMINI_API_KEY` (y opcionales `GEMINI_MODEL`, `GEMINI_MODEL_RESPALDO`, `GEMINI_MODEL_ASISTENTE_RESPALDO`) | Tiqui y la IA del panel |
+| `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, `ELEVENLABS_MODEL` | La voz de Tiqui |
+| `OPENROUTESERVICE_API_KEY` | La ruta por las calles en el seguimiento del pedido |
+| `ANALITICA_URL`, `ANALITICA_CLAVE` | El servicio de pronóstico (la clave es la misma en los dos servicios) |
+| `PRINTER_EMAIL` | Mandar los trabajos de impresión a la impresora por correo |
+| `TIQUI_IA_PROPIA=1` | Encender el clasificador propio de Tiqui (apagado por defecto) |
+
+Inicia el servidor:
 ```bash
 npm run dev
 ```
+La documentación del API queda en `http://localhost:4000/api-docs`.
 
-### 3. Configurar el Frontend
-Abre una nueva terminal:
+### 2. Frontend
 ```bash
 cd frontend
 npm install
 ```
-Asegúrate de que tus peticiones en Axios apunten a `http://localhost:4000/api` (o al puerto configurado en el backend).
-Inicia el frontend:
+Copia `.env.example` como `.env`. `VITE_API_URL` apunta por defecto a `http://localhost:4000/api`, y las demás variables son opcionales: `VITE_GOOGLE_CLIENT_ID`, `VITE_WHATSAPP` y `VITE_LANDING_URL`.
 ```bash
 npm run dev
 ```
+Abre `http://localhost:5173`. El panel de administración está en `/admin`.
 
-### 4. Acceder
-Abre tu navegador e ingresa a `http://localhost:5173` (o el puerto que te indique Vite).
+### 3. App móvil
+```bash
+cd movil
+npm install
+npx expo start
+```
+La app usa el backend publicado en Render. Para usar tu backend local:
+1. Pon su dirección en `HOST_MANUAL`, en `movil/src/api/api.js` (en el emulador de Android: `http://10.0.2.2:4000/api`).
+2. Al terminar, déjalo otra vez en `null`.
+
+### 4. Servicio de pronóstico (opcional)
+```bash
+cd analitica
+python -m venv .venv
+.venv/Scripts/pip install -r requirements-dev.txt
+.venv/Scripts/python -m uvicorn app.main:app --port 8600
+```
+(En macOS o Linux, `.venv/bin/` en vez de `.venv/Scripts/`.) También se puede correr con Docker:
+```bash
+docker build -t analitica-la635 .
+docker run -p 8000:8000 -e ANALITICA_CLAVE=una-clave analitica-la635
+```
+Luego, en el `.env` del backend, `ANALITICA_URL` apunta a ese servicio y `ANALITICA_CLAVE` lleva la misma clave.
 
 ---
 
-## Decisiones de Diseño (UI/UX)
-- Se optó por una paleta de colores rica, basada en tonos tierra (Marrón, Naranja oscuro, Blanco, y colores madera) para dar un toque Premium y "Artesanal".
-- Bordes redondeados (`rounded-xl`, `rounded-2xl`, `rounded-full`) en tarjetas, botones y modales para un aspecto amigable y moderno.
-- Animaciones fluidas utilizando **Framer Motion** para transiciones y elevación de tarjetas, combinadas con efectos sutiles (`transition-colors`, `backdrop-blur-[1px]`) para retroalimentación visual sin saturar el rendimiento del navegador.
+## Pruebas
+
+| Parte | Comando |
+| --- | --- |
+| Backend | `cd backend && npm test` |
+| Frontend | `cd frontend && npm run lint && npm test` |
+| App móvil | `cd movil && npm test` |
+| Análisis | `cd analitica && pytest` |
+
+GitHub Actions (`.github/workflows/pruebas.yml`) corre todas las pruebas, el linter y la construcción de la web en cada pull request y en cada push a `develop` y `main`.
+
+---
+
+## Despliegue
+
+- **Web** (`frontend/`): Vercel. `vercel.json` manda `/api/*` al backend y el resto a la SPA.
+- **Backend** (`backend/`): Render (`https://cartify-tiendala635.onrender.com`). El plan gratis se duerme, así que `despertar-servidor.yml` lo visita cada 10 minutos.
+- **Análisis** (`analitica/`): Render con Docker. La primera respuesta después de dormir puede tardar más de un minuto; el panel lo espera.
+- **App** (`movil/`):
+  - Se compila con EAS Build (perfiles `development`, `preview` y `production` en `eas.json`).
+  - Los cambios que son solo de JavaScript se publican con `eas update`. `actualizar-app.yml` lo hace solo en cada push a `main` que toque `movil/`.
+  - Un cambio nativo (un módulo nuevo de Expo, por ejemplo) necesita compilar una APK nueva.
+
+---
+
+## Decisiones de diseño (UI/UX)
+- Paleta cálida en tonos tierra, con un color de marca que cambia según la temporada. Hay modo oscuro en la tienda, el panel y la app.
+- El contenido fluye sobre el fondo, sin encerrarlo en tarjetas o recuadros decorativos.
+- Bordes redondeados en botones y modales, y animaciones suaves con **Framer Motion** que respetan la preferencia de reducir movimiento.
+- Tiqui, de estilo plano, acompaña los estados del pedido, los avisos y el asistente.
+- La web y la app se ven y se comportan igual: lo que cambia en una, se cambia en la otra.
 
 ---
 
