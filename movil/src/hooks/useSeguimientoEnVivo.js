@@ -88,6 +88,9 @@ export const useSeguimientoEnVivo = (pedidoId, activo = true, { conAviso = true 
           velocidad,
           // La ruta por las calles que le falta (backend/src/utils/rutaReparto.js), o null.
           ruta: data?.ruta?.puntos?.length > 1 ? data.ruta : null,
+          // Sin punto fresco del repartidor: la ruta desde la tienda y cuánto
+          // falta desde que salió (estimadoDesdeLaTienda, mismo archivo), o null.
+          estimado: data?.estimado?.desde ? data.estimado : null,
         });
       } catch {
         // Un fallo de red no borra lo que ya se sabía.
@@ -118,30 +121,44 @@ export const useSeguimientoEnVivo = (pedidoId, activo = true, { conAviso = true 
     : null;
 
   const senalFria = desdeUltimoDato != null && desdeUltimoDato > SENAL_FRIA_MS;
+  const enVivo = !!punto && !senalFria;
+  // Sin eso, lo aproximado desde la tienda (si el servidor lo mandó).
+  const estimado = enVivo ? null : actual?.estimado || null;
 
   /*
    * Con la ruta por las calles, lo que falta es lo que mide esa línea y la
    * espera sale de su tiempo; sin ella, la línea recta de siempre. Con la
    * señal fría no se muestra: sería un camino desde donde ya no está.
    */
-  const ruta = punto && !senalFria ? actual?.ruta : null;
+  const ruta = enVivo ? actual?.ruta : null;
+  const puntosDeLinea = ruta?.puntos || estimado?.puntos || null;
+  // La misma línea llega como objeto nuevo en cada consulta: se compara por
+  // contenido para no recrear el WebView del mapa cada 10 segundos.
+  const claveDeLinea = puntosDeLinea?.length > 1 ? JSON.stringify(puntosDeLinea) : '';
   const lineaDeRuta = useMemo(
-    () => (ruta ? ruta.puntos.map(([lng, lat]) => ({ lat, lng })) : null),
-    [ruta]
+    () => (claveDeLinea ? JSON.parse(claveDeLinea).map(([lng, lat]) => ({ lat, lng })) : null),
+    [claveDeLinea]
   );
 
-  const metrosFaltantes = ruta?.metros
-    ?? (punto && actual?.destino ? distanciaMetros(punto, actual.destino) : null);
-  const minutos = ruta?.segundos != null
-    ? Math.max(1, Math.round(ruta.segundos / 60))
-    : minutosDeViaje(metrosFaltantes, actual?.velocidad);
+  const metrosFaltantes = !enVivo ? null : ruta?.metros
+    ?? (actual?.destino ? distanciaMetros(punto, actual.destino) : null);
+  const minutos = estimado
+    ? Math.max(1, Math.round(estimado.segundos / 60))
+    : ruta?.segundos != null
+      ? Math.max(1, Math.round(ruta.segundos / 60))
+      : minutosDeViaje(metrosFaltantes, actual?.velocidad);
 
   return {
-    enVivo: !!punto && !senalFria,
+    enVivo,
+    // Sin GPS del repartidor: ruta y tiempo aproximados desde la tienda
+    // (`origen`). Las pantallas lo dicen así y no pintan su punto.
+    estimado: !!estimado,
+    origen: estimado?.desde || null,
     estado: actual?.status || null,
-    punto,
+    // Un punto con la señal fría no se dibuja como si fuera de ahorita.
+    punto: enVivo ? punto : null,
     destino: actual?.destino || null,
-    // La línea por las calles que le falta, como [{lat,lng}…], o null.
+    // La línea por las calles que le falta (o la de la tienda), como [{lat,lng}…], o null.
     ruta: lineaDeRuta,
     repartidor: courier?.name || '',
     senalFria,
@@ -149,7 +166,7 @@ export const useSeguimientoEnVivo = (pedidoId, activo = true, { conAviso = true 
     distancia: formatoDistancia(metrosFaltantes),
     espera: textoDeEspera(minutos),
     minutos,
-    yaCasi: metrosFaltantes != null && metrosFaltantes <= YA_CASI_M,
+    yaCasi: enVivo && metrosFaltantes != null && metrosFaltantes <= YA_CASI_M,
   };
 };
 

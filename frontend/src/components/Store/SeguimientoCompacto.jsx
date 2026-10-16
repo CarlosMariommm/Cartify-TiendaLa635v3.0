@@ -52,7 +52,8 @@ const SeguimientoCompacto = ({ pedido }) => {
   const estado = seguimiento.estado || pedido.status;
   const pasos = pasosDe(pedido.deliveryType);
   const actual = indiceDePaso(pasos, estado);
-  const enCamino = estado === 'en_camino' && seguimiento.enVivo;
+  // Con el punto fresco del repartidor, o con la ruta aproximada desde la tienda.
+  const enCamino = estado === 'en_camino' && (seguimiento.enVivo || seguimiento.estimado);
 
   return (
     <div className="mb-3">
@@ -113,7 +114,11 @@ const SeguimientoCompacto = ({ pedido }) => {
           {seguimiento.distancia && (
             <span style={{ color: c.textMuted }}>· {t('a {distancia}', { distancia: seguimiento.distancia })}</span>
           )}
-          <Radio className="w-3 h-3 ml-auto flex-none" style={{ color: 'var(--marca-texto)' }} />
+          {seguimiento.estimado && (
+            <span style={{ color: c.textMuted }}>· {t('calculado desde la tienda')}</span>
+          )}
+          {/* La señal "en vivo" solo con el GPS del repartidor de verdad. */}
+          {seguimiento.enVivo && <Radio className="w-3 h-3 ml-auto flex-none" style={{ color: 'var(--marca-texto)' }} />}
         </div>
       )}
 
@@ -128,6 +133,7 @@ const SeguimientoCompacto = ({ pedido }) => {
             punto={seguimiento.punto}
             destino={seguimiento.destino}
             ruta={seguimiento.ruta}
+            origen={seguimiento.origen}
             alto={170}
             borde={c.cardBorder}
           />

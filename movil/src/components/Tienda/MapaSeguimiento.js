@@ -52,25 +52,28 @@ import { useIdioma } from '../../context/IdiomaContext';
  * @param punto      - dónde va el repartidor ahora ({lat,lng}), o null.
  * @param destino    - la casa del cliente ({lat,lng}), o null.
  * @param ruta       - la línea por las calles que le falta ([{lat,lng}…]), o null.
+ * @param origen     - la tienda ({lat,lng}), o null: solo sin GPS del
+ *                     repartidor, cuando la ruta es la aproximada desde ahí.
  * @param alto       - alto del mapa en dp.
  * @param colorMarca - color del pin de la casa; el del repartidor es fijo
  *                     (el mismo azul que la web, no cambia con la temporada).
  * @param alAgrandar - se llama al tocar la miniatura; quien la use decide
  *                     qué hacer (abrir ModalMapaSeguimiento.js).
  */
-const MapaSeguimiento = ({ punto, destino, ruta, alto = 132, colorMarca = '#8C5628', alAgrandar }) => {
+const MapaSeguimiento = ({ punto, destino, ruta, origen, alto = 132, colorMarca = '#8C5628', alAgrandar }) => {
   const { t } = useIdioma();
   // Calles oscuras de CARTO en modo oscuro, igual que la web.
   const { oscuro } = useModo();
 
-  const sinPuntos = !punto && !destino;
+  const sinPuntos = !punto && !destino && !origen;
 
   const html = useMemo(
-    () => (sinPuntos ? '' : crearHtmlSeguimiento({ punto, destino, ruta, colorMarca, interactivo: false, oscuro })),
+    () => (sinPuntos ? '' : crearHtmlSeguimiento({ punto, destino, ruta, origen, colorMarca, interactivo: false, oscuro })),
     // Cambia de HTML solo cuando el punto se movió de verdad (o llegó otra
     // ruta), no en cada segundo que pasa: recrear el WebView entero por cada
     // "tic" del reloj haría parpadear el mapa en vez de solo mover el pin.
-    [sinPuntos, punto?.lat, punto?.lng, destino?.lat, destino?.lng, ruta, colorMarca, oscuro]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sinPuntos, punto?.lat, punto?.lng, destino?.lat, destino?.lng, origen?.lat, origen?.lng, ruta, colorMarca, oscuro]
   );
 
   // Sin ningún punto no hay mapa que valga la pena: ver el porqué en

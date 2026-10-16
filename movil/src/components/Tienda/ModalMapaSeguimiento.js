@@ -21,7 +21,8 @@ import { useIdioma } from '../../context/IdiomaContext';
  * ============================================================
  */
 
-const ModalMapaSeguimiento = ({ punto, destino, ruta, colorMarca, alCerrar }) => {
+// `origen` (la tienda) llega solo sin GPS del repartidor: ahí el título no dice "en vivo".
+const ModalMapaSeguimiento = ({ punto, destino, ruta, origen, colorMarca, alCerrar }) => {
   const { t } = useIdioma();
   const { top, bottom } = useSafeAreaInsets();
   const COLORES = useColores();
@@ -50,15 +51,16 @@ const ModalMapaSeguimiento = ({ punto, destino, ruta, colorMarca, alCerrar }) =>
   // Mismo criterio que la miniatura: solo se recrea el HTML cuando el punto
   // se movió de verdad, no en cada segundo que pasa.
   const html = useMemo(
-    () => crearHtmlSeguimiento({ punto, destino, ruta, colorMarca, interactivo: true, oscuro: COLORES.oscuro }),
-    [punto?.lat, punto?.lng, destino?.lat, destino?.lng, ruta, colorMarca, COLORES.oscuro]
+    () => crearHtmlSeguimiento({ punto, destino, ruta, origen, colorMarca, interactivo: true, oscuro: COLORES.oscuro }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [punto?.lat, punto?.lng, destino?.lat, destino?.lng, origen?.lat, origen?.lng, ruta, colorMarca, COLORES.oscuro]
   );
 
   return (
     <View style={estilos.capa}>
       <Animated.View style={[estilos.pagina, { opacity: opacidad }]}>
         <View style={[estilos.encabezado, { paddingTop: top + 10 }]}>
-          <Text style={estilos.titulo}>{t('Seguimiento en vivo')}</Text>
+          <Text style={estilos.titulo}>{origen && !punto ? t('Ruta aproximada') : t('Seguimiento en vivo')}</Text>
           <Pressable
             onPress={cerrarConAnimacion}
             hitSlop={10}

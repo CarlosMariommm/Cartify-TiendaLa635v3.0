@@ -213,7 +213,8 @@ const ModalPedido = ({ pedido, alCerrar }) => {
 
   // El paso al día si se está siguiendo; si no, el de la lista.
   const estadoActual = seguimiento.estado || pedido.status;
-  const enCamino = estadoActual === 'en_camino' && seguimiento.enVivo;
+  // Con el punto fresco del repartidor, o con la ruta aproximada desde la tienda.
+  const enCamino = estadoActual === 'en_camino' && (seguimiento.enVivo || seguimiento.estimado);
   const estados = estadosPedido(COLORES.oscuro);
   const estado = estados[estadoActual] || estados.pagado;
   const numero = String(pedido._id || '').slice(-6).toUpperCase();
@@ -289,6 +290,7 @@ const ModalPedido = ({ pedido, alCerrar }) => {
                   punto={seguimiento.punto}
                   destino={seguimiento.destino}
                   ruta={seguimiento.ruta}
+                  origen={seguimiento.origen}
                   alto={170}
                   colorMarca={colores.marca}
                   alAgrandar={() => setMapaGrande(true)}
@@ -298,7 +300,9 @@ const ModalPedido = ({ pedido, alCerrar }) => {
                 </Text>
                 <Text style={estilos.mapaDetalle}>
                   {seguimiento.repartidor ? `${seguimiento.repartidor} · ` : ''}
-                  {seguimiento.distancia ? t('a {distancia} de tu dirección', { distancia: seguimiento.distancia }) : t('Te llevan tu pedido')}
+                  {seguimiento.estimado
+                    ? t('Calculado desde que salió de la tienda')
+                    : seguimiento.distancia ? t('a {distancia} de tu dirección', { distancia: seguimiento.distancia }) : t('Te llevan tu pedido')}
                 </Text>
               </View>
             )}
@@ -490,6 +494,7 @@ const ModalPedido = ({ pedido, alCerrar }) => {
           punto={seguimiento.punto}
           destino={seguimiento.destino}
           ruta={seguimiento.ruta}
+          origen={seguimiento.origen}
           colorMarca={colores.marca}
           alCerrar={() => setMapaGrande(false)}
         />

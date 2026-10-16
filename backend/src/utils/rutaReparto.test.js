@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import {
   recortarRuta,
   rutaDelRepartidor,
+  estimadoDesdeLaTienda,
   olvidarRuta,
   DESVIO_MAXIMO_M,
   ESPERA_ENTRE_CONSULTAS_MS,
@@ -84,6 +85,57 @@ describe("la ruta del repartidor", () => {
     olvidarRuta("e");
     expect(await rutaDelRepartidor({ pedidoId: "e", desde: { lat: 13.68, lng: -89.2 }, hacia: CASA, llave: "x", pedir, ahora })).toBeNull();
     expect(await rutaDelRepartidor({ pedidoId: "e", desde: { lat: 13.68, lng: -89.2 }, hacia: CASA, llave: "x", pedir, ahora: ahora + 10_000 })).toBeNull();
+    expect(pedir).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("sin GPS del repartidor: la ruta desde la tienda", () => {
+  const TIENDA = { lat: 13.68, lng: -89.2 };
+  const SALIO = 5_000_000;
+
+  it("la ruta de la tienda a la casa y lo que falta desde que salió; se pide una sola vez", async () => {
+    const pedir = servicio();
+    olvidarRuta("t1");
+    const recien = await estimadoDesdeLaTienda({ pedidoId: "t1", tienda: TIENDA, hacia: CASA, salio: SALIO, llave: "x", pedir, ahora: SALIO });
+    expect(recien.desde).toEqual(TIENDA);
+    expect(recien.puntos[0]).toEqual([-89.2, 13.68]);
+    expect(recien.puntos.length).toBe(RUTA.length + 1);
+    expect(recien.segundos).toBe(440);
+
+    // Dos minutos después faltan dos minutos menos, sin volver a preguntar.
+    const despues = await estimadoDesdeLaTienda({ pedidoId: "t1", tienda: TIENDA, hacia: CASA, salio: SALIO, llave: "x", pedir, ahora: SALIO + 120_000 });
+    expect(despues.segundos).toBe(320);
+    expect(pedir).toHaveBeenCalledTimes(1);
+
+    // Ya pasó el tiempo de la ruta: no baja de cero.
+    const tarde = await estimadoDesdeLaTienda({ pedidoId: "t1", tienda: TIENDA, hacia: CASA, salio: SALIO, llave: "x", pedir, ahora: SALIO + 900_000 });
+    expect(tarde.segundos).toBe(0);
+  });
+
+  it("sin llave no hay línea, pero sí un tiempo por la línea recta", async () => {
+    const pedir = servicio();
+    olvidarRuta("t2");
+    const r = await estimadoDesdeLaTienda({ pedidoId: "t2", tienda: TIENDA, hacia: CASA, salio: SALIO, llave: "", pedir, ahora: SALIO });
+    expect(pedir).not.toHaveBeenCalled();
+    expect(r.puntos).toBeNull();
+    // ~1.56 km en recta × 1.35 de rodeo a 18 km/h: unos 7 minutos.
+    expect(r.segundos).toBeGreaterThan(380);
+    expect(r.segundos).toBeLessThan(470);
+  });
+
+  it("sin la ubicación de la tienda no hay nada que estimar", async () => {
+    const pedir = servicio();
+    expect(await estimadoDesdeLaTienda({ pedidoId: "t3", tienda: { lat: null, lng: null }, hacia: CASA, salio: SALIO, llave: "x", pedir })).toBeNull();
+    expect(pedir).not.toHaveBeenCalled();
+  });
+
+  it("si el servicio falla, igual da el tiempo y no insiste enseguida", async () => {
+    const pedir = vi.fn(async () => { throw new Error("caído"); });
+    olvidarRuta("t4");
+    const r = await estimadoDesdeLaTienda({ pedidoId: "t4", tienda: TIENDA, hacia: CASA, salio: SALIO, llave: "x", pedir, ahora: SALIO });
+    expect(r.puntos).toBeNull();
+    expect(r.segundos).toBeGreaterThan(0);
+    await estimadoDesdeLaTienda({ pedidoId: "t4", tienda: TIENDA, hacia: CASA, salio: SALIO, llave: "x", pedir, ahora: SALIO + 10_000 });
     expect(pedir).toHaveBeenCalledTimes(1);
   });
 });

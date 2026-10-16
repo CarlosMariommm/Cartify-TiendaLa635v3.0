@@ -117,7 +117,8 @@ const EstadoPedido = () => {
   const PASOS = pasosDe(pedido.deliveryType);
   const pasoActual = indiceDePaso(PASOS, estado);
   const estaEnCamino = estado === 'en_camino';
-  const enCamino = estaEnCamino && seguimiento.enVivo;
+  // Con el punto fresco del repartidor, o con la ruta aproximada desde la tienda.
+  const enCamino = estaEnCamino && (seguimiento.enVivo || seguimiento.estimado);
 
   const numero = String(pedido._id).slice(-6).toUpperCase();
   const infoPago = PAGO[pedido.paymentMethod] || PAGO.efectivo;
@@ -254,12 +255,13 @@ const EstadoPedido = () => {
             {/* Mapa en vivo, solo cuando de verdad hay alguien en camino.
                 El mapa lo dibuja MapaSeguimiento, que es el mismo de la
                 burbuja, la confirmacion y Mis Pedidos. */}
-            {enCamino && seguimiento.punto && (
+            {enCamino && (
               <div className="mt-6 rounded-2xl overflow-hidden" style={{ border: `1px solid ${c.cardBorder}` }}>
                 <MapaSeguimiento
                   punto={seguimiento.punto}
                   destino={seguimiento.destino}
                   ruta={seguimiento.ruta}
+                  origen={seguimiento.origen}
                   alto={200}
                   borde="transparent"
                 />
@@ -268,6 +270,7 @@ const EstadoPedido = () => {
                   <Bike className="w-4 h-4" />
                   {seguimiento.yaCasi ? t('Ya casi toca tu puerta') : seguimiento.espera}
                   {seguimiento.distancia ? ` · ${t('a {distancia}', { distancia: seguimiento.distancia })}` : ''}
+                  {seguimiento.estimado ? ` · ${t('calculado desde la tienda')}` : ''}
                 </div>
               </div>
             )}

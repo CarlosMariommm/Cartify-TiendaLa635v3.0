@@ -115,9 +115,10 @@ const BurbujaPedido = () => {
   const pasoActual = indiceDePaso(PASOS, estado);
   const paso = PASOS[pasoActual] || PASOS[0];
   // "En camino" ya es un estado real, no una adivinanza con el GPS — el mapa
-  // solo entra a competir con si de verdad hay un punto fresco que mostrar.
+  // sale con el punto fresco del repartidor o, sin él, con la ruta aproximada
+  // desde la tienda.
   const estaEnCamino = estado === 'en_camino';
-  const enCamino = estaEnCamino && seguimiento.enVivo;
+  const enCamino = estaEnCamino && (seguimiento.enVivo || seguimiento.estimado);
   // La ilustración del estado. "En camino" va aparte porque solo existe en la
   // lista de domicilio, y `paso` cae al primero si el estado no está en ella.
   const pose = estaEnCamino ? 'en-camino' : paso.pose;
@@ -255,7 +256,8 @@ const BurbujaPedido = () => {
             El mapa solo aparece cuando de verdad hay alguien en camino con la
             novedad fresca. Un mapa con un punto viejo es peor que no tener
             mapa: el cliente sale a la banqueta a esperar a alguien que va
-            tres calles atrás.
+            tres calles atrás. Sin ese punto, la ruta desde la tienda y un
+            tiempo que dice que es aproximado, sin repartidor dibujado.
           */}
           {enCamino && (
             <div>
@@ -265,6 +267,7 @@ const BurbujaPedido = () => {
                 punto={seguimiento.punto}
                 destino={seguimiento.destino}
                 ruta={seguimiento.ruta}
+                origen={seguimiento.origen}
                 alto={132}
                 borde="transparent"
                 interactivo={false}
@@ -291,9 +294,11 @@ const BurbujaPedido = () => {
                   {seguimiento.repartidor ? `${seguimiento.repartidor} · ` : ''}
                   {/* La distancia solo sale si el pedido guardó su punto en el
                       mapa; los viejos traen nada más la dirección escrita */}
-                  {seguimiento.distancia
-                    ? t('a {distancia} de tu dirección', { distancia: seguimiento.distancia })
-                    : t('Te llevan tu pedido')}
+                  {seguimiento.estimado
+                    ? t('Calculado desde que salió de la tienda')
+                    : seguimiento.distancia
+                      ? t('a {distancia} de tu dirección', { distancia: seguimiento.distancia })
+                      : t('Te llevan tu pedido')}
                 </div>
               </div>
             </div>
