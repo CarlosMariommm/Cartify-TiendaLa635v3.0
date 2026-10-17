@@ -25,7 +25,9 @@
  * ============================================================
  */
 
-const URL_ORS = "https://api.openrouteservice.org/v2/directions/driving-car/geojson";
+// La dirección nueva de OpenRouteService: api.openrouteservice.org se está
+// retirando (aviso en su panel, octubre de 2026). Misma llave, mismo formato.
+const URL_ORS = "https://api.heigit.org/openrouteservice/v2/directions/driving-car/geojson";
 
 // Si el repartidor está a más de esto de la línea, tomó otra calle: ruta nueva.
 export const DESVIO_MAXIMO_M = 60;
