@@ -1,12 +1,8 @@
 import api from './api';
 
-/*
- * Tiqui del panel: la asistente del equipo. Es OTRA asistente que la de la
- * tienda (aiService.asistente) y habla con su propia ruta, que solo abre una
- * sesión de personal. Ver backend/src/controller/tiquiPanelController.js.
- *
- * `enSilencio`: si falla, lo dice Tiqui en su globo, no un aviso rojo encima.
- */
+// Tiqui del panel: la asistente del equipo. Es OTRA asistente que la de la tienda
+// (aiService.asistente) y habla con su propia ruta, que solo abre una sesión de personal. Ver
+// backend/src/controller/tiquiPanelController.js.
 export const tiquiPanelService = {
   conversar: async ({ frase, historial, pantalla }) => {
     try {

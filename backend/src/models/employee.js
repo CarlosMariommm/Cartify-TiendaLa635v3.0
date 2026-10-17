@@ -1,14 +1,4 @@
-/*
-Campos:
-    fullnName: String,
-    dui: String,
-    phoneNumber: String,
-    image: String,
-    email: String,
-    userName: String,
-    password: String,
-    isActive: Boolean,
-*/
+// Campos: fullnName, dui, phoneNumber, image, email, userName, password, isActive.
 
 /**
  * @swagger

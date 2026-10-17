@@ -2,11 +2,9 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { loyaltyService } from '../api/loyaltyService';
 
-/*
- * useLoyaltyConfig — para el ADMIN: carga y guarda la config del programa de
- * puntos (tasa por dólar, meses de vencimiento, activo/inactivo).
- * La lógica vive aquí; la página Fidelidad solo pinta el formulario.
- */
+// useLoyaltyConfig — para el ADMIN: carga y guarda la config del programa de puntos (tasa por
+// dólar, meses de vencimiento, activo/inactivo). La lógica vive aquí; la página Fidelidad solo
+// pinta el formulario.
 export const useLoyaltyConfig = () => {
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);

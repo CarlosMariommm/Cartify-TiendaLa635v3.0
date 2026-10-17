@@ -14,15 +14,8 @@ import FilterSelect from '../components/UI/FilterSelect';
 import OrdenSelect from '../components/UI/OrdenSelect';
 import { coincide, ordenarLista, ORDEN_INICIAL } from '../utils/listasPanel';
 
-/*
- * ServiciosImpresion (Admin) — catálogo de formatos de impresión con precio.
- * El cliente elige estos formatos en /impresiones.
- *
- * La medida se escribe y se muestra en PÍXELES — es lo que se conoce, como
- * una foto (1200×1200) — y se convierte a centímetros solo para guardarla:
- * el editor y el PDF final necesitan el tamaño real en papel. Ver
- * utils/pxImpresion.js.
- */
+// ServiciosImpresion (Admin) — catálogo de formatos de impresión con precio. El cliente elige
+// estos formatos en /impresiones.
 const emptyForm = { name: '', widthPx: pxDesdeCm(21.6), heightPx: pxDesdeCm(27.9), pricePerCopy: '', allowsColor: true, colorSurcharge: '', isActive: true, materialId: '' };
 
 const ServiciosImpresion = () => {
@@ -162,12 +155,9 @@ const ServiciosImpresion = () => {
         </div>
       ) : (
         <>
-          {/*
-            Base primero: son los tamaños de uso general (Carta, Oficio, DUI...)
-            que ya vienen cargados — lo que casi cualquier tienda va a usar.
-            Se pueden editar o borrar igual que cualquier otro, esto es solo
-            para que no se pierdan entre los que el dueño va agregando.
-          */}
+          {/* Base primero: son los tamaños de uso general (Carta, Oficio, DUI...) que ya vienen cargados — lo
+             que casi cualquier tienda va a usar. Se pueden editar o borrar igual que cualquier otro, esto es
+             solo para que no se pierdan entre los que el dueño va agregando. */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <h3 className="text-xl font-bold text-gray-800 mb-1">Formatos base</h3>
             <p className="text-xs text-gray-400 mb-6">De uso general — ya vienen cargados, revise sus precios antes de usarlos.</p>
@@ -194,10 +184,9 @@ const ServiciosImpresion = () => {
         </>
       )}
 
-      {/* El papel y la tinta. Va DEBAJO de los formatos porque se consulta
-          menos seguido, pero en la misma pantalla: son la misma conversación
-          —qué puedo imprimir hoy— y separarlas obligaría a saltar de pantalla
-          para entender por qué un formato está apagado. */}
+      {/* El papel y la tinta. Va DEBAJO de los formatos porque se consulta menos seguido, pero en la
+         misma pantalla: son la misma conversación —qué puedo imprimir hoy— y separarlas obligaría a
+         saltar de pantalla para entender por qué un formato está apagado. */}
       <MaterialesImpresion />
 
       {/* Modal crear/editar */}
@@ -243,12 +232,9 @@ const ServiciosImpresion = () => {
                   </div>
                 )}
 
-                {/*
-                  En qué papel se imprime. Es opcional a propósito: los formatos
-                  que ya estaban cargados no tienen material y tienen que seguir
-                  ofreciéndose igual. Solo al elegir uno, el formato empieza a
-                  apagarse solo cuando ese papel llega a cero.
-                */}
+                {/* En qué papel se imprime. Es opcional a propósito: los formatos que ya estaban cargados no tienen
+                   material y tienen que seguir ofreciéndose igual. Solo al elegir uno, el formato empieza a
+                   apagarse solo cuando ese papel llega a cero. */}
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">Papel que usa</label>
                   <select

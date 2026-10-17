@@ -1,21 +1,6 @@
-/*
- * ============================================================
- * ESTADO DE CUENTA DE UN PROVEEDOR — cuentaProveedor.js
- * ============================================================
- * Convierte una lista de movimientos (compras y pagos) en el estado real de
- * la cuenta: cuánto se debe, qué facturas siguen abiertas y cuáles ya vencieron.
- *
- * Cómo se aplican los pagos: LO MÁS VIEJO PRIMERO.
- *
- * Un pago no dice a qué factura corresponde — el tendero le da $100 al
- * proveedor y ya. Lo estándar en cuentas por pagar es abonarlo a la factura
- * más antigua pendiente, y eso es también lo que le conviene al negocio: paga
- * primero lo que está por vencer y evita el recargo.
- *
- * Función pura: recibe datos y devuelve datos. Sin base, sin fechas ocultas
- * (el "hoy" entra por parámetro), así que se puede probar de verdad.
- * ============================================================
- */
+// ESTADO DE CUENTA DE UN PROVEEDOR — cuentaProveedor.js
+// Convierte una lista de movimientos (compras y pagos) en el estado real de la cuenta: cuánto se
+// debe, qué facturas siguen abiertas y cuáles ya vencieron.
 
 const CENTAVO = 0.005; // tolerancia para no arrastrar errores de decimales
 
@@ -39,11 +24,8 @@ export const estadoCuenta = (movimientos = [], hoy = new Date()) => {
     .filter((m) => m.type === "pago")
     .reduce((s, m) => s + aNumero(m.amount), 0);
 
-  /*
-   * Repartimos lo pagado entre las compras, de la más vieja a la más nueva.
-   * Lo que sobre después de cubrirlas todas es saldo a favor de la tienda
-   * (pagó de más o adelantado).
-   */
+  // Repartimos lo pagado entre las compras, de la más vieja a la más nueva. Lo que sobre después de
+  // cubrirlas todas es saldo a favor de la tienda (pagó de más o adelantado).
   let bolsa = totalPagado;
   const pendientes = [];
 
@@ -88,11 +70,9 @@ export const estadoCuenta = (movimientos = [], hoy = new Date()) => {
   };
 };
 
-/*
- * Cuánto más le pueden fiar. Si no hay límite configurado devuelve null en vez
- * de 0: "no configurado" y "sin cupo" son cosas distintas, y mostrar $0.00
- * cuando en realidad nadie puso el límite haría creer que no le fían nada.
- */
+// Cuánto más le pueden fiar. Si no hay límite configurado devuelve null en vez de 0: "no
+// configurado" y "sin cupo" son cosas distintas, y mostrar $0.00 cuando en realidad nadie puso el
+// límite haría creer que no le fían nada.
 export const creditoDisponible = (limite, deuda) => {
   const tope = aNumero(limite);
   if (tope <= 0) return null;

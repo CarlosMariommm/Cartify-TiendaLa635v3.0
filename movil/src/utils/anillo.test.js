@@ -1,10 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { distanciaEnAnillo, indiceEnAnillo, ordenarAnuncios, poseEnAnillo } from './anillo';
 
-/*
- * El anillo de promociones de la app: el mismo orden y el mismo giro que el
- * carrusel de la web (usePromoCarousel.js).
- */
+// El anillo de promociones de la app: el mismo orden y el mismo giro que el carrusel de la web
+// (usePromoCarousel.js).
 
 describe('el anillo de promociones', () => {
   it('pone las más nuevas primero y solo nueve', () => {

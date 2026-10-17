@@ -10,32 +10,16 @@ import { etiquetaPromo, textoVencimiento, promoVencida } from '../../utils/promo
 import { useIdioma } from '../../hooks/useIdioma';
 import { foto, ANCHO } from '../../utils/fotos';
 
-/*
- * ============================================================
- * UNA PROMOCIÓN, A PANTALLA COMPLETA — PromoDetailModal.jsx
- * ============================================================
- * Lo que se abre al tocar un banner del carrusel.
- *
- * Antes era una ventanita flotando sobre la tienda oscurecida, y adentro el
- * banner otra vez como TARJETA —con sus esquinas y su sombra— metido en otra
- * tarjeta. Una caja dentro de una caja: la promo, que es lo que la persona
- * quería ver en grande, quedaba del mismo tamaño que en el carrusel.
- *
- * Ahora es una pantalla, igual que la ficha de un producto: arriba el MISMO
- * encabezado de la tienda, debajo la promo a todo el ancho con sus colores
- * —sin bordes, sin sombra, es el fondo de la página— y después los productos
- * que entran, directo sobre el papel.
- * ============================================================
- */
+// UNA PROMOCIÓN, A PANTALLA COMPLETA — PromoDetailModal.jsx
+// Lo que se abre al tocar un banner del carrusel. Una caja dentro de una caja: la promo, que es lo
+// que la persona quería ver en grande, quedaba del mismo tamaño que en el carrusel.
 
 const aparecer = keyframes`from { opacity: 0; } to { opacity: 1; }`;
 const subir = keyframes`from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; }`;
 
-/*
- * Por debajo de la ficha de producto (1000): desde aquí se puede abrir un
- * producto, y ese tiene que quedar encima, no debajo. El carrito (1050) y el
- * asistente también quedan por encima, que se abren desde este encabezado.
- */
+// Por debajo de la ficha de producto (1000): desde aquí se puede abrir un producto, y ese tiene
+// que quedar encima, no debajo. El carrito (1050) y el asistente también quedan por encima, que se
+// abren desde este encabezado.
 const Capa = styled.div`
   position: fixed;
   inset: 0;
@@ -78,12 +62,9 @@ const PortadaInterior = styled.div`
   }
 `;
 
-/*
- * El botón de volver vive DENTRO de la página, igual que en la ficha de
- * producto: en el teléfono la flecha del navegador queda lejos del pulgar, y
- * en el kiosco directamente no existe. Toma el color del texto de la promo
- * para leerse sobre cualquier tema.
- */
+// El botón de volver vive DENTRO de la página, igual que en la ficha de producto: en el teléfono
+// la flecha del navegador queda lejos del pulgar, y en el kiosco directamente no existe. Toma el
+// color del texto de la promo para leerse sobre cualquier tema.
 const Volver = styled.button`
   align-self: flex-start;
   display: flex;
@@ -118,10 +99,8 @@ const Volver = styled.button`
   }
 `;
 
-/*
- * Sobre una imagen a sangre el borde no alcanza: la foto puede ser clara u
- * oscura en esa esquina. Ahí el botón lleva su propio fondo.
- */
+// Sobre una imagen a sangre el borde no alcanza: la foto puede ser clara u oscura en esa esquina.
+// Ahí el botón lleva su propio fondo.
 const VolverSobreFoto = styled(Volver)`
   position: absolute;
   top: 20px;
@@ -191,10 +170,8 @@ const Bajada = styled.p`
   text-wrap: pretty;
 `;
 
-/*
- * La marca de agua: el icono de la promo en grande, apenas visible, detrás
- * del texto. Es la misma idea que en el banner del carrusel (PromoCard).
- */
+// La marca de agua: el icono de la promo en grande, apenas visible, detrás del texto. Es la misma
+// idea que en el banner del carrusel (PromoCard).
 const MarcaDeAgua = styled.span`
   position: absolute;
   right: max(4%, calc((100% - 1240px) / 2));
@@ -215,11 +192,8 @@ const MarcaDeAgua = styled.span`
   }
 `;
 
-/*
- * La foto que acompaña al texto se funde con el fondo hacia la izquierda, como
- * en el carrusel. En el teléfono no hay lado que darle: sube arriba y se
- * funde hacia abajo, y el texto se lee debajo.
- */
+// La foto que acompaña al texto se funde con el fondo hacia la izquierda, como en el carrusel. En
+// el teléfono no hay lado que darle: sube arriba y se funde hacia abajo, y el texto se lee debajo.
 const FotoAcompana = styled.img`
   position: absolute;
   top: 0;
@@ -239,10 +213,8 @@ const FotoAcompana = styled.img`
   }
 `;
 
-/*
- * El banner diseñado completo (1200 × 480) ya trae su texto: se muestra
- * entero y a todo el ancho, sin recortarle nada.
- */
+// El banner diseñado completo (1200 × 480) ya trae su texto: se muestra entero y a todo el ancho,
+// sin recortarle nada.
 const FotoASangre = styled.img`
   display: block;
   width: 100%;
@@ -282,13 +254,9 @@ const BajadaTexto = styled.p`
   max-width: 640px;
 `;
 
-/*
- * Los datos sueltos —cuántos productos, en qué pasillo— van en una línea de
- * texto y no en pastillas ni recuadros: son para leer de pasada.
- *
- * "Lo encontrás en": La 635 es una tienda de verdad, y saber que el 2x1 está
- * en Lácteos le ahorra al cliente dar vueltas buscándolo.
- */
+// Los datos sueltos —cuántos productos, en qué pasillo— van en una línea de texto y no en
+// pastillas ni recuadros: son para leer de pasada. "Lo encontrás en": La 635 es una tienda de
+// verdad, y saber que el 2x1 está en Lácteos le ahorra al cliente dar vueltas buscándolo.
 const Datos = styled.p`
   display: flex;
   align-items: center;
@@ -348,11 +316,9 @@ const VerTienda = styled.button`
   &:active { transform: scale(0.97); }
 `;
 
-/*
- * El icono elegido para la promo. Sale de una tabla fija (iconosPromo), no se
- * fabrica en cada render; va con createElement para que el linter no lo
- * confunda con un componente creado al vuelo.
- */
+// El icono elegido para la promo. Sale de una tabla fija (iconosPromo), no se fabrica en cada
+// render; va con createElement para que el linter no lo confunda con un componente creado al
+// vuelo.
 const IconoPromo = ({ icono, ...props }) => {
   const Icono = iconoDePromo(icono);
   return Icono ? createElement(Icono, props) : null;
@@ -367,19 +333,14 @@ const PromoDetailModal = ({
   onVerEnTienda,
   onVerProducto,
   onAgregarAlCarrito,
-  /*
-   * Lo que el encabezado necesita de la tienda: el pasillo, la búsqueda y el
-   * carrito. Igual que en la ficha de producto. Ver HeaderTienda.
-   */
+  // Lo que el encabezado necesita de la tienda: el pasillo, la búsqueda y el carrito. Igual que en
+  // la ficha de producto. Ver HeaderTienda.
   header = {},
 }) => {
   const { t, locale } = useIdioma();
-  /*
-   * UN SOLO SCROLL: esta capa scrollea por dentro, y sin congelar el de la
-   * tienda de atrás quedaban dos barras peleando. Mismo candado que la ficha
-   * de producto; como las dos guardan lo que había antes, abrir un producto
-   * desde aquí y cerrarlo devuelve el candado de la promo intacto.
-   */
+  // UN SOLO SCROLL: esta capa scrollea por dentro, y sin congelar el de la tienda de atrás quedaban
+  // dos barras peleando. Mismo candado que la ficha de producto; como las dos guardan lo que había
+  // antes, abrir un producto desde aquí y cerrarlo devuelve el candado de la promo intacto.
   useEffect(() => {
     const overflowPrevio = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -402,11 +363,9 @@ const PromoDetailModal = ({
   // letra oscura para leerse (y al revés en el tema claro). Igual que PromoCard.
   const textoSobreAcento = colores.texto === '#FFFFFF' ? '#101820' : colores.texto;
 
-  /*
-   * Pasillos distintos donde vive lo de la promo. Se sacan de los productos ya
-   * mapeados (cada uno trae su `modulo`), así que no hace falta pedir nada más.
-   * Se ordenan para que "Lácteos · Panadería" salga siempre igual y no baile.
-   */
+  // Pasillos distintos donde vive lo de la promo. Se sacan de los productos ya mapeados (cada uno
+  // trae su `modulo`), así que no hace falta pedir nada más. Se ordenan para que "Lácteos ·
+  // Panadería" salga siempre igual y no baile.
   const pasillos = [...new Set(productos.map((p) => p.modulo).filter(Boolean))].sort();
 
   return (

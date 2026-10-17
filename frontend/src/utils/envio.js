@@ -1,15 +1,6 @@
-/*
- * ============================================================
- * COSTO DE ENVÍO POR DISTANCIA — envio.js (frontend)
- * ============================================================
- * El MISMO cálculo que backend/src/utils/envio.js, para que el carrito muestre
- * exactamente lo que el servidor va a cobrar. Se duplica a propósito: el front
- * no puede importar del backend, y tener dos números distintos (uno en pantalla,
- * otro en la cuenta) sería peor que repetir doce líneas.
- *
- * Precio de más específico a más general: zona → por km → solo la base.
- * ============================================================
- */
+// COSTO DE ENVÍO POR DISTANCIA — envio.js (frontend)
+// El MISMO cálculo que backend/src/utils/envio.js, para que el carrito muestre exactamente lo que
+// el servidor va a cobrar.
 
 const RADIO_TIERRA_KM = 6371;
 const rad = (g) => (g * Math.PI) / 180;
@@ -35,10 +26,8 @@ export const distanciaKm = (lat1, lng1, lat2, lng2) => {
   return RADIO_TIERRA_KM * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-/*
- * Devuelve { costo, metodo, distanciaKm, zona }. `metodo` sirve para el texto
- * de apoyo en el carrito ("$2.50 · a 3 km" o "$2.00 · Centro").
- */
+// Devuelve { costo, metodo, distanciaKm, zona }. `metodo` sirve para el texto de apoyo en el
+// carrito ("$2.50 · a 3 km" o "$2.00 · Centro").
 export const calcularEnvio = (ajustes = {}, destino = {}) => {
   const base = num(ajustes.envioBase, 1);
   const porKm = num(ajustes.envioPorKm, 0.5);

@@ -1,32 +1,6 @@
-/*
- * ============================================================
- * FOTOS DE PRODUCTOS DE VERDAD — fotosDeProductos.js
- * ============================================================
- * Al importar el inventario desde Excel, cada producto busca su foto en Open
- * Food Facts: una base abierta y gratis de productos empacados, con la foto
- * del empaque que sube la gente (licencia CC BY-SA: hay que decir de dónde
- * salió, por eso el producto guarda `fotoFuente` y la ficha lo menciona).
- *
- *   Por código de barras  exacto: el código identifica el empaque. Es lo
- *                         que mejor funciona (la Coca-Cola de aquí aparece).
- *   Por nombre            solo si es un producto EMPACADO (lo dice la IA:
- *                         la fruta suelta, el pan o el queso al detalle no
- *                         tienen empaque que buscar; "Plátano maduro" traía
- *                         unos plátanos fritos de bolsa) y si el nombre (y
- *                         la marca, si hay) coinciden casi palabra por
- *                         palabra. Queda marcada para revisar. Medido:
- *                         buscar "Pilsener" a secas trae una de Sudáfrica,
- *                         así que se exige mucho.
- *
- * No se inventa nada: sin una foto que de verdad sea del producto, queda sin
- * foto y el encargado la sube. Nada de imágenes generadas que parezcan el
- * empaque y no lo sean.
- *
- * Open Food Facts pide identificarse con un User-Agent propio y no golpear
- * su búsqueda: cada pedido tiene su tope de tiempo, y un error o un "más
- * despacio" (429) es simplemente "sin foto".
- * ============================================================
- */
+// FOTOS DE PRODUCTOS DE VERDAD — fotosDeProductos.js
+// Al importar desde Excel, busca la foto de cada producto en Open Food Facts: por código de barras
+// o, si es empacado, por nombre. El crédito queda en `fotoFuente`.
 
 const PRODUCTO = "https://world.openfoodfacts.org/api/v2/product/";
 const BUSCAR = "https://search.openfoodfacts.org/search";
@@ -47,11 +21,8 @@ export const palabras = (texto) => sinTildes(texto)
   .split(/[^a-z0-9]+/)
   .filter((p) => p && !VACIAS.has(p) && !(p.length < 2 && !/\d/.test(p)));
 
-/*
- * Qué tanto del nombre buscado aparece en lo encontrado (0 a 1). Se mide
- * desde lo que se busca: "Lays Barbacoa" contra "Lay's Barbacoa 150 g"
- * coincide entero aunque lo encontrado diga más.
- */
+// Qué tanto del nombre buscado aparece en lo encontrado (0 a 1). Se mide desde lo que se busca:
+// "Lays Barbacoa" contra "Lay's Barbacoa 150 g" coincide entero aunque lo encontrado diga más.
 export const parecido = (buscado, encontrado) => {
   const a = palabras(buscado);
   if (!a.length) return 0;

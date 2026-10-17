@@ -1,10 +1,8 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { buscarFoto, enParalelo, fotoGrande, palabras, parecido, porCodigo, porNombre } from "./fotosDeProductos.js";
 
-/*
- * Las fotos de Open Food Facts al importar: por código, exacta; por nombre,
- * solo si de verdad coincide. Open Food Facts es de mentira.
- */
+// Las fotos de Open Food Facts al importar: por código, exacta; por nombre, solo si de verdad
+// coincide. Open Food Facts es de mentira.
 
 const conRespuesta = (porUrl) => vi.stubGlobal("fetch", vi.fn(async (url) => {
   const datos = porUrl(String(url));

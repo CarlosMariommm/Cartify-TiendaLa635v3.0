@@ -1,28 +1,6 @@
-/*
- * ============================================================
- * ONBOARDING — la bienvenida de la app, una sola vez
- * ============================================================
- * Lo primero que ve quien acaba de instalar la app: cuatro diapositivas que
- * explican qué se puede hacer aquí, antes de pedirle que entre o se registre.
- * RootNavigator.js decide si esto se muestra (lee `utils/almacen.js` con la
- * misma llave que graba OnboardingRoute al terminar) — este archivo solo dice
- * qué cuenta cada diapositiva.
- *
- * ── Con el estilo de Tiqui ──
- * La cuenta Tiqui, en primera persona y tuteando, con el MISMO molde de su
- * tutorial (components/Tiqui/TutorialTiqui.js): fondo claro, una ilustración
- * suya en cada diapositiva, el titular navy con su palabra en azul y el botón
- * navy. Antes era otra cosa —degradados de la temporada, una cuadrícula,
- * íconos de marca de agua, un botón de vidrio y maquetas con fotos— y al lado
- * del tutorial de Tiqui parecía de otra app.
- *
- * ── De dónde sale el texto ──
- * Son las mismas cuatro promesas de antes, que repiten las Ventajas del login
- * de la web (frontend/src/pages/LoginClient.jsx): no se inventó nada nuevo,
- * solo cambió quién lo cuenta. El titular de la primera es el eslogan de la
- * tienda, "a un toque".
- * ============================================================
- */
+// ONBOARDING — la bienvenida de la app, una sola vez
+// Lo primero que ve quien acaba de instalar la app: cuatro diapositivas que explican qué se puede
+// hacer aquí, antes de pedirle que entre o se registre.
 
 import TutorialTiqui from '../components/Tiqui/TutorialTiqui';
 import { ESCENAS_TIQUI, NAVY } from '../components/Tiqui/EscenasTiqui';

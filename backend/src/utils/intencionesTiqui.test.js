@@ -2,10 +2,8 @@ import { readFileSync } from "node:fs";
 import { describe, it, expect } from "vitest";
 import { clasificarIntencion, normalizar, rasgos } from "./intencionesTiqui.js";
 
-/*
- * La IA propia de Tiqui en Node tiene que dar EXACTAMENTE lo que calculó
- * Python con el mismo modelo (datos/intencionesTiqui.paridad.json).
- */
+// La IA propia de Tiqui en Node tiene que dar EXACTAMENTE lo que calculó Python con el mismo
+// modelo (datos/intencionesTiqui.paridad.json).
 
 const PARIDAD = JSON.parse(readFileSync(new URL("../datos/intencionesTiqui.paridad.json", import.meta.url), "utf8"));
 

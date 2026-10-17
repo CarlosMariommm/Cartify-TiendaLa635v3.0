@@ -9,16 +9,11 @@ import { TEMAS_AYUDA } from '../../utils/ayudaPanel';
 import { diapositivasDe } from '../../utils/tutorialesPanel';
 import { supplierService } from '../../api/supplierService';
 
-/*
- * El tutorial que sale la primera vez que el administrador entra a cada
- * apartado del panel. El contenido es el de la ayuda (ayudaPanel.js).
- */
+// El tutorial que sale la primera vez que el administrador entra a cada apartado del panel. El
+// contenido es el de la ayuda (ayudaPanel.js).
 
-/*
- * Sin animaciones: con los relojes de mentira, la salida de una ventana podía
- * quedar a medias de una prueba a la siguiente. Aquí se prueba qué se
- * muestra y cuándo, no cómo se anima.
- */
+// Sin animaciones: con los relojes de mentira, la salida de una ventana podía quedar a medias de
+// una prueba a la siguiente. Aquí se prueba qué se muestra y cuándo, no cómo se anima.
 vi.mock('framer-motion', async () => {
   const { createElement } = await import('react');
   const sinAnimar = ({ initial, animate, exit, transition, ...props }) => createElement('div', props);

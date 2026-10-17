@@ -1,19 +1,6 @@
-/*
- * ============================================================
- * LOS DISFRACES DE TIQUI — disfracesTiqui.js
- * ============================================================
- * El dueño viste a Tiqui para cada temporada desde el panel (Personalización
- * → Apariencia): una pieza en la cabeza, otra en la cara y otra en el cuello,
- * con sus colores, y los cachetes colorados. Se guardan en
- * temporada.disfraces, por la clave de la temporada:
- *
- *   { navidad: { cabeza: { tipo, principal, acento }, cara: null, cuello: null, rubor: false } }
- *
- * Aquí solo se revisa lo que llega antes de guardarlo. Cómo se ve cada pieza
- * lo saben la web y la app (utils/piezasDisfraz.js en cada una); si allá se
- * agrega una pieza, se agrega también en esta lista.
- * ============================================================
- */
+// LOS DISFRACES DE TIQUI — disfracesTiqui.js
+// Revisa y guarda el disfraz de Tiqui de cada temporada (cabeza, cara, cuello, colores y rubor)
+// que el dueño arma en Personalización.
 
 export const PIEZAS_POR_RANURA = {
   cabeza: [
@@ -35,11 +22,9 @@ const CLAVE_VALIDA = /^[a-z0-9-]{1,60}$/;
 const NO_VALIDOS = "Los disfraces de Tiqui no son válidos";
 const esObjeto = (v) => !!v && typeof v === "object" && !Array.isArray(v);
 
-/*
- * Revisa y limpia los disfraces que manda el panel. Devuelve { disfraces } o
- * { error } con un mensaje para el dueño. Un disfraz sin ninguna pieza es
- * válido: quiere decir que en esa temporada Tiqui va sin disfraz.
- */
+// Revisa y limpia los disfraces que manda el panel. Devuelve { disfraces } o { error } con un
+// mensaje para el dueño. Un disfraz sin ninguna pieza es válido: quiere decir que en esa temporada
+// Tiqui va sin disfraz.
 export const limpiarDisfraces = (entrada) => {
   if (!esObjeto(entrada)) return { error: NO_VALIDOS };
   const claves = Object.keys(entrada);

@@ -1,24 +1,5 @@
-/*
- * ============================================================
- * ¿SEGURO? — ModalConfirmar.js
- * ============================================================
- * La pregunta de confirmar, con la cara de la app. Reemplaza al `Alert.alert`
- * de React Native, que es el cuadro gris del SISTEMA: tipografía de Android,
- * botones en mayúsculas y verde, esquinas ajenas — en medio de una tienda que
- * es azul marino y redondeada, y que además tiene modo oscuro. Se notaba
- * sobre todo al cerrar sesión, que es la última cosa que se ve de la app.
- *
- * ── Por qué centrado y no una hoja que sube ──
- *
- * El resto de la app usa hojas desde abajo (ModalProducto, MenuPasillos) y
- * esas son para VER algo. Esto es una pregunta de dos respuestas que hay que
- * contestar antes de seguir: centrada, corta, y con la acción peligrosa a la
- * derecha, lejos del pulgar que venía bajando.
- *
- * Mantiene lo bueno del Alert nativo: tocar afuera o el botón atrás de Android
- * equivalen a "no". Sin decidir, no pasa nada.
- * ============================================================
- */
+// ¿SEGURO? — ModalConfirmar.js
+// La pregunta de confirmar, con la cara de la app.
 
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -59,11 +40,9 @@ const ModalConfirmar = ({
   const { t } = useIdioma();
 
   const colorAccion = destructivo ? COLORES.peligro : colores.marca;
-  /*
-   * En oscuro el rojo de peligro se aclara (es el mismo criterio de toda la
-   * paleta), y ahí el texto blanco encima se lee mal: sobre ese rojo claro
-   * la letra va oscura. En claro, y en el botón de marca, sigue siendo blanca.
-   */
+  // En oscuro el rojo de peligro se aclara (es el mismo criterio de toda la paleta), y ahí el texto
+  // blanco encima se lee mal: sobre ese rojo claro la letra va oscura. En claro, y en el botón de
+  // marca, sigue siendo blanca.
   const colorTextoAccion = destructivo
     ? (COLORES.oscuro ? COLORES.sobreTinta : '#FFFFFF')
     // Sobre la marca: blanco, salvo con las paletas oscuras del panel (modo del personal).
@@ -131,11 +110,9 @@ const ModalConfirmar = ({
 const crearEstilos = (COLORES) => StyleSheet.create({
   capa: {
     ...StyleSheet.absoluteFillObject,
-    /*
-     * Por encima de TODO lo de la pantalla, incluida la píldora flotante de
-     * abajo (zIndex 900 / elevation 12, ver BarraInferior): un cuadro que
-     * pregunta con media respuesta tapada no sirve de nada.
-     */
+    // Por encima de TODO lo de la pantalla, incluida la píldora flotante de abajo (zIndex 900 /
+    // elevation 12, ver BarraInferior): un cuadro que pregunta con media respuesta tapada no sirve de
+    // nada.
     zIndex: 970,
     elevation: 24,
   },

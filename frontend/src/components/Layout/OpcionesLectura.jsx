@@ -1,15 +1,8 @@
 import { useTheme } from '../../context/ThemeContext';
 import { TAMANOS_TEXTO } from '../../utils/lecturaPanel';
 
-/*
- * OpcionesLectura — texto más grande, más espacio entre líneas, menos
- * animaciones y resaltar enlaces y foco. Lo que hace cada una está en
- * ThemeContext (LECTURA) e index.css.
- *
- * Va en dos lugares: el botón de la paleta de la barra de arriba (para
- * cambiarlo al vuelo desde cualquier pantalla) y la pestaña de colores de
- * Cuenta. `compacto` es la versión del desplegable.
- */
+// OpcionesLectura — texto más grande, más espacio entre líneas, menos animaciones y resaltar
+// enlaces y foco. Lo que hace cada una está en ThemeContext (LECTURA) e index.css.
 
 // La "A" de cada tamaño se dibuja más grande: se entiende sin leer la etiqueta.
 const TAMANO_DE_LA_A = { normal: 13, grande: 16, 'muy-grande': 19 };

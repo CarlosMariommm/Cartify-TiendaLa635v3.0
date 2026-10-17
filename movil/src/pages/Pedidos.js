@@ -1,23 +1,6 @@
-/*
- * ============================================================
- * PEDIDOS — el historial de compras del cliente
- * ============================================================
- * El equivalente de `frontend/src/pages/cliente/MisPedidos.jsx`: una tarjeta por
- * compra con su número, su fecha, en qué va, qué llevaba y cuánto sumó.
- *
- * Trae los datos aquí mismo y no en un contexto, al revés que la tienda o los
- * favoritos: esos dos los necesitan varias pantallas a la vez (el corazón de una
- * tarjeta, el contador del carrito), pero los pedidos solo se miran en esta. Un
- * proveedor para un solo consumidor es una capa que hay que leer para entender
- * algo que se explica solo.
- *
- * ── Los colores de estado no siguen la temporada ──
- *
- * Son los mismos cuatro de la web, fijos. "Entregado" tiene que verse verde en
- * diciembre igual que en agosto: ahí el color no decora, informa, y un pedido
- * cancelado pintado del rojo navideño se leería como que todo está bien.
- * ============================================================
- */
+// PEDIDOS — el historial de compras del cliente
+// El equivalente de `frontend/src/pages/cliente/MisPedidos.jsx`: una tarjeta por compra con su
+// número, su fecha, en qué va, qué llevaba y cuánto sumó.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -39,11 +22,7 @@ import PastillasCategoria from '../components/Tienda/PastillasCategoria';
 import { avisarActividad } from '../utils/actividadUsuario';
 import { useIdioma } from '../context/IdiomaContext';
 
-// Las tres ventanas de tiempo del filtro (además de "Todos", que ya resuelve
-// PastillasCategoria). "Semana pasada"/"Mes pasado" son ventanas RODANTES
-// —últimos 7 y últimos 30 días— y no la semana/mes de calendario anterior:
-// es lo que espera alguien que busca "mis pedidos recientes", sin sorpresas
-// por dónde cae el lunes.
+// Las tres ventanas de tiempo del filtro (además de "Todos", que ya resuelve PastillasCategoria).
 const FILTROS_FECHA = ['Hoy', 'Semana pasada', 'Mes pasado'];
 const DIA_MS = 24 * 60 * 60 * 1000;
 
@@ -65,11 +44,9 @@ const dentroDelFiltro = (iso, filtro) => {
   return Date.now() - fecha.getTime() <= limite;
 };
 
-/*
- * "12 ene 2026". La web usa `toLocaleDateString('es-SV', ...)` y aquí se hace
- * igual, pero con respaldo: Android sin los datos de idioma cargados devuelve la
- * fecha en inglés en vez de reventar, y eso se ve mal pero no rompe nada.
- */
+// "12 ene 2026". La web usa `toLocaleDateString('es-SV', ...)` y aquí se hace igual, pero con
+// respaldo: Android sin los datos de idioma cargados devuelve la fecha en inglés en vez de
+// reventar, y eso se ve mal pero no rompe nada.
 const fechaCorta = (iso, locale) => {
   if (!iso) return '';
   try {
@@ -83,12 +60,9 @@ const fechaCorta = (iso, locale) => {
   }
 };
 
-/*
- * El número que se le enseña al cliente son los últimos seis del id de Mongo, en
- * mayúsculas — mismo criterio que la web. El id entero mide 24 caracteres: nadie
- * lo dicta por teléfono, y seis bastan para que en el mostrador encuentren cuál
- * es.
- */
+// El número que se le enseña al cliente son los últimos seis del id de Mongo, en mayúsculas —
+// mismo criterio que la web. El id entero mide 24 caracteres: nadie lo dicta por teléfono, y seis
+// bastan para que en el mostrador encuentren cuál es.
 const numeroCorto = (id) => String(id || '').slice(-6).toUpperCase();
 
 const TarjetaPedido = ({ pedido, alPresionar }) => {
@@ -119,12 +93,9 @@ const TarjetaPedido = ({ pedido, alPresionar }) => {
 
       <View style={estilos.lineas}>
         {(pedido.items || []).map((item, i) => (
-          /*
-           * La clave es el índice porque las líneas del pedido no tienen `_id`
-           * propio (el esquema las guarda con `_id: false`) y el mismo producto
-           * puede aparecer dos veces. Es un caso donde el índice sí sirve: la
-           * lista de un pedido cerrado no se reordena ni se le quitan renglones.
-           */
+          // La clave es el índice porque las líneas del pedido no tienen `_id` propio (el esquema las guarda
+          // con `_id: false`) y el mismo producto puede aparecer dos veces. Es un caso donde el índice sí
+          // sirve: la lista de un pedido cerrado no se reordena ni se le quitan renglones.
           <View key={i} style={estilos.linea}>
             <Text style={estilos.lineaNombre} numberOfLines={1}>
               {/* `name` es la foto del nombre al momento de comprar; si un
@@ -211,11 +182,8 @@ const Pedidos = () => {
       const lista = await getPedidosDeCliente(user.id);
       setPedidos(Array.isArray(lista) ? lista : []);
     } catch (e) {
-      /*
-       * Se distingue "no ha comprado nada" de "no se pudo preguntar". Sin este
-       * estado, el backend apagado se ve exactamente igual que un cliente nuevo
-       * — y uno de los dos tiene arreglo.
-       */
+      // Se distingue "no ha comprado nada" de "no se pudo preguntar". Sin este estado, el backend
+      // apagado se ve exactamente igual que un cliente nuevo — y uno de los dos tiene arreglo.
       setError(e?.message || t('No se pudieron cargar tus pedidos'));
     } finally {
       setCargando(false);
@@ -226,11 +194,9 @@ const Pedidos = () => {
     cargar();
   }, [cargar]);
 
-  /*
-   * Un pedido cambió desde el detalle (el cliente lo canceló): se pinta aquí
-   * también, sin volver a pedir la lista. Ver actualizarPedido en
-   * PedidoActivoContext. Se ajusta en el mismo render, sin un efecto de más.
-   */
+  // Un pedido cambió desde el detalle (el cliente lo canceló): se pinta aquí también, sin volver a
+  // pedir la lista. Ver actualizarPedido en PedidoActivoContext. Se ajusta en el mismo render, sin
+  // un efecto de más.
   const [cambioVisto, setCambioVisto] = useState(null);
   if (ultimoCambio && ultimoCambio !== cambioVisto) {
     setCambioVisto(ultimoCambio);
@@ -249,11 +215,8 @@ const Pedidos = () => {
       </View>
 
       {!cargando && !error && pedidos.length > 0 && (
-        // El View envolvente no es decoración: PastillasCategoria es un
-        // ScrollView sin alto propio, y un ScrollView suelto dentro de un
-        // padre flex:1 se estira a ocupar el espacio libre en vez de
-        // encogerse a su contenido — el mismo View que ya lo envuelve en
-        // Inicio.js es lo que evita eso ahí.
+        // Envoltorio que evita que PastillasCategoria (un ScrollView sin alto) se estire a ocupar todo
+        // el espacio libre.
         <View>
           <PastillasCategoria categorias={FILTROS_FECHA} seleccionada={filtro} alSeleccionar={setFiltro} />
         </View>

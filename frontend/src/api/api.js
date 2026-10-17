@@ -4,29 +4,11 @@ import { mensajeEnEspanol } from '../utils/mensajesBackend';
 import { CAJON, areaDeRuta } from '../utils/sesion';
 import { tAhora } from '../utils/idioma';
 
-/*
- * ============================================================
- * CLIENTE AXIOS CENTRALIZADO — api.js
- * ============================================================
- * Axios es una librería de JavaScript para hacer peticiones HTTP
- * (como fetch, pero más potente). En lugar de escribir fetch() en
- * cada componente, creamos UNA SOLA instancia configurada aquí
- * y la importamos donde se necesite.
- *
- * ¿Por qué centralizar?
- *  - Si cambia la URL del backend, solo se cambia aquí.
- *  - Si se necesita un encabezado global (como el token JWT),
- *    se agrega una sola vez.
- *  - Los errores del servidor se manejan en un solo lugar,
- *    sin repetir código en cada componente.
- * ============================================================
- */
+// CLIENTE AXIOS CENTRALIZADO — api.js
+// Axios es una librería de JavaScript para hacer peticiones HTTP (como fetch, pero más potente).
 
-// 1- Creamos la instancia de Axios con la configuración base
-//    `baseURL`: prefijo que se añade a todas las rutas. Ejemplo:
-//    api.get('/product') equivale a GET http://localhost:4000/api/product
-//    `withCredentials`: envía las cookies de sesión automáticamente en
-//    cada petición (necesario para que el backend reconozca al usuario).
+// 1- Creamos la instancia de Axios con la configuración base `baseURL`: prefijo que se añade a
+// todas las rutas.
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000/api',
     withCredentials: true,
@@ -36,39 +18,9 @@ const api = axios.create({
     }
 });
 
-/*
- * ============================================================
- * INTERCEPTORES DE RESPUESTA
- * ============================================================
- * Los interceptores son funciones que se ejecutan ANTES de que
- * la respuesta llegue al componente que hizo la petición.
- *
- *  - Interceptor de ÉXITO: recibe respuestas con status 2xx.
- *    Simplemente deja pasar la respuesta sin modificarla.
- *
- *  - Interceptor de ERROR: captura cualquier respuesta con status
- *    >= 300 (400, 401, 403, 500, etc.) o errores de red.
- *    Muestra automáticamente un toast (notificación) con el mensaje
- *    de error del servidor, sin que el componente tenga que hacerlo.
- * ============================================================
- */
-/*
- * ============================================================
- * CUANDO EL SERVIDOR DICE QUE YA NO NOS CONOCE
- * ============================================================
- * Desde que la API pide sesión de verdad, un 401 significa una cosa concreta:
- * la cookie venció o nunca existió. Y ahí aparecía un estado feo — la app
- * seguía mostrando a la persona "conectada", porque el localStorage decía que
- * sí, mientras el servidor le contestaba 401 a todo. Se veía como pantallas
- * vacías con un aviso suelto, o sea como si la tienda estuviera rota.
- *
- * Aquí se cierra ese cajón y se manda a la puerta que corresponde.
- *
- * NO HACE FALTA EXCLUIR LOS LOGIN: todos van por `fetch` pelado en authApi.js,
- * así que un login con la contraseña equivocada NUNCA pasa por este
- * interceptor. Si algún día se pasan a axios, hay que excluirlos aquí o se
- * echará a quien solo se equivocó de clave.
- */
+// INTERCEPTORES DE RESPUESTA
+// Revisan cada respuesta antes de que llegue al componente. Un 401 significa que la sesión venció
+// o nunca existió: se cierra la sesión y se manda a entrar de nuevo.
 let echandoSesion = false;
 
 const cerrarSesionVencida = () => {
@@ -77,11 +29,9 @@ const cerrarSesionVencida = () => {
 
   const area = areaDeRuta(window.location.pathname);
 
-  /*
-   * Si nunca hubo sesión en este cajón, el 401 es lo esperado —alguien
-   * mirando la tienda sin cuenta— y no hay a quién echar. Sin esta guarda, un
-   * visitante anónimo terminaría en el login por curiosear.
-   */
+  // Si nunca hubo sesión en este cajón, el 401 es lo esperado —alguien mirando la tienda sin cuenta—
+  // y no hay a quién echar. Sin esta guarda, un visitante anónimo terminaría en el login por
+  // curiosear.
   if (!localStorage.getItem(CAJON[area])) {
     toast.error(tAhora('Inicia sesión para ver esto.'));
     return;
@@ -108,29 +58,9 @@ api.interceptors.response.use(
 
     // 3- Error de respuesta: se maneja de forma centralizada
     (error) => {
-        /*
-         * 3.1- LAS PETICIONES DE FONDO NO ECHAN A NADIE.
-         *
-         * Hay llamadas que la tienda hace por su cuenta, sin que nadie las
-         * pidiera: clasificar el catálogo, entender una frase dictada. Son
-         * opcionales por diseño —si fallan, la pantalla se arma igual— y las
-         * dos ya se tragan su propio error en el servicio.
-         *
-         * El problema es que el error igual pasaba por AQUÍ antes de llegar a
-         * ese catch, y aquí un 401 significa "cierre la sesión y váyase al
-         * login". O sea: una petición que el código daba por opcional tenía el
-         * poder de echar de la tienda a un cliente que estaba comprando. Pasó
-         * de verdad, con /ai/clasificar en la portada; ver useClasificacionIA.
-         *
-         * Con esta marca esas llamadas fallan como siempre estuvo previsto: en
-         * silencio, sin aviso rojo y sin tocar la sesión de nadie. Se pide así:
-         *
-         *   api.post('/ai/clasificar', datos, { enSilencio: true })
-         *
-         * Es a propósito una lista corta y explícita. Todo lo que el cliente
-         * pidió a mano —entrar, pagar, guardar una dirección— tiene que seguir
-         * avisando cuando falla.
-         */
+        // 3.1- LAS PETICIONES DE FONDO NO ECHAN A NADIE.
+        // Hay llamadas que la tienda hace por su cuenta, sin que nadie las pidiera: clasificar el
+        // catálogo, entender una frase dictada.
         if (error.config?.enSilencio) {
             return Promise.reject(error);
         }
@@ -144,27 +74,14 @@ api.interceptors.response.use(
         // 5- Si sí hay respuesta, extraemos el código de estado HTTP y el mensaje
         const { status, data } = error.response;
 
-        /*
-         * 5.1- El mensaje del servidor pasa por el traductor ANTES de pintarse.
-         *
-         * Este es el único lugar de toda la app donde el texto que escribió el
-         * backend se convierte en un aviso que ve el cliente. Por eso se
-         * traduce aquí y no en cada pantalla: aunque mañana alguien agregue un
-         * endpoint nuevo y se le escape un "Product not found", la tienda de
-         * la 635 nunca va a mostrar inglés. Ver frontend/src/utils/mensajesBackend.js.
-         *
-         * Si el mensaje ya viene en español (que es lo normal hoy), el
-         * traductor lo devuelve intacto y no estorba.
-         */
+        // 5.1- El mensaje del servidor pasa por el traductor ANTES de pintarse. Este es el único lugar de
+        // toda la app donde el texto que escribió el backend se convierte en un aviso que ve el cliente.
         // Y después al idioma que eligió el cliente (en el panel, tAhora lo deja en español).
         const mensaje = tAhora(mensajeEnEspanol(data?.message, status));
 
-        /*
-         * 5.2- Un mismo error, una sola píldora. Una pantalla que pide cuatro
-         * cosas al servidor y las cuatro fallan igual pintaba cuatro avisos
-         * idénticos apilados abajo al centro, tapando la tienda. Con el texto
-         * como id, el segundo reemplaza al primero en vez de sumarse.
-         */
+        // 5.2- Un mismo error, una sola píldora. Una pantalla que pide cuatro cosas al servidor y las
+        // cuatro fallan igual pintaba cuatro avisos idénticos apilados abajo al centro, tapando la tienda.
+        // Con el texto como id, el segundo reemplaza al primero en vez de sumarse.
         const unaVez = { id: mensaje };
 
         // 6- Mostramos un mensaje diferente según el tipo de error recibido

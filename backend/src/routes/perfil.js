@@ -5,10 +5,8 @@ import { soloPersonal } from "../middlewares/validarSesion.js";
 
 const router = express.Router();
 
-/*
- * Mi perfil: solo para el personal (administradores y empleados). Quién es se
- * saca de la sesión, no de la URL, así nadie le cambia la foto a otra cuenta.
- */
+// Mi perfil: solo para el personal (administradores y empleados). Quién es se saca de la sesión,
+// no de la URL, así nadie le cambia la foto a otra cuenta.
 router.use(soloPersonal);
 
 router.route("/foto")

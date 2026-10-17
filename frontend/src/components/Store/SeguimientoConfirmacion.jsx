@@ -4,25 +4,15 @@ import { pasosDe, indiceDePaso } from '../../utils/pasosPedido';
 import MapaSeguimiento from './MapaSeguimiento';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * ============================================================
- * SEGUIMIENTO EN LA CONFIRMACIÓN — SeguimientoConfirmacion.jsx
- * ============================================================
- * Lo que antes obligaba a tocar "Ver el estado del pedido": el avance del
- * pedido y el mapa del repartidor, AHORA MISMO en la pantalla de confirmación
- * y actualizándose solo (el hook consulta cada 10 s, sin recargar).
- *
- * En un pedido a domicilio el mapa muestra siempre la dirección de entrega, y
- * cuando el repartidor sale a la calle aparece su punto y el tiempo estimado.
- * ============================================================
- */
+// SEGUIMIENTO EN LA CONFIRMACIÓN — SeguimientoConfirmacion.jsx
+// El avance del pedido y el mapa en la pantalla de confirmación, actualizándose solo cada 10 s:
+// la dirección de entrega siempre y, cuando sale el repartidor, su punto.
 
 const BROWN = 'var(--marca-600)';
 
-// Esta lista se habia quedado SIN el paso "En camino", asi que un pedido a
-// domicilio que ya iba en la moto se le mostraba al cliente como "Recibido"
-// —justo en la pantalla que mira mientras espera—. Ahora sale de
-// utils/pasosPedido.js, que es la unica lista que existe.
+// Esta lista se habia quedado SIN el paso "En camino", asi que un pedido a domicilio que ya iba en
+// la moto se le mostraba al cliente como "Recibido" —justo en la pantalla que mira mientras
+// espera—. Ahora sale de utils/pasosPedido.js, que es la unica lista que existe.
 
 // Los pines y el encuadre del mapa se mudaron a MapaSeguimiento.jsx: estaban
 // copiados en tres pantallas y esta era una de las copias.

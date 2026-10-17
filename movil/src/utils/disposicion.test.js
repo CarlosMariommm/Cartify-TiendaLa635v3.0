@@ -1,10 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { anchoDeCelda, columnasPara } from './disposicion';
 
-/*
- * Cuántas tarjetas de producto caben por fila. En el teléfono tienen que ser
- * 2 siempre (así se diseñó la tarjeta); en la tablet, más, pero sin pasar de 5.
- */
+// Cuántas tarjetas de producto caben por fila. En el teléfono tienen que ser 2 siempre (así se
+// diseñó la tarjeta); en la tablet, más, pero sin pasar de 5.
 describe('columnas del catálogo', () => {
   it('en cualquier teléfono, 2', () => {
     for (const ancho of [320, 360, 393, 412, 430]) expect(columnasPara(ancho, false)).toBe(2);

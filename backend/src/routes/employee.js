@@ -4,13 +4,9 @@ import upload from '../utils/cloudinaryConfig.js';
 
 import { soloAdmin } from '../middlewares/validarSesion.js';
 
-/*
- * ── Documentación de la API (Swagger) ──
- *
- * Viene de main. Va agrupada aquí y no pegada a cada ruta porque
- * swagger-jsdoc rastrea el archivo entero: dónde esté no cambia lo que
- * documenta, y así el código de las rutas se lee sin interrupciones.
- */
+// ── Documentación de la API (Swagger) ──
+// Va agrupada aquí y no pegada a cada ruta porque swagger-jsdoc rastrea el archivo entero: dónde
+// esté no cambia lo que documenta, y así el código de las rutas se lee sin interrupciones.
 
 /**
  * @swagger
@@ -123,12 +119,8 @@ import { soloAdmin } from '../middlewares/validarSesion.js';
 
 const router = express.Router();
 
-/*
- * Todo lo de empleados es del personal, sin excepción: aquí se listan, se dan
- * de alta y se borran las cuentas de quienes trabajan en la tienda. Estaba
- * abierto, así que la lista con sus nombres y correos —y hasta ayer con el
- * hash de su contraseña— se la llevaba cualquiera.
- */
+// Todo lo de empleados es del personal, sin excepción: aquí se listan, se dan de alta y se borran
+// las cuentas de quienes trabajan en la tienda.
 router.use(soloAdmin);
 
 router.route("/")

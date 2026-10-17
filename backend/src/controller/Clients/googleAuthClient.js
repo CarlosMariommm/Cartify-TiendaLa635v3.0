@@ -5,21 +5,8 @@ import clientModel from "../../models/client.js";
 import { config } from "../../../config.js";
 import { VERSION_TERMINOS, esVerdadero } from "../../utils/terminos.js";
 
-/*
- * ============================================================
- * INICIO DE SESIÓN CON GOOGLE — googleAuthClient.js
- * ============================================================
- * El botón de Google del frontend obtiene un "ID token" firmado por Google y
- * lo manda aquí. Este controlador NO confía en lo que diga el navegador sobre
- * quién es la persona: verifica la firma del token con las llaves públicas de
- * Google y comprueba que se haya emitido para ESTA app (audience === clientId).
- * Solo entonces saca el correo, el nombre y la foto de adentro del token.
- *
- * Desde ahí es igual que el login normal: se busca (o se crea) el cliente, se
- * emite el MISMO JWT y la MISMA cookie de cliente, y se responde con la misma
- * forma que loginClient.login para que el frontend de sesión no note diferencia.
- * ============================================================
- */
+// INICIO DE SESIÓN CON GOOGLE — googleAuthClient.js
+// El botón de Google del frontend obtiene un "ID token" firmado por Google y lo manda aquí.
 
 const googleAuthClientController = {};
 
@@ -27,11 +14,9 @@ const googleAuthClientController = {};
 const googleClient = new OAuth2Client(config.google.clientId);
 
 googleAuthClientController.login = async (req, res) => {
-  /*
-   * Además del token de Google viene el consentimiento, pero SOLO cuando esto
-   * se usa para registrarse (el botón de la pantalla de Registro). Entrar con
-   * una cuenta que ya existe no vuelve a pedir nada.
-   */
+  // Además del token de Google viene el consentimiento, pero SOLO cuando esto se usa para
+  // registrarse (el botón de la pantalla de Registro). Entrar con una cuenta que ya existe no vuelve
+  // a pedir nada.
   const { credential, aceptaTerminos, promociones, phoneNumber, fechaNacimiento, dui } = req.body;
 
   if (!credential) {
@@ -71,11 +56,9 @@ googleAuthClientController.login = async (req, res) => {
         return res.status(403).json({ message: "La cuenta está desactivada" });
       }
 
-      /*
-       * Enlazar una cuenta existente (creada con correo/contraseña) a Google la
-       * primera vez que entra por aquí. Se marca verificada —Google ya confirmó
-       * el correo— y se guarda el googleId. La contraseña que tuviera no se toca.
-       */
+      // Enlazar una cuenta existente (creada con correo/contraseña) a Google la primera vez que entra
+      // por aquí. Se marca verificada —Google ya confirmó el correo— y se guarda el googleId. La
+      // contraseña que tuviera no se toca.
       const cambios = {};
       if (!cliente.googleId) cambios.googleId = payload.sub;
       if (!cliente.isVerified) cambios.isVerified = true;
@@ -84,20 +67,8 @@ googleAuthClientController.login = async (req, res) => {
         cliente = await clientModel.findByIdAndUpdate(cliente._id, cambios, { new: true });
       }
     } else {
-      /*
-       * 3- CUENTA NUEVA, y aquí no se puede tomar el atajo.
-       *
-       * Entrar con Google prueba QUIÉN es la persona, no que haya aceptado
-       * nada. Antes esta rama creaba la cuenta de una y se saltaba el
-       * consentimiento entero: quedaba un cliente sin constancia de haber
-       * aceptado los términos —justo lo que el aviso de privacidad promete
-       * poder demostrar— y, como no se escribían las preferencias, caía en el
-       * default del modelo y quedaba inscrito en promociones sin pedirlo.
-       *
-       * Así que el registro por Google exige lo mismo que el normal. Si no
-       * viene la aceptación, no se crea nada y se le dice al navegador que
-       * mande a la persona a completar su registro.
-       */
+      // 3- CUENTA NUEVA, y aquí no se puede tomar el atajo. Entrar con Google prueba QUIÉN es la
+      // persona, no que haya aceptado nada. Así que el registro por Google exige lo mismo que el normal.
       if (!esVerdadero(aceptaTerminos)) {
         return res.status(403).json({
           message: "Para crear tu cuenta hay que aceptar los términos y el aviso de privacidad",
@@ -120,15 +91,9 @@ googleAuthClientController.login = async (req, res) => {
         email,
         userName: (email.split("@")[0] || "").toLowerCase(),
         image: payload.picture || "",
-        /*
-         * Lo que Google NO da y la tienda sí necesita.
-         *
-         * El teléfono es de la tienda: sin él no hay a quién llamar cuando el
-         * repartidor no encuentra la casa. La fecha de nacimiento destapa los
-         * productos +18. El DUI es opcional de verdad — mucha gente del barrio
-         * no lo anda a mano— y se guarda como undefined y NUNCA como cadena
-         * vacía: el índice del modelo choca entre dos vacíos. Ver models/client.
-         */
+        // Lo que Google NO da y la tienda sí necesita. El teléfono es de la tienda: sin él no hay a quién
+        // llamar cuando el repartidor no encuentra la casa. La fecha de nacimiento destapa los productos
+        // +18.
         ...(phoneNumber ? { phoneNumber: String(phoneNumber).trim() } : {}),
         ...(fechaNacimiento ? { fechaNacimiento: new Date(fechaNacimiento) } : {}),
         ...(String(dui || '').trim() ? { dui: String(dui).trim() } : {}),

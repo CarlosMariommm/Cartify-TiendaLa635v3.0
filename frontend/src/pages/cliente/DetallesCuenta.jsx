@@ -15,10 +15,8 @@ const aInputDate = (valor) => {
   return isNaN(f.getTime()) ? '' : f.toISOString().split('T')[0];
 };
 
-/*
- * DetallesCuenta — el cliente ve y edita sus datos básicos (área "Mi Cuenta").
- * La carga y el guardado viven en useClientProfile; aquí solo está el formulario.
- */
+// DetallesCuenta — el cliente ve y edita sus datos básicos (área "Mi Cuenta"). La carga y el
+// guardado viven en useClientProfile; aquí solo está el formulario.
 const DetallesCuenta = () => {
   const { palette } = useTheme();
   const c = palette.colors;

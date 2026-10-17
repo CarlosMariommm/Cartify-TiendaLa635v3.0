@@ -1,16 +1,6 @@
-/*
- * navigationRef — para navegar desde fuera de una pantalla.
- *
- * FavoritosProvider necesita poder mandar a la pantalla de entrar cuando se
- * toca un corazón sin sesión, y vive por fuera del NavigationContainer (envuelve
- * a toda la app, incluido el árbol de navegación). Sin este ref no tendría
- * forma de llamar a `navigation.navigate`.
- *
- * `destinoPendiente` es lo mismo que antes vivía como `useRef` dentro de
- * `App.js`: a dónde iba quien tuvo que pasar por el login primero. Ahora vive
- * aquí porque quien lo necesita —la barra de abajo, el carrito, el login— ya
- * no comparte un mismo componente padre.
- */
+// navigationRef — para navegar desde fuera de una pantalla. FavoritosProvider necesita poder
+// mandar a la pantalla de entrar cuando se toca un corazón sin sesión, y vive por fuera del
+// NavigationContainer (envuelve a toda la app, incluido el árbol de navegación).
 
 import { useSyncExternalStore } from 'react';
 import { createNavigationContainerRef } from '@react-navigation/native';
@@ -24,11 +14,8 @@ export const destinoPendiente = { current: null };
 // arranque resolviéndose y no un login interactivo — ver RootNavigator.
 export const arranqueResuelto = { current: false };
 
-// Quien solo necesita LEER `.current` dentro de un efecto (AuthWatcher) le
-// alcanza con el ref de arriba. Pero BurbujaPedido vive fuera del stack de
-// pantallas (ver App.js) y necesita volver a pintarse en cuanto el arranque
-// se resuelve — un pedido ya "en curso" no debe asomar la burbuja mientras
-// todavía se ve el Splash. Un ref solo no avisa de sus cambios; esto sí.
+// Quien solo necesita LEER `.current` dentro de un efecto (AuthWatcher) le alcanza con el ref de
+// arriba.
 const oyentesArranque = new Set();
 
 export const marcarArranqueResuelto = () => {
@@ -52,12 +39,9 @@ export const navegarA = (nombre, params) => {
   }
 };
 
-/*
- * La ficha de un producto, como su propia página (pages/Producto.js), igual
- * que en la web. Va por id: la pila distingue una página de otra por él
- * (RootNavigator, getId), así que abrir un recomendado apila su página
- * encima y tocar dos veces el mismo no abre dos.
- */
+// La ficha de un producto, como su propia página (pages/Producto.js), igual que en la web. Va por
+// id: la pila distingue una página de otra por él (RootNavigator, getId), así que abrir un
+// recomendado apila su página encima y tocar dos veces el mismo no abre dos.
 export const abrirProducto = (producto) => {
   const id = producto?.id ?? producto;
   if (id != null) navegarA('Producto', { id: String(id) });

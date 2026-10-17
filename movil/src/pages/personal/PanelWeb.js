@@ -1,42 +1,6 @@
-/*
- * ============================================================
- * EL PANEL DEL NEGOCIO EN LA APP — PanelWeb.js
- * ============================================================
- * El administrador tiene en la app el MISMO panel de la web (inventario,
- * pedidos, clientes, personalización...), abierto en un navegador dentro de
- * la app. Rehacer cada pantalla del panel para el teléfono sería tener dos
- * paneles que mantener; este es el de siempre, que ya se acomoda a pantallas
- * chicas (con su menú de tres rayas).
- *
- * LA SESIÓN. El navegador de adentro no comparte la sesión de la app. Para no
- * pedir otra vez contraseña y código, la app pide un pase de un solo uso
- * (vence en un minuto) y abre el panel con él; el panel lo canjea y queda
- * dentro. Ver backend/src/utils/pasesPanel.js.
- *
- *   - Va en incógnito: la sesión del panel vive mientras está abierto y se
- *     borra con él. Quien sale del modo personal no deja el panel abierto en
- *     el teléfono.
- *   - Si la sesión del panel vence a medio trabajo (el panel manda a su login
- *     con ?volver=), la app pide otro pase y lo devuelve a donde iba.
- *   - Si alguien cierra la sesión desde el panel, se queda cerrada hasta que
- *     toque "Volver a abrir".
- *
- * El botón atrás de Android va hacia atrás DENTRO del panel mientras se pueda.
- * Los enlaces que no son del panel (WhatsApp, correo, mapas) se abren fuera.
- *
- * LOS REPORTES. El panel arma sus PDF en la página; dentro de la app los sube
- * un momento al servidor y navega a su dirección, y este WebView le pasa la
- * descarga al gestor de Android, que la deja en Descargas con su aviso (ver
- * frontend/src/utils/descargar.js). Por eso las direcciones del servidor
- * también cuentan como "del panel".
- *
- * LA PALETA. Lo que el administrador elige en el panel (Lectura, Calma, Modo
- * oscuro...) el panel se lo avisa a la app, y la app pinta con eso todo su
- * modo del personal (ver utils/paletaPanel.js). Al abrir, el panel arranca con
- * la que la app tiene guardada: el navegador de adentro es de incógnito y no
- * siempre la recuerda.
- * ============================================================
- */
+// EL PANEL DEL NEGOCIO EN LA APP — PanelWeb.js
+// El administrador tiene en la app el MISMO panel de la web (inventario, pedidos, clientes,
+// personalización...), abierto en un navegador dentro de la app.
 
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -50,29 +14,22 @@ import { useBotonAtras } from '../../hooks/useBotonAtras';
 import Mascota, { CargandoMascota } from '../../components/Tiqui/Mascota';
 import { direccionConPase, esDelPanel, queHacerCon } from '../../utils/panelWeb';
 
-/*
- * Si el panel se va a su login una y otra vez nada más abrirlo, algo anda mal
- * del lado del servidor: después de dos intentos seguidos se para y se avisa,
- * en vez de quedarse pidiendo pases para siempre.
- */
+// Si el panel se va a su login una y otra vez nada más abrirlo, algo anda mal del lado del
+// servidor: después de dos intentos seguidos se para y se avisa, en vez de quedarse pidiendo pases
+// para siempre.
 const MAXIMO_REINTENTOS = 2;
 const VENTANA_REINTENTOS_MS = 30000;
 
-/*
- * `inicio`: la pantalla del panel con la que abre la primera vez (p. ej.
- * '/pedidos' cuando se llega tocando el aviso de un pedido nuevo).
- */
+// `inicio`: la pantalla del panel con la que abre la primera vez (p. ej. '/pedidos' cuando se
+// llega tocando el aviso de un pedido nuevo).
 const PanelWeb = forwardRef(({ activo, inicio }, ref) => {
   const estilos = useEstilos(crearEstilos);
   const COLORES = useColores();
   const { colores } = useTema();
   const { sesion, salir, paletaPanel, cambiarPaletaPanel } = usePersonal();
 
-  /*
-   * Antes de que cargue la página: la paleta guardada en el teléfono, para que
-   * el panel no arranque en "Mi marca" y le cambie los colores a la app.
-   * Solo una palabra de letras y guiones: nada que se pueda colar como código.
-   */
+  // Antes de que cargue el panel, le pasa la paleta guardada en el teléfono para que no cambie los
+  // colores de la app; solo acepta letras y guiones.
   const paletaGuardada = /^[a-z0-9-]{1,30}$/.test(paletaPanel?.id || '') ? paletaPanel.id : '';
   const antesDeCargar = paletaGuardada
     ? `try { localStorage.setItem('theme-palette', '${paletaGuardada}'); } catch (e) {} true;`

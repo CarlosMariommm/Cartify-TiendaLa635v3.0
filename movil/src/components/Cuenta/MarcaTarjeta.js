@@ -1,17 +1,6 @@
-/*
- * ============================================================
- * EL LOGO DE LA RED DE LA TARJETA — MarcaTarjeta.js
- * ============================================================
- * Puerto de `frontend/src/components/Cuenta/MarcaTarjeta.jsx`: el logo se
- * dibuja aquí mismo, sin imágenes que descargar ni un paquete de logos.
- *
- * `sobreColor` es para ponerlo encima de la tarjeta de colores de la vista
- * previa: ahí va en blanco y sin su cajita de fondo.
- *
- * Los colores de las marcas NO salen de la paleta del modo: el azul de Visa
- * es el azul de Visa tanto de día como de noche.
- * ============================================================
- */
+// EL LOGO DE LA RED DE LA TARJETA — MarcaTarjeta.js
+// Puerto de `frontend/src/components/Cuenta/MarcaTarjeta.jsx`: el logo se dibuja aquí mismo, sin
+// imágenes que descargar ni un paquete de logos.
 
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';

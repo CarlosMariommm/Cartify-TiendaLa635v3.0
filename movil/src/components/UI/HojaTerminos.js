@@ -1,22 +1,5 @@
-/*
- * ============================================================
- * HOJA DE LOS DOCUMENTOS LEGALES — el documento, para leerlo
- * ============================================================
- * Lo que en la web es `ModalTerminos` + `TextoTerminos`. Se abre desde el
- * registro y NO navega a otro lado: quien está a mitad del formulario no
- * puede perder lo escrito por ir a leer qué está aceptando.
- *
- * Muestra cualquiera de los documentos (términos, privacidad, devoluciones;
- * ver utils/legales). Los enlaces entre ellos cambian de documento DENTRO de
- * la misma hoja, por lo mismo: sin salir del formulario.
- *
- * ── Las tablas ──
- * En la web son tablas de cuatro columnas. Cuatro columnas en un teléfono
- * son ilegibles, y con desplazamiento horizontal se esconden justo las
- * últimas. Así que cada fila se vuelve una ficha: el primer dato de título y
- * los demás etiquetados, uno debajo del otro.
- * ============================================================
- */
+// HOJA DE LOS DOCUMENTOS LEGALES — el documento, para leerlo
+// Lo que en la web es `ModalTerminos` + `TextoTerminos`.
 
 import { useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';

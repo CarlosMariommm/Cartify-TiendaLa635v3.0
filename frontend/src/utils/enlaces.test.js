@@ -2,10 +2,8 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { foto, ANCHO } from './fotos';
 import { enlaceDeProducto, compartirEnlace } from './compartir';
 
-/*
- * Fotos al tamaño justo y enlaces para compartir: si fallan, la tienda se
- * vuelve lenta o un producto compartido no abre.
- */
+// Fotos al tamaño justo y enlaces para compartir: si fallan, la tienda se vuelve lenta o un
+// producto compartido no abre.
 
 const NUBE = 'https://res.cloudinary.com/dprv1cb0c/image/upload/v1791266881/grupo1B/fresas.webp';
 

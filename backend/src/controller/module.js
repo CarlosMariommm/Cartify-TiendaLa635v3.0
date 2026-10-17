@@ -61,11 +61,8 @@ moduleController.updateModule = async (req, res) => {
 
         const datos = { name, description, isActive };
 
-        /*
-         * El flujo solo se pisa si viene en la petición: un módulo viejo que
-         * todavía no lo tiene no debe volverse 'estandar' porque alguien le
-         * corrigió una tilde a la descripción.
-         */
+        // El flujo solo se pisa si viene en la petición: un módulo viejo que todavía no lo tiene no debe
+        // volverse 'estandar' porque alguien le corrigió una tilde a la descripción.
         if (flujo !== undefined) datos.flujo = flujo === 'impresiones' ? 'impresiones' : 'estandar';
         if (icono !== undefined) datos.icono = icono;
         if (orden !== undefined) datos.orden = Number(orden) || 0;

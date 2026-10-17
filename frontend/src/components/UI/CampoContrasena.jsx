@@ -2,22 +2,8 @@ import { forwardRef, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * CampoContrasena — input de contraseña con el ojo para verla.
- *
- * Escribir a ciegas una contraseña con mayúsculas y símbolos, en un teclado
- * de celular, es la razón número uno de "no me deja entrar". Poder mirarla un
- * segundo resuelve más problemas de acceso que cualquier mensaje de error.
- *
- * Se comporta como un <input> normal: acepta las mismas props y funciona con
- * react-hook-form (por eso el forwardRef, para que register() alcance al input
- * de adentro y no se pierda en este envoltorio).
- */
-/*
- * Solo el ojo, para las pantallas que arman su input con styled-components y
- * ya tienen su propio envoltorio posicionado. Estilos en línea a propósito:
- * así funciona igual dentro de Tailwind que dentro de styled-components.
- */
+// CampoContrasena — input de contraseña con el ojo para verla.
+// `BotonOjo` es solo el ojo, para las pantallas que ya arman su propio input.
 export const BotonOjo = ({ visible, onToggle, derecha = 14 }) => {
   const { t } = useIdioma();
   return (
@@ -62,10 +48,8 @@ const CampoContrasena = forwardRef(({ className = '', ...props }, ref) => {
       <button
         type="button"
         onClick={() => setVisible((v) => !v)}
-        /*
-         * Fuera del recorrido del tabulador: quien navega con teclado va del
-         * campo al botón de entrar, no a un interruptor visual.
-         */
+        // Fuera del recorrido del tabulador: quien navega con teclado va del campo al botón de entrar, no
+        // a un interruptor visual.
         tabIndex={-1}
         aria-label={visible ? t('Ocultar contraseña') : t('Mostrar contraseña')}
         title={visible ? t('Ocultar contraseña') : t('Mostrar contraseña')}

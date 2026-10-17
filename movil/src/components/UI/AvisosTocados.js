@@ -1,28 +1,6 @@
-/*
- * ============================================================
- * AL TOCAR UN AVISO — a dónde lleva cada uno
- * ============================================================
- * Tocar una notificación tiene que llevar justo a lo que avisaba, no a la
- * portada para que la persona lo busque a mano:
- *
- *   "Tu pedido va en camino"   → la tienda, con la burbuja del pedido
- *                                desplegada: el mapa y el repartidor.
- *   preparando / listo /       → el detalle de ESE pedido.
- *   llegó / cancelado
- *   una promoción              → esa promoción abierta.
- *   productos nuevos           → la sección "Nuevos en la tienda".
- *
- * El servidor manda qué es y de qué pedido o promo en la carga del aviso
- * (backend/src/utils/avisosCliente.js y avisoPromo.js).
- *
- * Si la app estaba cerrada, el toque llega antes que los datos: el aviso se
- * guarda como pendiente y se resuelve en cuanto hay con qué (la navegación
- * lista, los pedidos o el catálogo cargados). Si lo que buscaba ya no está
- * (se borró la promo, el pedido no aparece), cae en la pestaña que le toca.
- *
- * No pinta nada: vive en el árbol solo para escuchar.
- * ============================================================
- */
+// AL TOCAR UN AVISO — a dónde lleva cada uno
+// Cada notificación lleva justo a lo que avisaba: "va en camino" abre la burbuja con el mapa, los
+// demás estados abren el detalle de ese pedido, y una oferta abre su promoción.
 
 import { useEffect, useRef, useState } from 'react';
 import { escucharToques } from '../../utils/notificaciones';

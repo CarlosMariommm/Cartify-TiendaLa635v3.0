@@ -1,28 +1,13 @@
-/*
- * ============================================================
- * LOS OTROS DOS AVISOS POR CORREO — plantillasAviso.js
- * ============================================================
- * "Productos nuevos" y "Mi pedido va en camino": los dos interruptores que la
- * pantalla de Notificaciones ofrecía y que no encendían nada.
- *
- * El esqueleto —la armadura contra el modo oscuro de Gmail, la identidad de la
- * tienda y el pie— vive en correoBase.js, compartido con el de promociones.
- * ============================================================
- */
+// LOS OTROS DOS AVISOS POR CORREO — plantillasAviso.js
+// "Productos nuevos" y "Mi pedido va en camino": los dos interruptores que la pantalla de
+// Notificaciones ofrecía y que no encendían nada.
 
 import {
   AZUL, AZUL_OSCURO, dinero, limpio, ESTILOS, identidad, pie, boton, urlTienda,
 } from "./correoBase.js";
 
-/*
- * El sobre que comparten los dos. Recibe el contenido ya armado y lo mete en
- * la misma tarjeta, para que los correos de la tienda se reconozcan entre sí.
- *
- * Cada pieza lleva su clase Y su estilo en línea: la clase es lo que la
- * armadura del <head> puede volver a pintar cuando Gmail invierte los colores,
- * y el estilo en línea es el respaldo para los clientes que descartan el
- * <style> entero.
- */
+// El sobre que comparten los dos. Recibe el contenido ya armado y lo mete en la misma tarjeta,
+// para que los correos de la tienda se reconozcan entre sí.
 const sobre = ({ tienda, encabezado, subtitulo, cuerpo, accion, enlaceBaja, motivoBaja }) => `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -61,16 +46,9 @@ const sobre = ({ tienda, encabezado, subtitulo, cuerpo, accion, enlaceBaja, moti
 
 /* ══════════ 1. Productos nuevos ══════════ */
 
-/*
- * Va en LOTE y no uno por producto. Quien carga el inventario un lunes sube
- * treinta cosas de corrido; con un correo por producto la tienda le manda
- * treinta correos seguidos a cada cliente y termina en spam el mismo día.
- * Ver avisosCliente.js.
- *
- * @param {Array} productos - [{ nombre, precio, imagen }]
- * @param {object} tienda   - { nombre, marca } — marca es el logo o el nombre
- * @param {string} enlaceBaja - la baja de UN clic, con su token
- */
+// Va en LOTE y no uno por producto. Quien carga el inventario un lunes sube treinta cosas de
+// corrido; con un correo por producto la tienda le manda treinta correos seguidos a cada cliente y
+// termina en spam el mismo día. Ver avisosCliente.js.
 export const plantillaProductosNuevos = ({ productos = [], tienda, enlaceBaja }) => {
   const varios = productos.length > 1;
   const visibles = productos.slice(0, 4);
@@ -175,25 +153,18 @@ export const plantillaPedidoEnCamino = ({ pedido, nombreCliente, tienda }) => {
       subtitulo: 'Ya salió de la tienda.',
       cuerpo,
       accion: { texto: 'Seguirlo en el mapa', url: enlace },
-      /*
-       * SIN enlace de baja. Esto no es publicidad: es información de algo que
-       * la persona compró y está esperando. Ofrecerle "dejar de recibir esto"
-       * junto al aviso de su propia entrega la haría dudar de si se dio de baja
-       * de algo importante. El interruptor sigue en Mi Cuenta.
-       */
+      // SIN enlace de baja. Esto no es publicidad: es información de algo que la persona compró y está
+      // esperando. Ofrecerle "dejar de recibir esto" junto al aviso de su propia entrega la haría dudar
+      // de si se dio de baja de algo importante. El interruptor sigue en Mi Cuenta.
       enlaceBaja: null,
     }),
     texto,
   };
 };
 
-/*
- * PEDIDO CANCELADO — con el motivo y lo que se le devolvió.
- *
- * Este correo sale siempre, sin interruptor: es la única forma de enterarse
- * para quien compró en la web y no tiene la app. Quien espera un pedido que
- * ya no va a llegar tiene que saberlo, y saber por qué.
- */
+// PEDIDO CANCELADO — con el motivo y lo que se le devolvió.
+// Este correo sale siempre, sin interruptor: es la única forma de enterarse para quien compró en
+// la web y no tiene la app.
 export const plantillaPedidoCancelado = ({ pedido, nombreCliente, tienda }) => {
   const saluda = nombreCliente ? `${nombreCliente.split(' ')[0]}, lo` : 'Lo';
   const numero = String(pedido._id).slice(-6).toUpperCase();

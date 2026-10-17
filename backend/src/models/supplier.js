@@ -1,10 +1,4 @@
-/*
-Campos:
-    name: String,
-    phoneNumber: String,
-    email: String,
-    creditDays: String,
- */
+// Campos: name, phoneNumber, email, creditDays.
 
 /**
  * @swagger
@@ -78,18 +72,11 @@ const supplierSchema = new Schema({
     // Plazo que da el proveedor para pagar (en días). Viene como texto de datos
     // viejos, por eso se convierte con Number() antes de usarlo.
     creditDays: { type:"String"},
-    /*
-     * Techo de crédito que el proveedor le otorgó a la tienda. El crédito
-     * DISPONIBLE no se guarda: se calcula restándole la deuda actual, que a su
-     * vez sale de los movimientos. Guardar un "disponible" sería tener el mismo
-     * dato en dos lugares, y tarde o temprano uno de los dos queda mal.
-     */
+    // Techo de crédito que el proveedor le otorgó a la tienda. El crédito DISPONIBLE no se guarda: se
+    // calcula restándole la deuda actual, que a su vez sale de los movimientos.
     creditLimit: { type: Number, default: 0 },
-    /*
-     * Por dónde se le hacen los pedidos (WhatsApp, una app como BEES, o
-     * llamada), para pedirle con un toque desde la compra sugerida del
-     * pronóstico. Ver utils/pedidoProveedor.js.
-     */
+    // Por dónde se le hacen los pedidos (WhatsApp, una app como BEES, o llamada), para pedirle con un
+    // toque desde la compra sugerida del pronóstico. Ver utils/pedidoProveedor.js.
     pedidos: {
       canal: { type: String, enum: ["whatsapp", "app", "llamada", ""], default: "" },
       whatsapp: { type: String, default: "" },

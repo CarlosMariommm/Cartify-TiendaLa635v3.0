@@ -1,35 +1,6 @@
-/*
- * ============================================================
- * TIQUI COLGADA — la que cuelga de arriba en la app
- * ============================================================
- * La etiqueta colgando de su cordón, agarrada con un broche al borde de
- * arriba, como en el inicio de sesión de la web (MascotaColgada.jsx). Se
- * mece despacio. La usan dos pantallas:
- *
- *   · el asistente: duerme hasta que la despiertan tocándola, y su cara dice
- *     en qué va (escucha, piensa, habla);
- *   · el inicio: baja cuando se jala la lista para recargar (JalarParaRecargar).
- *
- * `cara`:
- *   'dormida'   ojos cerrados, respirando, con zetas. Se mece apenas.
- *   'normal'    despierta y sonriendo.
- *   'escucha'   ojos grandes, cejas arriba, boca en "o", y las ondas llegando.
- *   'piensa'    mira hacia arriba, una ceja arriba.
- *   'habla'     la boca se abre y se cierra. Con `animo` (el de su voz, ver
- *               utils/animoTiqui.js) los ojos y las cejas lo acompañan:
- *               alegre, emocionada o se ríe con ojos felices y cachetes;
- *               asombrada con los ojos grandes; apenada con las cejas
- *               caídas; dudosa con una ceja arriba; despertando con los
- *               ojos a medio abrir.
- *   'feliz'     ojos felices y cachetes.
- *   'tapada'    no mira: ojos cerrados y colorada (la contraseña del login).
- *   'jalada'    la están jalando: sorprendida, estirada.
- *   'soltada'   la soltaron: contenta, de vuelta para arriba.
- *
- * Es un dibujo: el lector de pantalla la salta, y quien la usa dice con
- * texto lo que pasa (o la envuelve en un botón con nombre).
- * ============================================================
- */
+// TIQUI COLGADA — la que cuelga de arriba en la app
+// La etiqueta colgando de su cordón, agarrada con un broche al borde de arriba, como en el inicio
+// de sesión de la web (MascotaColgada.jsx). Se mece despacio.
 
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, View } from 'react-native';
@@ -198,12 +169,9 @@ const Zetas = ({ color, tam }) => {
   );
 };
 
-/*
- * `largo`: cuánto cordón hay entre el broche y la etiqueta (en unidades del
- * dibujo). `alto`: el alto total en pantalla, cordón incluido.
- * `broche` y `meciendo`: apagados cuando otro dibuja el broche y el cordón
- * tenso que la sostiene (JalarParaRecargar).
- */
+// `largo`: cuánto cordón hay entre el broche y la etiqueta (en unidades del dibujo). `alto`: el
+// alto total en pantalla, cordón incluido. `broche` y `meciendo`: apagados cuando otro dibuja el
+// broche y el cordón tenso que la sostiene (JalarParaRecargar).
 const TiquiColgada = ({ cara = 'normal', animo, alto = 240, largo = 150, conDisfraz = true, broche = true, meciendo = true, style }) => {
   const c = useColoresTiqui();
   const disfraz = useDisfrazTiqui();

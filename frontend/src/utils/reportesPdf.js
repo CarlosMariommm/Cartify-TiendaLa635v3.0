@@ -1,28 +1,6 @@
-/*
- * ============================================================
- * LOS REPORTES DEL PANEL, CON CARA DE DOCUMENTO — reportesPdf.js
- * ============================================================
- * Las piezas de un reporte formal, iguales para todos los que las usen:
- *
- *   nuevoReporte   la hoja carta con el encabezado de la tienda: su nombre,
- *                  sus datos (dirección, teléfono, NIT, NRC; los que estén en
- *                  Personalización › Datos del negocio), el título del
- *                  documento y los renglones que dicen de qué es y de cuándo;
- *   seccion        el título de una sección con su línea;
- *   vinetas        un resumen en puntos;
- *   parrafo        una nota en letra chica;
- *   tabla          una tabla sobria: solo líneas horizontales, números a la
- *                  derecha y el encabezado que se repite si salta de página;
- *   pie            al final: la línea, el nombre del documento y la página.
- *
- * Sobrio a propósito: tinta negra, un solo color de la casa para los
- * títulos, Helvetica, márgenes parejos. Un documento que se va a imprimir y
- * a enseñar tiene que parecer de una empresa, no de una presentación.
- *
- * Todo en milímetros. Cada función recibe la altura `y` donde va y devuelve
- * dónde termina, para que el reporte se arme de arriba a abajo sin cuentas.
- * ============================================================
- */
+// LOS REPORTES DEL PANEL, CON CARA DE DOCUMENTO — reportesPdf.js
+// Las piezas comunes de los reportes en PDF: la hoja carta con el encabezado y los datos de la
+// tienda, los resúmenes, las tablas y el pie de página.
 
 // Con nombre, como lo documenta jsPDF: así carga igual en el navegador y en las pruebas (Node).
 import { jsPDF } from 'jspdf';
@@ -51,11 +29,9 @@ export const asegurarEspacio = (doc, y, necesita) => {
   return ARRIBA_EN_PAGINA_NUEVA;
 };
 
-/*
- * El logo de Personalización, como imagen que jsPDF entiende. Se pasa por un
- * canvas porque puede venir en WEBP, que jsPDF no lee. Si no carga en 5
- * segundos (o no hay logo), el reporte sale igual, sin él.
- */
+// El logo de Personalización, como imagen que jsPDF entiende. Se pasa por un canvas porque puede
+// venir en WEBP, que jsPDF no lee. Si no carga en 5 segundos (o no hay logo), el reporte sale
+// igual, sin él.
 export const cargarLogo = (url) => new Promise((resolver) => {
   if (!url || typeof Image === 'undefined') { resolver(null); return; }
   const imagen = new Image();
@@ -77,11 +53,8 @@ export const cargarLogo = (url) => new Promise((resolver) => {
   imagen.src = url;
 });
 
-/*
- * La hoja con su encabezado. `tienda`: { nombre, direccion, telefono, nit,
- * nrc, logo } (logo = lo que devuelve cargarLogo, o nada). Devuelve el
- * documento y la altura donde empieza el contenido.
- */
+// La hoja con su encabezado. `tienda`: { nombre, direccion, telefono, nit, nrc, logo } (logo = lo
+// que devuelve cargarLogo, o nada). Devuelve el documento y la altura donde empieza el contenido.
 export const nuevoReporte = ({ tienda, titulo, renglones = [], orientacion = 'portrait' }) => {
   const doc = new jsPDF({ orientation: orientacion, unit: 'mm', format: 'letter' });
   doc.setProperties({ title: `${titulo} · ${tienda.nombre}`, author: tienda.nombre, creator: tienda.nombre });
@@ -179,10 +152,8 @@ export const parrafo = (doc, texto, y, { tamano = 8, color = COLOR.suave } = {})
   return y + lineas.length * interlineado + 3;
 };
 
-/*
- * `derecha`: los índices de las columnas con números (van alineados a la
- * derecha, como en cualquier estado de cuenta). `pie`: una fila de totales.
- */
+// `derecha`: los índices de las columnas con números (van alineados a la derecha, como en
+// cualquier estado de cuenta). `pie`: una fila de totales.
 export const tabla = (doc, { y, encabezado, filas, pie, derecha = [], anchos = {} }) => {
   const columnStyles = {};
   derecha.forEach((i) => { columnStyles[i] = { ...(columnStyles[i] || {}), halign: 'right' }; });
@@ -248,11 +219,9 @@ export const pie = (doc, texto) => {
   }
 };
 
-/*
- * Los datos de la tienda para el encabezado, sacados de Personalización:
- * nombre, dirección, y teléfono, NIT y NRC de "Datos del negocio", más el
- * logo si hay. Lo usan todos los reportes del panel.
- */
+// Los datos de la tienda para el encabezado, sacados de Personalización: nombre, dirección, y
+// teléfono, NIT y NRC de "Datos del negocio", más el logo si hay. Lo usan todos los reportes del
+// panel.
 export const datosDeLaTienda = async (ajustes) => {
   const negocio = ajustes?.negocio || {};
   return {
@@ -275,18 +244,8 @@ export const pasoRedondo = (bruto) => {
 const GRIS_BARRA = [173, 181, 189];
 export const COLOR_GRAFICA = { real: GRIS_BARRA, marca: COLOR.marca };
 
-/*
- * Una gráfica de barras sobria, dibujada a mano con jsPDF (una librería de
- * gráficas para unas cuantas barras sería más peso que gráfica).
- *
- *   grupos   [{ etiqueta, barras: [{ valor, color, bajo?, alto? }] }]: cada
- *            grupo es un lugar del eje (una semana, un mes) con una o más
- *            barras lado a lado. Con `bajo` y `alto`, la barra lleva la
- *            línea de su rango (un pronóstico).
- *   leyenda  [{ texto, color }]
- *
- * Las líneas guía caen en montos redondos ($150, $300, $450).
- */
+// Una gráfica de barras sobria, dibujada a mano con jsPDF (una librería de gráficas para unas
+// cuantas barras sería más peso que gráfica).
 export const graficaDeBarras = (doc, y, { grupos, leyenda = [], altoGrafica = 46 }) => {
   y = asegurarEspacio(doc, y, altoGrafica + 16);
   const izquierda = MARGEN + 14;

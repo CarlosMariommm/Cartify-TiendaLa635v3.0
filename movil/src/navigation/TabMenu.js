@@ -1,16 +1,5 @@
-/*
- * ============================================================
- * TAB MENU — los cuatro apartados, ahora con react-navigation
- * ============================================================
- * La barra sigue siendo `BarraInferior` tal cual estaba: se le pasa como
- * `tabBar` propio en vez de dejar que bottom-tabs dibuje la suya, porque esa
- * barra ya trae el diseño, los iconos de lucide y el hueco de la franja de
- * gestos resueltos.
- *
- * La única lógica nueva de este archivo es la que antes vivía en `Raiz`
- * (App.js): los dos apartados que piden sesión no se abren a medias, y si se
- * cierra la sesión estando en uno de esos dos, se cae a la tienda.
- */
+// TAB MENU — los cuatro apartados, ahora con react-navigation
+// Las pestañas de abajo, con la barra propia `BarraInferior` en vez de la que dibuja bottom-tabs.
 
 import { useEffect, useRef } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -37,11 +26,9 @@ const BarraDeApartados = ({ state, navigation }) => {
     }
   }, [isAuthenticated, apartado, navigation]);
 
-  /*
-   * Cambiar de apartado cuenta como "el usuario se movió", igual que
-   * scrollear — BurbujaPedido se aparta sola. Se salta el primer render: eso
-   * no es un cambio de pestaña, es la app arrancando en una.
-   */
+  // Cambiar de apartado cuenta como "el usuario se movió", igual que scrollear — BurbujaPedido se
+  // aparta sola. Se salta el primer render: eso no es un cambio de pestaña, es la app arrancando en
+  // una.
   const primeraVez = useRef(true);
   useEffect(() => {
     if (primeraVez.current) {
@@ -75,10 +62,9 @@ const InicioTab = ({ navigation }) => (
 const TabMenu = () => (
   <Tab.Navigator
     tabBar={(props) => <BarraDeApartados {...props} />}
-    // `animation` es de bottom-tabs 7, no algo casero: solo se prende. Un
-    // cruce de opacidad entre pantallas, no un slide — no hay un "orden"
-    // real entre Tienda/Asistente/Pedidos/Perfil que un slide izq-der tenga
-    // que respetar.
+    // `animation` es de bottom-tabs 7, no algo casero: solo se prende. Un cruce de opacidad entre
+    // pantallas, no un slide — no hay un "orden" real entre Tienda/Asistente/Pedidos/Perfil que un
+    // slide izq-der tenga que respetar.
     screenOptions={{ headerShown: false, animation: 'fade' }}
   >
     <Tab.Screen name="inicio" component={InicioTab} />

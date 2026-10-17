@@ -1,28 +1,6 @@
-/*
- * ============================================================
- * EDAD — el candado de los productos +18, compartido por toda la app
- * ============================================================
- * Puerto de `frontend/src/context/EdadContext.jsx`. La tarjeta, la ficha del
- * producto y el asistente de voz preguntan lo mismo desde un solo lado.
- *
- * `mayorConfirmado` es verdadero cuando:
- *   - hay sesión de cliente y ya tiene un DUI guardado (el DUI se emite a
- *     los 18, así que tenerlo afirma la mayoría de edad), o
- *   - confirmó un DUI en esta misma sesión de la app.
- *
- * `pedirConfirmacion(cb)` abre el modal si hace falta y ejecuta `cb` cuando
- * la persona confirma (o de una si ya estaba confirmado). Así el que llama
- * no tiene que saber nada del candado: pide y sigue.
- *
- * ── Por qué no hay nada guardado en disco ──
- *
- * La web usa `sessionStorage`: se recuerda mientras la pestaña siga abierta,
- * y se olvida al cerrarla. Aquí el equivalente es no guardar nada — un
- * `useState` en memoria ya se "olvida" solo al cerrar la app del todo, que
- * es la misma idea. Guardarlo en SecureStore lo haría MÁS permanente que en
- * la web, y eso no es lo que se pidió portar.
- * ============================================================
- */
+// EDAD — el candado de los productos +18, compartido por toda la app
+// Puerto de `frontend/src/context/EdadContext.jsx`. La tarjeta, la ficha del producto y el
+// asistente de voz preguntan lo mismo desde un solo lado.
 
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';

@@ -1,21 +1,6 @@
-/*
- * ============================================================
- * UNA PROMOCIÓN, A PANTALLA COMPLETA — Promo.js
- * ============================================================
- * Lo que se abre al tocar un banner del carrusel, igual que en la web
- * (PromoDetailModal.jsx en teléfono): arriba la promo a todo el ancho con sus
- * colores —sin bordes ni sombra, es el fondo de la página— con "‹ Volver",
- * sus sellos, el título y la descripción completa; debajo cuántos productos
- * entran y en qué pasillo están, los productos y "Ver todos en la tienda".
- *
- * Antes era una hoja encima de la tienda con el banner metido como tarjeta:
- * una caja dentro de una caja, y la promo, que es lo que se quería ver en
- * grande, quedaba del mismo tamaño que en el carrusel.
- *
- * La foto que acompaña sube arriba y se funde hacia abajo con el fondo (en el
- * teléfono no hay lado que darle), y el texto se lee al pie de la portada.
- * ============================================================
- */
+// UNA PROMOCIÓN, A PANTALLA COMPLETA — Promo.js
+// Lo que se abre al tocar un banner del carrusel: la promo con sus colores arriba y, debajo, los
+// productos que entran, igual que en la web.
 
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
@@ -54,11 +39,8 @@ const Promo = ({ route, navigation }) => {
   const id = String(route.params?.id ?? '');
   const promo = (promociones || []).find((p) => String(p._id) === id);
 
-  /*
-   * Los productos salen del catálogo ya mapeado, no de promo.items, para que
-   * se vean con su precio de oferta y su existencia de ahora: los mismos que
-   * verá en la tienda.
-   */
+  // Los productos salen del catálogo ya mapeado, no de promo.items, para que se vean con su precio
+  // de oferta y su existencia de ahora: los mismos que verá en la tienda.
   const productosDePromo = useMemo(() => {
     if (!promo) return [];
     const ids = idsDePromo(promo).map(String);
@@ -89,11 +71,9 @@ const Promo = ({ route, navigation }) => {
   const glifo = glifoDePromo(promo.icono);
   const textoSobreAcento = colores.texto === '#FFFFFF' ? '#101820' : colores.texto;
 
-  /*
-   * Pasillos distintos donde vive lo de la promo, ordenados para que
-   * "Lácteos · Panadería" salga siempre igual. Una tienda de verdad: saber
-   * que el 2x1 está en Lácteos ahorra dar vueltas buscándolo.
-   */
+  // Pasillos distintos donde vive lo de la promo, ordenados para que "Lácteos · Panadería" salga
+  // siempre igual. Una tienda de verdad: saber que el 2x1 está en Lácteos ahorra dar vueltas
+  // buscándolo.
   const pasillos = [...new Set(productosDePromo.map((p) => p.modulo).filter(Boolean))].sort();
 
   // El color del fondo donde termina la foto que acompaña, para fundirla.
@@ -229,10 +209,8 @@ const Promo = ({ route, navigation }) => {
             <CuadriculaProductos productos={productosDePromo} alVerDetalle={verProducto} alAgregar={agregarAlCarrito} />
           )}
 
-          {/*
-            "Ver todos en la tienda" deja la portada filtrada a esta promo y
-            vuelve a ella: la misma lista, con el resto de la tienda alrededor.
-          */}
+          {/* "Ver todos en la tienda" deja la portada filtrada a esta promo y vuelve a ella: la misma lista,
+             con el resto de la tienda alrededor. */}
           {productosDePromo.length > 0 && (
             <Pressable
               onPress={() => {

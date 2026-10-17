@@ -1,37 +1,6 @@
-/*
- * ============================================================
- * MIS DATOS — nombre, usuario, correo, teléfono, fecha y DUI
- * ============================================================
- * El equivalente de `frontend/src/pages/cliente/DetallesCuenta.jsx`: los
- * campos que el cliente puede cambiar de su propia cuenta.
- *
- * ── La foto se sube aparte, tocando el círculo ──
- *
- * Va por el mismo endpoint (`PATCH /client/:id/profile`), pero como una
- * petición propia con FormData en cuanto se elige: no espera al botón
- * "Guardar cambios" de abajo, que es para los campos de texto. Total, el
- * cliente ya vio la foto puesta en el círculo — parecería que se subió y en
- * realidad quedó esperando a que toque otro botón.
- *
- * ── La fecha de nacimiento y el DUI ──
- *
- * Los mismos dos campos que la web, con su misma regla: el DUI solo se habilita
- * cuando la fecha dice que ya es mayor de edad, porque en El Salvador el DUI se
- * emite a los 18. Los dos son opcionales y el endpoint
- * (`PATCH /client/:id/profile`) los acepta — vacíos, los borra.
- *
- * Guardar un DUI aquí además LEVANTA el candado de los productos +18 sin tener
- * que volver a escribirlo en el modal de la tienda: por eso se avisa a la
- * sesión con `actualizarUsuario` (ver EdadContext, que mira `user.dui`).
- *
- * ── Se valida antes de mandar ──
- *
- * El backend rechaza el perfil incompleto con un 400 y un "Faltan campos
- * obligatorios" que no dice cuál falta. Validando aquí, el error sale debajo
- * del campo que está mal — que es donde hay que ir a arreglarlo. Las reglas son
- * las mismas de utils/validaciones.js que ya usan el registro y el login.
- * ============================================================
- */
+// MIS DATOS — nombre, usuario, correo, teléfono, fecha y DUI
+// El equivalente de `frontend/src/pages/cliente/DetallesCuenta.jsx`: los campos que el cliente
+// puede cambiar de su propia cuenta. ── La foto se sube aparte, tocando el círculo ──
 
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -72,13 +41,9 @@ import {
 } from '../../utils/validaciones';
 import { contenidoCentrado } from '../../theme/pantalla';
 
-/*
- * La fecha es OPCIONAL aquí (en el registro sí es obligatoria): quien se
- * registró antes de que existiera el campo tiene la cuenta sin fecha, y
- * obligarlo a ponerla para cambiar su teléfono sería cobrarle un peaje.
- * Vacía pasa; escrita, tiene que ser una fecha de calendario real y de una
- * persona viva.
- */
+// La fecha es OPCIONAL aquí (en el registro sí es obligatoria): quien se registró antes de que
+// existiera el campo tiene la cuenta sin fecha, y obligarlo a ponerla para cambiar su teléfono
+// sería cobrarle un peaje.
 const validarFechaOpcional = (valor) => {
   if (!String(valor || '').trim()) return null;
   const iso = fechaISO(valor);
@@ -206,11 +171,9 @@ const MisDatos = ({ alVolver }) => {
       return;
     }
 
-    /*
-     * La fecha viaja en ISO, que es lo que guarda la base (y lo que ya manda
-     * el <input type="date"> de la web). Si por lo que sea no es mayor, no se
-     * manda un DUI que no debería tener — mismo criterio que DetallesCuenta.
-     */
+    // La fecha viaja en ISO, que es lo que guarda la base (y lo que ya manda el <input type="date"> de
+    // la web). Si por lo que sea no es mayor, no se manda un DUI que no debería tener — mismo criterio
+    // que DetallesCuenta.
     const dui = mayorDeEdad ? form.dui.trim() : '';
     const datos = {
       ...form,
@@ -221,11 +184,8 @@ const MisDatos = ({ alVolver }) => {
     setGuardando(true);
     try {
       await actualizarPerfil(user.id, datos);
-      /*
-       * Que la sesión se entere del DUI: es lo que mira el candado de los +18
-       * (ver EdadContext). Sin esto habría que volver a escribirlo en el modal
-       * de la tienda aunque acabe de guardarlo aquí.
-       */
+      // Que la sesión se entere del DUI: es lo que mira el candado de los +18 (ver EdadContext). Sin
+      // esto habría que volver a escribirlo en el modal de la tienda aunque acabe de guardarlo aquí.
       actualizarUsuario({ dui });
       avisar(t('Tus datos quedaron guardados'), 'exito');
       alVolver?.();

@@ -1,10 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-/*
- * El puente con el servicio de analítica: qué le manda, con qué clave, y qué
- * hace si no está. La base y el servicio son de mentira.
- */
+// El puente con el servicio de analítica: qué le manda, con qué clave, y qué hace si no está. La
+// base y el servicio son de mentira.
 
 const config = { analitica: { url: "http://analitica.test", clave: "clave-de-prueba" } };
 vi.mock("../../config.js", () => ({ config }));

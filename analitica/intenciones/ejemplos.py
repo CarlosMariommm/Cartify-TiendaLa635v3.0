@@ -1,24 +1,6 @@
-"""
-Las frases con las que aprende Tiqui, por intención.
-
-Hay dos clases de intenciones:
-
-  DIRECTAS   Tiqui las contesta sola, al instante y sin Gemini: saludar,
-             decir qué sabe hacer, el total, ir a pagar, abrir una sección
-             de la cuenta, las ofertas, los datos de la tienda, el nombre.
-  A GEMINI   "pedir" (todo lo que nombra productos o toca el carrito:
-             agregar, quitar, buscar, precios, recomendar) y "otro" (charla).
-             Esas necesitan el catálogo y conversación: las sigue resolviendo
-             Gemini como siempre.
-
-Las frases se escriben como llegan del reconocimiento de voz (a veces sin
-tildes ni signos) y como habla la gente aquí: "regálame", "cuánto sale todo",
-"ya estuvo". Cada intención se arma con sus frases base, más arranques
-("oye Tiqui", "mira") y cierres ("por favor", "porfa") combinados.
-
-PRUEBA son frases escritas aparte, con otras palabras, que el modelo NO ve al
-entrenar: con ellas se mide qué tan bien entiende lo que nunca oyó.
-"""
+"""Las frases con las que aprende Tiqui, por intención. Hay dos clases de intenciones: DIRECTAS
+Tiqui las contesta sola, al instante y sin Gemini: saludar, decir qué sabe hacer, el total, ir a
+pagar, abrir una sección de la cuenta, las ofertas, los datos de la tienda, el nombre."""
 
 import random
 

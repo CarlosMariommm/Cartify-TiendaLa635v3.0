@@ -4,33 +4,16 @@ import toast from 'react-hot-toast';
 import { useAjustesCtx } from '../../context/AjustesContext';
 import Mapa from '../Mapa/Mapa';
 
-/*
- * ============================================================
- * CONFIGURACIÓN DE ENVÍO (Admin) — ConfiguracionEnvio.jsx
- * ============================================================
- * El precio del domicilio se calcula por la DISTANCIA real hasta el cliente:
- *   envío = tarifa base + (precio por km × km desde la tienda).
- *
- * Aquí el dueño fija DE DÓNDE salen los repartos: escribe la dirección en el
- * buscador y el mapa se va ahí (o toca el mapa a mano). La geocodificación es
- * de OpenStreetMap (Nominatim): gratis, sin tarjeta y sin Google, igual que el
- * resto de los mapas de la app.
- *
- * El cálculo vive en utils/envio.js y es el MISMO que usa el carrito y el
- * backend. Sin ubicación fijada (o si el cliente no marcó su punto) se cobra
- * solo la tarifa base.
- * ============================================================
- */
+// CONFIGURACIÓN DE ENVÍO (Admin) — ConfiguracionEnvio.jsx
+// El precio del domicilio se calcula por la DISTANCIA real hasta el cliente: envío = tarifa base +
+// (precio por km × km desde la tienda).
 
 // San Salvador, por si la tienda todavía no tiene ubicación fijada.
 const CENTRO_POR_DEFECTO = [13.6989, -89.1914];
 
-/*
- * var(--theme-primary) y no var(--marca-*) para el pin: el resto de esta
- * pantalla ya sigue la paleta del panel (ver el MapPin de abajo), y este pin
- * es lo mismo, un marcador de ubicación. --theme-primary está pintada siempre,
- * sin importar la ruta.
- */
+// var(--theme-primary) y no var(--marca-*) para el pin: el resto de esta pantalla ya sigue la
+// paleta del panel (ver el MapPin de abajo), y este pin es lo mismo, un marcador de ubicación.
+// --theme-primary está pintada siempre, sin importar la ruta.
 const COLOR_PIN = 'var(--theme-primary, #003049)';
 
 // Number(null) === 0, así que hay que descartar vacíos antes de tratarlos como
@@ -65,10 +48,8 @@ const ConfiguracionEnvio = () => {
 
   const alClicEnMapa = ({ lat, lng }) => setTienda({ lat, lng });
 
-  /*
-   * Busca la dirección en Nominatim (OpenStreetMap). Se sesga a El Salvador
-   * (countrycodes=sv) para que "Calle Sevilla 635" no caiga en otro país.
-   */
+  // Busca la dirección en Nominatim (OpenStreetMap). Se sesga a El Salvador (countrycodes=sv) para
+  // que "Calle Sevilla 635" no caiga en otro país.
   const buscarDireccion = async (e) => {
     e?.preventDefault();
     const q = busqueda.trim();
@@ -175,11 +156,8 @@ const ConfiguracionEnvio = () => {
       {/* El mapa */}
       <div className="rounded-2xl overflow-hidden border mb-2" style={{ borderColor: 'var(--theme-card-border)' }}>
         <div style={{ height: 320 }}>
-          {/*
-            Tocar el mapa fija la tienda. Cuando el buscador encuentra una
-            dirección el mapa se mueve hasta ella (`seguir`): sin eso el pin
-            nuevo aparecía pero el mapa se quedaba mirando a otro lado.
-          */}
+          {/* Tocar el mapa fija la tienda. Cuando el buscador encuentra una dirección el mapa se mueve hasta
+             ella (`seguir`): sin eso el pin nuevo aparecía pero el mapa se quedaba mirando a otro lado. */}
           <Mapa
             centro={{ lat: centro[0], lng: centro[1] }}
             zoom={tieneUbicacion ? 16 : 13}

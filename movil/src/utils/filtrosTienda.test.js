@@ -1,10 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { aplicarFiltros, cuantosFiltros, enOferta, FILTROS_VACIOS, marcasDe } from './filtrosTienda';
 
-/*
- * Los filtros de la tienda para el cliente: ordenar, precio, ofertas,
- * disponibles y marca. (La web tiene la misma prueba sobre la suya.)
- */
+// Los filtros de la tienda para el cliente: ordenar, precio, ofertas, disponibles y marca. (La web
+// tiene la misma prueba sobre la suya.)
 
 const PRODUCTOS = [
   { id: 'a', nombre: 'Leche', precio: 1.25, stock: 10, marca: 'Salud', creadoEn: '2026-10-01' },

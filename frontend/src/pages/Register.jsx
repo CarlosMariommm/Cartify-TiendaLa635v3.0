@@ -182,15 +182,8 @@ const FooterLink = styled.button`
   &:hover { text-decoration: underline; }
 `;
 
-/*
- * El bloque del consentimiento.
- *
- * Va justo antes del botón y no perdido entre los campos: es lo último que se
- * lee antes de decidir, que es donde tiene que estar. Y son DOS casillas
- * separadas a propósito — aceptar las condiciones y querer publicidad son dos
- * decisiones distintas, y meterlas en una sola casilla es cobrarle una con la
- * otra.
- */
+// El bloque del consentimiento. Va justo antes del botón y no perdido entre los campos: es lo
+// último que se lee antes de decidir, que es donde tiene que estar.
 const BloqueConsentimiento = styled.div`
   margin: 24px 0 4px;
   padding: 16px 18px;
@@ -224,17 +217,9 @@ const Casilla = styled.div`
   }
 `;
 
-/*
- * El enlace a los términos, que es un BOTÓN y no un <a>.
- *
- * No navega: abre el documento encima (ver useModalTerminos). Se pinta como
- * enlace porque eso es lo que la persona espera tocar ahí, pero por dentro no
- * puede ser un enlace de verdad — el formulario lleno no se puede arriesgar.
- *
- * Va FUERA de la <label> a propósito: una etiqueta le reenvía al control todos
- * los clics que caen adentro, así que un botón anidado ahí abriría el
- * documento Y desmarcaría la casilla que la persona acaba de marcar.
- */
+// El enlace a los términos, que es un BOTÓN y no un <a>. No navega: abre el documento encima (ver
+// useModalTerminos). Se pinta como enlace porque eso es lo que la persona espera tocar ahí, pero
+// por dentro no puede ser un enlace de verdad — el formulario lleno no se puede arriesgar.
 const EnlaceTerminos = styled.button`
   background: none;
   border: none;
@@ -285,12 +270,7 @@ const Register = () => {
   // el hook. Aquí solo se pinta el formulario. Ver useRegistro.
   const { cargando, elegirArchivo, registrar } = useRegistro();
 
-  /*
-   * Los términos se leen ENCIMA del formulario, sin navegar. Se probó con un
-   * enlace a pestaña nueva y no basta: hay navegadores —el de adentro de
-   * WhatsApp, por donde entra media tienda— que abren encima y se llevan todo
-   * lo escrito. Ver useModalTerminos.
-   */
+  // Los términos se leen ENCIMA del formulario, sin navegar. Ver useModalTerminos.
   const { abierto: terminosAbiertos, abrir: abrirTerminos, cerrar: cerrarTerminos, clave: documentoAbierto } =
     useModalTerminos();
 
@@ -299,29 +279,18 @@ const Register = () => {
   const { login } = useAuth();
   const [entrandoGoogle, setEntrandoGoogle] = useState(false);
 
-  /*
-   * Registrarse con Google. No pasa por el flujo de verificación por código: el
-   * correo ya viene confirmado por Google, así que la cuenta queda lista y se
-   * entra directo a la tienda. Si el correo ya existía, simplemente inicia esa
-   * sesión (el backend lo enlaza).
-   */
+  // Registrarse con Google. No pasa por el flujo de verificación por código: el correo ya viene
+  // confirmado por Google, así que la cuenta queda lista y se entra directo a la tienda. Si el
+  // correo ya existía, simplemente inicia esa sesión (el backend lo enlaza).
   const onGoogle = async (credentialResponse) => {
     const credential = credentialResponse?.credential;
     if (!credential) {
       toast.error(t('No se recibió la respuesta de Google'));
       return;
     }
-    /*
-     * El consentimiento viaja TAMBIÉN por el camino de Google.
-     *
-     * Antes no: entrar con Google creaba la cuenta de una y se saltaba las
-     * casillas de esta misma pantalla, así que quedaba un cliente sin
-     * constancia de haber aceptado los términos y —peor— inscrito en
-     * promociones por el valor por defecto del modelo, sin haberlo pedido.
-     *
-     * Se revisa aquí antes de molestar al servidor, y el servidor lo vuelve a
-     * exigir por su cuenta: la casilla del navegador no le prueba nada a nadie.
-     */
+    // El consentimiento viaja TAMBIÉN por el camino de Google. Se revisa aquí antes de molestar al
+    // servidor, y el servidor lo vuelve a exigir por su cuenta: la casilla del navegador no le prueba
+    // nada a nadie.
     if (!watch('aceptaTerminos')) {
       toast.error(t('Marca primero que aceptas los términos y la política de privacidad'));
       return;
@@ -388,12 +357,9 @@ const Register = () => {
               </InputWrapper>
             </InputContainer>
 
-            {/*
-              Fecha de nacimiento: para calcular la edad de los productos +18.
-              Es obligatoria, pero NO bloquea a los menores de tener cuenta —
-              pueden comprar lo demás; solo no verán los productos restringidos.
-              Va ANTES que el DUI porque es la que decide si el DUI se pide.
-            */}
+            {/* Fecha de nacimiento: para calcular la edad de los productos +18. Es obligatoria, pero NO bloquea
+               a los menores de tener cuenta — pueden comprar lo demás; solo no verán los productos
+               restringidos. Va ANTES que el DUI porque es la que decide si el DUI se pide. */}
             <InputContainer>
               <Label htmlFor="campo-fechaNacimiento">{t('Fecha de nacimiento')}</Label>
               <InputWrapper>
@@ -416,11 +382,8 @@ const Register = () => {
               </InputWrapper>
             </InputContainer>
 
-            {/*
-              El DUI solo aparece cuando la fecha ya dice que es mayor de edad:
-              es opcional, y a un menor no tendría por qué pedírsele. Se revisa
-              solo si escribió algo (ver reglaDuiOpcional).
-            */}
+            {/* El DUI solo aparece cuando la fecha ya dice que es mayor de edad: es opcional, y a un menor no
+               tendría por qué pedírsele. Se revisa solo si escribió algo (ver reglaDuiOpcional). */}
             {puedeDui && (
               <InputContainer>
                 <Label htmlFor="campo-dui">{t('DUI (opcional)')}</Label>
@@ -461,13 +424,8 @@ const Register = () => {
               </InputWrapper>
             </InputContainer>
 
-            {/*
-              Aquí había un campo de "Dirección" en texto plano. Se quitó: lo
-              que escribía la persona se guardaba aparte y NUNCA se usaba para
-              entregar nada. Las direcciones de verdad se agregan en
-              "Mi cuenta > Direcciones", con referencia y punto en el mapa, y de
-              ahí las toman el encabezado de la tienda y el checkout.
-            */}
+            {/* Aquí había un campo de "Dirección" en texto plano. Se quitó: lo que escribía la persona se
+               guardaba aparte y NUNCA se usaba para entregar nada. */}
 
             <InputContainer>
               <Label htmlFor="campo-email">{t('Correo Electrónico')}</Label>
@@ -530,12 +488,9 @@ const Register = () => {
                 <input
                   type="checkbox"
                   id="aceptaTerminos"
-                  /*
-                    El nombre completo para quien no ve la pantalla. La etiqueta
-                    visible se corta en "los" porque la frase sigue en el botón,
-                    y un lector de pantalla anunciaría "acepto los" a secas —
-                    una casilla que no dice qué se está aceptando.
-                  */
+                  // El nombre completo para quien no ve la pantalla. La etiqueta visible se corta en "los" porque la
+                  // frase sigue en el botón, y un lector de pantalla anunciaría "acepto los" a secas — una casilla
+                  // que no dice qué se está aceptando.
                   aria-label={t('He leído y acepto los términos y condiciones y la política de privacidad')}
                   {...register('aceptaTerminos', {
                     required: 'Hay que aceptar los términos para crear la cuenta',
@@ -557,11 +512,8 @@ const Register = () => {
                 <ErrorCasilla>{t(errors.aceptaTerminos.message)}</ErrorCasilla>
               )}
 
-              {/*
-                Desmarcada por defecto y sin `required`. Es opcional de verdad:
-                se puede crear la cuenta sin tocarla, y no se pierde nada de la
-                tienda por no querer publicidad.
-              */}
+              {/* Desmarcada por defecto y sin `required`. Es opcional de verdad: se puede crear la cuenta sin
+                 tocarla, y no se pierde nada de la tienda por no querer publicidad. */}
               <Casilla>
                 <input type="checkbox" id="promociones" {...register('promociones')} />
                 <label htmlFor="promociones">

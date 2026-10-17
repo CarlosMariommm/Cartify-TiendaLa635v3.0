@@ -7,13 +7,9 @@ import { obtenerTambienLlevan } from "../utils/tambienLlevan.js";
 
 const productController = {};
 
-/*
- * SELECT — el catálogo de la tienda, público.
- *
- * Lo piden la tienda web, el kiosco y la app (también la que ya está
- * instalada), así que va solo lo que ve un cliente; ver utils/productoPublico.js.
- * De categoría, marca y pasillo, apenas el nombre: es lo único que se pinta.
- */
+// SELECT — el catálogo de la tienda, público.
+// Lo piden la tienda web, el kiosco y la app (también la que ya está instalada), así que va solo
+// lo que ve un cliente; ver utils/productoPublico.js.
 productController.getProduct = async (req, res) => {
 
   try {
@@ -36,14 +32,9 @@ productController.getProduct = async (req, res) => {
   }
 };
 
-/*
- * SELECT — el inventario completo, para el panel.
- *
- * Lo que la tienda no enseña: costo, proveedor poblado, código de barras,
- * vencimiento. Lo usan el inventario, el aviso de promo bajo costo y el PDF
- * "Inventario completo" del dashboard. Este último lo descarga también el
- * empleado, por eso la ruta pide personal y no solo admin.
- */
+// SELECT — el inventario completo, para el panel.
+// Lo que la tienda no enseña: costo, proveedor poblado, código de barras, vencimiento. Lo usan el
+// inventario, el aviso de promo bajo costo y el PDF "Inventario completo" del dashboard.
 productController.getInventario = async (req, res) => {
 
   try {
@@ -66,14 +57,8 @@ productController.getInventario = async (req, res) => {
   }
 };
 
-/*
- * Un solo producto, con lo que se puede mostrar en público.
- *
- * GET /product/:id caía en getProduct y devolvía el catálogo entero sin mirar
- * el id. Ahora devuelve solo ese producto, y solo lo que ve un cliente: lo usa
- * la vista previa al compartir un enlace (frontend/middleware.js), que no
- * tiene por qué saber el costo ni el proveedor.
- */
+// Un solo producto, con lo que se puede mostrar en público. GET /product/:id caía en getProduct y
+// devolvía el catálogo entero sin mirar el id.
 productController.getProductById = async (req, res) => {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -94,12 +79,9 @@ productController.getProductById = async (req, res) => {
   }
 };
 
-/*
- * Quien compra esto también lleva: { productos: { id: [ids] } } para TODO el
- * catálogo de una vez, así la ficha de cada producto lo tiene al instante.
- * Público como el catálogo: solo ids, ningún dato de quién compró. Ver
- * utils/tambienLlevan.js.
- */
+// Quien compra esto también lleva: { productos: { id: [ids] } } para TODO el catálogo de una vez,
+// así la ficha de cada producto lo tiene al instante. Público como el catálogo: solo ids, ningún
+// dato de quién compró. Ver utils/tambienLlevan.js.
 productController.getTambienLlevan = async (req, res) => {
   try {
     const productos = await obtenerTambienLlevan();
@@ -193,14 +175,8 @@ productController.insertProduct = async (req, res) => {
 
     await newProduct.save();
 
-    /*
-     * El aviso a quien pidió enterarse de los productos nuevos.
-     *
-     * No manda nada ahora: apunta el producto en un lote y espera unos minutos
-     * a ver si vienen más. Quien carga inventario sube treinta cosas de
-     * corrido, y treinta correos seguidos de la misma tienda es la receta
-     * exacta para acabar en spam el mismo día. Ver utils/avisosCliente.js.
-     */
+    // El aviso a quien pidió enterarse de los productos nuevos. No manda nada ahora: apunta el
+    // producto en un lote y espera unos minutos a ver si vienen más.
     anotarProductoNuevo({
       nombre: newProduct.name,
       precio: newProduct.salePrice,

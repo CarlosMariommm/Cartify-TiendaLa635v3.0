@@ -1,16 +1,5 @@
-/*
- * ============================================================
- * MÁSCARAS DE ENTRADA — mascaras.js
- * ============================================================
- * Puerto de `frontend/src/utils/mascaras.js`. Mismas reglas, misma salida: un
- * DUI escrito en el celular tiene que quedar guardado igual que uno escrito en
- * la computadora, o buscar al cliente después no encuentra nada.
- *
- * Lo que no se copió: `alEscribir`, que manipula `e.target.value` del DOM. En
- * React Native el `onChangeText` ya entrega el texto pelado, así que la
- * pantalla llama al formateador directo.
- * ============================================================
- */
+// MÁSCARAS DE ENTRADA — mascaras.js
+// Puerto de `frontend/src/utils/mascaras.js`.
 
 const soloDigitos = (valor) => String(valor || '').replace(/\D/g, '');
 
@@ -45,17 +34,9 @@ export const LARGO_DUI = 10;        // 8 + guion + 1
 export const LARGO_TELEFONO = 9;    // 4 + guion + 4
 export const LARGO_FECHA = 10;      // 2 + barra + 2 + barra + 4
 
-/*
- * "31/12/2000" (lo que se ve en el campo) -> "2000-12-31" (lo que ya manda el
- * <input type="date"> de la web y lo que espera el backend). `null` si está
- * incompleta o si no es una fecha de calendario real.
- *
- * A diferencia del selector nativo del navegador, este campo es texto libre:
- * nada más impide escribir "31/02/2020". Por eso se arma la fecha con el
- * constructor de componentes (año, mes, día) y se compara contra lo que
- * quedó — si el 31 de febrero no existe, JavaScript lo empuja a marzo, y esa
- * vuelta ya no coincide con lo que se escribió.
- */
+// "31/12/2000" (lo que se ve en el campo) -> "2000-12-31" (lo que ya manda el <input type="date">
+// de la web y lo que espera el backend). `null` si está incompleta o si no es una fecha de
+// calendario real.
 export const fechaISO = (valor) => {
   const d = soloDigitos(valor);
   if (d.length !== 8) return null;
@@ -72,16 +53,8 @@ export const fechaISO = (valor) => {
   return `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
 };
 
-/*
- * El camino de vuelta: lo que viene de la base ("2000-12-31", o una fecha ISO
- * completa con hora) -> "31/12/2000", que es lo que muestra el campo. Cadena
- * vacía si no hay fecha o no se entiende.
- *
- * Se parte el texto a mano en vez de usar `new Date()`: una fecha sin hora la
- * lee el motor como UTC, y en El Salvador (UTC-6) eso devuelve el día
- * ANTERIOR. Un cumpleaños que se corre un día cada vez que se abre la
- * pantalla es un error que nadie perdona.
- */
+// El camino de vuelta: lo que viene de la base ("2000-12-31", o una fecha ISO completa con hora)
+// -> "31/12/2000", que es lo que muestra el campo. Cadena vacía si no hay fecha o no se entiende.
 export const fechaVisible = (valor) => {
   if (!valor) return '';
   const [fecha] = String(valor).split('T');

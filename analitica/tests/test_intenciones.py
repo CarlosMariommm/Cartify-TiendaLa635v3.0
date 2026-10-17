@@ -1,7 +1,5 @@
-"""
-La IA propia de Tiqui: que aprenda bien, que no haga acciones que nadie
-pidió y que el modelo que usa el servidor esté al día con estos ejemplos.
-"""
+"""La IA propia de Tiqui: que aprenda bien, que no haga acciones que nadie pidió y que el modelo
+que usa el servidor esté al día con estos ejemplos."""
 
 import json
 from pathlib import Path

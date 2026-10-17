@@ -1,17 +1,6 @@
-/*
- * ============================================================
- * ACTIVIDAD DEL USUARIO — actividadUsuario.js
- * ============================================================
- * Un aviso de "el usuario se está moviendo" (scrolleando una lista, cambiando
- * de pestaña), para que BurbujaPedido se aparte sola en vez de estorbar.
- *
- * Mismo patrón que navigationRef.js y no un Context: quien avisa está
- * repartido en media docena de pantallas sueltas (Inicio, Seccion, Pedidos,
- * Favoritos, Carrito, la barra de pestañas...) que no tienen por qué estar
- * anidadas bajo un Provider en común solo para esto, y BurbujaPedido —la
- * única que escucha— ya vive fuera de ese árbol de todos modos.
- * ============================================================
- */
+// ACTIVIDAD DEL USUARIO — actividadUsuario.js
+// Un aviso de "el usuario se está moviendo" (scrolleando una lista, cambiando de pestaña), para
+// que BurbujaPedido se aparte sola en vez de estorbar.
 
 const oyentes = new Set();
 

@@ -1,24 +1,6 @@
-/*
- * ============================================================
- * EL REPORTE PREDICTIVO EN PDF — reportePredictivo.js
- * ============================================================
- * Lo que calcula el servicio de analítica (analitica/app/pronostico.py, vía
- * GET /dashboard/pronostico), puesto en un documento para el administrador:
- *
- *   1. Resumen        en palabras, lo que hay que saber;
- *   2. Ventas         las 4 semanas que vienen con su rango, al lado de las
- *                     4 que pasaron (gráfica y tabla);
- *   3. Se agotan      los productos que no llegan a fin de mes, el primero
- *                     arriba;
- *   4. Compras        lo que conviene pedir, por proveedor, con su costo;
- *   5. Por producto   el pronóstico de cada uno;
- *   6. Confiabilidad  qué tan bien acierta y cómo se calculó.
- *
- * El documento no exagera: con poco historial lo dice, con un solo día de
- * venta no sugiere cantidades y los rangos van siempre al lado del número.
- * El formato (encabezado, tablas, pie) es el de utils/reportesPdf.js.
- * ============================================================
- */
+// EL REPORTE PREDICTIVO EN PDF — reportePredictivo.js
+// Pone en un PDF para el administrador lo que calcula el servicio de analítica: ventas esperadas,
+// lo que se va a agotar y la compra sugerida por proveedor.
 
 import {
   COLOR, COLOR_GRAFICA, MARGEN, asegurarEspacio, dinero, fechaCorta, fechaLarga, graficaDeBarras, hoyLocal,
@@ -29,12 +11,9 @@ import { nombreDelCanal } from './pedidoProveedor';
 const DIAS_SEMANA = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
 const CONFIANZA = { alta: 'Alta', media: 'Media', baja: 'Baja' };
 
-/*
- * Cuántas unidades, escrito siempre igual en todo el reporte:
- *   - lo que se espera (un promedio) lleva un decimal: 3.8;
- *   - lo que se cuenta (existencia, vendido, pedir) y los rangos, enteros;
- *   - por libra, siempre un decimal y "lb".
- */
+// Cuántas unidades, escrito siempre igual en todo el reporte: - lo que se espera (un promedio)
+// lleva un decimal: 3.8; - lo que se cuenta (existencia, vendido, pedir) y los rangos, enteros; -
+// por libra, siempre un decimal y "lb".
 export const cantidad = (n, unidad = 'unidad', { promedio = false } = {}) => {
   const valor = Number(n) || 0;
   if (unidad === 'libra') return `${valor.toFixed(1)} lb`;
@@ -52,29 +31,15 @@ const contar = (n, singular, plural) => `${n} ${n === 1 ? singular : plural}`;
 
 const semanasDe = (datos) => Math.round((datos.tienda?.dias?.length || 28) / 7);
 
-/*
- * ¿La tienda real todavía no junta 4 semanas de ventas? El servicio solo
- * llena "las 4 semanas anteriores" (`periodo_anterior`) desde 28 días de
- * historial; sin ventas (`vacio`) tampoco hay nada que mostrar.
- *
- * Mientras tanto el panel abre el pronóstico con la DEMOSTRACIÓN (si el
- * servidor la tiene): así quien entra ve lo que hace, sin meter ventas
- * inventadas en la base real. Ver pages/Pronostico.jsx y DescargaPredictiva.
- */
+// ¿La tienda real todavía no junta 4 semanas de ventas? El servicio solo llena "las 4 semanas
+// anteriores" (`periodo_anterior`) desde 28 días de historial; sin ventas (`vacio`) tampoco hay
+// nada que mostrar.
 export const faltanCuatroSemanas = (datos) =>
   !datos || Boolean(datos.vacio) || datos.faltanCuatroSemanas === true || datos.tienda?.periodo_anterior == null;
 
-/*
- * El pronóstico que conviene ENSEÑAR: el de la tienda real si ya tiene sus
- * 4 semanas; si no, y hay demostración, el de la demostración, marcado con
- * `porFaltaDeHistoria` para que la pantalla lo diga.
- *
- * Mientras el cálculo real tarda (Render despertando), el servidor contesta
- * "calculando" y ya dice si a la tienda le faltan sus 4 semanas: en ese caso
- * no se le espera, se va directo a la demostración. Y si la tienda real no se
- * pudo calcular en este momento, también se enseña la demostración
- * (`realConError` lleva el porqué) en vez de dejar la pantalla con un error.
- */
+// El pronóstico que conviene ENSEÑAR: el de la tienda real si ya tiene sus 4 semanas; si no, y hay
+// demostración, el de la demostración, marcado con `porFaltaDeHistoria` para que la pantalla lo
+// diga.
 const yaSeSabeQueFalta = (datos) => Boolean(datos?.demoDisponible && datos?.faltanCuatroSemanas);
 
 export const pronosticoParaMostrar = async (pedir, { forzar = false } = {}) => {
@@ -99,10 +64,8 @@ export const pronosticoParaMostrar = async (pedir, { forzar = false } = {}) => {
 // Los productos que no llegan al final del periodo: lo agotado primero.
 const queSeAgotan = (datos) => datos.productos.filter((p) => p.se_acaba?.agotado || p.se_acaba?.probable);
 
-/*
- * El resumen, en frases. Aparte del PDF para poder probarlo (y para que
- * Tiqui del panel lo pueda contar igual, más adelante).
- */
+// El resumen, en frases. Aparte del PDF para poder probarlo (y para que Tiqui del panel lo pueda
+// contar igual, más adelante).
 export const resumenDelPronostico = (datos) => {
   const puntos = [];
   const { tienda, historial, precision } = datos;
@@ -173,10 +136,8 @@ export const resumenDelPronostico = (datos) => {
   return puntos;
 };
 
-/*
- * La gráfica: las semanas que pasaron (gris) y las que vienen (azul), con el
- * rango del pronóstico como una línea vertical (ver reportesPdf.graficaDeBarras).
- */
+// La gráfica: las semanas que pasaron (gris) y las que vienen (azul), con el rango del pronóstico
+// como una línea vertical (ver reportesPdf.graficaDeBarras).
 const grafica = (doc, y, datos) => graficaDeBarras(doc, y, {
   grupos: [
     ...(datos.historial?.semanas || []).map((s) => ({ etiqueta: fechaCorta(s.desde), barras: [{ valor: s.total, color: COLOR_GRAFICA.real }] })),
@@ -188,10 +149,8 @@ const grafica = (doc, y, datos) => graficaDeBarras(doc, y, {
   ],
 });
 
-/*
- * El documento. `tienda`: los datos del encabezado (ver reportesPdf.nuevoReporte).
- * Devuelve el jsPDF ya armado; quien lo llama lo descarga.
- */
+// El documento. `tienda`: los datos del encabezado (ver reportesPdf.nuevoReporte). Devuelve el
+// jsPDF ya armado; quien lo llama lo descarga.
 export const construirReportePredictivo = (datos, tienda, ahora = new Date()) => {
   const { historial, tienda: ventas } = datos;
   const semanas = semanasDe(datos);

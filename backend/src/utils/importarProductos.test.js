@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-/*
- * Importar el inventario desde Excel: la vista previa (con y sin IA) y el
- * guardado. La base, la IA, Cloudinary y Open Food Facts son de mentira.
- */
+// Importar el inventario desde Excel: la vista previa (con y sin IA) y el guardado. La base, la
+// IA, Cloudinary y Open Food Facts son de mentira.
 
 const db = { productos: [], pasillos: [], categorias: [], marcas: [], proveedores: [] };
 let siguienteId = 1;

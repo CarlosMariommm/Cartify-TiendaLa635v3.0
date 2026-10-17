@@ -2,11 +2,9 @@ import { describe, it, expect, vi } from "vitest";
 import { cambiosDePreferencias, quiereEnLaApp, AVISO_DEL_ESTADO } from "./preferenciasAvisos.js";
 import { repartirPushDeLaPromo, textoDeFavoritos, textoDelPush } from "./avisoPromo.js";
 
-/*
- * El correo, de mentira. avisoPromo.js lo trae, y el de verdad arma el
- * cliente de Mailjet al cargarse: sin las llaves del .env (en GitHub no hay)
- * revienta antes de correr una sola prueba. Aquí no se manda nada.
- */
+// El correo, de mentira. avisoPromo.js lo trae, y el de verdad arma el cliente de Mailjet al
+// cargarse: sin las llaves del .env (en GitHub no hay) revienta antes de correr una sola prueba.
+// Aquí no se manda nada.
 vi.mock("./sendMailMailjet.js", () => ({ sendEmail: vi.fn() }));
 
 /*

@@ -1,19 +1,6 @@
-/*
- * ============================================================
- * TOKENS DE MOVIMIENTO — motion.js
- * ============================================================
- * Curvas y duraciones compartidas para TODA la app, siguiendo los
- * estándares de diseño de Emil Kowalski. Antes cada modal tenía su
- * propia curva escrita a mano (y la de framer, que es muy floja);
- * ahora todo sale de aquí.
- *
- * Regla de oro de las curvas:
- *   - Algo que ENTRA o SALE  -> ease-out (arranca rápido, se siente ágil)
- *   - Algo que se MUEVE      -> ease-in-out
- *   - Cajones / drawers      -> curva tipo iOS
- * Nunca ease-in en UI: arranca lento justo cuando el usuario está mirando.
- * ============================================================
- */
+// TOKENS DE MOVIMIENTO — motion.js
+// Curvas y duraciones compartidas para TODA la app, siguiendo los estándares de diseño de Emil
+// Kowalski.
 
 export const EASE_OUT = [0.23, 1, 0.32, 1];
 export const EASE_IN_OUT = [0.77, 0, 0.175, 1];

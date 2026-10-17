@@ -1,30 +1,6 @@
-/*
- * ============================================================
- * LOS AVISOS DEL PERSONAL — avisosPersonal.js
- * ============================================================
- * Cada pedido que entra suena en el teléfono de quien trabaja en la tienda
- * (administrador o empleado), mientras tenga la sesión abierta en la app.
- * Antes había que tener el panel abierto y estar mirándolo para enterarse.
- *
- * ── Un teléfono, una persona ──
- *
- * El teléfono se apunta al entrar al modo personal de la app (PUT
- * /perfil/avisos) y se borra al cerrar sesión (POST /logoutAdmin con el
- * token del aviso). Al apuntarlo se le quita a cualquier otra cuenta del
- * personal que lo tuviera: si el empleado le pasa el teléfono al dueño, los
- * avisos son del que entró último, no de los dos.
- *
- * La baja va en el cierre de sesión, que no pide sesión válida, a propósito:
- * si la sesión ya venció, la app igual tiene que poder decir "aquí ya no".
- * Lo peor que puede hacer alguien con un token ajeno es quitarle los avisos a
- * ese teléfono, y para eso tendría que conocerlo: no viaja a ningún lado más.
- *
- * ── Quién NO recibe ──
- *
- * El pedido que el personal cobra en caja a nombre de un cliente: lo hizo
- * alguien de la tienda, con el cliente enfrente (ver identificarComprador).
- * ============================================================
- */
+// LOS AVISOS DEL PERSONAL — avisosPersonal.js
+// Cada pedido que entra suena en el teléfono de quien trabaja en la tienda (administrador o
+// empleado), mientras tenga la sesión abierta en la app. ── Un teléfono, una persona ──
 
 import adminModel from "../models/admin.js";
 import employeeModel from "../models/employee.js";
@@ -41,11 +17,8 @@ const nombreCorto = (nombre) => {
   return limpio.length > LARGO_NOMBRE ? `${limpio.slice(0, LARGO_NOMBRE - 1)}…` : limpio;
 };
 
-/*
- * Lo que dice el aviso. El total va en el título porque es lo primero que se
- * pregunta; el cuerpo dice de quién es y qué hay que hacer con él (llevarlo o
- * dejarlo listo en el mostrador).
- */
+// Lo que dice el aviso. El total va en el título porque es lo primero que se pregunta; el cuerpo
+// dice de quién es y qué hay que hacer con él (llevarlo o dejarlo listo en el mostrador).
 export const textoPedidoNuevo = (pedido, nombreCliente = "") => {
   const precio = `$${(Number(pedido?.total) || 0).toFixed(2)}`;
   const quien = nombreCorto(nombreCliente);
@@ -102,13 +75,8 @@ export const olvidarTelefono = async (token) => {
   );
 };
 
-/*
- * Por el canal "tienda" (lo crea la app solo en el modo personal): prioridad
- * alta, sale como globo arriba de la pantalla aunque se esté en otra app.
- *
- * `datos` es lo que lee la app al tocarlo: a domicilio lleva al Reparto; para
- * recoger, a Pedidos del panel (ver pages/personal/ModoPersonal.js).
- */
+// Por el canal "tienda" (lo crea la app solo en el modo personal): prioridad alta, sale como globo
+// arriba de la pantalla aunque se esté en otra app.
 export const avisarPedidoNuevo = async (pedido) => {
   const tokens = await dispositivosDelPersonal();
   if (!tokens.length) return { enviados: 0 };
@@ -131,10 +99,8 @@ export const avisarPedidoNuevo = async (pedido) => {
   return { enviados: tokens.length };
 };
 
-/*
- * La que llama el controlador: dispara y se olvida. El pedido ya se guardó;
- * que el aviso no salga no puede convertirlo en un error.
- */
+// La que llama el controlador: dispara y se olvida. El pedido ya se guardó; que el aviso no salga
+// no puede convertirlo en un error.
 export const avisarPedidoNuevoEnSegundoPlano = (pedido) => {
   avisarPedidoNuevo(pedido).catch((error) => {
     console.log("aviso de pedido nuevo al personal: falló el envío: " + error);

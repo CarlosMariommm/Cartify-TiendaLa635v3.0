@@ -1,22 +1,6 @@
-/*
- * ============================================================
- * LA ACTUALIZACIÓN DE LA APP, AL MOMENTO — useActualizacionApp.js
- * ============================================================
- * Los arreglos de la app llegan por internet (expo-updates, ver app.json):
- * la app baja la versión nueva al abrirse, pero la ESTRENA hasta la siguiente
- * vez que se abre desde cero. En Android la app se queda viva en memoria por
- * días, así que en la tablet de la tienda un arreglo publicado ayer podía
- * seguir sin verse hoy (pasó con la paleta del panel).
- *
- * Esto, para el modo del personal:
- *   - busca la versión nueva al abrir y cada vez que se vuelve a la app;
- *   - si ya la bajó, avisa que está lista y la aplica con un toque
- *     (no sola: si alguien va repartiendo, reiniciar le cortaría el viaje);
- *   - dice qué versión corre, para comprobarlo sin adivinar.
- *
- * En desarrollo y en la web no hay actualizaciones por internet: no hace nada.
- * ============================================================
- */
+// LA ACTUALIZACIÓN DE LA APP, AL MOMENTO — useActualizacionApp.js
+// Los arreglos de la app llegan por internet (expo-updates, ver app.json): la app baja la versión
+// nueva al abrirse, pero la ESTRENA hasta la siguiente vez que se abre desde cero.
 
 import { useCallback, useEffect } from 'react';
 import { AppState } from 'react-native';

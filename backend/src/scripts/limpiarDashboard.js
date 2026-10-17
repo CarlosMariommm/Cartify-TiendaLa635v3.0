@@ -1,34 +1,6 @@
-/*
- * ============================================================
- * LIMPIAR LOS DATOS DEL DASHBOARD — limpiarDashboard.js
- * ============================================================
- * Dos formas de dejar el dashboard legible:
- *
- *   --raros  Solo los pedidos imposibles: totales de más de $5,000 o trabajos
- *            de impresión con más de 200 copias o 500 páginas. Son los que
- *            dejaron números como $5×10^256 (copias sin tope) o $12,000 de
- *            envío (el GPS del emulador de Android, en California).
- *   --todo   Todos los pedidos y todos los puntos: el dashboard queda en cero.
- *
- * SIN --borrar NO TOCA NADA: se conecta, cuenta y dice qué borraría. Con
- * --borrar, antes de borrar guarda un respaldo de todo lo que va a quitar en
- * backend/respaldos/ (fuera de git: lleva datos de clientes).
- *
- * Qué hace al borrar:
- *   - Los pedidos que seguían en curso (por preparar, preparando, en camino,
- *     listo) se deshacen como al cancelar: vuelve su stock, y el saldo y los
- *     puntos canjeados. Los entregados no: esos productos ya salieron.
- *   - Se borran los pedidos y sus lotes de puntos (en --todo, todos los lotes).
- *   - Se recalculan los puntos de los clientes con los lotes que quedan
- *     (en --todo, todos a cero).
- *   - NO toca clientes, productos, compras a proveedores ni tarjetas.
- *
- * Uso, desde la carpeta backend/:
- *   node src/scripts/limpiarDashboard.js
- *   node src/scripts/limpiarDashboard.js --raros --borrar
- *   node src/scripts/limpiarDashboard.js --todo --borrar
- * ============================================================
- */
+// LIMPIAR LOS DATOS DEL DASHBOARD — limpiarDashboard.js
+// Dos formas de dejar el dashboard legible: --raros Solo los pedidos imposibles: totales de más de
+// $5,000 o trabajos de impresión con más de 200 copias o 500 páginas.
 import dotenv from "dotenv";
 dotenv.config();
 import fs from "fs";
@@ -108,10 +80,8 @@ const correr = async () => {
   let deshechos = 0;
   for (const pedido of objetivo) {
     if (!EN_CURSO.includes(pedido.status)) continue;
-    /*
-     * Un total imposible no se "devuelve" al saldo: nadie pudo pagarlo de
-     * verdad, y devolverlo le pondría $10^256 a un cliente.
-     */
+    // Un total imposible no se "devuelve" al saldo: nadie pudo pagarlo de verdad, y devolverlo le
+    // pondría $10^256 a un cliente.
     const seguro = Number(pedido.total) > TOTAL_IMPOSIBLE ? { ...pedido, paymentMethod: "efectivo" } : pedido;
     await devolverLoDelPedido(seguro);
     deshechos += 1;

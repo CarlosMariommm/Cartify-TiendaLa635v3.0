@@ -1,29 +1,11 @@
-/*
- * ============================================================
- * EL CORREO DE UNA PROMOCIÓN NUEVA — plantillaCorreoPromo.js
- * ============================================================
- * El aviso que sale cuando la tienda publica una promoción.
- *
- * El esqueleto —la armadura contra el modo oscuro de Gmail, la identidad de la
- * tienda y el pie— vive en correoBase.js, compartido con los otros avisos.
- * Aquí queda solo lo que es propio de una promoción: su color, su sello y la
- * lista de productos con el precio tachado.
- * ============================================================
- */
+// EL CORREO DE UNA PROMOCIÓN NUEVA — plantillaCorreoPromo.js
+// El aviso que sale cuando la tienda publica una promoción.
 
 import { config } from "../../config.js";
 import { dinero, limpio, ESTILOS, identidad, pie, boton } from "./correoBase.js";
 
-/*
- * El color del correo sale del MISMO tema con que se dibujó el banner en la
- * tienda, para que el aviso y la promo se reconozcan como la misma cosa.
- *
- * Es una copia recortada de frontend/src/utils/temasPromo.js — solo el color
- * sólido de cada tema, porque los degradados no sobreviven a Outlook. Se copia
- * y no se importa porque el backend no puede alcanzar el bundle del frontend.
- * Si algún día aparece un tema nuevo y aquí no está, el correo sale del azul
- * de la casa: menos vistoso, nunca roto.
- */
+// El color del correo sale del MISMO tema con que se dibujó el banner en la tienda, para que el
+// aviso y la promo se reconozcan como la misma cosa.
 const COLOR_POR_TEMA = {
   cafe: "#B46C30",
   fresco: "#2E8B5A",
@@ -47,11 +29,8 @@ const colorDe = (promo) => {
   return COLOR_POR_TEMA[promo?.tema] || AZUL_DE_LA_CASA;
 };
 
-/*
- * El sello: el mismo texto corto que lleva el banner. Sale de la oferta, no de
- * un campo escrito a mano, salvo en los anuncios —que no tienen número que
- * mostrar y por eso llevan su etiqueta.
- */
+// El sello: el mismo texto corto que lleva el banner. Sale de la oferta, no de un campo escrito a
+// mano, salvo en los anuncios —que no tienen número que mostrar y por eso llevan su etiqueta.
 const selloDe = (promo, items) => {
   if (promo.type === "anuncio") return (promo.etiqueta || "Nuevo").toUpperCase();
   if (promo.type === "nxm") return `${promo.buyQty}x${promo.payQty}`;
@@ -63,10 +42,8 @@ const selloDe = (promo, items) => {
   return mayor > 0 ? `-${mayor}%` : "OFERTA";
 };
 
-/*
- * Una frase que dice qué se gana, en el idioma de quien compra. "Compre 2 y
- * pague 1" se entiende sin pensar; "nxm con buyQty 2" no.
- */
+// Una frase que dice qué se gana, en el idioma de quien compra. "Compre 2 y pague 1" se entiende
+// sin pensar; "nxm con buyQty 2" no.
 const gananciaDe = (promo, items) => {
   if (promo.type === "anuncio") return "Recién llegado a la tienda.";
   if (promo.type === "nxm") return `Compre ${promo.buyQty} y pague ${promo.payQty}.`;
@@ -83,13 +60,9 @@ const vencimientoEnTexto = (endsAt) => {
   return fecha.toLocaleDateString("es-SV", { day: "numeric", month: "long" });
 };
 
-/*
- * Una fila de producto: foto chica, nombre y precio.
- *
- * El precio se muestra tachado + nuevo solo cuando de verdad baja. En un
- * anuncio no hay rebaja, así que sale el precio de siempre y ya: inventarle un
- * tachado a un producto que no cambió de precio es mentirle al cliente.
- */
+// Una fila de producto: foto chica, nombre y precio. El precio se muestra tachado + nuevo solo
+// cuando de verdad baja. En un anuncio no hay rebaja, así que sale el precio de siempre y ya:
+// inventarle un tachado a un producto que no cambió de precio es mentirle al cliente.
 const filaProducto = (item, color) => {
   const hayRebaja = item.precioOferta != null && item.precioOferta < item.precio;
 
@@ -112,12 +85,7 @@ const filaProducto = (item, color) => {
     </tr>`;
 };
 
-/*
- * @param {object} promo  - la promoción recién guardada
- * @param {Array}  items  - [{ nombre, imagen, precio, precioOferta, descuento }]
- * @param {object} tienda - { nombre, nombreLinea1, nombreLinea2, logoUrl }
- * @param {string} enlaceBaja - la baja de UN clic, con el token de quien lo recibe
- */
+// Recibe: promo, items, tienda, enlaceBaja.
 export const plantillaCorreoPromo = ({ promo, items = [], tienda, enlaceBaja }) => {
   const color = colorDe(promo);
   const nombreTienda = tienda?.nombre || config.tienda.nombre;
@@ -126,18 +94,13 @@ export const plantillaCorreoPromo = ({ promo, items = [], tienda, enlaceBaja }) 
   const vence = vencimientoEnTexto(promo.endsAt);
   const titulo = promo.title || promo.promoDescription;
 
-  /*
-   * El enlace lleva a la promo abierta, no a la portada. Quien hace clic en
-   * "40% en quesos" quiere ver los quesos, no ponerse a buscarlos.
-   */
+  // El enlace lleva a la promo abierta, no a la portada. Quien hace clic en "40% en quesos" quiere
+  // ver los quesos, no ponerse a buscarlos.
   const enlace = `${config.tienda.url}/?promo=${promo._id}`;
 
-  /*
-   * Tres productos y "y N más". Un correo con la lista completa de una promo
-   * de cuarenta productos se vuelve un catálogo que nadie baja hasta el final,
-   * y los clientes de correo cortan los mensajes largos con un "[Mensaje
-   * recortado]" justo encima del botón.
-   */
+  // Tres productos y "y N más". Un correo con la lista completa de una promo de cuarenta productos
+  // se vuelve un catálogo que nadie baja hasta el final, y los clientes de correo cortan los
+  // mensajes largos con un "[Mensaje recortado]" justo encima del botón.
   const visibles = items.slice(0, 3);
   const restantes = items.length - visibles.length;
 
@@ -214,11 +177,8 @@ export const plantillaCorreoPromo = ({ promo, items = [], tienda, enlaceBaja }) 
 </body>
 </html>`;
 
-  /*
-   * La versión en texto. No es un trámite: un correo que es SOLO HTML es una
-   * de las señales que más pesan para que los filtros lo manden a spam, y este
-   * sale en lote a toda la lista de clientes.
-   */
+  // La versión en texto. No es un trámite: un correo que es SOLO HTML es una de las señales que más
+  // pesan para que los filtros lo manden a spam, y este sale en lote a toda la lista de clientes.
   const texto = [
     `${sello} — ${titulo}`,
     "",

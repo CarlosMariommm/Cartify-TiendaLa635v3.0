@@ -12,33 +12,9 @@ import { estadoCuenta } from "./cuentaProveedor.js";
 import { DIAS_CADUCA, filtroStockBajo, inicioDelDia, numero } from "../controller/dashboardController.js";
 import { analizarVentas, olvidarConsejos } from "./consejosVentas.js";
 
-/*
- * ============================================================
- * EL PANORAMA DEL NEGOCIO — lo que Tiqui sabe en el panel
- * ============================================================
- * Tiqui del panel (controller/tiquiPanelController.js) contesta en UNA sola
- * vuelta al modelo, igual que la de la tienda: en vez de dejar que la IA pida
- * datos de a uno (una consulta más por cada pregunta, y en voz cada consulta
- * se nota), recibe de entrada un resumen del negocio ya escrito en texto:
- *
- *   - los pedidos que hay que atender, del más viejo al más nuevo;
- *   - las ventas de hoy, ayer, la semana y el mes, con su ganancia;
- *   - qué reponer, qué se agotó y qué caduca;
- *   - lo más vendido y lo que nadie compra;
- *   - y, solo para el administrador, clientes, proveedores y promociones,
- *     con cuánto deja cada promo y los consejos de ventas (consejosVentas.js).
- *
- * Los umbrales ("stock bajo", "caduca esta semana") y el "hoy" son los MISMOS
- * del dashboard (se importan de ahí): si Tiqui dijera un número y el
- * dashboard otro, no se le creería a ninguno de los dos.
- *
- * Se arma una vez cada 20 segundos por tipo de sesión: en una charla se
- * pregunta varias veces seguidas y no hace falta ir a la base cada vez.
- *
- * Aparte, productosDeLaCharla: las existencias de los productos de los que se
- * está hablando ("¿cuánta leche queda?"), que no caben en un resumen fijo.
- * ============================================================
- */
+// EL PANORAMA DEL NEGOCIO — lo que Tiqui sabe en el panel
+// Arma en texto un resumen del negocio (pedidos, ventas, existencias, deudas…) para que la Tiqui
+// del panel conteste en una sola vuelta al modelo.
 
 const VIGENCIA_MS = 20 * 1000;
 const enMemoria = new Map(); // "admin" | "empleado" -> { en, texto }
@@ -281,11 +257,9 @@ const armarPanorama = async ({ esAdmin }) => {
   return lineas.join("\n");
 };
 
-/*
- * Las temporadas que se pueden poner: las de fábrica (las mismas de
- * frontend/src/utils/temporadas.js: si allá se agrega una, se agrega aquí) y
- * las que el dueño creó en Personalización.
- */
+// Las temporadas que se pueden poner: las de fábrica (las mismas de
+// frontend/src/utils/temporadas.js: si allá se agrega una, se agrega aquí) y las que el dueño creó
+// en Personalización.
 const TEMPORADAS_DE_FABRICA = [
   { clave: "navidad", nombre: "Navidad" },
   { clave: "halloween", nombre: "Halloween" },
@@ -322,12 +296,9 @@ export const panoramaDelNegocio = async ({ esAdmin }) => {
   return texto;
 };
 
-/*
- * ── Las existencias de lo que se está hablando ──
- * "¿Cuánta leche nos queda?", "¿a cuánto vendemos el queso?": los productos
- * cuyo nombre, categoría o marca aparecen en la charla, con su existencia y su
- * precio (y el costo, solo para el administrador).
- */
+// ── Las existencias de lo que se está hablando ── "¿Cuánta leche nos queda?", "¿a cuánto vendemos
+// el queso?": los productos cuyo nombre, categoría o marca aparecen en la charla, con su
+// existencia y su precio (y el costo, solo para el administrador).
 let catalogo = { en: 0, lista: null };
 
 const aPlano = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();

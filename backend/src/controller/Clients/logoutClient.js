@@ -1,13 +1,8 @@
 const logoutController = {};
 
-/*
- * Cierra SOLO la sesión de cliente.
- *
- * Las dos áreas tienen su propia cookie ("authCookie" para el personal,
- * "authCookieCliente" para la tienda) porque la misma persona suele estar
- * conectada como las dos cosas en el mismo navegador: el dueño es cliente de
- * su propia tienda. Con una sola cookie, salir de un lado sacaba del otro.
- */
+// Cierra SOLO la sesión de cliente. Las dos áreas tienen su propia cookie ("authCookie" para el
+// personal, "authCookieCliente" para la tienda) porque la misma persona suele estar conectada como
+// las dos cosas en el mismo navegador: el dueño es cliente de su propia tienda.
 logoutController.logout = async (req, res) => {
   res.clearCookie("authCookieCliente");
 

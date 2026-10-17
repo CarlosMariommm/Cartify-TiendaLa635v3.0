@@ -10,19 +10,9 @@ import {
   temaDeLaFecha,
 } from '../../utils/temporadas';
 
-/*
- * ============================================================
- * TEMPORADAS PROPIAS (Admin) — TemporadasPropias.jsx
- * ============================================================
- * Las temporadas que no vienen de fábrica: "Regreso a clases", "Día de la
- * madre", el aniversario de la tienda. El dueño elige nombre, fechas, dos
- * colores, la figura que cae de fondo y el saludo de la cinta.
- *
- * Se piden DOS colores y no seis: los tonos claros y oscuros los deriva
- * utils/temporadas.js. La vista previa enseña cómo quedan los botones y la
- * cinta antes de guardar, y avisa si el color no deja leer el texto blanco.
- * ============================================================
- */
+// TEMPORADAS PROPIAS (Admin) — TemporadasPropias.jsx
+// Las temporadas que no vienen de fábrica: "Regreso a clases", "Día de la madre", el aniversario
+// de la tienda.
 
 const MAXIMO = 12;
 const DIAS_POR_MES = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -50,11 +40,8 @@ const nuevaTemporada = () => ({
 
 const esHex = (v) => /^#[0-9a-fA-F]{6}$/.test(v);
 
-/*
- * ¿El rango pisa alguna temporada de fábrica? Se recorre día por día un año
- * bisiesto: son 366 comparaciones, nada, y así no hay que pensar en los
- * rangos que cruzan el año.
- */
+// ¿El rango pisa alguna temporada de fábrica? Se recorre día por día un año bisiesto: son 366
+// comparaciones, nada, y así no hay que pensar en los rangos que cruzan el año.
 const coincideConFabrica = (desde, hasta) => {
   const encontradas = new Set();
   const inicio = desde.mes * 100 + desde.dia;
@@ -138,11 +125,9 @@ const SelectorColor = ({ etiqueta, ayuda, valor, onChange, estilo }) => {
   );
 };
 
-/*
- * Cómo se va a ver: la cinta, un botón y una pastilla de la tienda, con la
- * paleta ya derivada. Se dibuja con estilos en línea y NO con las variables
- * --marca-*, que en el panel no están pintadas por la temporada.
- */
+// Cómo se va a ver: la cinta, un botón y una pastilla de la tienda, con la paleta ya derivada. Se
+// dibuja con estilos en línea y NO con las variables --marca-*, que en el panel no están pintadas
+// por la temporada.
 const VistaPrevia = ({ borrador }) => {
   const p = paletaDesdeColores(borrador.colorPrincipal, borrador.colorAcento);
   const Icono = ICONO_DE_FIGURA[borrador.figura] || Sparkles;

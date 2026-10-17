@@ -3,19 +3,8 @@ import {
   fijarIdiomaActual, guardarIdioma, leerIdiomaGuardado, localeDe, traducir, esIdiomaValido,
 } from '../utils/idioma';
 
-/*
- * ============================================================
- * IDIOMA — IdiomaContext.js
- * ============================================================
- * `t(texto, vars)` para cualquier pantalla de la tienda, y `setIdioma` para
- * Preferencias. Igual que ModoProvider, no pinta nada hasta leer lo guardado:
- * así la app no arranca un instante en español para pasar a inglés.
- *
- * Solo envuelve la tienda (ver App.js). Al salir de ella —el modo del
- * personal— el idioma de "ahora" vuelve a español, para que los avisos que
- * se traducen fuera de un componente no salgan en inglés en el Reparto.
- * ============================================================
- */
+// IDIOMA — IdiomaContext.js
+// `t(texto, vars)` para cualquier pantalla de la tienda, y `setIdioma` para Preferencias.
 
 const IdiomaContexto = createContext(null);
 

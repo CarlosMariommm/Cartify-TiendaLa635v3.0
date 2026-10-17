@@ -1,17 +1,6 @@
-/*
- * ============================================================
- * CUANDO TIQUI DEL PANEL CAMBIA ALGO — cambiosDeTiqui.js
- * ============================================================
- * Tiqui mueve un pedido o cambia un precio desde la esquina, pero la pantalla
- * que está abierta (Pedidos, Inventario…) cargó sus datos antes. Sin avisarle,
- * Tiqui diría "listo, quedó listo para recoger" y la tarjeta seguiría en
- * "En preparación" hasta recargar la página.
- *
- * Así que Tiqui avisa qué tipo de cosa cambió (el mismo `tipo` del servidor,
- * ver backend/src/utils/cambiosTiqui.js) y cada pantalla vuelve a cargar solo
- * si le toca.
- * ============================================================
- */
+// CUANDO TIQUI DEL PANEL CAMBIA ALGO — cambiosDeTiqui.js
+// Tiqui mueve un pedido o cambia un precio desde la esquina, pero la pantalla que está abierta
+// (Pedidos, Inventario…) cargó sus datos antes.
 
 const EVENTO = 'tiqui-panel:cambio';
 

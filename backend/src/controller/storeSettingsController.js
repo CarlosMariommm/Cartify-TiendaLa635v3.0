@@ -1,52 +1,24 @@
 import storeSettingsModel, { CLAVE_UNICA, FIGURAS_DE_TEMPORADA } from "../models/storeSettings.js";
 import { limpiarDisfraces } from "../utils/disfracesTiqui.js";
 
-/*
- * ============================================================
- * AJUSTES DE LA TIENDA — storeSettingsController.js
- * ============================================================
- * Un solo documento para toda la tienda. Ver src/models/storeSettings.js.
- *
- * La lectura es PÚBLICA a propósito: la tienda se ve sin cuenta, y el nombre,
- * el logo y el orden de la portada son parte de lo primero que se pinta. Si
- * esto exigiera sesión, quien entra por un enlace de WhatsApp vería la tienda
- * sin nombre hasta que iniciara sesión.
- * ============================================================
- */
+// AJUSTES DE LA TIENDA — storeSettingsController.js
+// Un solo documento para toda la tienda. Ver src/models/storeSettings.js.
 
 const storeSettingsController = {};
 
-/*
- * Los campos que el panel puede cambiar. Ir por lista blanca y no por
- * `{...req.body}` es lo que evita que alguien mande `_id`, `createdAt` o un
- * campo inventado y lo guardemos sin darnos cuenta.
- */
-/*
- * Ojo con lo que NO está en esta lista: `logoUrl`.
- *
- * Estaba, y eso dejaba apuntar el logo de la tienda a cualquier dirección de
- * internet con un solo PUT, saltándose la puerta de subida. La URL del logo la
- * escriben únicamente updateLogo (con lo que devuelve Cloudinary) y deleteLogo
- * (con cadena vacía). Ninguna pantalla la manda en el PUT, así que sacarla no
- * rompe nada.
- */
+// Los campos que el panel puede cambiar con el PUT de los ajustes, por lista blanca: nada de `_id`,
+// fechas ni campos inventados. `logoUrl` no está: el logo solo lo escriben updateLogo y deleteLogo.
 const CAMPOS_DE_TEXTO = ["nombreLinea1", "nombreLinea2", "lema", "direccion", "ubicacionTiendaTexto"];
 
-/*
- * Campos numéricos que el panel puede cambiar: las dos piezas del envío por
- * distancia (tarifa base y precio por km) y la tarifa de servicio. Se validan
- * aparte de los de texto porque un número mal formado o negativo tiene que
- * rebotar como error del cliente (400), no guardarse.
- */
+// Campos numéricos que el panel puede cambiar: las dos piezas del envío por distancia (tarifa base
+// y precio por km) y la tarifa de servicio. Se validan aparte de los de texto porque un número mal
+// formado o negativo tiene que rebotar como error del cliente (400), no guardarse.
 const CAMPOS_NUMERICOS = ["envioBase", "envioPorKm", "servicioValor"];
 
 const MODOS_DE_TEMPORADA = ["automatico", "manual", "ninguno"];
 
-/*
- * Las claves de las temporadas de fábrica (frontend/src/utils/temporadas.js).
- * Una temporada creada por el dueño no puede llamarse igual: al elegirla a
- * mano no se sabría cuál de las dos manda.
- */
+// Las claves de las temporadas de fábrica (frontend/src/utils/temporadas.js). Una temporada creada
+// por el dueño no puede llamarse igual: al elegirla a mano no se sabría cuál de las dos manda.
 const CLAVES_DE_FABRICA = ["navidad", "halloween", "independencia", "san-valentin"];
 const MAXIMO_DE_TEMPORADAS_PROPIAS = 12;
 const DIAS_POR_MES = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -70,14 +42,8 @@ const fechaValida = (f) => {
   return { mes, dia };
 };
 
-/*
- * Revisa y limpia la lista de temporadas propias que manda el panel. Devuelve
- * { lista } o { error } con un mensaje que dice cuál está mal y por qué.
- *
- * La CLAVE se conserva cuando ya existe: es lo que usa el modo manual para
- * saber cuál está elegida, así que cambiarle el nombre a "Regreso a clases"
- * no debe soltarla. Solo se inventa una para las nuevas.
- */
+// Revisa y limpia la lista de temporadas propias que manda el panel. Devuelve { lista } o { error
+// } con un mensaje que dice cuál está mal y por qué.
 const limpiarTemporadasPropias = (entrada) => {
   if (!Array.isArray(entrada)) return { error: "Las temporadas propias no son válidas" };
   if (entrada.length > MAXIMO_DE_TEMPORADAS_PROPIAS) {
@@ -125,12 +91,9 @@ const limpiarTemporadasPropias = (entrada) => {
 // valores por defecto para que el frontend siempre reciba la misma forma.
 storeSettingsController.getSettings = async (req, res) => {
   try {
-    /*
-     * Un solo findOneAndUpdate con upsert en vez de "buscar y si no hay, crear":
-     * ese par de pasos deja una rendija entre los dos en la que otra petición
-     * puede crear su propio documento. Con el índice único de `clave` (ver el
-     * modelo), aquí solo puede existir uno.
-     */
+    // Un solo findOneAndUpdate con upsert en vez de "buscar y si no hay, crear": ese par de pasos deja
+    // una rendija entre los dos en la que otra petición puede crear su propio documento. Con el índice
+    // único de `clave` (ver el modelo), aquí solo puede existir uno.
     const ajustes = await storeSettingsModel.findOneAndUpdate(
       { clave: CLAVE_UNICA },
       { $setOnInsert: { clave: CLAVE_UNICA } },
@@ -148,11 +111,8 @@ storeSettingsController.updateSettings = async (req, res) => {
   try {
     const cambios = {};
 
-    /*
-     * Texto. Se recorta y se comprueba que el nombre no quede en blanco: una
-     * tienda sin nombre en el encabezado se ve como si la página se hubiera
-     * cargado a medias.
-     */
+    // Texto. Se recorta y se comprueba que el nombre no quede en blanco: una tienda sin nombre en el
+    // encabezado se ve como si la página se hubiera cargado a medias.
     CAMPOS_DE_TEXTO.forEach((campo) => {
       if (req.body[campo] === undefined) return;
       cambios[campo] = String(req.body[campo]).trim();
@@ -162,11 +122,8 @@ storeSettingsController.updateSettings = async (req, res) => {
       return res.status(400).json({ message: "La primera línea del nombre no puede quedar vacía" });
     }
 
-    /*
-     * Números. Se rechaza lo que no sea un número finito y no negativo: un
-     * costo de envío en blanco, con letras o negativo no tiene sentido y no
-     * debe pisar el valor bueno que ya estaba guardado.
-     */
+    // Números. Se rechaza lo que no sea un número finito y no negativo: un costo de envío en blanco,
+    // con letras o negativo no tiene sentido y no debe pisar el valor bueno que ya estaba guardado.
     for (const campo of CAMPOS_NUMERICOS) {
       if (req.body[campo] === undefined) continue;
       const valor = Number(req.body[campo]);
@@ -176,11 +133,8 @@ storeSettingsController.updateSettings = async (req, res) => {
       cambios[campo] = valor;
     }
 
-    /*
-     * Secciones de la portada. Solo se guardan la clave, si se ve y en qué
-     * posición: el título y el contenido de cada fila los pone el frontend,
-     * que es quien sabe armarlas.
-     */
+    // Secciones de la portada. Solo se guardan la clave, si se ve y en qué posición: el título y el
+    // contenido de cada fila los pone el frontend, que es quien sabe armarlas.
     if (Array.isArray(req.body.secciones)) {
       cambios.secciones = req.body.secciones
         .filter((s) => s && typeof s.clave === "string" && s.clave.trim())
@@ -193,19 +147,8 @@ storeSettingsController.updateSettings = async (req, res) => {
         }));
     }
 
-    /*
-     * Temporada, campo por campo y con NOTACIÓN DE PUNTOS.
-     *
-     * Ojo con esto, que no es un capricho de estilo: `temporada` es un
-     * subesquema, y si se le pasa el objeto entero a findOneAndUpdate,
-     * Mongoose lo castea a un subdocumento nuevo —rellenando con los valores
-     * por defecto las rutas que no vinieron— y hace $set del subdocumento
-     * COMPLETO. O sea que mandar solo `tema` devolvía `modo` a 'automatico', y
-     * mandar solo `modo` borraba el tema. Silenciosamente, sin error.
-     *
-     * Con "temporada.modo" / "temporada.tema" Mongoose emite un $set por ruta
-     * y deja en paz a la hermana, que es lo que prometen los guardas de abajo.
-     */
+    // Temporada, campo por campo y con NOTACIÓN DE PUNTOS. O sea que mandar solo `tema` devolvía
+    // `modo` a 'automatico', y mandar solo `modo` borraba el tema. Silenciosamente, sin error.
     if (req.body.temporada && typeof req.body.temporada === "object") {
       const { modo, tema, decoracion, saludos, saludoNormal, personalizados, disfraces } = req.body.temporada;
 
@@ -218,13 +161,9 @@ storeSettingsController.updateSettings = async (req, res) => {
       if (tema !== undefined) cambios["temporada.tema"] = String(tema).trim();
       if (decoracion !== undefined) cambios["temporada.decoracion"] = !!decoracion;
 
-      /*
-       * Los saludos personalizados, uno por tema. Se manda el objeto completo
-       * cada vez (igual que zonasEnvio o secciones): más simple que mezclar
-       * clave por clave, y aquí no hay carrera que perder porque solo lo edita
-       * el dueño desde un solo panel. Vacío después de recortar = "use el de
-       * fábrica", así que ni se guarda.
-       */
+      // Los saludos personalizados, uno por tema. Se manda el objeto completo cada vez (igual que
+      // zonasEnvio o secciones): más simple que mezclar clave por clave, y aquí no hay carrera que
+      // perder porque solo lo edita el dueño desde un solo panel.
       if (saludos !== undefined) {
         if (typeof saludos !== "object" || saludos === null || Array.isArray(saludos)) {
           return res.status(400).json({ message: "Los saludos de temporada no son válidos" });
@@ -241,10 +180,8 @@ storeSettingsController.updateSettings = async (req, res) => {
         cambios["temporada.saludoNormal"] = String(saludoNormal ?? "").trim().slice(0, 160);
       }
 
-      /*
-       * Los disfraces de Tiqui, uno por temporada. Igual que los saludos, se
-       * manda el objeto completo cada vez.
-       */
+      // Los disfraces de Tiqui, uno por temporada. Igual que los saludos, se manda el objeto completo
+      // cada vez.
       if (disfraces !== undefined) {
         const limpios = limpiarDisfraces(disfraces);
         if (limpios.error) return res.status(400).json({ message: limpios.error });
@@ -256,11 +193,9 @@ storeSettingsController.updateSettings = async (req, res) => {
         if (error) return res.status(400).json({ message: error });
         cambios["temporada.personalizados"] = lista;
 
-        /*
-         * Si la que estaba elegida a mano se borró, se suelta la elección: un
-         * modo manual apuntando a una temporada que ya no existe deja la
-         * tienda sin colores y el panel sin nada marcado, sin explicar por qué.
-         */
+        // Si la que estaba elegida a mano se borró, se suelta la elección: un modo manual apuntando a una
+        // temporada que ya no existe deja la tienda sin colores y el panel sin nada marcado, sin explicar
+        // por qué.
         if (tema === undefined) {
           const actuales = await storeSettingsModel.findOne({ clave: CLAVE_UNICA }).select("temporada.tema").lean();
           const elegida = actuales?.temporada?.tema || "";
@@ -271,12 +206,9 @@ storeSettingsController.updateSettings = async (req, res) => {
       }
     }
 
-    /*
-     * Ubicación de la tienda (de dónde salen los repartos). Va con notación de
-     * puntos por lo mismo que la temporada: es un subobjeto, y mandarlo entero
-     * pisaría la mitad con los valores por defecto. Se acepta null/null para
-     * borrarla (sin ubicación se cobra solo la tarifa base).
-     */
+    // Ubicación de la tienda (de dónde salen los repartos). Va con notación de puntos por lo mismo que
+    // la temporada: es un subobjeto, y mandarlo entero pisaría la mitad con los valores por defecto.
+    // Se acepta null/null para borrarla (sin ubicación se cobra solo la tarifa base).
     if (req.body.ubicacionTienda && typeof req.body.ubicacionTienda === "object") {
       const { lat, lng } = req.body.ubicacionTienda;
       if (lat === null && lng === null) {
@@ -293,12 +225,9 @@ storeSettingsController.updateSettings = async (req, res) => {
       }
     }
 
-    /*
-     * Zonas de envío: cada una es un círculo (centro + radio) con precio fijo.
-     * Se reemplaza el arreglo completo, igual que las secciones de la portada.
-     * Se validan una por una: sin nombre, sin ubicación o con precio malo, se
-     * rebota con 400 diciendo cuál falló.
-     */
+    // Zonas de envío: cada una es un círculo (centro + radio) con precio fijo. Se reemplaza el arreglo
+    // completo, igual que las secciones de la portada. Se validan una por una: sin nombre, sin
+    // ubicación o con precio malo, se rebota con 400 diciendo cuál falló.
     if (Array.isArray(req.body.zonasEnvio)) {
       const zonas = [];
       for (const z of req.body.zonasEnvio) {
@@ -328,12 +257,9 @@ storeSettingsController.updateSettings = async (req, res) => {
       cambios.zonasEnvio = zonas;
     }
 
-    /*
-     * Datos del negocio (los que usan las páginas legales y el pie). Con
-     * notación de puntos, igual que la temporada: mandar el objeto entero
-     * borraría los campos que no vinieron. Cada campo vacío es válido: el
-     * dueño puede no tener NRC, y entonces no se muestra.
-     */
+    // Datos del negocio (los que usan las páginas legales y el pie). Con notación de puntos, igual que
+    // la temporada: mandar el objeto entero borraría los campos que no vinieron. Cada campo vacío es
+    // válido: el dueño puede no tener NRC, y entonces no se muestra.
     if (req.body.negocio && typeof req.body.negocio === "object") {
       const n = req.body.negocio;
       const texto = (v, max) => String(v ?? "").trim().slice(0, max);
@@ -356,10 +282,8 @@ storeSettingsController.updateSettings = async (req, res) => {
       }
     }
 
-    /*
-     * Tarifa de servicio: encendido/apagado y el tipo (fijo o porcentaje). El
-     * valor viaja por CAMPOS_NUMERICOS de arriba.
-     */
+    // Tarifa de servicio: encendido/apagado y el tipo (fijo o porcentaje). El valor viaja por
+    // CAMPOS_NUMERICOS de arriba.
     if (req.body.servicioActivo !== undefined) {
       cambios.servicioActivo = !!req.body.servicioActivo;
     }
@@ -378,12 +302,9 @@ storeSettingsController.updateSettings = async (req, res) => {
 
     return res.status(200).json({ message: "Ajustes guardados", ajustes });
   } catch (error) {
-    /*
-     * Un dato malo es culpa de quien lo mandó, no del servidor. Con el 500 de
-     * antes, escribir un nombre más largo del permitido salía como "Error
-     * interno del servidor": el aviso echaba la culpa al sitio y no decía qué
-     * campo corregir.
-     */
+    // Un dato malo es culpa de quien lo mandó, no del servidor. Con el 500 de antes, escribir un
+    // nombre más largo del permitido salía como "Error interno del servidor": el aviso echaba la culpa
+    // al sitio y no decía qué campo corregir.
     if (error?.name === "ValidationError" || error?.name === "CastError") {
       const primero = Object.values(error.errors || {})[0]?.message;
       return res.status(400).json({ message: primero || "Alguno de los datos no es válido" });
@@ -393,14 +314,9 @@ storeSettingsController.updateSettings = async (req, res) => {
   }
 };
 
-/*
- * El logo, subido como archivo.
- *
- * Va por su propia puerta y no dentro de updateSettings porque cambiar el
- * logo es una acción sola: no tiene por qué obligar a reenviar el nombre, el
- * lema y la portada entera. Multer ya dejó la imagen en Cloudinary y nos pasa
- * la URL en req.file.path.
- */
+// El logo, subido como archivo. Va por su propia puerta y no dentro de updateSettings porque
+// cambiar el logo es una acción sola: no tiene por qué obligar a reenviar el nombre, el lema y la
+// portada entera. Multer ya dejó la imagen en Cloudinary y nos pasa la URL en req.file.path.
 storeSettingsController.updateLogo = async (req, res) => {
   try {
     if (!req.file?.path) {

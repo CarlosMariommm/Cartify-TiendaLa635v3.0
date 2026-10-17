@@ -6,47 +6,12 @@ import { areaDeRuta } from '../../utils/sesion';
 import Mascota from './Mascota';
 import { traducir, leerIdiomaGuardado } from '../../utils/idioma';
 
-/*
- * ============================================================
- * LÍMITE DE ERROR — LimiteDeError.jsx
- * ============================================================
- * La red debajo del trapecio.
- *
- * Cuando algo revienta durante el dibujado, React no deja la pantalla a
- * medias: desmonta TODO el árbol. El resultado es una página blanca absoluta
- * —ni encabezado, ni aviso, ni salida— y quien la ve no tiene forma de saber
- * si se cayó la tienda, si se le fue el internet o si hizo algo mal.
- *
- * Esto no arregla el error: lo contiene. Una falla al abrir un modal deja de
- * costar la sesión entera; se dice qué pasó y se ofrece una salida.
- *
- * Va como CLASE y no como hook a propósito: componentDidCatch es lo único de
- * React que todavía no tiene equivalente en hooks. No es una excepción a la
- * regla de la casa, es la única forma que hay.
- *
- * El detalle técnico solo se muestra en desarrollo. Al cliente no se le
- * enseña un stack trace: no le dice nada y lo asusta.
- * ============================================================
- */
+// LÍMITE DE ERROR — LimiteDeError.jsx
+// La red debajo del trapecio. Cuando algo revienta durante el dibujado, React no deja la pantalla
+// a medias: desmonta TODO el árbol.
 
-/*
- * DOS PALETAS, SEGÚN DÓNDE REVENTÓ.
- *
- * Este límite envuelve TODA la app, y ahí estaba el problema: pintaba siempre
- * con --theme-*, la paleta del PANEL. Con "Modo Oscuro" puesto, un error en la
- * TIENDA le mostraba al cliente una pantalla morada sobre fondo negro — los
- * colores de una herramienta de trabajo que él nunca ha visto, justo en el
- * momento en que más necesita reconocer dónde está parado.
- *
- * Ahora el color lo decide la ruta, igual que los avisos. Los hex de respaldo
- * se quedan para el caso extremo de que algo truene ANTES de que los
- * proveedores terminen de montar. Ver useEstiloAvisos.
- */
-/*
- * Los dos colores que se usan más de una vez, en funciones y no repetidos en
- * cada regla: el principal (icono, botón sólido, borde del otro botón) y el
- * de la tarjeta.
- */
+// DOS PALETAS, SEGÚN DÓNDE REVENTÓ: los colores del panel o los de la tienda, según la pantalla
+// donde ocurrió el error.
 const colorPrincipal = (p) => (p.$panel ? 'var(--theme-primary, #003049)' : 'var(--marca-600, #003049)');
 const colorTarjeta = (p) => (p.$panel ? 'var(--theme-card-bg, #fff)' : 'var(--papel, #fff)');
 
@@ -59,11 +24,7 @@ const Pantalla = styled.div`
   background: ${(p) => (p.$panel ? "var(--theme-main-bg, #F1F6F9)" : "var(--papel, #fff)")};
 `;
 
-/*
- * Directo sobre el fondo, sin tarjeta: la mascota, el texto y los botones se
- * separan con aire. Antes iba en un recuadro blanco con sombra que no
- * agrupaba nada que no estuviera ya agrupado por estar solo en la pantalla.
- */
+// Directo sobre el fondo, sin tarjeta: la mascota, el texto y los botones se separan con aire.
 const Contenido = styled.div`
   width: 100%;
   max-width: 460px;
@@ -158,11 +119,8 @@ class LimiteDeError extends Component {
     console.error('Error de render contenido por LimiteDeError:', error, info?.componentStack);
   }
 
-  /*
-   * Recargar y no un setState: si el árbol se cayó a la mitad, el estado que
-   * quedó vivo alrededor ya no es de fiar. Volver a arrancar limpio es más
-   * honesto que fingir que no pasó nada.
-   */
+  // Recargar y no un setState: si el árbol se cayó a la mitad, el estado que quedó vivo alrededor ya
+  // no es de fiar. Volver a arrancar limpio es más honesto que fingir que no pasó nada.
   recargar = () => window.location.reload();
 
   irALaTienda = () => { window.location.href = '/'; };
@@ -202,17 +160,9 @@ class LimiteDeError extends Component {
   }
 }
 
-/*
- * El envoltorio que le dice al límite dónde está parada la persona.
- *
- * Va aparte porque componentDidCatch solo existe en clases y las clases no
- * pueden usar hooks. Así el que se exporta sigue llamándose igual y App.jsx no
- * se entera del cambio.
- *
- * La frontera entre panel y tienda no se vuelve a escribir aquí: es la misma
- * de utils/sesion.js, la que decide también qué sesión manda en cada ruta y de
- * qué color salen los avisos. Una ruta nueva del panel se agrega ALLÁ.
- */
+// El envoltorio que le dice al límite dónde está parada la persona. Va aparte porque
+// componentDidCatch solo existe en clases y las clases no pueden usar hooks. Así el que se exporta
+// sigue llamándose igual y App.jsx no se entera del cambio.
 const LimiteDeErrorConArea = ({ children }) => {
   const { pathname } = useLocation();
   return (

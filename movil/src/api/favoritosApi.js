@@ -1,16 +1,6 @@
-/*
- * ============================================================
- * FAVORITOS — favoritosApi.js
- * ============================================================
- * Los dos endpoints del corazón, los mismos que usa `clientService` en la web:
- *
- *   GET   /client/:id/favorites   la lista completa
- *   PATCH /client/:id/favorites   marca o desmarca uno (manda { productId })
- *
- * El PATCH es un interruptor, no un "agregar": el servidor mira si ya estaba y
- * hace lo contrario. Por eso no hay un DELETE aparte.
- * ============================================================
- */
+// FAVORITOS — favoritosApi.js
+// Trae la lista de favoritos del cliente y marca o desmarca uno (el PATCH es un interruptor),
+// con las mismas rutas que la web.
 
 import { peticion } from './api';
 

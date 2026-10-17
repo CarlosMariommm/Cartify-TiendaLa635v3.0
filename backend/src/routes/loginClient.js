@@ -2,13 +2,9 @@ import express from "express";
 import loginClientController from "../controller/Clients/loginClient.js";
 import googleAuthClientController from "../controller/Clients/googleAuthClient.js";
 
-/*
- * ── Documentación de la API (Swagger) ──
- *
- * Viene de main. Va agrupada aquí y no pegada a cada ruta porque
- * swagger-jsdoc rastrea el archivo entero: dónde esté no cambia lo que
- * documenta, y así el código de las rutas se lee sin interrupciones.
- */
+// ── Documentación de la API (Swagger) ──
+// Va agrupada aquí y no pegada a cada ruta porque swagger-jsdoc rastrea el archivo entero: dónde
+// esté no cambia lo que documenta, y así el código de las rutas se lee sin interrupciones.
 
 /**
  * @swagger

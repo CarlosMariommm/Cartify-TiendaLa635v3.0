@@ -3,10 +3,8 @@ import { useTheme } from '../../hooks/useClientTheme';
 import { useCentroAyuda } from '../../hooks/useCentroAyuda';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * CentroAyuda — preguntas frecuentes y los canales REALES de la tienda.
- * Qué se puede ofrecer lo decide useCentroAyuda; aquí solo se pinta.
- */
+// CentroAyuda — preguntas frecuentes y los canales REALES de la tienda. Qué se puede ofrecer lo
+// decide useCentroAyuda; aquí solo se pinta.
 
 // El tipo de canal manda el icono: la lista viene del hook sin saber de dibujos.
 const ICONOS = { whatsapp: MessageCircle, direccion: MapPin };
@@ -21,11 +19,8 @@ const CentroAyuda = () => {
     <div>
       <h1 className="text-2xl font-bold mb-6" style={{ color: c.textPrimary }}>{t('Centro de ayuda')}</h1>
 
-      {/*
-        Canales de contacto. Si no hay ninguno configurado no se pinta nada:
-        más vale un centro de ayuda sin bloque de contacto que uno con un
-        número que no contesta.
-      */}
+      {/* Canales de contacto. Si no hay ninguno configurado no se pinta nada: más vale un centro de ayuda
+         sin bloque de contacto que uno con un número que no contesta. */}
       {canales.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
           {canales.map((canal) => {

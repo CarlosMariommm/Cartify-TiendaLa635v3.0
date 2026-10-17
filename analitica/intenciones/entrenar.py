@@ -1,26 +1,5 @@
-"""
-Entrena la IA propia de Tiqui y la deja lista para el servidor.
-
-    cd analitica
-    .venv/Scripts/python.exe -m intenciones.entrenar
-
-El modelo:
-  - TF-IDF sobre los rasgos de rasgos.py (palabras, pares y pedazos de
-    letras), con la frecuencia amortiguada (1 + log) y cada frase de largo 1;
-  - una regresión logística multinomial: un peso por rasgo y por intención,
-    y la probabilidad de cada intención con softmax.
-
-Es pequeño a propósito: se entrena en segundos, contesta en menos de un
-milisegundo y cabe en un JSON que Node usa sin Python (ver
-backend/src/utils/intencionesTiqui.js). No reemplaza a Gemini: le quita lo
-sencillo y frecuente, y lo cubre cuando Gemini está saturado.
-
-Exporta dos archivos en backend/src/datos/:
-  intencionesTiqui.json          el modelo (rasgos, idf, pesos, sesgos)
-  intencionesTiqui.paridad.json  frases con las probabilidades que da ESTE
-                                 modelo exportado: la prueba del servidor
-                                 comprueba que Node calcula lo mismo.
-"""
+"""Entrena la IA propia de Tiqui y la deja lista para el servidor. cd analitica
+.venv/Scripts/python.exe -m intenciones.entrenar"""
 
 import json
 import math
@@ -43,15 +22,9 @@ CUANTOS_RASGOS = 4000
 
 
 def elegir_rasgos(frases: list[str], cuantos: int = CUANTOS_RASGOS) -> list[str]:
-    """
-    Los rasgos que usa el modelo: los que aparecen en al menos 2 frases, los
-    más frecuentes primero y, entre los que empatan, por orden alfabético.
-
-    Antes los elegía `max_features` de scikit-learn, que desempata con un
-    ordenamiento de numpy que no siempre es igual: 629 rasgos empataban justo
-    en el corte, y en el Linux de GitHub entraban otros que en Windows. El
-    modelo no salía igual en dos máquinas y la prueba "al día" fallaba allá.
-    """
+    """Los rasgos que usa el modelo: los que aparecen en al menos 2 frases, los más frecuentes primero
+    y, entre los que empatan, por orden alfabético. El modelo no salía igual en dos máquinas y la
+    prueba "al día" fallaba allá."""
     frecuencia, en_frases = Counter(), Counter()
     for frase in frases:
         r = rasgos(frase)

@@ -3,30 +3,9 @@ import {
   Megaphone, Award, Gift, Palette, UserSquare2, Users, Truck, Settings, Sparkles, TrendingUp,
 } from 'lucide-react';
 
-/*
- * ============================================================
- * LA AYUDA DEL PANEL — ayudaPanel.js
- * ============================================================
- * Qué hace cada apartado del panel y cómo se usa, para quien lo abre por
- * primera vez (o para el que no se acuerda de dónde se cambiaba el envío).
- * Lo pinta pages/AyudaPanel.jsx; aquí solo vive el contenido, así que corregir
- * un texto o agregar un tema no toca la pantalla.
- *
- * Cada tema:
- *   id        la clave de la URL (/ayuda?tema=inventario) y del ancla.
- *   ruta      la pantalla de la que habla. El "?" de la barra de arriba abre
- *             la ayuda del tema cuya ruta coincide con donde se está parado.
- *   grupo     igual que el menú lateral: el día a día, Catálogo, Ventas,
- *             Personas, y lo general.
- *   soloAdmin el empleado no lo ve: esas pantallas tampoco las tiene.
- *   resumen   para qué sirve, en una frase.
- *   pasos     cómo se usa, en orden.
- *   consejos  lo que conviene saber y no es obvio.
- *
- * OJO: si una pantalla cambia (un botón, un campo), cambia su tema aquí. Una
- * ayuda que describe botones que ya no existen confunde más que no tenerla.
- * ============================================================
- */
+// LA AYUDA DEL PANEL — ayudaPanel.js
+// Qué hace cada apartado del panel y cómo se usa, para quien lo abre por primera vez (o para el
+// que no se acuerda de dónde se cambiaba el envío).
 
 export const GRUPOS_AYUDA = [
   { id: 'general', nombre: 'Para empezar' },

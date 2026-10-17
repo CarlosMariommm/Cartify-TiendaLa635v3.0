@@ -1,24 +1,6 @@
-/*
- * ============================================================
- * TARJETA DE PRODUCTO
- * ============================================================
- * La cara de un producto en la portada. Copia de
- * `frontend/src/components/Store/ProductCard.jsx`, con una ausencia a
- * propósito: el crecer al pasar el cursor. En una pantalla táctil no hay
- * cursor, y el propio comentario de la web dice que ese efecto es solo del
- * ratón porque con el dedo se queda pegado. Lo que sí se conserva es el
- * hundido al apretar, que es lo que el dedo recibe a cambio.
- *
- * ── El corazón: relleno gris en vez de contorno ──
- *
- * La web usa los caracteres ♡ y ♥ — hueco cuando no está marcado, lleno
- * cuando sí. Aquí los iconos se dibujan con Views (ver UI/Iconos.js) y el
- * corazón es un cuadrado girado con dos bolitas encima: hacerle un contorno
- * pide dibujar la silueta entera de nuevo, y a 17 píxeles el borde saldría
- * dentado. Así que la diferencia la marca el color, que a ese tamaño se lee
- * mejor de todos modos: gris apagado contra rojo.
- * ============================================================
- */
+// TARJETA DE PRODUCTO
+// La cara de un producto en la portada. Copia de `frontend/src/components/Store/ProductCard.jsx`,
+// con una ausencia a propósito: el crecer al pasar el cursor.
 
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -50,15 +32,9 @@ const selloDePromo = (promo, t) => {
   return t('Oferta');
 };
 
-/*
- * Entrada escalonada al aparecer, calcada de `.card-in` en index.css: un
- * fundido con un empujón de 8px hacia arriba, 260ms, con la MISMA fórmula de
- * retraso por posición (45ms por tarjeta, tope de 8) para que la cuadrícula
- * entre en cascada y no de golpe. Con `useNativeDriver: true` porque tanto
- * opacity como translateY sí corren en el hilo nativo — a diferencia del
- * ancho de los puntos del carrusel (ver CarruselPromos.js), aquí no hay
- * ningún borderRadius que un `transform` pueda deformar.
- */
+// Entrada escalonada al aparecer, calcada de `.card-in` en index.css: un fundido con un empujón de
+// 8px hacia arriba, 260ms, con la MISMA fórmula de retraso por posición (45ms por tarjeta, tope de
+// 8) para que la cuadrícula entre en cascada y no de golpe.
 const DURACION_ENTRADA = 260;
 const RETRASO_POR_TARJETA = 45;
 const TOPE_RETRASO = 8;
@@ -85,12 +61,9 @@ const TarjetaProducto = ({ producto, alVerDetalle, alAgregar, indice = 0 }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /*
-   * Candado +18: si el producto es restringido y todavía no se confirmó la
-   * edad EN NINGÚN LADO de la app (esto es un solo interruptor global, no
-   * uno por producto), la foto se tapa y cada intento —ver o agregar— pasa
-   * antes por pedirConfirmacion. Igual que ProductCard.jsx en la web.
-   */
+  // Candado +18: si el producto es restringido y todavía no se confirmó la edad EN NINGÚN LADO de la
+  // app (esto es un solo interruptor global, no uno por producto), la foto se tapa y cada intento
+  // —ver o agregar— pasa antes por pedirConfirmacion. Igual que ProductCard.jsx en la web.
   const { mayorConfirmado, pedirConfirmacion } = useEdad();
   const tapado = esSoloAdultos(producto) && !mayorConfirmado;
 
@@ -135,12 +108,9 @@ const TarjetaProducto = ({ producto, alVerDetalle, alAgregar, indice = 0 }) => {
         {producto.imagen && !fallóImagen ? (
           <Image
             source={{ uri: foto(producto.imagen, ANCHO.tarjeta) }}
-            /*
-             * `contain` y no `cover`: con cover se recorta lo que sobra para
-             * llenar la caja, y a una foto vertical le come la mitad. Las fotos
-             * vienen de mil tamaños distintos (unas del proveedor, otras del
-             * celular), así que ninguna caja fija les queda bien a todas.
-             */
+            // `contain` y no `cover`: con cover se recorta lo que sobra para llenar la caja, y a una foto
+            // vertical le come la mitad. Las fotos vienen de mil tamaños distintos (unas del proveedor, otras
+            // del celular), así que ninguna caja fija les queda bien a todas.
             contentFit="contain"
             style={estilos.imagen}
             onError={() => setFallóImagen(true)}
@@ -149,11 +119,9 @@ const TarjetaProducto = ({ producto, alVerDetalle, alAgregar, indice = 0 }) => {
           <Paquete size={38} />
         )}
 
-        {/*
-          La web tapa con un desenfoque (backdrop-filter: blur); aquí un panel
-          oscuro semitransparente hace el mismo trabajo —esconder la foto
-          hasta confirmar— sin traer expo-blur solo para este candado.
-        */}
+        {/* La web tapa con un desenfoque (backdrop-filter: blur); aquí un panel oscuro semitransparente
+           hace el mismo trabajo —esconder la foto hasta confirmar— sin traer expo-blur solo para este
+           candado. */}
         {tapado && (
           <View style={estilos.coberturaEdad}>
             <Lock size={18} color="#FFFFFF" />
@@ -163,23 +131,17 @@ const TarjetaProducto = ({ producto, alVerDetalle, alAgregar, indice = 0 }) => {
         )}
       </View>
 
-      {/*
-        El sello va anclado a la TARJETA y no al marco de la foto: dentro del
-        marco, el relleno lo empujaría hacia adentro y quedaría flotando en
-        medio de la imagen.
-      */}
+      {/* El sello va anclado a la TARJETA y no al marco de la foto: dentro del marco, el relleno lo
+         empujaría hacia adentro y quedaría flotando en medio de la imagen. */}
       {sello && (
         <View style={[estilos.sello, { backgroundColor: colores.marca }]}>
           <Text style={estilos.selloTexto} numberOfLines={1}>{sello}</Text>
         </View>
       )}
 
-      {/*
-        El corazón. Mide 32 y se toca con `hitSlop` hasta 44: el diseño pide
-        que sea discreto —no puede robarle protagonismo a la foto— pero un
-        pulgar necesita 44, y fallarlo aquí no es inocente, porque el toque
-        cae en la tarjeta y abre el producto en vez de marcar el favorito.
-      */}
+      {/* El corazón. Mide 32 y se toca con `hitSlop` hasta 44: el diseño pide que sea discreto —no puede
+         robarle protagonismo a la foto— pero un pulgar necesita 44, y fallarlo aquí no es inocente,
+         porque el toque cae en la tarjeta y abre el producto en vez de marcar el favorito. */}
       <Pressable
         onPress={() => alternar(producto.id, producto.nombre)}
         hitSlop={6}
@@ -200,10 +162,8 @@ const TarjetaProducto = ({ producto, alVerDetalle, alAgregar, indice = 0 }) => {
 
         <View style={estilos.filaNombre}>
           <Text style={estilos.nombre} numberOfLines={2}>{producto.nombre}</Text>
-          {/*
-            El +18 pegado al nombre: es una condición para comprarlo, no un
-            adorno. Mejor enterarse aquí que en la puerta de la casa.
-          */}
+          {/* El +18 pegado al nombre: es una condición para comprarlo, no un adorno. Mejor enterarse aquí que
+             en la puerta de la casa. */}
           {esSoloAdultos(producto) && (
             <View style={estilos.marca18}>
               <Text style={estilos.marca18Texto}>+18</Text>
@@ -211,11 +171,9 @@ const TarjetaProducto = ({ producto, alVerDetalle, alAgregar, indice = 0 }) => {
           )}
         </View>
 
-        {/*
-          Solo se avisa cuando se está acabando o cuando ya no hay. Poner
-          "100 disponibles" en cada tarjeta le enseña el inventario al cliente
-          sin que le sirva de nada; lo que sí lo mueve es saber que quedan pocas.
-        */}
+        {/* Solo se avisa cuando se está acabando o cuando ya no hay. Poner "100 disponibles" en cada
+           tarjeta le enseña el inventario al cliente sin que le sirva de nada; lo que sí lo mueve es saber
+           que quedan pocas. */}
         {producto.stock === 0 ? (
           <Text style={estilos.stock}>{t('Agotado')}</Text>
         ) : bajoStock ? (
@@ -227,11 +185,8 @@ const TarjetaProducto = ({ producto, alVerDetalle, alAgregar, indice = 0 }) => {
             {!!producto.precioAnterior && (
               <Text style={estilos.precioViejo}>${Number(producto.precioAnterior).toFixed(2)}</Text>
             )}
-            {/*
-              El "/lb" pegado al precio y no en un renglón aparte: es parte del
-              precio, no un dato adicional. Sin él, "$1.25" en un tomate se lee
-              como lo que cuesta ese tomate. Ver utils/unidades.js.
-            */}
+            {/* El "/lb" pegado al precio y no en un renglón aparte: es parte del precio, no un dato adicional.
+               Sin él, "$1.25" en un tomate se lee como lo que cuesta ese tomate. Ver utils/unidades.js. */}
             <Text style={estilos.precio} numberOfLines={1}>
               ${Number(producto.precio).toFixed(2)}
               {esPorLibra(producto) && <Text style={estilos.porUnidad}>/lb</Text>}
@@ -239,15 +194,9 @@ const TarjetaProducto = ({ producto, alVerDetalle, alAgregar, indice = 0 }) => {
             {!!contenido && <Text style={estilos.contenido}>{contenido}</Text>}
           </View>
 
-          {/*
-            El botón es NEGRO, no café: el acento de la marca es el café, y el
-            negro hace que la acción de agregar resalte sobre él en vez de
-            competirle.
-
-            `hitSlop` es el equivalente del rectángulo invisible que la web le
-            pone con un pseudo-elemento: el cuadro se ve de 38 y se toca de 48.
-            Errarle a este botón cuesta una venta.
-          */}
+          {/* El botón es NEGRO, no café: el acento de la marca es el café, y el negro hace que la acción de
+             agregar resalte sobre él en vez de competirle. `hitSlop` es el equivalente del rectángulo
+             invisible que la web le pone con un pseudo-elemento: el cuadro se ve de 38 y se toca de 48. */}
           <Pressable
             onPress={alTocarAgregar}
             disabled={producto.stock === 0}
@@ -276,28 +225,18 @@ const crearEstilos = (COLORES) => StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORES.linea,
     overflow: 'hidden',
-    /*
-     * `width: '100%'` y NO `flex: 1`, aunque flex sea lo que uno escribe.
-     *
-     * Quien manda el ancho es la celda que la envuelve —flexible en la
-     * cuadrícula, fija de 160 en la fila de "Más vendidos"— y la tarjeta solo
-     * lo llena. Con `flex: 1` aquí, dentro de la celda de ancho fijo la
-     * tarjeta pasa a tener flexBasis 0: la celda no tiene alto propio, calcula
-     * el suyo sumando lo que aportan sus hijos, y ese 0 le deja alto CERO. La
-     * fila entera se veía como una franja vacía.
-     */
+    // `width: '100%'` y NO `flex: 1`, aunque flex sea lo que uno escribe. Quien manda el ancho es la
+    // celda que la envuelve —flexible en la cuadrícula, fija de 160 en la fila de "Más vendidos"— y la
+    // tarjeta solo lo llena.
     width: '100%',
   },
   tarjetaPresionada: {
     transform: [{ scale: 0.98 }],
     borderColor: COLORES.lineaCard,
   },
-  /*
-   * El marco de la foto: un panel redondeado DENTRO de la tarjeta, con aire
-   * alrededor. No es adorno — le da a cada producto el mismo escenario. Con
-   * fotos de proveedores distintos la fila se veía despareja; encuadradas
-   * todas igual, la vista compara productos en vez de tropezar con las fotos.
-   */
+  // El marco de la foto: un panel redondeado DENTRO de la tarjeta, con aire alrededor. No es adorno
+  // — le da a cada producto el mismo escenario. Con fotos de proveedores distintos la fila se veía
+  // despareja; encuadradas todas igual, la vista compara productos en vez de tropezar con las fotos.
   marcoImagen: {
     backgroundColor: COLORES.papelGris,
     height: 130,
@@ -397,12 +336,9 @@ const crearEstilos = (COLORES) => StyleSheet.create({
     lineHeight: 17,
     flexShrink: 1,
   },
-  /*
-   * El +18 va en el rojo de los avisos y no en el café de la marca: no es una
-   * característica que se presume, es una condición para poder comprarlo.
-   * Fijo también en oscuro: con el texto blanco encima, el rojo aclarado del
-   * modo oscuro ya no se lee.
-   */
+  // El +18 va en el rojo de los avisos y no en el café de la marca: no es una característica que se
+  // presume, es una condición para poder comprarlo. Fijo también en oscuro: con el texto blanco
+  // encima, el rojo aclarado del modo oscuro ya no se lee.
   marca18: {
     backgroundColor: '#FF4D4F',
     borderRadius: 999,
@@ -470,12 +406,9 @@ const crearEstilos = (COLORES) => StyleSheet.create({
     backgroundColor: COLORES.oscuro ? '#FFFFFF' : '#000000',
     transform: [{ scale: 0.95 }],
   },
-  /*
-   * El "+" de un producto agotado va GRIS, no en el café apagado de la marca.
-   * Ese café es el del botón deshabilitado de las pantallas de sesión, y en
-   * una tienda pintada de verde por Navidad un botón marrón no se lee como
-   * "apagado": se lee como un color suelto que nadie eligió.
-   */
+  // El "+" de un producto agotado va GRIS, no en el café apagado de la marca. Ese café es el del
+  // botón deshabilitado de las pantallas de sesión, y en una tienda pintada de verde por Navidad un
+  // botón marrón no se lee como "apagado": se lee como un color suelto que nadie eligió.
   botonMasApagado: {
     backgroundColor: COLORES.tintaApagada,
   },

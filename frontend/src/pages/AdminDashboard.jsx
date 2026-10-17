@@ -19,12 +19,9 @@ import { productService } from '../api/productService';
 import { modalTransition, overlayTransition, modalInitial, modalAnimate } from '../utils/motion';
 import { formatearFecha } from '../utils/fechas';
 
-/*
- * AdminDashboard — el resumen operativo de la tienda, con datos REALES.
- * La idea no es lucir números bonitos, sino decir qué hay que hacer hoy:
- * qué reponer, qué caduca, qué preparar y qué ya no se vende.
- * Toda la carga vive en useDashboard; aquí solo pintamos.
- */
+// AdminDashboard — el resumen operativo de la tienda, con datos REALES. La idea no es lucir
+// números bonitos, sino decir qué hay que hacer hoy: qué reponer, qué caduca, qué preparar y qué
+// ya no se vende. Toda la carga vive en useDashboard; aquí solo pintamos.
 
 const PERIODOS = [
   { id: 'semana', label: 'Semana' },
@@ -37,11 +34,9 @@ const fechaLarga = () =>
 
 const money = (n) => `$${Number(n || 0).toFixed(2)}`;
 
-/*
- * Formato corto para el eje de la gráfica: con montos reales de una tienda de
- * barrio ($152) se ve el número tal cual; si algún día crece a miles, se abrevia
- * ($1.2k) para que el eje no se amontone.
- */
+// Formato corto para el eje de la gráfica: con montos reales de una tienda de barrio ($152) se ve
+// el número tal cual; si algún día crece a miles, se abrevia ($1.2k) para que el eje no se
+// amontone.
 const ejeMoneda = (v) => {
   const n = Number(v) || 0;
   if (Math.abs(n) >= 1000) return `$${(n / 1000).toFixed(1)}k`;
@@ -79,13 +74,9 @@ const AdminDashboard = () => {
   // Los datos de la tienda para el encabezado de los reportes (Personalización).
   const { ajustes } = useAjustesCtx();
 
-  /*
-   * ── Reporte "Resumen de la tienda" ──
-   * Pide el resumen DE VERDAD para el periodo elegido en el modal —semanal,
-   * mensual o anual—, así que el PDF trae esos números aunque en pantalla se
-   * esté viendo otro. El documento lo arma utils/reportesTienda.js, con el
-   * mismo formato que el reporte predictivo.
-   */
+  // ── Reporte "Resumen de la tienda" ── Pide el resumen DE VERDAD para el periodo elegido en el
+  // modal —semanal, mensual o anual—, así que el PDF trae esos números aunque en pantalla se esté
+  // viendo otro.
   const handleDescargarResumen = async () => {
     setDescargando(true);
     try {
@@ -102,11 +93,8 @@ const AdminDashboard = () => {
     }
   };
 
-  /*
-   * ── Reporte "Inventario completo" ──
-   * Todo el catálogo activo con precio, costo, margen y existencia —sin
-   * imágenes: es para leer o imprimir—, por categoría y en horizontal.
-   */
+  // ── Reporte "Inventario completo" ── Todo el catálogo activo con precio, costo, margen y
+  // existencia —sin imágenes: es para leer o imprimir—, por categoría y en horizontal.
   const handleDescargarInventario = async () => {
     setDescargandoInventario(true);
     try {
@@ -153,11 +141,9 @@ const AdminDashboard = () => {
       sub: 'Trabajos de impresión sin entregar',
       accion: () => navigate('/pedidos'),
     },
-    /*
-      Mismo umbral y mismo tono que el banner de Proveedores: lo vencido
-      manda (rojo, urge) y si no hay nada vencido pero sí hay deuda, se
-      avisa en un tono más tranquilo. Sin deuda, la alerta ni aparece.
-    */
+    // Mismo umbral y mismo tono que el banner de Proveedores: lo vencido manda (rojo, urge) y si no
+    // hay nada vencido pero sí hay deuda, se avisa en un tono más tranquilo. Sin deuda, la alerta ni
+    // aparece.
     ...(creditoTotales.deuda > 0 ? [{
       icon: Wallet,
       color: creditoTotales.vencido > 0 ? '#dc2626' : '#7c3aed',
@@ -192,11 +178,7 @@ const AdminDashboard = () => {
           extra={<Variacion valor={data.pedidosHoy.variacion} />} />
         <StatCard title="Entregados (7 días)" value={data.entregados.valor}
           extra={<Variacion valor={data.entregados.variacion} sufijo="vs semana pasada" />} />
-        {/*
-          Antes acá decía "Ganancia" pero mostraba los ingresos a secas, sin
-          restar lo que costaron los productos. Ahora son tres números: lo que
-          entró, lo que costó y lo que quedó.
-        */}
+        {/* Tres números: lo que entró, lo que costó y lo que quedó de ganancia. */}
         <StatCard title="Ingresos del día" value={money(data.ingresos?.valor ?? 0)}
           extra={<Variacion valor={data.ingresos?.delta ?? 0} esDinero />} />
         <StatCard title="Por reponer" value={data.porReponer.total}
@@ -252,12 +234,9 @@ const AdminDashboard = () => {
 
       {/* ── Gráfica + alertas ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/*
-          min-w-0 en la caja de la gráfica: el ResponsiveContainer mide a su
-          padre para saber cuánto ancho tiene, y sin esto el padre se estiraba
-          hasta el ancho que la gráfica pedía en vez de al revés. La página
-          entera terminaba corriéndose de lado en teléfono.
-        */}
+        {/* min-w-0 en la caja de la gráfica: el ResponsiveContainer mide a su padre para saber cuánto ancho
+           tiene, y sin esto el padre se estiraba hasta el ancho que la gráfica pedía en vez de al revés.
+           La página entera terminaba corriéndose de lado en teléfono. */}
         <div className="lg:col-span-2 min-w-0 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <h3 className="text-xl font-bold text-gray-800">Ventas y compras</h3>
@@ -281,13 +260,8 @@ const AdminDashboard = () => {
             <p className="text-sm text-gray-500 py-24 text-center">Todavía no hay ventas ni compras en este periodo.</p>
           ) : (
             <ResponsiveContainer width="100%" height={280}>
-              {/*
-                Antes eran barras: con un mes disparado y el resto casi en
-                cero, las barras chicas quedaban invisibles al lado de la
-                grande. La línea conecta los mismos puntos y cada uno sigue
-                siendo legible (con su punto y su tooltip) sin importar qué
-                tan chico sea frente al vecino.
-              */}
+              {/* Gráfica de línea: cada mes se ve con su punto y su tooltip aunque uno se dispare y los demás
+                 queden casi en cero. */}
               <LineChart data={grafica} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
                 {/* La cuadrícula con el borde de la paleta: gris claro fijo, en Modo oscuro brillaba. */}
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={c.cardBorder} />
@@ -299,12 +273,9 @@ const AdminDashboard = () => {
                 />
                 <Legend />
                 {/* Colores tomados de la paleta activa, no fijos */}
-                {/*
-                  type="linear" (recta entre puntos), no "monotone": con
-                  meses en cero seguidos de un pico, una curva suavizada
-                  insinúa un crecimiento gradual que nunca pasó. La recta
-                  cuenta solo lo que hay, sin inventar el tramo de en medio.
-                */}
+                {/* type="linear" (recta entre puntos), no "monotone": con meses en cero seguidos de un pico, una
+                   curva suavizada insinúa un crecimiento gradual que nunca pasó. La recta cuenta solo lo que hay,
+                   sin inventar el tramo de en medio. */}
                 <Line type="linear" dataKey="ventas" name="Ventas" stroke={c.primary} strokeWidth={2}
                   dot={{ r: 4, fill: c.primary, strokeWidth: 2, stroke: c.cardBg }}
                   activeDot={{ r: 6, fill: c.primary, strokeWidth: 2, stroke: c.cardBg }} />
@@ -351,12 +322,9 @@ const AdminDashboard = () => {
         {data.masVendidos.length === 0 ? (
           <p className="text-sm text-gray-500">Aún no hay ventas registradas.</p>
         ) : (
-          /*
-            Seis columnas no caben en un teléfono y no hay forma de que quepan.
-            En vez de dejar que estiren la página, la tabla se corre de lado
-            DENTRO de su caja: lo que no cabe se busca deslizando aquí, y el
-            resto del panel se queda quieto.
-          */
+          // Seis columnas no caben en un teléfono y no hay forma de que quepan. En vez de dejar que estiren
+          // la página, la tabla se corre de lado DENTRO de su caja: lo que no cabe se busca deslizando aquí,
+          // y el resto del panel se queda quieto.
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <table className="w-full min-w-[680px]">
               <thead>

@@ -3,13 +3,9 @@ import orderModel from "../models/order.js";
 
 const reviewController = {};
 
-/*
- * Las valoraciones de un producto, con el resumen que necesita la ficha:
- * promedio, total y cuántas hay de cada estrella.
- *
- * Devuelve siempre la misma forma aunque no haya ninguna: así la pantalla
- * pinta "todavía nadie opinó" en vez de romperse buscando un promedio.
- */
+// Las valoraciones de un producto, con el resumen que necesita la ficha: promedio, total y cuántas
+// hay de cada estrella. Devuelve siempre la misma forma aunque no haya ninguna: así la pantalla
+// pinta "todavía nadie opinó" en vez de romperse buscando un promedio.
 reviewController.getByProduct = async (req, res) => {
   try {
     const reviews = await reviewModel
@@ -35,13 +31,9 @@ reviewController.getByProduct = async (req, res) => {
   }
 };
 
-/*
- * Crear o actualizar la valoración del cliente.
- *
- * Se exige haber comprado el producto. Es la diferencia entre una reseña que
- * significa algo y un formulario que cualquiera puede llenar: sin esta
- * comprobación, la competencia (o el dueño) puede escribir lo que quiera.
- */
+// Crear o actualizar la valoración del cliente. Se exige haber comprado el producto. Es la
+// diferencia entre una reseña que significa algo y un formulario que cualquiera puede llenar: sin
+// esta comprobación, la competencia (o el dueño) puede escribir lo que quiera.
 reviewController.upsert = async (req, res) => {
   try {
     const { productId, clientId, rating, comment } = req.body;

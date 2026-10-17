@@ -4,29 +4,8 @@ import { tiquiPanelService } from '../api/tiquiPanelService';
 import { decirConTiqui, callarTiqui, paraDecir } from '../utils/vozTiqui';
 import { avisarCambioDeTiqui } from '../utils/cambiosDeTiqui';
 
-/*
- * ============================================================
- * TIQUI DEL PANEL — la conversación (useTiquiPanel.js)
- * ============================================================
- * La asistente del equipo, la que flota en la esquina del panel. Es OTRA
- * asistente que la de la tienda (useVoiceAssistant) y no comparte con ella
- * ni el estado ni la memoria: su charla vive aquí y se va con el panel.
- * Solo usan lo mismo para la voz (utils/vozTiqui.js).
- *
- * Cómo se conversa:
- *   - Tocarla la despierta y se pone a escuchar. Contesta hablando, y en
- *     cuanto termina vuelve a escuchar, por si hay otra pregunta ("¿y
- *     ayer?"). Si nadie dice nada dos veces seguidas, se queda quieta con su
- *     última respuesta en el globo.
- *   - También se le puede escribir: en una oficina con gente, o en un
- *     navegador sin reconocimiento de voz. Escribiéndole no se pone a
- *     escuchar después: quien escribe quiere seguir escribiendo.
- *   - Tocarla mientras habla la interrumpe y escucha de una vez.
- *
- * Lo que contesta puede traer una pantalla a abrir (los pedidos por preparar,
- * la leche en el inventario): se navega aquí, sin recargar, y la charla sigue.
- * ============================================================
- */
+// TIQUI DEL PANEL — la conversación (useTiquiPanel.js)
+// La asistente del equipo, la que flota en la esquina del panel.
 
 const SILENCIOS_ANTES_DE_DESCANSAR = 2;
 const REINTENTO_SILENCIO_MS = 900;
@@ -41,11 +20,9 @@ const SIN_RESPUESTA = {
 };
 const NO_ENTENDI = 'No te entendí bien. ¿Me lo repites?';
 
-/*
- * Cuando Tiqui propuso un cambio ("¿Lo hago?"), un "sí" o un "no" cortos lo
- * contestan sin pasar por la IA. Cortos a propósito: "sí, pero ponlo a $8"
- * no es un sí a lo de antes, es otro pedido, y va a la IA como cualquier frase.
- */
+// Cuando Tiqui propuso un cambio ("¿Lo hago?"), un "sí" o un "no" cortos lo contestan sin pasar
+// por la IA. Cortos a propósito: "sí, pero ponlo a $8" no es un sí a lo de antes, es otro pedido,
+// y va a la IA como cualquier frase.
 const plano = (t) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
   .replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
 const ES_SI = /^(si|sip|dale|hazlo|confirmo|confirmado|confirma|ok|okay|va|claro|adelante|de acuerdo|correcto|asi es|simon|sale|por favor)( .*)?$/;
@@ -293,13 +270,9 @@ export const useTiquiPanel = () => {
     tiquiPanelService.despertar().then(({ voz, consejo }) => {
       vozTiquiRef.current = voz;
       setVozTiqui(voz);
-      /*
-       * El consejo de ventas (solo al administrador, y solo si hay algo que lo
-       * amerite: una promo que deja pérdida, algo que caduca). Va como lo
-       * primero que dice Tiqui, en lugar del saludo, y queda en la charla para
-       * que un "sí, ajústala" sepa de qué se habla. Sin voz: al abrirla ya
-       * está escuchando, y hablar encima cortaría a quien empezó a decir algo.
-       */
+      // El consejo de ventas (solo al administrador, y solo si hay algo que lo amerite: una promo que
+      // deja pérdida, algo que caduca). Va como lo primero que dice Tiqui, en lugar del saludo, y queda
+      // en la charla para que un "sí, ajústala" sepa de qué se habla.
       if (consejo && !memoriaRef.current.length) {
         memoriaRef.current = [{ quien: 'tiqui', texto: consejo }];
         setMensajes([{ id: idRef.current++, quien: 'tiqui', texto: consejo }]);

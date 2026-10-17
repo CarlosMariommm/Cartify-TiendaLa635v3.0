@@ -4,27 +4,9 @@ import DisfrazTiqui from './DisfrazTiqui';
 import { useDisfrazTiqui } from '../../hooks/useDisfrazTiqui';
 import { sinSombrero } from '../../utils/disfracesTiqui';
 
-/*
- * ============================================================
- * MASCOTA COLGADA — MascotaColgada.jsx
- * ============================================================
- * La etiqueta colgando de la página en el inicio de sesión: el cordón baja
- * desde la línea del encabezado, agarrado con un broche, y la etiqueta se
- * mece despacio. No flota en el aire: cuelga de algo, como en un estante.
- *
- * Y está pendiente de lo que uno hace en el formulario:
- *   mirada 'formulario' — mira hacia el formulario.
- *   mirada 'correo'     — sigue lo que se va escribiendo (`progreso`, de 0 a 1).
- *   mirada 'tapada'     — con la contraseña escondida cierra los ojos (y se
- *                         sonroja): no está mirando.
- *   mirada 'espia'      — con la contraseña a la vista espía con un ojo.
- *   estado 'entrando'   — se mece más rápido mientras se inicia la sesión.
- *   estado 'error'      — niega con la cabeza: algo no cuadró.
- *
- * Los colores son los mismos tokens de Mascota.jsx (se voltea sola en modo
- * oscuro) y los movimientos viven en index.css, sección MASCOTA COLGADA.
- * ============================================================
- */
+// MASCOTA COLGADA — MascotaColgada.jsx
+// La etiqueta colgando de la página en el inicio de sesión: el cordón baja desde la línea del
+// encabezado, agarrado con un broche, y la etiqueta se mece despacio.
 
 // Cuánto cordón hay entre el broche y la punta de la etiqueta (unidades del dibujo).
 const LARGO = 140;

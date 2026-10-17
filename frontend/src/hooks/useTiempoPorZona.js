@@ -2,30 +2,12 @@ import { useState, useEffect } from 'react';
 import { orderService } from '../api/orderService';
 import { useIdioma } from './useIdioma';
 
-/*
- * ============================================================
- * TIEMPO POR ZONA — useTiempoPorZona.js
- * ============================================================
- * Cuánto tardamos en llegar a SU zona, calculado con las entregas que ya
- * hicimos por ahí.
- *
- * Todas las tiendas prometen "30 a 45 minutos" y ese rango no sale de ningún
- * dato: es lo que suena razonable. Nosotros ya tenemos con qué responder de
- * verdad, y decirlo con el número de entregas en que se basa ("según 8
- * entregas a su zona") es lo que separa un dato de una promesa de vendedor.
- *
- * Cuando todavía no hay historial suficiente, este hook devuelve
- * `hayDatos: false` y la pantalla no dice nada. Inventar un tiempo para
- * llenar el hueco sería exactamente lo que estamos tratando de no hacer.
- * ============================================================
- */
+// TIEMPO POR ZONA — useTiempoPorZona.js
+// Cuánto tardamos en llegar a SU zona, calculado con las entregas que ya hicimos por ahí.
 export const useTiempoPorZona = (lat, lng) => {
-  /*
-   * El punto va DENTRO de la respuesta guardada. Así, al cambiar de
-   * dirección, lo de la anterior se descarta al comparar en vez de tener que
-   * limpiarlo con un setState dentro del efecto (que provoca un render de
-   * más y deja ver por un instante el tiempo de la otra zona).
-   */
+  // El punto va DENTRO de la respuesta guardada. Así, al cambiar de dirección, lo de la anterior se
+  // descarta al comparar en vez de tener que limpiarlo con un setState dentro del efecto (que
+  // provoca un render de más y deja ver por un instante el tiempo de la otra zona).
   const clave = lat != null && lng != null ? `${lat},${lng}` : null;
   const [datos, setDatos] = useState(null);
   const { t } = useIdioma();
@@ -52,11 +34,9 @@ export const useTiempoPorZona = (lat, lng) => {
   const actual = clave && datos?.clave === clave ? datos : null;
   const cargando = !!clave && !actual;
 
-  /*
-   * El texto ya armado, para que las pantallas no repitan la misma frase
-   * cada una a su manera. Se habla en rango (típico → holgado) porque un
-   * número solo se lee como promesa, y el tráfico no lo controlamos.
-   */
+  // El texto ya armado, para que las pantallas no repitan la misma frase cada una a su manera. Se
+  // habla en rango (típico → holgado) porque un número solo se lee como promesa, y el tráfico no lo
+  // controlamos.
   const texto = actual?.hayDatos
     ? (actual.tipico === actual.holgado
         ? t('Llega en unos {n} min', { n: actual.tipico })

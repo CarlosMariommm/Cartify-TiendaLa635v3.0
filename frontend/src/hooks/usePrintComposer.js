@@ -1,33 +1,14 @@
 import { useState, useRef, useCallback, useMemo } from 'react';
 
-/*
- * usePrintComposer — el "cerebro" del editor de impresiones.
- *
- * La hoja es SIEMPRE tamaño carta (o el formato elegido, si es más grande que
- * una carta — un póster no cabe tiled). Adentro se traza una CUADRÍCULA de
- * celdas del tamaño exacto del formato elegido (10×10, pasaporte, lo que
- * sea): tantas columnas y filas como quepan. Cada foto que se sube va a la
- * siguiente celda vacía y la llena por completo — se recorta lo que sobre,
- * nunca queda una foto chica flotando en una hoja enorme.
- *
- * ANTES el editor era de posición libre: se subía una foto y quedaba del
- * tamaño de la HOJA (10×10 si el formato era 10×10), así que imprimir tres
- * fotitos de carnet gastaba tres hojas enteras. Ahora esas tres fotos caen en
- * tres celdas de la MISMA hoja carta, como en una tira de fotomatón.
- *
- * Soporta VARIAS PÁGINAS: al llenarse la cuadrícula de una, la siguiente foto
- * abre una página nueva sola.
- *
- * Al exportar sale un PDF (jsPDF), con el tamaño real de la hoja en cm.
- */
+// usePrintComposer — el "cerebro" del editor de impresiones. La hoja es SIEMPRE tamaño carta (o el
+// formato elegido, si es más grande que una carta — un póster no cabe tiled).
 
 const DPI = 300;             // calidad de impresión
 const MAX_LADO_PX = 4000;    // tope para que una hoja grande no reviente la memoria
 
-// Papel carta: el que carga la impresora cuando el formato elegido es más
-// chico que una hoja entera (10×10, pasaporte...). Un formato más grande que
-// esto (un póster) manda su propio tamaño: no tiene sentido "tilear" algo que
-// ya es más grande que el papel de siempre.
+// Papel carta: el que carga la impresora cuando el formato elegido es más chico que una hoja
+// entera (10×10, pasaporte...). Un formato más grande que esto (un póster) manda su propio tamaño:
+// no tiene sentido "tilear" algo que ya es más grande que el papel de siempre.
 const CARTA_ANCHO_CM = 21.6;
 const CARTA_ALTO_CM = 27.9;
 
@@ -41,12 +22,9 @@ const cargarImagen = (src) =>
   });
 
 export const usePrintComposer = ({ widthCm = 21.6, heightCm = 27.9 } = {}) => {
-  /*
-   * La cuadrícula: cuántas celdas de `widthCm × heightCm` caben en una hoja
-   * carta. Un formato más grande que la carta en cualquier lado se queda con
-   * SU propio tamaño de hoja y una sola celda — así un póster de 40×60 sigue
-   * ocupando su hoja completa, como antes.
-   */
+  // La cuadrícula: cuántas celdas de `widthCm × heightCm` caben en una hoja carta. Un formato más
+  // grande que la carta en cualquier lado se queda con SU propio tamaño de hoja y una sola celda —
+  // así un póster de 40×60 sigue ocupando su hoja completa, como antes.
   const { columnas, filas, celdasPorHoja, hojaAnchoCm, hojaAltoCm } = useMemo(() => {
     const cabeEnCarta = widthCm <= CARTA_ANCHO_CM && heightCm <= CARTA_ALTO_CM;
     const anchoHoja = cabeEnCarta ? CARTA_ANCHO_CM : widthCm;
@@ -65,17 +43,8 @@ export const usePrintComposer = ({ widthCm = 21.6, heightCm = 27.9 } = {}) => {
   const idRef = useRef(100);
   const nuevoId = () => ++idRef.current;
 
-  /*
-   * Si cambia el formato (otro `widthCm`/`heightCm`, ej. el cliente elige
-   * "10x10" después de haber estado en "Carta"), la cuadrícula cambia de
-   * forma y las páginas viejas se vuelven a empezar.
-   *
-   * Sin esto, la primera página se quedaba con el tamaño de cuando el
-   * composer se montó por primera vez —`useState` solo lee su valor inicial
-   * UNA vez, en el montaje— y las páginas siguientes sí usaban el tamaño
-   * nuevo: la hoja 1 tenía una sola celda y la 2 en adelante tenían cuatro,
-   * así que las fotos se repartían torcido y sobraban páginas.
-   */
+  // Si cambia el formato (otro `widthCm`/`heightCm`, ej. el cliente elige "10x10" después de haber
+  // estado en "Carta"), la cuadrícula cambia de forma y las páginas viejas se vuelven a empezar.
   const [celdasPorHojaAnterior, setCeldasPorHojaAnterior] = useState(celdasPorHoja);
   if (celdasPorHojaAnterior !== celdasPorHoja) {
     setCeldasPorHojaAnterior(celdasPorHoja);
@@ -84,17 +53,8 @@ export const usePrintComposer = ({ widthCm = 21.6, heightCm = 27.9 } = {}) => {
     setSeleccionado(null);
   }
 
-  // Agrega imágenes: cada una cae en la SIGUIENTE celda vacía, empezando por
-  // la página activa. Si no queda ninguna, se abren páginas nuevas solas.
-  /*
-   * El id de una página nueva se saca de `copia.length` (dónde va a quedar en
-   * el arreglo) y no de un contador aparte: en StrictMode React invoca dos
-   * veces la función que se le pasa a setPaginas para detectar justo esto —
-   * un efecto secundario ahí adentro (un contador que avanza, una URL de
-   * blob que se crea) se duplica en cada invocación y la hoja terminaba con
-   * el doble de páginas de las que tocaban. `copia.length` da el MISMO
-   * resultado las dos veces porque depende solo del estado de entrada.
-   */
+  // Agregar imágenes: cada una cae en la siguiente celda vacía y, si no queda ninguna, se abren
+  // páginas nuevas. El id de cada página sale de su posición, no de un contador.
   const idDePagina = (indice) => `pagina-${indice}`;
 
   // A dónde saltar después de acomodar: se calcula DENTRO del cálculo puro de
@@ -186,11 +146,9 @@ export const usePrintComposer = ({ widthCm = 21.6, heightCm = 27.9 } = {}) => {
     setSeleccionado(null);
   }, []);
 
-  /*
-   * Dibuja una página completa en un canvas a resolución de impresión. Cada
-   * celda se llena a lo "cubrir" (como object-fit: cover): se recorta lo que
-   * sobre del lado más largo, nunca queda un borde en blanco.
-   */
+  // Dibuja una página completa en un canvas a resolución de impresión. Cada celda se llena a lo
+  // "cubrir" (como object-fit: cover): se recorta lo que sobre del lado más largo, nunca queda un
+  // borde en blanco.
   const renderPagina = useCallback(async (pagina) => {
     const pxPorCm = DPI / 2.54;
     let W = Math.round(hojaAnchoCm * pxPorCm);
@@ -204,14 +162,7 @@ export const usePrintComposer = ({ widthCm = 21.6, heightCm = 27.9 } = {}) => {
       H = Math.round(H * escalaHoja);
     }
 
-    /*
-     * El tamaño de CADA celda en píxeles, calculado de su medida real en cm
-     * —no de W/columnas—. Dividir el ancho de la hoja entre las columnas
-     * estira cada celda para llenar hasta el último milímetro, y una celda
-     * de 10×10 en una hoja de 21.6×27.9 con 2 columnas y 2 filas quedaba de
-     * 10.8×13.95: un rectángulo, no el cuadrado que se pidió. Lo que sobra
-     * de la hoja se queda en blanco, como el margen de una hoja de verdad.
-     */
+    // El tamaño de CADA celda en píxeles, calculado de su medida real en cm —no de W/columnas—.
     const celdaWpx = widthCm * pxPorCm * escalaHoja;
     const celdaHpx = heightCm * pxPorCm * escalaHoja;
 

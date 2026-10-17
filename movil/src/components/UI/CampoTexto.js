@@ -1,16 +1,6 @@
-/*
- * ============================================================
- * CAMPO DE TEXTO — el input de la tienda, en nativo
- * ============================================================
- * En la web cada pantalla vuelve a declarar su `Label`, su `InputWrapper`, su
- * `IconWrapper` y su `Input` con styled-components. Son casi idénticos entre
- * LoginClient y Register, así que aquí se escriben una sola vez.
- *
- * Mantiene lo que importa del original: la etiqueta arriba, el icono metido
- * dentro del campo a la izquierda, el borde que se pone café al enfocar y rojo
- * al fallar, y el error en chiquito debajo.
- * ============================================================
- */
+// CAMPO DE TEXTO — el input de la tienda, en nativo
+// En la web cada pantalla vuelve a declarar su `Label`, su `InputWrapper`, su `IconWrapper` y su
+// `Input` con styled-components.
 
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -31,12 +21,9 @@ const CampoTexto = ({
   // rediseñado. Opcional para no mover el resto de formularios (Registro,
   // el DUI de ModalConfirmarEdad) que siguen con el campo cuadrado normal.
   redondo = false,
-  /*
-   * El recorrido con el teclado. `siguiente` es la ref del campo que viene:
-   * la tecla del teclado dice "Siguiente" y salta ahí sin cerrarse. En el
-   * último campo va `alEnviar`: la tecla dice "Listo" y manda el formulario.
-   * Sin esto había que cerrar el teclado y tocar cada campo a mano.
-   */
+  // El recorrido con el teclado. `siguiente` es la ref del campo que viene: la tecla del teclado
+  // dice "Siguiente" y salta ahí sin cerrarse. En el último campo va `alEnviar`: la tecla dice
+  // "Listo" y manda el formulario. Sin esto había que cerrar el teclado y tocar cada campo a mano.
   siguiente,
   alEnviar,
   // Se avisan hacia afuera sin pisar el borde de foco de aquí adentro
@@ -85,10 +72,9 @@ const CampoTexto = ({
             { borderColor: colorBorde },
             enfocado && !error && [estilos.campoEnfocado, { shadowColor: colores.marca }],
             esContrasena && estilos.campoConOjo,
-            // Un campo apagado (editable={false}) se ve apagado: sin esto
-            // parece que se puede escribir y no pasa nada al tocarlo. Lo usa
-            // el DUI de Mis datos, que espera a que la fecha de nacimiento
-            // diga que ya es mayor de edad.
+            // Un campo apagado (editable={false}) se ve apagado: sin esto parece que se puede escribir y no
+            // pasa nada al tocarlo. Lo usa el DUI de Mis datos, que espera a que la fecha de nacimiento diga
+            // que ya es mayor de edad.
             props.editable === false && estilos.campoApagado,
           ]}
           value={valor}
@@ -108,17 +94,9 @@ const CampoTexto = ({
           {...props}
         />
 
-        {/*
-         * El ojo para ver la contraseña. En un teclado de celular, escribir a
-         * ciegas una clave con mayúsculas y símbolos es la razón número uno de
-         * "no me deja entrar"; poder mirarla un segundo resuelve más que
-         * cualquier mensaje de error.
-         *
-         * Se usan `Eye`/`EyeOff` de lucide-react-native —los MISMOS iconos que
-         * la web (`Eye`/`EyeOff` de lucide-react)— para que el ojo quede
-         * idéntico. Cuando la contraseña está a la vista, el icono es el ojo
-         * tachado (para ocultarla).
-         */}
+        {/* El ojo para ver la contraseña. En un teclado de celular, escribir a ciegas una clave con
+           mayúsculas y símbolos es la razón número uno de "no me deja entrar"; poder mirarla un segundo
+           resuelve más que cualquier mensaje de error. */}
         {esContrasena && (
           <Pressable
             onPress={() => setVerTexto((v) => !v)}
@@ -160,18 +138,8 @@ const crearEstilos = (COLORES) => StyleSheet.create({
     position: 'relative',
     justifyContent: 'center',
   },
-  /*
-   * ── Por qué estos dos llevan `elevation` ──
-   *
-   * En Android `elevation` decide qué se dibuja encima, y le GANA a `zIndex`.
-   * El campo enfocado lleva `elevation: 1` (ver `campoEnfocado`, que es el halo
-   * del :focus de la web), así que al empezar a escribir el input se ponía por
-   * encima del icono; y como el input tiene fondo blanco opaco, se lo tragaba.
-   * El icono desaparecía justo al tocarlo y volvía al salir del campo.
-   *
-   * `zIndex` solo no alcanza: hay que subirlos por encima del 1 del campo.
-   * En iOS `elevation` se ignora y ordena el zIndex, así que no molesta.
-   */
+  // ── Por qué estos dos llevan `elevation` ──
+  // En Android `elevation` decide qué se dibuja encima, y le GANA a `zIndex`.
   icono: {
     position: 'absolute',
     left: 14,

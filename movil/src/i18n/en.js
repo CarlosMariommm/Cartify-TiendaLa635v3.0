@@ -1,23 +1,5 @@
-/*
- * ============================================================
- * LA APP EN INGLÉS — en.js
- * ============================================================
- * "Así en español" → "así en inglés". La clave es el texto exacto que sale
- * en la pantalla en español (ver utils/idioma.js): si en una pantalla cambia
- * el texto en español, aquí hay que cambiar la clave también, o esa frase
- * vuelve a salir en español (en desarrollo, la consola avisa).
- *
- * Arrancó como copia del de la web (frontend/src/i18n/en.js): muchas frases
- * son las mismas en los dos lados. Las de la app van al final, por pantalla.
- * Las dos copias no se comparten porque la app no puede importar de la web.
- *
- * Las llaves {n}, {nombre}… se reemplazan con el dato: van igual en los dos
- * idiomas. Ordenado por pantalla, como se recorre la tienda.
- *
- * El inglés es de Estados Unidos (es el que más se lee en la región) y trata
- * de "you" a todos: no hay "usted" ni "tú" que distinguir.
- * ============================================================
- */
+// LA APP EN INGLÉS — en.js
+// "Así en español" → "así en inglés".
 const EN = {
   // ── Preferencias ──
   'Preferencias': 'Preferences',

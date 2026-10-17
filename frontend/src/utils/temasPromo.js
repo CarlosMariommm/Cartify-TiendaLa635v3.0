@@ -1,17 +1,6 @@
-/*
- * ============================================================
- * TEMAS DE BANNER — temasPromo.js
- * ============================================================
- * Paletas listas para las promociones.
- *
- * Por qué paletas y no un selector de color libre: quien arma la promo es el
- * tendero, no un diseñador. Pedirle un código hexadecimal es pedirle que
- * adivine, y el resultado suele ser texto ilegible sobre un fondo chillón.
- * Con paletas elige "Café" o "Fresco" y el contraste ya está resuelto.
- *
- * Igual queda "Personalizado" para quien sepa lo que hace.
- * ============================================================
- */
+// TEMAS DE BANNER — temasPromo.js
+// Paletas listas para las promociones. Pedirle un código hexadecimal es pedirle que adivine, y el
+// resultado suele ser texto ilegible sobre un fondo chillón.
 
 export const TEMAS = [
   {
@@ -64,16 +53,9 @@ export const TEMAS = [
     muestra: '#EDE0CE',
   },
 
-  /*
-   * ── Fechas especiales ──
-   * Las temporadas son cuando más se vende y cuando menos tiempo hay para
-   * ponerse a elegir colores. Con estas, armar la promo de Navidad es un
-   * click en vez de pelearse con un selector de color un 20 de diciembre.
-   *
-   * Van marcadas con `festivo` para agruparlas aparte en el formulario: si se
-   * mezclaran con las de siempre, encontrar "Café" costaría el doble el resto
-   * del año.
-   */
+  // ── Fechas especiales ── Las temporadas son cuando más se vende y cuando menos tiempo hay para
+  // ponerse a elegir colores. Con estas, armar la promo de Navidad es un click en vez de pelearse
+  // con un selector de color un 20 de diciembre.
   {
     id: 'navidad',
     nombre: 'Navidad',
@@ -146,24 +128,14 @@ export const TEMAS_FESTIVOS = TEMAS.filter((t) => t.festivo);
 
 const POR_DEFECTO = TEMAS[0];
 
-/*
- * Devuelve los colores que hay que pintar. Si la promo eligió "personalizado"
- * usa los suyos; si no, los del tema. Siempre devuelve algo pintable, aunque
- * la promo venga incompleta de la base.
- *
- * `flecha` sale aparte del acento aunque casi siempre valga lo mismo: el
- * círculo de la flecha era el único color que no se podía tocar, y sobre
- * ciertos fondos se perdía.
- */
+// Devuelve los colores que hay que pintar. Si la promo eligió "personalizado" usa los suyos; si
+// no, los del tema. Siempre devuelve algo pintable, aunque la promo venga incompleta de la base.
 export const coloresDePromo = (promo) => {
   if (!promo) return { ...POR_DEFECTO, flecha: POR_DEFECTO.acento };
 
   if (promo.tema === 'personalizado' && promo.colorFondo) {
-    /*
-     * Dos colores de fondo = degradado propio, como los temas de fábrica.
-     * Con uno solo el personalizado se veía más pobre que los presets y
-     * nadie lo usaba.
-     */
+    // Dos colores de fondo = degradado propio, como los temas de fábrica. Con uno solo el
+    // personalizado se veía más pobre que los presets y nadie lo usaba.
     const fondo = promo.colorFondo2
       ? `linear-gradient(135deg, ${promo.colorFondo} 0%, ${promo.colorFondo2} 100%)`
       : promo.colorFondo;

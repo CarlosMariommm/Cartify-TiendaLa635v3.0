@@ -4,22 +4,9 @@ import { Image } from 'expo-image';
 import { DURACION_VUELO, terminarVuelo, useVuelosAlCarrito } from '../../utils/volarAlCarrito';
 import { foto, ANCHO } from '../../utils/fotos';
 
-/*
- * ============================================================
- * VUELO AL CARRITO — el dibujo del vuelo, en la raíz de la app
- * ============================================================
- * Va montado como el ÚLTIMO hermano de App.js (después de BurbujaPedido y
- * PedidoDetalleFlotante): mismo motivo que esos dos — en Android el
- * `elevation` compara distinto entre pantallas del stack (`react-native-
- * screens` monta cada una en su propio contenedor nativo), así que la foto
- * volando tiene que pintarse en el mismo árbol raíz para no quedar tapada
- * por la pantalla de la que sale. Ver el comentario grande de
- * `pedidoAbierto` en PedidoActivoContext.js para el porqué completo.
- *
- * Quién decide QUÉ vuela y HACIA DÓNDE vive en utils/volarAlCarrito.js; esto
- * solo pinta la lista de vuelos en curso con Animated.
- * ============================================================
- */
+// VUELO AL CARRITO — el dibujo del vuelo, en la raíz de la app
+// Pinta la foto que vuela al carrito por encima de todo; va de último en App.js porque en Android
+// la elevación no se compara entre pantallas.
 
 // Misma curva pareja que la capa exterior en la web (cubic-bezier(0.45,0,0.55,1)).
 const CURVA_TRASLADO = Easing.bezier(0.45, 0, 0.55, 1);
@@ -27,13 +14,9 @@ const CURVA_TRASLADO = Easing.bezier(0.45, 0, 0.55, 1);
 // el valor pasa brevemente por debajo de 0 antes de avanzar — eso dibuja el arco.
 const CURVA_VUELO = Easing.bezier(0.6, -0.4, 0.74, 0.05);
 
-/*
- * Dos relojes y no uno con dos curvas: el animador nativo no acepta `easing`
- * dentro de `interpolate` (en desarrollo lo avisaba en rojo con cada "+"), así
- * que la curva va en cada `timing` y los dos corren a la vez. `pareja` mueve
- * de lado; `arco` hace todo lo demás, y como su curva baja un poco de 0 antes
- * de avanzar, la foto sube un poco antes de caer hacia el carrito.
- */
+// Dos relojes y no uno con dos curvas: el animador nativo no acepta `easing` dentro de
+// `interpolate` (en desarrollo lo avisaba en rojo con cada "+"), así que la curva va en cada
+// `timing` y los dos corren a la vez.
 const Vuelo = ({ vuelo }) => {
   const { id, uri, origen, destino } = vuelo;
   const pareja = useRef(new Animated.Value(0)).current;

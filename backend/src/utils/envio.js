@@ -1,21 +1,6 @@
-/*
- * ============================================================
- * COSTO DE ENVÍO POR DISTANCIA — envio.js
- * ============================================================
- * Calcula cuánto cuesta llevar un pedido a una dirección. Sin APIs de pago ni
- * Google: la distancia se saca con la fórmula de haversine (dos coordenadas y
- * trigonometría), gratis y sin internet.
- *
- * El precio se decide de MÁS específico a MÁS general:
- *   1. Zona: si la dirección cae dentro de una zonaEnvio (un círculo con precio
- *      fijo), manda ese precio. Si cae en varias, gana la de radio más chico.
- *   2. Por km: envioBase + envioPorKm × distancia desde la tienda.
- *   3. Solo la base: si no se puede medir (falta la ubicación de la tienda o
- *      del cliente), se cobra envioBase y nada más. Antes aquí entraba una
- *      "tarifa plana de respaldo" aparte, que el panel ya no dejaba editar y
- *      aun así se seguía cobrando: un precio que nadie veía ni podía cambiar.
- * ============================================================
- */
+// COSTO DE ENVÍO POR DISTANCIA — envio.js
+// Calcula cuánto cuesta llevar un pedido a una dirección. Sin APIs de pago ni Google: la distancia
+// se saca con la fórmula de haversine (dos coordenadas y trigonometría), gratis y sin internet.
 
 const RADIO_TIERRA_KM = 6371;
 const rad = (g) => (g * Math.PI) / 180;
@@ -27,19 +12,8 @@ const esCoord = (v) => v !== null && v !== undefined && v !== "" && Number.isFin
 const hayCoord = (lat, lng) => esCoord(lat) && esCoord(lng);
 const redondear = (n) => Number(num(n, 0).toFixed(2));
 
-/*
- * HASTA DÓNDE SE ENTREGA.
- *
- * El cobro por km no tenía techo, y la distancia sale del punto que marca el
- * cliente. El GPS del emulador de Android viene de fábrica en California: un
- * pedido de prueba desde ahí salía a 4,000 km de la tienda y se cobraba $12,000
- * de envío, que el dashboard sumaba como ventas.
- *
- * Más allá de este radio no se cobra un envío: el pedido a domicilio no se
- * acepta (ver createOrder) y se ofrece pasar a recogerlo. La tienda puede
- * cambiarlo con `radioMaximoKm` en sus ajustes; si no lo tiene, vale este.
- * La web repite la misma cuenta en frontend/src/utils/envio.js.
- */
+// HASTA DÓNDE SE ENTREGA.
+// El cobro por km no tenía techo, y la distancia sale del punto que marca el cliente.
 export const RADIO_MAXIMO_KM = 30;
 
 // Distancia en km entre dos puntos (haversine).
@@ -52,14 +26,8 @@ export const distanciaKm = (lat1, lng1, lat2, lng2) => {
   return RADIO_TIERRA_KM * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-/*
- * Devuelve el costo de envío a una dirección, con el desglose de cómo se
- * calculó (útil para mostrárselo al cliente: "$2.50 · a 3 km").
- *
- * ajustes: documento de storeSettings (ubicacionTienda, envioBase, envioPorKm,
- *          zonasEnvio).
- * destino: { lat, lng } de la dirección del cliente (puede venir sin coords).
- */
+// Devuelve el costo de envío a una dirección, con el desglose de cómo se calculó (útil para
+// mostrárselo al cliente: "$2.50 · a 3 km").
 export const calcularEnvio = (ajustes = {}, destino = {}) => {
   const base = num(ajustes.envioBase, 1);
   const porKm = num(ajustes.envioPorKm, 0.5);

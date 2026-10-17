@@ -8,30 +8,8 @@ import CintaTemporada from './CintaTemporada';
 import { useAuth } from '../../hooks/useAuth';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * ============================================================
- * ENCABEZADO DE LA TIENDA — HeaderTienda.jsx
- * ============================================================
- * La misma barra de arriba para TODAS las pantallas del cliente.
- *
- * Vivía dentro de Store.jsx, y por eso Impresiones se había quedado con una
- * barra propia de dos botones: sin pasillos, sin dirección de entrega, sin
- * buscador y sin carrito. Quien entraba a imprimir algo salía de la tienda sin
- * darse cuenta, y para volver a comprar tenía que apretar "Ir a la tienda"
- * como si fuera otro sitio. No lo es: es el mismo negocio, otro pasillo.
- *
- * CÓMO SE ADAPTA A CADA PANTALLA
- * Los controles que necesitan el estado de la tienda (buscar, abrir el
- * carrito, hablarle al asistente) reciben su función por props. Donde esa
- * función NO se pasa —Impresiones, que no monta useStore— el control NO
- * desaparece: navega a la tienda, que es donde esa acción sí existe.
- *
- * Es a propósito. Un botón que desaparece según la pantalla obliga a la
- * persona a volver a buscar dónde quedó; uno que siempre está y siempre lleva
- * al mismo lugar se aprende una sola vez. Y esconder el carrito justo cuando
- * alguien lleva cosas adentro es la peor de las opciones.
- * ============================================================
- */
+// ENCABEZADO DE LA TIENDA — HeaderTienda.jsx
+// La misma barra de arriba para TODAS las pantallas del cliente.
 
 const BROWN = 'var(--marca-600)';
 
@@ -48,19 +26,9 @@ const Barra = styled.header`
   top: 0;
   z-index: 200;
 
-  /*
-   * En teléfono el encabezado pasa a DOS renglones.
-   *
-   * Nombre, dirección, buscador, asistente, carrito y cuenta nunca cupieron en
-   * una fila de 375px: el buscador es el que cede (flex:1 con min-width:0) y
-   * terminaba midiendo catorce píxeles mientras los botones se salían de la
-   * pantalla.
-   *
-   * Se parte donde menos duele: arriba el nombre y los botones —que se
-   * reconocen por su icono— y el buscador se lleva un renglón entero. En una
-   * tienda de barrio la gente no navega pasillos: viene por algo concreto y lo
-   * escribe.
-   */
+  /* En teléfono el encabezado pasa a DOS renglones. Nombre, dirección, buscador, asistente, carrito
+     y cuenta nunca cupieron en una fila de 375px: el buscador es el que cede (flex:1 con
+     min-width:0) y terminaba midiendo catorce píxeles mientras los botones se salían de la pantalla. */
   @media (max-width: 700px) {
     height: auto;
     flex-wrap: wrap;
@@ -93,12 +61,9 @@ const SearchBox = styled.div`
     box-shadow: 0 0 0 3px color-mix(in srgb, ${BROWN} 12%, transparent);
   }
 
-  /*
-   * El renglón de abajo, completo. La propiedad order lo manda después de los botones
-   * aunque en el código venga antes: en el marcado va en medio porque ahí se
-   * lee en pantalla grande, y no vale la pena mover el HTML —y con él el orden
-   * del tabulador— solo para acomodar el teléfono.
-   */
+  /* El renglón de abajo, completo. La propiedad order lo manda después de los botones aunque en el
+     código venga antes: en el marcado va en medio porque ahí se lee en pantalla grande, y no vale la
+     pena mover el HTML —y con él el orden del tabulador— solo para acomodar el teléfono. */
   @media (max-width: 700px) {
     order: 3;
     flex-basis: 100%;
@@ -143,11 +108,9 @@ const Derecha = styled.div`
   }
 `;
 
-/*
- * El texto de los botones. En pantalla angosta se esconde a la vista pero NO
- * se borra: sigue disponible para el lector de pantalla, así el botón se
- * sigue llamando "Carrito" para quien no lo ve. Con display:none quedaría mudo.
- */
+// El texto de los botones. En pantalla angosta se esconde a la vista pero NO se borra: sigue
+// disponible para el lector de pantalla, así el botón se sigue llamando "Carrito" para quien no lo
+// ve. Con display:none quedaría mudo.
 const Etiqueta = styled.span`
   @media (max-width: 900px) {
     position: absolute;
@@ -183,12 +146,7 @@ const Pill = styled.button`
               color var(--dur-press) var(--ease-out),
               transform var(--dur-press) var(--ease-out);
 
-  /*
-   * El borde solo se pinta de marca en la pastilla SOLIDA (Asistente, que ya
-   * nace de ese color). Carrito y Mi Cuenta no tienen un estado "activo" que
-   * marcar, así que su borde se queda en la misma línea gris de siempre — solo
-   * el texto se tiñe un poco al pasar el mouse, como aviso de que es clicable.
-   */
+  /* El borde solo se pinta de marca en la pastilla SOLIDA (Asistente, que ya nace de ese color). */
   @media (hover: hover) and (pointer: fine) {
     &:hover { border-color: ${(p) => (p.$solida ? BROWN : 'var(--linea)')}; color: ${(p) => (p.$solida ? '#fff' : BROWN)}; }
   }
@@ -228,25 +186,17 @@ const HeaderTienda = ({
   cantidadItems = 0,
   onAbrirCarrito,
   onAbrirAsistente,
-  /*
-   * Qué hacer cuando le dan Enter al buscador en una pantalla que SÍ maneja la
-   * búsqueda. Normalmente nada: la lista de abajo ya se filtró mientras
-   * escribía. Pero la ficha de un producto está encima de esa lista, así que
-   * ahí "buscar" tiene que apartarse para dejar ver el resultado — y eso solo
-   * lo sabe la pantalla, no el encabezado. Ver ProductDetailModal.
-   */
+  // Qué hacer cuando le dan Enter al buscador en una pantalla que SÍ maneja la búsqueda. Normalmente
+  // nada: la lista de abajo ya se filtró mientras escribía.
   onEnviarBusqueda,
 }) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { t } = useIdioma();
 
-  /*
-   * Cuando la pantalla no maneja la búsqueda (Impresiones), el buscador guarda
-   * lo escrito acá y al enviarlo lleva a la tienda con el término puesto. Así
-   * teclear algo desde Impresiones hace lo que uno espera —encontrarlo— en vez
-   * de no hacer nada.
-   */
+  // Cuando la pantalla no maneja la búsqueda (Impresiones), el buscador guarda lo escrito acá y al
+  // enviarlo lleva a la tienda con el término puesto. Así teclear algo desde Impresiones hace lo que
+  // uno espera —encontrarlo— en vez de no hacer nada.
   const [textoLocal, setTextoLocal] = useState('');
   const manejaBusqueda = typeof onBuscar === 'function';
   const texto = manejaBusqueda ? terminoBusqueda : textoLocal;
@@ -307,24 +257,17 @@ const HeaderTienda = ({
         {/* data-destino-carrito: a dónde vuela la foto al agregar (utils/volarAlCarrito.js). */}
         <Pill data-destino-carrito onClick={() => (onAbrirCarrito ? onAbrirCarrito() : navigate('/'))} title={t('Carrito')}>
           <ShoppingBag size={18} strokeWidth={2.2} /> <Etiqueta>{t('Carrito')}</Etiqueta>
-          {/*
-            El `key` con la cantidad es lo que hace que esto se vea.
-
-            Una animación CSS corre al montar el elemento y nunca más; si el
-            globo solo cambia su número, el rebote no vuelve a dispararse.
-            Cambiando la key, React lo remonta en cada cambio de cuenta y la
-            animación arranca de nuevo. Ver .globo-pop en index.css.
-          */}
+          {/* El `key` con la cantidad es lo que hace que esto se vea. Una animación CSS corre al montar el
+             elemento y nunca más; si el globo solo cambia su número, el rebote no vuelve a dispararse.
+             Cambiando la key, React lo remonta en cada cambio de cuenta y la animación arranca de nuevo. */}
           {cantidadItems > 0 && (
             <Globo key={cantidadItems} className="globo-pop">{cantidadItems}</Globo>
           )}
         </Pill>
 
-        {/*
-          Sin sesión el botón invita a entrar; con sesión lleva a su cuenta. La
-          tienda se ve sin cuenta, así que ofrecerle "Mi Cuenta" a alguien que
-          no tiene ninguna sería una puerta a un cuarto que no existe.
-        */}
+        {/* Sin sesión el botón invita a entrar; con sesión lleva a su cuenta. La tienda se ve sin cuenta,
+           así que ofrecerle "Mi Cuenta" a alguien que no tiene ninguna sería una puerta a un cuarto que no
+           existe. */}
         {isAuthenticated ? (
           <Pill onClick={() => navigate('/mi-cuenta')} title={t('Mi Cuenta')}>
             <User size={18} strokeWidth={2.2} /> <Etiqueta>{t('Mi Cuenta')}</Etiqueta>

@@ -32,23 +32,15 @@ const BROWN_LIGHT = 'var(--marca-100)';
 /* ─── Layout ─── */
 const Container = styled.div`
   min-height: 100vh;
-  /*
-   * Fondo blanco. El beige de antes competía con las tarjetas —que también
-   * son claras— y hacía ver la página como una hoja vieja; con blanco los
-   * productos y las promociones son lo único con color.
-   */
+  /* Fondo blanco. El beige de antes competía con las tarjetas —que también son claras— y hacía ver
+     la página como una hoja vieja; con blanco los productos y las promociones son lo único con
+     color. */
   background: var(--papel);
   font-family: var(--fuente);
 
-  /*
-   * Columna flex para que el pie se quede ABAJO cuando la página es corta.
-   *
-   * Con min-height: 100vh a secas, una búsqueda de cinco productos dejaba el
-   * pie flotando a media pantalla y 259 píxeles de blanco debajo: la página
-   * parecía cortada, como si le faltara algo por cargar. Ahora el contenido
-   * empuja (flex: 1) y el pie aterriza en el borde de abajo aunque haya poco
-   * que mostrar.
-   */
+  /* Columna flex para que el pie se quede ABAJO cuando la página es corta. Con min-height: 100vh a
+     secas, una búsqueda de cinco productos dejaba el pie flotando a media pantalla y 259 píxeles de
+     blanco debajo: la página parecía cortada, como si le faltara algo por cargar. */
   display: flex;
   flex-direction: column;
 `;
@@ -62,11 +54,9 @@ const Cuerpo = styled.div`
 /* Lo que tapa cada flecha: al traer la categoría elegida a la vista se deja ese margen. */
 const ANCHO_FLECHA_CAT = 56;
 
-/*
- * Fundido solo en la orilla que tiene algo escondido. Es lo que avisa que hay
- * más categorías: sin él, la última cortada a filo se lee como el final de la
- * lista. En la orilla a la que ya se llegó no hay nada que avisar.
- */
+// Fundido solo en la orilla que tiene algo escondido. Es lo que avisa que hay más categorías: sin
+// él, la última cortada a filo se lee como el final de la lista. En la orilla a la que ya se llegó
+// no hay nada que avisar.
 const fundidoCategorias = ({ $izq, $der }) => {
   const izq = $izq ? 'transparent 0, #000 var(--fundido)' : '#000 0';
   const der = $der ? '#000 calc(100% - var(--fundido)), transparent 100%' : '#000 100%';
@@ -84,11 +74,9 @@ const CategoryBar = styled.nav`
   background: transparent;
   display: flex;
   overflow-x: auto;
-  /*
-   * Sin raya abajo. La única línea de la pantalla es la del encabezado, que
-   * sí separa dos cosas distintas; esta partía la tienda en dos por gusto y
-   * competía con el borde de las tarjetas de promoción que van justo abajo.
-   */
+  /* Sin raya abajo. La única línea de la pantalla es la del encabezado, que sí separa dos cosas
+     distintas; esta partía la tienda en dos por gusto y competía con el borde de las tarjetas de
+     promoción que van justo abajo. */
   height: 60px;
   align-items: center;
   &::-webkit-scrollbar { display: none; }
@@ -98,10 +86,8 @@ const CategoryBar = styled.nav`
   mask-image: ${fundidoCategorias};
   -webkit-mask-image: ${fundidoCategorias};
 
-  /*
-   * Deslizable con el dedo, sin arrastrar la página con él: el que se corre es
-   * ESTE renglón, no el cuerpo.
-   */
+  /* Deslizable con el dedo, sin arrastrar la página con él: el que se corre es ESTE renglón, no el
+     cuerpo. */
   @media (max-width: 700px) {
     height: 54px;
     scroll-padding-inline: 16px;
@@ -109,17 +95,9 @@ const CategoryBar = styled.nav`
   }
 `;
 
-/*
- * En el diseño las categorías van CENTRADAS, pero sin perder la orilla.
- *
- * Antes la barra misma llevaba justify-content: center, y cuando las
- * categorías ya no cabían el centrado empujaba la lista hacia los DOS lados:
- * lo que sobraba a la derecha se alcanzaba deslizando, pero lo de la izquierda
- * quedaba fuera del área de scroll y no había forma de llegar ("Todos" se veía
- * como una "s" cortada). Esta pista se centra con margen automático, que
- * centra igual cuando sobra espacio y se vuelve cero cuando no: la lista
- * arranca siempre en "Todos".
- */
+// En el diseño las categorías van CENTRADAS, pero sin perder la orilla. Esta pista se centra con
+// margen automático, que centra igual cuando sobra espacio y se vuelve cero cuando no: la lista
+// arranca siempre en "Todos".
 const CategoryPista = styled.div`
   display: flex;
   align-items: center;
@@ -132,12 +110,9 @@ const CategoryPista = styled.div`
   @media (max-width: 700px) { padding: 0 16px; }
 `;
 
-/*
- * La barra de pasillos y sus estilos se eliminaron: los pasillos ahora se
- * eligen desde el menú del nombre de la tienda (MenuTienda). Tener las dos
- * cosas era decir lo mismo dos veces, y la barra empujaba los productos media
- * pantalla hacia abajo antes de que se viera un solo precio.
- */
+// La barra de pasillos y sus estilos se eliminaron: los pasillos ahora se eligen desde el menú del
+// nombre de la tienda (MenuTienda). Tener las dos cosas era decir lo mismo dos veces, y la barra
+// empujaba los productos media pantalla hacia abajo antes de que se viera un solo precio.
 
 /* Pill blanca con borde; la activa es café SÓLIDO con texto blanco. */
 const CatBtn = styled.button`
@@ -189,15 +164,7 @@ const Content = styled.div`
   @media (max-width: 560px) { padding: 20px 16px 32px; }
 `;
 
-/*
- * El carril de una fila de la portada.
- *
- * Mismo ancho y mismo margen lateral que <Content>, pero por bloque en vez de
- * envolverlos a todos: las promociones van de orilla a orilla —su carrusel
- * asoma las tarjetas de los lados— y ahora pueden ir en cualquier posición
- * del orden, así que ya no se puede meter todo en un solo contenedor con
- * relleno y dejar las promos fuera.
- */
+// El carril de una fila de la portada.
 const Franja = styled.div`
   max-width: 1400px;
   margin: 0 auto;
@@ -252,21 +219,15 @@ const SectionCount = styled.span`
   color: var(--tinta-tenue);
 `;
 
-/*
- * Flechas circulares a la derecha del título, como en el diseño. Por ahora
- * desplazan la fila de tarjetas; cuando la sección no se pueda mover más,
- * la flecha se apaga sola.
- */
+// Flechas circulares a la derecha del título, como en el diseño. Por ahora desplazan la fila de
+// tarjetas; cuando la sección no se pueda mover más, la flecha se apaga sola.
 const SectionNav = styled.div`
   display: flex;
   gap: 8px;
   flex-shrink: 0;
 
-  /*
-   * En pantalla táctil la fila se desliza con el dedo: las flechas sobran y
-   * en un teléfono le quitaban el lugar al título ("Más vendidos6 productos",
-   * pegados).
-   */
+  /* En pantalla táctil la fila se desliza con el dedo: las flechas sobran y en un teléfono le
+     quitaban el lugar al título ("Más vendidos6 productos", pegados). */
   @media (hover: none), (pointer: coarse) { display: none; }
 `;
 
@@ -288,11 +249,9 @@ const NavCircle = styled.button`
   &:disabled { opacity: 0.35; cursor: default; }
 `;
 
-/*
- * Las flechas de la barra de categorías. Con la barra de desplazamiento
- * escondida, con el mouse no había cómo llegar a las que no caben; en
- * pantalla táctil no hacen falta, ahí se desliza con el dedo.
- */
+// Las flechas de la barra de categorías. Con la barra de desplazamiento escondida, con el mouse no
+// había cómo llegar a las que no caben; en pantalla táctil no hacen falta, ahí se desliza con el
+// dedo.
 const CatFlecha = styled(NavCircle)`
   position: absolute;
   top: 50%;
@@ -425,11 +384,9 @@ const FilterToggle = styled.div`
 `;
 
 /* ─── Trending Section ─── */
-/*
- * Sin tarjeta blanca alrededor: el recuadro partía la portada en cajas y se
- * sentía como secciones separadas en vez de una sola página. Ahora las filas
- * se distinguen por el aire entre ellas, no por un borde.
- */
+// Sin tarjeta blanca alrededor: el recuadro partía la portada en cajas y se sentía como secciones
+// separadas en vez de una sola página. Ahora las filas se distinguen por el aire entre ellas, no
+// por un borde.
 const TrendingSection = styled.div`
   margin-bottom: 34px;
 `;
@@ -464,11 +421,8 @@ const LiveDot = styled.span`
   }
 `;
 
-/*
- * En el diseño esta fila NO es una grilla: se corre de lado con las flechas.
- * scroll-snap hace que siempre quede una tarjeta alineada al borde, sin cortes
- * a media tarjeta.
- */
+// En el diseño esta fila NO es una grilla: se corre de lado con las flechas. scroll-snap hace que
+// siempre quede una tarjeta alineada al borde, sin cortes a media tarjeta.
 const TrendingGrid = styled.div`
   display: flex;
   gap: 14px;
@@ -476,41 +430,14 @@ const TrendingGrid = styled.div`
   scroll-snap-type: x proximity;
   scroll-padding-left: 2px;
 
-  /*
-   * Aire arriba y abajo, comido con márgenes negativos.
-   *
-   * Un contenedor con overflow-x recorta también por ARRIBA y por ABAJO: el
-   * navegador no deja tener un eje recortado y el otro suelto. Sin este
-   * respiro, la tarjeta que crece al pasar el cursor se quedaba con la
-   * sombra cortada a filo, como apoyada sobre una regla.
-   *
-   * Los márgenes negativos devuelven el espacio, así el aire existe para la
-   * sombra pero la fila no se separa del resto de la página.
-   */
-  /*
-   * El respiro sale de la sombra en hover, no de un numero al azar: la
-   * tarjeta sube 4px y su sombra es 0 12px 32px, o sea que se derrama unos
-   * 20px hacia arriba y unos 32px hacia abajo. Con menos que esto se corta
-   * a filo, y el recorte lateral se comia la sombra de la primera y la
-   * ultima tarjeta, que son las pegadas al borde del scroll.
-   *
-   * Los margenes negativos devuelven el espacio; el -4 de arriba conserva
-   * los 16px de separacion con el titulo que tenia esta fila.
-   */
+  /* Aire arriba y abajo de la fila, comido con márgenes negativos, para que la sombra de la tarjeta
+     al pasar el mouse no se recorte. */
   padding: 24px 16px 44px;
   margin: -8px -16px -40px;
 
-  /*
-   * Fundido en las orillas.
-   *
-   * El aire lateral resuelve la sombra de la primera y la última tarjeta,
-   * pero se desplaza CON el contenido: apenas se hace scroll, la tarjeta que
-   * va saliendo vuelve a cortarse a filo contra el borde. El degradado hace
-   * que se desvanezca en vez de cortarse, y de paso avisa que hay más.
-   *
-   * El fundido mide lo mismo que el padding, así que en reposo cae sobre
-   * espacio vacío y no toca la primera tarjeta.
-   */
+  /* Fundido en las orillas. El aire lateral resuelve la sombra de la primera y la última tarjeta,
+     pero se desplaza CON el contenido: apenas se hace scroll, la tarjeta que va saliendo vuelve a
+     cortarse a filo contra el borde. */
   mask-image: linear-gradient(to right, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
   -webkit-mask-image: linear-gradient(to right, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
 
@@ -523,19 +450,8 @@ const TrendingGrid = styled.div`
   }
 `;
 
-/*
- * Una fila de la portada mientras llega el catálogo.
- *
- * Antes, cargando, la portada no pintaba ninguna fila: se veía solo la
- * cuadrícula de "Todos los productos", y al llegar los datos aparecían
- * "Más vendidos" y las demás filas ENCIMA, empujándola media pantalla hacia
- * abajo. Lighthouse lo medía como el peor salto de la página (CLS 0.57 en
- * teléfono, 0.82 en computadora).
- *
- * Usa las mismas piezas que "Más vendidos" (sección, encabezado y fila), así
- * que mide lo mismo sin copiar números: solo se fijan el alto del encabezado
- * (el de las flechas redondas) y el de la tarjeta.
- */
+// Una fila de la portada mientras llega el catálogo. Lighthouse lo medía como el peor salto de la
+// página (CLS 0.57 en teléfono, 0.82 en computadora).
 const TituloCargando = styled.div`
   width: min(220px, 55%);
   height: 40px;
@@ -565,14 +481,9 @@ const ProductsGrid = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
   gap: 16px;
 
-  /*
-   * DOS columnas en el teléfono, no una.
-   *
-   * Con el mínimo en 195px no cabían dos (2×195+16 = 406 en 343 de ancho), así
-   * que la cuadrícula caía a una sola columna y cada producto ocupaba la
-   * pantalla entera: para ver seis había que bajar tres veces. Bajando el
-   * mínimo a 150 entran dos, que es como se compara precio contra precio.
-   */
+  /* DOS columnas en el teléfono, no una. Con el mínimo en 195px no cabían dos (2×195+16 = 406 en 343
+     de ancho), así que la cuadrícula caía a una sola columna y cada producto ocupaba la pantalla
+     entera: para ver seis había que bajar tres veces. */
   @media (max-width: 560px) {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 12px;
@@ -616,10 +527,8 @@ const BotonReintentar = styled.button`
 /* ─── Component ─── */
 const Store = () => {
   const navigate = useNavigate();
-  /*
-   * Si vino desde "Servicios" con ?modulo=, la tienda abre parada en ese
-   * pasillo. Se lee una sola vez, al montar: después manda la barra de arriba.
-   */
+  // Si vino desde "Servicios" con ?modulo=, la tienda abre parada en ese pasillo. Se lee una sola
+  // vez, al montar: después manda la barra de arriba.
   const [searchParams, setSearchParams] = useSearchParams();
   const { pathname, search, state: estadoNavegacion } = useLocation();
   const { id: idProducto } = useParams();
@@ -663,30 +572,23 @@ const Store = () => {
     abrirPromo,
     cerrarPromo,
     verPromoEnTienda,
-  /*
-   * El `q` lo manda el buscador del encabezado cuando se escribe desde una
-   * pantalla que no maneja la búsqueda —Impresiones—. Así teclear algo allá
-   * hace lo que uno espera: llegar a la tienda con eso ya buscado.
-   */
+  // El `q` lo manda el buscador del encabezado cuando se escribe desde una pantalla que no maneja la
+  // búsqueda —Impresiones—. Así teclear algo allá hace lo que uno espera: llegar a la tienda con eso
+  // ya buscado.
   } = useStore({
     moduloInicial: searchParams.get('modulo'),
     busquedaInicial: searchParams.get('q') || '',
-    /*
-     * El `promo` lo trae el botón del correo con que se anuncian las
-     * promociones nuevas: abre esa promo en grande al entrar, en vez de dejar
-     * a la persona en la portada buscando lo que le acaban de ofrecer.
-     */
+    // El `promo` lo trae el botón del correo con que se anuncian las promociones nuevas: abre esa
+    // promo en grande al entrar, en vez de dejar a la persona en la portada buscando lo que le acaban
+    // de ofrecer.
     promoInicial: searchParams.get('promo'),
   });
 
   // Flechas de la fila de "Más vendidos" (se apagan solas en los extremos).
   const destacados = useFilaDeslizable();
 
-  /*
-   * La barra de categorías: flechas en las orillas y la rueda del mouse la
-   * corre de lado, como el menú de Mi Cuenta. Ya no caben todas en una
-   * pantalla de laptop.
-   */
+  // La barra de categorías: flechas en las orillas y la rueda del mouse la corre de lado, como el
+  // menú de Mi Cuenta. Ya no caben todas en una pantalla de laptop.
   const filaCategorias = useFilaDeslizable({ rueda: true });
   const barraCategorias = useRef(null);
   const { fila: engancharFilaCategorias } = filaCategorias;
@@ -700,11 +602,9 @@ const Store = () => {
   // las fichas, para que abrirlos sea instantáneo. Ver pantallasDiferidas.
   useEffect(() => { if (!cargando) precargarPantallas(); }, [cargando]);
 
-  /*
-   * La categoría elegida se trae a la vista: si la eligió el asistente de voz
-   * o se volvió atrás, puede estar escondida al fondo de la barra. Se corre
-   * solo la barra, a mano: scrollIntoView movería también la página.
-   */
+  // La categoría elegida se trae a la vista: si la eligió el asistente de voz o se volvió atrás,
+  // puede estar escondida al fondo de la barra. Se corre solo la barra, a mano: scrollIntoView
+  // movería también la página.
   useEffect(() => {
     const el = barraCategorias.current;
     const activa = el?.querySelector('[aria-pressed="true"]');
@@ -722,38 +622,26 @@ const Store = () => {
   // Sus pedidos alimentan la fila "Volver a comprar"; si es cliente nuevo,
   // esa fila simplemente no se arma.
   const { orders } = useMyOrders();
-  /*
-   * Las secciones automáticas se arman con lo del pasillo, no con todo el
-   * catálogo: estando en Librería, "Nuevos en la tienda" mostraba las papas
-   * de abarrotes y el filtro parecía roto.
-   */
+  // Las secciones automáticas se arman con lo del pasillo, no con todo el catálogo: estando en
+  // Librería, "Nuevos en la tienda" mostraba las papas de abarrotes y el filtro parecía roto.
   const secciones = useSeccionesTienda({ productos: productosDelPasillo, pedidos: orders });
 
-  /*
-   * El orden y la visibilidad de las filas los decide el panel. Ver
-   * utils/portada.js y la pantalla de Personalización.
-   */
+  // El orden y la visibilidad de las filas los decide el panel. Ver utils/portada.js y la pantalla
+  // de Personalización.
   const { portadaVisible, ajustes } = useAjustesCtx();
 
-  /*
-   * Qué filas guardan su lugar mientras carga el catálogo: "Más vendidos" y la
-   * primera de las que casi siempre salen. Con esas dos se llena la primera
-   * pantalla; lo que va más abajo puede acomodarse sin que nadie lo vea
-   * moverse. "Volver a comprar" no se reserva: un cliente nuevo no la tiene, y
-   * un hueco que luego se cierra también es un salto.
-   */
+  // Qué filas guardan su lugar mientras carga el catálogo: "Más vendidos" y la primera de las que
+  // casi siempre salen. Con esas dos se llena la primera pantalla; lo que va más abajo puede
+  // acomodarse sin que nadie lo vea moverse.
   const filasQueEsperan = useMemo(() => {
     const claves = portadaVisible.map((b) => b.clave);
     const siguiente = claves.find((c) => ['nuevos', 'familias', 'por-acabarse'].includes(c));
     return new Set(['mas-vendidos', siguiente].filter(Boolean));
   }, [portadaVisible]);
 
-  /*
-   * Las filas automáticas, agrupadas bajo el bloque que las gobierna. Los
-   * estantes de familia ("Quesos", "Bebidas energizantes") caen todos bajo
-   * 'familias': cuáles aparecen depende del inventario, así que se encienden
-   * y se apagan juntos.
-   */
+  // Las filas automáticas, agrupadas bajo el bloque que las gobierna. Los estantes de familia
+  // ("Quesos", "Bebidas energizantes") caen todos bajo 'familias': cuáles aparecen depende del
+  // inventario, así que se encienden y se apagan juntos.
   const seccionesPorBloque = useMemo(() => {
     const mapa = new Map();
     secciones.forEach((seccion) => {
@@ -764,15 +652,9 @@ const Store = () => {
     return mapa;
   }, [secciones]);
 
-  /*
-   * LA FICHA ABIERTA SALE DE LA DIRECCIÓN (/producto/:id).
-   *
-   * Antes era un estado suelto: la dirección no cambiaba, así que un producto
-   * no se podía compartir ni guardar, y el "atrás" del teléfono sacaba de la
-   * tienda en vez de cerrar la ficha. Ahora abrir es navegar y cerrar es
-   * volver; el producto se busca en el catálogo ya cargado (con su precio de
-   * oferta, igual que en las tarjetas).
-   */
+  // LA FICHA ABIERTA SALE DE LA DIRECCIÓN (/producto/:id).
+  // Abrir un producto es navegar y cerrarlo es volver; el producto se busca en el catálogo ya
+  // cargado, con su precio de oferta.
   const productoSeleccionado = useMemo(
     () => (idProducto ? productos.find((p) => String(p.id) === idProducto) || null : null),
     [idProducto, productos]
@@ -794,20 +676,14 @@ const Store = () => {
     document.title = `${productoSeleccionado.nombre} · ${tienda}`;
     return () => { document.title = previo; };
   }, [productoSeleccionado, ajustes.nombreLinea1, ajustes.nombreLinea2]);
-  /*
-   * ?pagar=1: viene del login al que lo mandó Tiqui para pagar. Se abre el
-   * carrito directo en el pago, que es donde iba antes de que le pidieran la
-   * sesión. Ver irAPagar.
-   */
+  // ?pagar=1: viene del login al que lo mandó Tiqui para pagar. Se abre el carrito directo en el
+  // pago, que es donde iba antes de que le pidieran la sesión. Ver irAPagar.
   const vieneAPagar = searchParams.get('pagar') === '1';
   const [mostrarCarrito, setMostrarCarrito] = useState(false);
   const [carritoEnPago, setCarritoEnPago] = useState(false);
   const [mostrarAsistente, setMostrarAsistente] = useState(false);
-  /*
-   * Se abre cuando termina de cargar el catálogo, no antes: el carrito se arma
-   * con los productos de hoy y hasta entonces viene vacío. Abierto antes, caía
-   * en la lista vacía en vez del pago.
-   */
+  // Se abre cuando termina de cargar el catálogo, no antes: el carrito se arma con los productos de
+  // hoy y hasta entonces viene vacío. Abierto antes, caía en la lista vacía en vez del pago.
   const [pagoPendiente, setPagoPendiente] = useState(vieneAPagar);
   const abrirPagoPendiente = pagoPendiente && !cargando;
 
@@ -828,16 +704,9 @@ const Store = () => {
     setPagoPendiente(false);
   };
 
-  /*
-   * La persona le confirmó la compra a Tiqui: se abre el pago.
-   *
-   * Tiqui se cierra antes. Minimizado se quedaba justo encima del botón de
-   * "Realizar pedido", y ya no tiene nada que hacer: lo que falta —dirección
-   * y forma de pago— se elige tocando.
-   *
-   * Sin sesión de cliente, primero al login, y de vuelta aquí con ?pagar=1
-   * para caer directo en el pago. El carrito se guarda solo, no se pierde.
-   */
+  // La persona le confirmó la compra a Tiqui: se abre el pago. Tiqui se cierra antes. Minimizado se
+  // quedaba justo encima del botón de "Realizar pedido", y ya no tiene nada que hacer: lo que falta
+  // —dirección y forma de pago— se elige tocando.
   const irAPagar = () => {
     setMostrarAsistente(false);
     if (!esCliente) {
@@ -861,11 +730,9 @@ const Store = () => {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  /*
-   * Abrir una ficha es una página más en el historial. `fichas` cuenta
-   * cuántas se abrieron seguidas (de una recomendación a otra) para que
-   * cerrar vuelva a la tienda de una vez, y no ficha por ficha.
-   */
+  // Abrir una ficha es una página más en el historial. `fichas` cuenta cuántas se abrieron seguidas
+  // (de una recomendación a otra) para que cerrar vuelva a la tienda de una vez, y no ficha por
+  // ficha.
   const handleAbrirDetalle = (producto) => {
     if (!producto?.id || String(producto.id) === idProducto) return;
     const fichas = idProducto ? (estadoNavegacion?.fichas || 0) + 1 : 1;
@@ -889,11 +756,9 @@ const Store = () => {
   // Nombre del pasillo donde está parado el cliente, para los títulos y avisos.
   const nombrePasillo = pasillos.find((m) => String(m._id) === String(moduloSeleccionado))?.name || '';
 
-  /*
-   * El camino que hizo hasta el producto que abra, para las migas de la ficha.
-   * Se arma aquí y no dentro de la ficha porque los filtros —y las funciones
-   * para deshacerlos— viven en esta pantalla. Ver useRastroTienda.
-   */
+  // El camino que hizo hasta el producto que abra, para las migas de la ficha. Se arma aquí y no
+  // dentro de la ficha porque los filtros —y las funciones para deshacerlos— viven en esta pantalla.
+  // Ver useRastroTienda.
   const rastro = useRastroTienda({
     moduloSeleccionado, setModuloSeleccionado, nombrePasillo,
     categoriaSeleccionada, setCategoriaSeleccionada,
@@ -917,17 +782,11 @@ const Store = () => {
             limpiarCarrito={limpiarCarrito}
             carrito={carrito}
             totalCarrito={totalCarrito}
-            /*
-              A dónde puede llevar la voz. La tienda es la que sabe abrir un
-              producto o cambiar de pasillo sin recargar la página, así que
-              el asistente pide y ella mueve.
-            */
+            // A dónde puede llevar la voz. La tienda es la que sabe abrir un producto o cambiar de pasillo sin
+            // recargar la página, así que el asistente pide y ella mueve.
             categorias={categorias}
-            /*
-              Lo que abre Tiqui reemplaza a lo que había abierto: antes "quiero
-              ver fresas" y después "las promociones" dejaba la ficha de las
-              fresas encima de lo nuevo.
-            */
+            // Lo que abre Tiqui reemplaza a lo que había abierto: antes "quiero ver fresas" y después "las
+            // promociones" dejaba la ficha de las fresas encima de lo nuevo.
             irAProducto={(producto) => { cerrarPromo(); handleAbrirDetalle(producto); }}
             irACategoria={(cat) => {
               handleCerrarDetalle();
@@ -957,10 +816,9 @@ const Store = () => {
         )}
       </AnimatePresence>
 
-      {/* ── Header ──
-          Es el mismo componente que usa Impresiones. Vivía escrito aquí
-          adentro, y por eso Impresiones había terminado con una barra propia
-          de dos botones, sin pasillos ni carrito. Ver HeaderTienda. */}
+      {/* ── Header ── Es el mismo componente que usa Impresiones. Vivía escrito aquí adentro, y por eso
+         Impresiones había terminado con una barra propia de dos botones, sin pasillos ni carrito. Ver
+         HeaderTienda. */}
       <HeaderTienda
         moduloSeleccionado={moduloSeleccionado}
         onElegirModulo={setModuloSeleccionado}
@@ -971,11 +829,8 @@ const Store = () => {
         onAbrirAsistente={() => setMostrarAsistente(true)}
       />
 
-      {/*
-        La barra de pasillos se fue: ahora los pasillos viven en el menú del
-        nombre de la tienda. Tener las dos era decir lo mismo dos veces y
-        empujaba los productos media pantalla hacia abajo.
-      */}
+      {/* La barra de pasillos se fue: ahora los pasillos viven en el menú del nombre de la tienda. Tener
+         las dos era decir lo mismo dos veces y empujaba los productos media pantalla hacia abajo. */}
 
       {/* Todo lo que va entre el encabezado y el pie: es lo que crece y empuja
           el pie hasta abajo cuando hay pocos productos que mostrar. */}
@@ -996,11 +851,8 @@ const Store = () => {
             >
               {t('Todos')}
             </CatBtn>
-            {/*
-              Cargando, pastillas vacías donde van a caer las categorías: sin
-              ellas "Todos" salía solo en el centro y se corría a la orilla al
-              llegar las demás.
-            */}
+            {/* Cargando, pastillas vacías donde van a caer las categorías: sin ellas "Todos" salía solo en el
+               centro y se corría a la orilla al llegar las demás. */}
             {cargando && categorias.length === 0 && ANCHOS_CAT_CARGANDO.map((ancho, i) => (
               <CatCargando key={i} className="esqueleto" style={{ width: ancho }} aria-hidden="true" />
             ))}
@@ -1055,19 +907,8 @@ const Store = () => {
         </div>
       )}
 
-      {/*
-        ── La portada, en el orden que decidió el panel ──
-
-        Antes esto era una secuencia fija escrita aquí: promociones, más
-        vendidos, y después las filas automáticas. Ahora el orden y qué se
-        muestra salen de los ajustes de la tienda, porque no todas las tiendas
-        se ven igual: una que vende casi solo abarrotes quiere "Volver a
-        comprar" de primero, y una que estrena catálogo quiere "Nuevos".
-
-        Lo que NO cambió: el contenido de cada fila lo sigue armando el
-        sistema con el inventario. Aquí se acomodan bloques, no se eligen
-        productos a mano. Ver utils/portada.js.
-      */}
+      {/* ── La portada, en el orden que decidió el panel ──
+         El orden de las filas y cuáles se muestran salen de los ajustes de la tienda (Personalización). */}
       {showTrending && (
         <Portada>
           {portadaVisible.map((bloque) => {
@@ -1121,13 +962,9 @@ const Store = () => {
               );
             }
 
-            /*
-              El resto son filas que se arman solas con el inventario:
-              "Volver a comprar", "Se están acabando", "Nuevos" y los estantes
-              de familia (Quesos, Leches...). Si en este momento no hay datos
-              para armarla —un cliente nuevo no tiene qué volver a comprar—,
-              simplemente no se pinta.
-            */
+            // El resto son filas que se arman solas con el inventario: "Volver a comprar", "Se están
+            // acabando", "Nuevos" y los estantes de familia (Quesos, Leches...). Si en este momento no hay
+            // datos para armarla —un cliente nuevo no tiene qué volver a comprar—, simplemente no se pinta.
             const delBloque = seccionesPorBloque.get(bloque.clave) || [];
             if (delBloque.length === 0) return null;
 
@@ -1159,11 +996,7 @@ const Store = () => {
             El catálogo completo NO es un bloque configurable: es la tienda en
             sí. Siempre va al final y siempre está. */}
         <div>
-          {/*
-            Título, cantidad y Filtros en UNA sola línea. Antes la cantidad se
-            iba al extremo derecho y el botón caía debajo, así que el encabezado
-            ocupaba dos renglones y quedaba desalineado.
-          */}
+          {/* Título, cantidad y Filtros en UNA sola línea. */}
           <SectionHeader>
             <SectionTitle>
               {categoriaSeleccionada || terminoBusqueda
@@ -1177,11 +1010,8 @@ const Store = () => {
                 <SlidersHorizontal size={15} strokeWidth={2.2} /> {filtrosPuestos ? t('Filtros ({n})', { n: filtrosPuestos }) : t('Filtros')}
               </FilterBtn>
 
-              {/*
-                Orden, precio, ofertas, disponibles y marca. Se queda abierto al
-                elegir: se suelen combinar varios. Ver utils/filtrosTienda.js
-                (la app filtra igual).
-              */}
+              {/* Orden, precio, ofertas, disponibles y marca. Se queda abierto al elegir: se suelen combinar
+                 varios. Ver utils/filtrosTienda.js (la app filtra igual). */}
               {filterOpen && (
                 <FilterDropdown role="dialog" aria-label={t('Filtros')}>
                   <FilterGrupo>
@@ -1230,26 +1060,16 @@ const Store = () => {
             </FilterBar>
           </SectionHeader>
 
-          {/*
-            CARGANDO Y VACÍO NO SON LO MISMO, y confundirlos costaba caro: si
-            el servidor tardaba en contestar, la tienda anunciaba "Todavía no
-            hay productos en la tienda". Un arranque lento se leía como un
-            negocio sin nada que vender.
-
-            Ahora, mientras no se sepa, se dibujan los huecos donde van a caer
-            los productos; el aviso de vacío se guarda para cuando de verdad
-            conste que no hay nada.
-          */}
+          {/* CARGANDO Y VACÍO NO SON LO MISMO, y confundirlos costaba caro: si el servidor tardaba en
+             contestar, la tienda anunciaba "Todavía no hay productos en la tienda". Un arranque lento se
+             leía como un negocio sin nada que vender. */}
           {cargando ? (
             <ProductsGrid>
               <EsqueletoProductos />
             </ProductsGrid>
           ) : errorCarga ? (
-            /*
-              No llegó el catálogo. Se dice que fue la conexión y se ofrece
-              reintentar aquí mismo, sin recargar la página (el carrito sigue
-              donde estaba).
-            */
+            // No llegó el catálogo. Se dice que fue la conexión y se ofrece reintentar aquí mismo, sin
+            // recargar la página (el carrito sigue donde estaba).
             <EmptyState role="alert">
               <Mascota pose="error" alto={170} />
               <strong>{t('Ups, algo salió mal')}</strong>
@@ -1258,15 +1078,9 @@ const Store = () => {
             </EmptyState>
           ) : productosFiltrados.length === 0 ? (
             <EmptyState>
-              {/*
-                Buscó algo y no está: la mascota con la lupa. Un pasillo o una
-                tienda sin productos todavía no es una búsqueda fallida: ahí
-                mira para los lados.
-
-                Un pasillo recién creado está vacío hasta que le carguen
-                productos. Decir 'No hay productos para ""' hacía parecer que
-                la tienda estaba rota.
-              */}
+              {/* Buscó algo y no está: la mascota con la lupa. Un pasillo o una tienda sin productos todavía no
+                 es una búsqueda fallida: ahí mira para los lados. Un pasillo recién creado está vacío hasta que
+                 le carguen productos. Decir 'No hay productos para ""' hacía parecer que la tienda estaba rota. */}
               <Mascota pose={terminoBusqueda || categoriaSeleccionada || filtrosPuestos ? 'buscando' : 'perdida'} alto={150} />
               <strong>
                 {filtrosPuestos && !terminoBusqueda
@@ -1316,11 +1130,9 @@ const Store = () => {
       <PieTienda />
 
       {/* ── Modals ── */}
-      {/*
-        Detalle de la promo, a pantalla completa como la ficha de un producto
-        y con el mismo encabezado. Al dar Enter en el buscador se cierra: de
-        nada sirve filtrar una lista que está tapada por la promo.
-      */}
+      {/* Detalle de la promo, a pantalla completa como la ficha de un producto y con el mismo encabezado.
+         Al dar Enter en el buscador se cierra: de nada sirve filtrar una lista que está tapada por la
+         promo. */}
       {promoDetalle && (
         <Suspense fallback={null}>
         <PromoDetailModal
@@ -1355,12 +1167,9 @@ const Store = () => {
           todosLosProductos={productosDelPasillo?.length ? productosDelPasillo : productos}
           // Por dónde pasó hasta llegar aquí, con cada escalón pisable.
           rastro={rastro}
-          /*
-            La ficha lleva el MISMO encabezado de la tienda, así que necesita
-            los mismos mandos: el pasillo, la búsqueda y el carrito. Y al dar
-            Enter en el buscador la ficha se cierra sola — de nada sirve
-            filtrar una lista que está tapada por la foto de un producto.
-          */
+          // La ficha lleva el MISMO encabezado de la tienda, así que necesita los mismos mandos: el pasillo,
+          // la búsqueda y el carrito. Y al dar Enter en el buscador la ficha se cierra sola — de nada sirve
+          // filtrar una lista que está tapada por la foto de un producto.
           header={{
             moduloSeleccionado,
             onElegirModulo: setModuloSeleccionado,

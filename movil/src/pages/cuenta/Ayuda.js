@@ -1,22 +1,5 @@
-/*
- * ============================================================
- * AYUDA Y CONTACTO — la portada de "Mi cuenta > Ayuda"
- * ============================================================
- * Copia de `frontend/src/pages/cliente/CentroAyuda.jsx`: los canales REALES
- * de la tienda (por ahora, WhatsApp y la dirección) más las mismas preguntas
- * frecuentes — mismo texto que la web, para que la respuesta no cambie según
- * desde dónde se pregunte.
- *
- * Perfil.js dejó esta pantalla afuera al principio porque el único canal
- * real (el WhatsApp) salía de una variable de Vite que en Expo no existe.
- * Ahora sale de `EXPO_PUBLIC_WHATSAPP` (ver utils/tienda.js y .env.example),
- * la versión de Expo de lo mismo.
- *
- * La regla sigue siendo la de la web: solo se ofrece lo que existe. Sin
- * WhatsApp configurado, esa tarjeta no se pinta — un botón que no lleva a
- * nadie es peor que no tener botón.
- * ============================================================
- */
+// AYUDA Y CONTACTO — la portada de "Mi cuenta > Ayuda"
+// Los canales de la tienda (WhatsApp y la dirección) y las mismas preguntas frecuentes de la web.
 
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { HelpCircle, MapPin, MessageCircle } from 'lucide-react-native';

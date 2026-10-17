@@ -1,28 +1,6 @@
-/*
- * ============================================================
- * LA TIENDA — catálogo, filtros y carrito
- * ============================================================
- * El equivalente de `frontend/src/hooks/useStore.js`, con el mismo contrato:
- * quien conozca la web encuentra aquí `productosFiltrados`, `carrito`,
- * `agregarAlCarrito`, `totalCarrito` y compañía con esos mismos nombres.
- *
- * ── Por qué es un contexto y no un hook ──
- *
- * En la web `useStore` se llama desde Store.jsx y el carrito se abre como un
- * panel DENTRO de esa misma pantalla, así que un hook alcanza. Aquí Inicio y
- * Carrito son dos pantallas separadas: si cada una llamara a su propio hook,
- * cada una tendría su propio carrito y su propia copia del catálogo. El
- * estado tiene que vivir por encima de las dos.
- *
- * ── Lo que se dejó fuera, a propósito ──
- *
- * La búsqueda de la web también entiende ESTANTES ("energizante" encuentra las
- * latas aunque ninguna se llame así), y eso son 666 líneas entre
- * `utils/familias.js` y `utils/similitud.js`. Aquí se busca por nombre, marca
- * y categoría. Es menos listo, no es distinto: lo que ya se encontraba por esos
- * tres campos se sigue encontrando igual.
- * ============================================================
- */
+// LA TIENDA — catálogo, filtros y carrito
+// Lo mismo que useStore.js de la web, con los mismos nombres (`productosFiltrados`, `carrito`,
+// `agregarAlCarrito`, `totalCarrito`…), compartido por todas las pantallas.
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { aplicarFiltros, FILTROS_VACIOS, marcasDe } from '../utils/filtrosTienda';
@@ -43,27 +21,13 @@ import { tAhora } from '../utils/idioma';
 
 const TiendaContext = createContext(null);
 
-/*
- * ── El carrito guardado ──
- *
- * Una llave POR PERSONA y otra para quien todavía no entró, igual que en la
- * web. Así al cerrar sesión no queda a la vista el carrito de quien estaba
- * antes: su llave sencillamente ya no se lee.
- *
- * Los dos puntos de la llave de la web (`kartify:carrito:x`) no sirven aquí:
- * SecureStore solo acepta alfanuméricos, punto, guion y guion bajo. Ver
- * utils/almacen.js.
- */
+// ── El carrito guardado ──
+// Una llave POR PERSONA y otra para quien todavía no entró, igual que en la web.
 const llaveCarrito = (userId) => llave('cartify', 'carrito', userId || 'invitado');
 
-/*
- * Se guarda SOLO el id y la cantidad. Nunca el precio.
- *
- * Eso es lo importante: un precio guardado en el teléfono es un precio de
- * ayer, y el día que la tienda suba uno, quien tuviera el producto en el
- * carrito lo pagaría al viejo. Al no guardarlo no hay nada que reconciliar —
- * el precio, la promo y el stock salen siempre del catálogo recién cargado.
- */
+// Se guarda SOLO el id y la cantidad. Nunca el precio. Eso es lo importante: un precio guardado en
+// el teléfono es un precio de ayer, y el día que la tienda suba uno, quien tuviera el producto en
+// el carrito lo pagaría al viejo.
 const normalizarLineas = (crudo) => {
   try {
     const datos = JSON.parse(crudo || '[]');
@@ -87,15 +51,9 @@ export const TiendaProvider = ({ children }) => {
   const [cargando, setCargando] = useState(true);
   const [errorCarga, setErrorCarga] = useState('');
 
-  // Los pasillos (módulos) de la tienda: panadería, farmacia... Se cargan
-  // aparte del catálogo y no lo bloquean — si esta lista falla, la tienda
-  // sigue mostrando todo, solo sin el filtro por pasillo.
-  //
-  // `todosLosModulos` es la lista completa (incluye los de flujo propio,
-  // como Impresiones); `pasillos` es la que de verdad filtra el catálogo, y
-  // por eso se queda solo con los de flujo 'estandar' — ver utils/modulos.js.
-  // MenuPasillos.js necesita la lista completa para poder MOSTRAR Impresiones
-  // aunque no la use para filtrar nada.
+  // Los pasillos (módulos) de la tienda: panadería, farmacia... Se cargan aparte del catálogo y no
+  // lo bloquean — si esta lista falla, la tienda sigue mostrando todo, solo sin el filtro por
+  // pasillo.
   const [todosLosModulos, setTodosLosModulos] = useState([]);
   const [moduloSeleccionado, setModuloSeleccionado] = useState(null);
   const pasillos = useMemo(
@@ -111,13 +69,7 @@ export const TiendaProvider = ({ children }) => {
 
   // Las líneas guardadas: [{ id, cantidad }].
   const [lineas, setLineasEstado] = useState([]);
-  /*
-   * Las mismas líneas, pero al día AL INSTANTE (el estado se actualiza recién
-   * en el próximo render). Agregar, quitar y cambiar parten de aquí: Tiqui hace
-   * varias cosas de una sola vez ("dos cocas, un pan y una leche") y, partiendo
-   * del carrito del render, la segunda pisaba a la primera y del pedido entero
-   * solo quedaba lo último.
-   */
+  // Las mismas líneas, pero al día AL INSTANTE (el estado se actualiza recién en el próximo render).
   const lineasRef = useRef([]);
   const setLineas = useCallback((nuevas) => {
     lineasRef.current = nuevas;
@@ -139,11 +91,8 @@ export const TiendaProvider = ({ children }) => {
       setProductos(mapearCatalogo(crudos, promos));
       setPromociones(promos);
     } catch (error) {
-      /*
-       * En la web esto es un console.error y la tienda se queda vacía. Aquí se
-       * guarda el mensaje: en un teléfono, "no hay productos" y "no hay
-       * internet" se ven igual, y el segundo tiene arreglo.
-       */
+      // En la web esto es un console.error y la tienda se queda vacía. Aquí se guarda el mensaje: en un
+      // teléfono, "no hay productos" y "no hay internet" se ven igual, y el segundo tiene arreglo.
       setErrorCarga(error?.message || tAhora('No se pudo cargar la tienda'));
     } finally {
       setCargando(false);
@@ -154,12 +103,9 @@ export const TiendaProvider = ({ children }) => {
     traerCatalogo();
   }, [traerCatalogo]);
 
-  /*
-   * Volver a pedir el catálogo SIN pasar por "cargando": es el de jalar la
-   * lista para recargar. Con traerCatalogo la tienda entera se cambiaba por
-   * la pantalla de espera en medio del gesto. Devuelve si salió bien, para
-   * que quien jaló sepa si decir "listo" o "no se pudo".
-   */
+  // Volver a pedir el catálogo SIN pasar por "cargando": es el de jalar la lista para recargar. Con
+  // traerCatalogo la tienda entera se cambiaba por la pantalla de espera en medio del gesto.
+  // Devuelve si salió bien, para que quien jaló sepa si decir "listo" o "no se pudo".
   const refrescarCatalogo = useCallback(async () => {
     try {
       const { productos: crudos, promociones: promos } = await cargarTienda();
@@ -189,12 +135,9 @@ export const TiendaProvider = ({ children }) => {
     };
   }, []);
 
-  /*
-   * Los productos de UN pasillo, o todos si no hay ninguno elegido. De acá
-   * salen categorías, destacados y "Se están acabando" — elegir "Panadería"
-   * tiene que sentirse como entrar a una tienda más chica, no como un filtro
-   * más encima del catálogo entero.
-   */
+  // Los productos de UN pasillo, o todos si no hay ninguno elegido. De acá salen categorías,
+  // destacados y "Se están acabando" — elegir "Panadería" tiene que sentirse como entrar a una
+  // tienda más chica, no como un filtro más encima del catálogo entero.
   const productosDelPasillo = useMemo(() => {
     if (!moduloSeleccionado) return productos;
     return productos.filter((p) => String(p.moduloId) === String(moduloSeleccionado));
@@ -208,10 +151,8 @@ export const TiendaProvider = ({ children }) => {
     setFiltros((f) => (f.marca ? { ...f, marca: '' } : f));
   }, [moduloSeleccionado]);
 
-  /*
-   * Los filtros que elige el cliente: orden, precio, solo ofertas, solo lo
-   * disponible y marca. Igual que la web: ver utils/filtrosTienda.js.
-   */
+  // Los filtros que elige el cliente: orden, precio, solo ofertas, solo lo disponible y marca. Igual
+  // que la web: ver utils/filtrosTienda.js.
   const [filtros, setFiltros] = useState(FILTROS_VACIOS);
   const cambiarFiltro = useCallback((clave, valor) => setFiltros((f) => ({ ...f, [clave]: valor })), []);
   const limpiarFiltros = useCallback(() => setFiltros(FILTROS_VACIOS), []);
@@ -255,35 +196,27 @@ export const TiendaProvider = ({ children }) => {
 
   const productosDestacados = useMemo(() => productosDelPasillo.slice(0, 6), [productosDelPasillo]);
 
-  /*
-   * Las filas que se arman solas con el inventario ("Se están acabando",
-   * "Nuevos en la tienda"). Ver utils/secciones.js para cuáles y por qué esas.
-   */
+  // Las filas que se arman solas con el inventario ("Se están acabando", "Nuevos en la tienda"). Ver
+  // utils/secciones.js para cuáles y por qué esas.
   const secciones = useMemo(() => armarSecciones(productosDelPasillo), [productosDelPasillo]);
 
-  // Las que de verdad se anuncian en el carrusel, y solo las de ESTE pasillo
-  // — igual que la web (PromoBanners con moduloId). Sin pasillo elegido
-  // (toda la tienda) salen todas. Las más nuevas primero y hasta nueve, en el
-  // mismo orden que la web (ver utils/anillo.js).
+  // Las que de verdad se anuncian en el carrusel, y solo las de ESTE pasillo — igual que la web
+  // (PromoBanners con moduloId). Sin pasillo elegido (toda la tienda) salen todas. Las más nuevas
+  // primero y hasta nueve, en el mismo orden que la web (ver utils/anillo.js).
   const promosDelCarrusel = useMemo(
     () => ordenarAnuncios(promosVisibles(promociones)).filter((p) => promoEnModulo(p, moduloSeleccionado)),
     [promociones, moduloSeleccionado]
   );
 
-  /*
-   * Una promoción se mira en su propia página (pages/Promo.js), como en la
-   * web: antes era una hoja encima de la tienda. Se navega por su id; la
-   * página saca la promo y sus productos de aquí, al día.
-   */
+  // Una promoción se mira en su propia página (pages/Promo.js), como en la web: antes era una hoja
+  // encima de la tienda. Se navega por su id; la página saca la promo y sus productos de aquí, al
+  // día.
   const abrirPromo = useCallback((promo) => {
     if (promo?._id) navegarA('Promo', { id: String(promo._id) });
   }, []);
 
-  /*
-   * "Ver todos en la tienda": deja la lista filtrada a esa promo, limpiando
-   * categoría y búsqueda para que no se peleen entre filtros. Quien lo llama
-   * (la página de la promo) vuelve a la tienda.
-   */
+  // "Ver todos en la tienda": deja la lista filtrada a esa promo, limpiando categoría y búsqueda
+  // para que no se peleen entre filtros. Quien lo llama (la página de la promo) vuelve a la tienda.
   const verPromoEnTienda = useCallback((promo) => {
     setPromoSeleccionada(promo);
     setCategoriaSeleccionada(null);
@@ -309,14 +242,9 @@ export const TiendaProvider = ({ children }) => {
     };
   }, [llaveActual]);
 
-  /*
-   * Al iniciar sesión, lo que llenó como invitado se pasa a su cuenta.
-   *
-   * Sin esto el arreglo queda a medias justo donde más duele: la tienda se
-   * recorre sin cuenta, el carrito se llena sin cuenta, y al entrar para pagar
-   * la llave cambia y el carrito aparece vacío. Se toma la cantidad MAYOR de
-   * las dos, nunca la suma, para no duplicar sin querer.
-   */
+  // Al iniciar sesión, lo que llenó como invitado se pasa a su cuenta. Sin esto el arreglo queda a
+  // medias justo donde más duele: la tienda se recorre sin cuenta, el carrito se llena sin cuenta, y
+  // al entrar para pagar la llave cambia y el carrito aparece vacío.
   useEffect(() => {
     if (!user?.id) return;
     let vivo = true;
@@ -347,15 +275,9 @@ export const TiendaProvider = ({ children }) => {
     };
   }, [user?.id]);
 
-  /*
-   * El carrito que se ve = lo guardado CASADO con el catálogo de hoy.
-   *
-   * Por eso un producto que la tienda dio de baja o que se quedó sin stock
-   * desaparece solo, y una cantidad guardada mayor a lo que hay se recorta a
-   * lo que hay. Mientras el catálogo no haya cargado no se muestra nada: es
-   * preferible un carrito que tarda un instante a uno que enseña precios que
-   * ya no son.
-   */
+  // El carrito que se ve = lo guardado CASADO con el catálogo de hoy. Por eso un producto que la
+  // tienda dio de baja o que se quedó sin stock desaparece solo, y una cantidad guardada mayor a lo
+  // que hay se recorta a lo que hay.
   const carrito = useMemo(() => {
     if (lineas.length === 0 || productos.length === 0) return [];
     const porId = new Map(productos.map((p) => [String(p.id), p]));
@@ -367,11 +289,9 @@ export const TiendaProvider = ({ children }) => {
     }, []);
   }, [lineas, productos]);
 
-  /*
-   * Guardar es "escribir estas líneas y recordarlas". Se pasa la lista ya
-   * resuelta (con nombre, precio, etc.) y aquí se recorta a {id, cantidad}:
-   * quien llama no tiene que acordarse de no guardar el precio.
-   */
+  // Guardar es "escribir estas líneas y recordarlas". Se pasa la lista ya resuelta (con nombre,
+  // precio, etc.) y aquí se recorta a {id, cantidad}: quien llama no tiene que acordarse de no
+  // guardar el precio.
   const guardarCarrito = useCallback(
     (lista) => {
       const nuevas = (lista || [])
@@ -386,34 +306,21 @@ export const TiendaProvider = ({ children }) => {
       }
 
       guardar(llaveActual, JSON.stringify(nuevas)).then((ok) => {
-        /*
-         * SecureStore tiene un tope de tamaño (~2048 bytes en iOS). Un carrito
-         * son pares id+cantidad, así que hacen falta decenas de líneas para
-         * acercarse — pero si un día pasa, callarlo sería lo peor: el carrito
-         * seguiría bien en pantalla y aparecería vacío al volver mañana, sin
-         * que nadie entienda por qué.
-         */
+        // SecureStore tiene un tope de tamaño (~2048 bytes en iOS).
         if (!ok) avisar(tAhora('Tu carrito funciona, pero no se pudo guardar para la próxima vez'), 'error');
       });
     },
     [llaveActual, avisar, setLineas]
   );
 
-  /*
-   * Cuando el catálogo termina de cargar, lo guardado se limpia de una vez: lo
-   * que ya no existe se borra y lo que se recortó se guarda recortado. Si no,
-   * la corrección se rehacía en cada visita y el aviso volvía a salir cada vez.
-   *
-   * Se avisa porque callarlo es peor: quien pidió tres y recibe dos merece
-   * enterarse ahora y no en la puerta de su casa.
-   */
+  // Cuando el catálogo termina de cargar, lo guardado se limpia de una vez: lo que ya no existe se
+  // borra y lo que se recortó se guarda recortado. Si no, la corrección se rehacía en cada visita y
+  // el aviso volvía a salir cada vez.
   const yaConciliado = useRef(false);
   useEffect(() => {
     if (cargando || !carritoLeido || yaConciliado.current) return;
-    /*
-     * Catálogo vacío = la API no respondió. Ahí no se toca nada: borrarle el
-     * carrito a alguien porque se cayó el servidor sería el peor arreglo.
-     */
+    // Catálogo vacío = la API no respondió. Ahí no se toca nada: borrarle el carrito a alguien porque
+    // se cayó el servidor sería el peor arreglo.
     if (productos.length === 0 || lineas.length === 0) return;
     yaConciliado.current = true;
 
@@ -441,17 +348,9 @@ export const TiendaProvider = ({ children }) => {
     avisar(tAhora('De tu carrito guardado, {partes}. Ya está corregido.', { partes: partes.join(tAhora(' y ')) }));
   }, [cargando, carritoLeido, productos, lineas, carrito, guardarCarrito, avisar]);
 
-  /*
-   * `origenRef` es la vista de la foto desde donde se tocó "+": si viene, y
-   * el carrito está a la vista, sale volando hasta él (ver
-   * utils/volarAlCarrito.js). Sin foto de origen —el asistente de voz agrega
-   * así— no hay de dónde volar, y no pasa nada más que el aviso de siempre.
-   * Mismo contrato que `agregarAlCarrito` de useStore.js, en la web.
-   *
-   * `hastaDondeAlcance` es para Tiqui: si piden 74 y quedan 12, entran las 12
-   * (el "+" de una tarjeta, en cambio, no agrega nada de más). Devuelve cuánto
-   * entró DE VERDAD, para que Tiqui diga eso y no lo que se pidió.
-   */
+  // `origenRef` es la vista de la foto desde donde se tocó "+": si viene, y el carrito está a la
+  // vista, sale volando hasta él (ver utils/volarAlCarrito.js). Sin foto de origen —el asistente de
+  // voz agrega así— no hay de dónde volar, y no pasa nada más que el aviso de siempre.
   const agregarAlCarrito = useCallback(
     (producto, cantidad = 1, { origenRef, hastaDondeAlcance = false } = {}) => {
       if (!producto?.id) return 0;
@@ -485,10 +384,8 @@ export const TiendaProvider = ({ children }) => {
 
       volarAlCarrito({ origenRef, uri: producto.imagen });
 
-      /*
-       * El aviso dice cuántas lleva, no solo que se agregó: al segundo toque el
-       * texto era idéntico y no había forma de saber si el toque contó.
-       */
+      // El aviso dice cuántas lleva, no solo que se agregó: al segundo toque el texto era idéntico y no
+      // había forma de saber si el toque contó.
       avisar(
         nuevaCantidad > 1
           ? tAhora('{nombre} · {cantidad} en el carrito', { nombre: producto.nombre, cantidad: cantidadConUnidad(producto, nuevaCantidad) })
@@ -523,10 +420,8 @@ export const TiendaProvider = ({ children }) => {
       const linea = actuales.find((l) => l.id === id);
       const stock = Number(productos.find((p) => String(p.id) === id)?.stock) || 0;
       if (!linea || stock <= 0) return 0;
-      /*
-       * El tope se respeta también aquí, no solo apagando el botón: el "+" se
-       * pulsa más rápido de lo que el render alcanza a deshabilitarlo.
-       */
+      // El tope se respeta también aquí, no solo apagando el botón: el "+" se pulsa más rápido de lo que
+      // el render alcanza a deshabilitarlo.
       const cantidad = Math.min(nuevaCantidad, stock);
       if (cantidad === linea.cantidad) return cantidad;
       guardarCarrito(actuales.map((l) => (l.id === id ? { ...l, cantidad } : l)));
@@ -541,14 +436,7 @@ export const TiendaProvider = ({ children }) => {
     if (cuantos) avisar(tAhora(cuantos > 1 ? 'Se vació el carrito ({n} productos)' : 'Se vació el carrito ({n} producto)', { n: cuantos }), 'quitar');
   }, [carrito, guardarCarrito, avisar]);
 
-  /*
-   * Vaciar el carrito porque el pedido YA SE HIZO.
-   *
-   * Hace lo mismo que `limpiarCarrito` pero sin decir nada, y ese es todo el
-   * motivo de que exista: "Se vació el carrito (3 productos)" apareciendo justo
-   * después de comprar se lee como que algo se perdió, cuando lo que pasó es
-   * exactamente lo contrario. Ver pages/Confirmacion.js.
-   */
+  // Vaciar el carrito porque el pedido YA SE HIZO.
   const vaciarTrasPedido = useCallback(() => guardarCarrito([]), [guardarCarrito]);
 
   // El total ya trae aplicado el NxM: la cuenta vive en utils/catalogo.js para

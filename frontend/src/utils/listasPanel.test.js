@@ -1,10 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { coincide, fechaDeAlta, ordenarLista, ORDEN_INICIAL } from './listasPanel';
 
-/*
- * Las listas del panel: lo más reciente primero, de entrada; y la búsqueda
- * sin tildes ni mayúsculas.
- */
+// Las listas del panel: lo más reciente primero, de entrada; y la búsqueda sin tildes ni
+// mayúsculas.
 
 // Un id de Mongo con la fecha adentro (los primeros 8 caracteres son los segundos).
 const idDe = (iso) => `${Math.floor(Date.parse(iso) / 1000).toString(16)}0000000000000000`;

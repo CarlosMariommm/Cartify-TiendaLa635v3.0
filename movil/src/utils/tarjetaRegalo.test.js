@@ -1,10 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { formatoCodigoTarjeta, LARGO_CODIGO_TARJETA } from './tarjetaRegalo';
 
-/*
- * Los guiones del código de una tarjeta de regalo se ponen solos.
- * (La web tiene la misma prueba sobre su copia.)
- */
+// Los guiones del código de una tarjeta de regalo se ponen solos. (La web tiene la misma prueba
+// sobre su copia.)
 
 describe('el código de una tarjeta de regalo', () => {
   it('pone los guiones mientras se escribe, sin dejar uno colgando', () => {

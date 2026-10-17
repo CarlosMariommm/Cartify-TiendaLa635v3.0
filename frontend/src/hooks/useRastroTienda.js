@@ -1,37 +1,9 @@
 import { useMemo } from 'react';
 import { useIdioma } from './useIdioma';
 
-/*
- * ============================================================
- * POR DÓNDE PASÓ — useRastroTienda.js
- * ============================================================
- * El camino que hizo la persona hasta llegar al producto que está viendo, en
- * escalones que se pueden pisar para devolverse a cualquiera de ellos.
- *
- * Antes las migas eran una frase fija: "Inicio › categoría del producto ›
- * nombre". Dos problemas. Uno, decían la categoría del producto aunque la
- * persona hubiera llegado por una búsqueda o desde "Más vendidos", así que
- * anunciaban un paso que nunca dio. Dos, ninguno de los escalones se podía
- * tocar: eran un letrero, no un camino.
- *
- * DE DÓNDE SALE EL CAMINO
- * De los filtros que están puestos, no de un historial aparte. En esta tienda
- * "estar en Frutas" ES tener la categoría filtrada: no hay una página de
- * categoría a la que se navegue, hay una lista que se acota. Guardar además
- * una pila de rutas visitadas sería inventar una segunda verdad que se
- * desincroniza con la primera a la que alguien toque un filtro.
- *
- * El orden es el de la tienda: el pasillo manda sobre la categoría, y la
- * búsqueda y la promo acotan lo que quedó. Ver useStore.
- *
- * CÓMO SE PISA UN ESCALÓN
- * Volver a un escalón es apagar todo lo que se puso DESPUÉS de él y cerrar la
- * ficha lo hace la ficha, que sabe cómo hacerlo sin descuadrar la historia del
- * navegador. Cada escalón se arma con su propia limpieza y no con un "atrás"
- * genérico: tocar "Inicio" deja la tienda como estaba al entrar, no deshace un
- * paso. Ver useDetalleProducto.
- * ============================================================
- */
+// POR DÓNDE PASÓ — useRastroTienda.js
+// El camino que hizo la persona hasta llegar al producto que está viendo, en escalones que se
+// pueden pisar para devolverse a cualquiera de ellos. Dos problemas.
 
 export const useRastroTienda = ({
   moduloSeleccionado,
@@ -62,10 +34,8 @@ export const useRastroTienda = ({
       },
     ];
 
-    /*
-     * El pasillo. Va primero porque en la tienda manda sobre todo lo demás:
-     * estando en Panadería, las categorías y la búsqueda son de la panadería.
-     */
+    // El pasillo. Va primero porque en la tienda manda sobre todo lo demás: estando en Panadería, las
+    // categorías y la búsqueda son de la panadería.
     if (moduloSeleccionado && nombrePasillo) {
       escalones.push({
         etiqueta: nombrePasillo,
@@ -89,11 +59,8 @@ export const useRastroTienda = ({
       });
     }
 
-    /*
-     * La búsqueda entrecomillada. No es una página, pero para quien buscó es
-     * el sitio del que viene, y sin ella el camino se saltaba el paso donde
-     * de verdad encontró el producto.
-     */
+    // La búsqueda entrecomillada. No es una página, pero para quien buscó es el sitio del que viene, y
+    // sin ella el camino se saltaba el paso donde de verdad encontró el producto.
     if (terminoBusqueda) {
       escalones.push({
         etiqueta: `"${terminoBusqueda}"`,

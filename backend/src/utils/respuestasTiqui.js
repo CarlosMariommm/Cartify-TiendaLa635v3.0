@@ -1,28 +1,6 @@
-/*
- * ============================================================
- * LO QUE TIQUI CONTESTA SOLA — respuestasTiqui.js
- * ============================================================
- * Cuando la IA propia (intencionesTiqui.js) reconoce algo sencillo con
- * confianza, Tiqui contesta aquí mismo, al instante y sin Gemini. Devuelve lo
- * mismo que Gemini (acciones + frase + ánimo), así que la web y la app —también
- * la que ya está instalada— lo ejecutan igual.
- *
- *   saludo, despedida, ayuda       una frase
- *   total, carrito                 la acción "total": la web y la app dicen lo
- *                                  que lleva y cuánto suma, con la cuenta exacta
- *   pagar                          la acción "comprar"
- *   pedidos, puntos, favoritos,    abren esa sección de la cuenta (sin sesión,
- *   recibos, direcciones,          se dice que primero entre con su cuenta)
- *   metodos_pago, cuenta
- *   ofertas                        una o dos de las vigentes, con su precio
- *   horario, ubicacion,            de Personalización › Datos del negocio; si
- *   contacto, envio                no está, se dice cómo averiguarlo
- *   nombre                         el de la sesión, o que todavía no lo sabe
- *
- * Todo en tú, Tiqui en femenino y frases cortas: se ESCUCHAN (ver MODO_TIQUI).
- * Nada se inventa: sin el dato, se dice dónde encontrarlo.
- * ============================================================
- */
+// LO QUE TIQUI CONTESTA SOLA — respuestasTiqui.js
+// Cuando la IA propia (intencionesTiqui.js) reconoce algo sencillo con confianza, Tiqui contesta
+// aquí mismo, al instante y sin Gemini.
 
 // Desde cuánta confianza contesta sola. Medido con las frases de prueba
 // (analitica/intenciones): con 70% contesta el 91% de lo sencillo y no hace
@@ -71,14 +49,7 @@ const decirOfertas = (ofertas) => {
   };
 };
 
-/*
- * `intencion`: la que reconoció la IA propia. El resto, lo que hace falta
- * para contestar: `tienda` ({ direccion, horario, whatsapp, telefono,
- * envioBase, envioPorKm }), `ofertas` ([{ nombre, oferta }], solo de lo que
- * tiene existencias), `nombre` (el primer nombre del cliente con sesión).
- * Devuelve { acciones, respuesta, animo }, o null si no es de las que
- * contesta sola.
- */
+// `intencion`: la que reconoció la IA propia.
 export const respuestaDirecta = (intencion, { tienda = {}, ofertas = [], nombre = "", azar = Math.random } = {}) => {
   const conSesion = Boolean(nombre);
   switch (intencion) {

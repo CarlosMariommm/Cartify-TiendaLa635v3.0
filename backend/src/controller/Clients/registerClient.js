@@ -10,12 +10,8 @@ import { sendEmail } from "../../utils/sendMailMailjet.js";
 const registerClientController = {};
 
 registerClientController.register = async (req, res) => {
-  // 1. Extraer los datos de texto del body
-  /*
-   * La dirección ya no se pide aquí. El formulario mandaba un texto suelto que
-   * se guardaba en un campo que después no leía nadie: las direcciones de
-   * entrega viven en clientAddress y se administran desde "Mi cuenta".
-   */
+  // 1. Extraer los datos de texto del body (la dirección ya no se pide aquí: las direcciones se
+  // administran desde "Mi cuenta").
   const {
     fullName,
     dui,
@@ -31,15 +27,9 @@ registerClientController.register = async (req, res) => {
   } = req.body;
 
   try {
-    /*
-     * Sin aceptación no hay cuenta, y esto se revisa AQUÍ aunque el formulario
-     * ya lo revise.
-     *
-     * La casilla del navegador es una cortesía para la persona, no una
-     * garantía para la tienda: cualquiera puede mandar el registro sin pasar
-     * por el formulario. Si el único control estuviera allá, la tienda tendría
-     * clientes sin consentimiento y ninguna forma de saber cuáles.
-     */
+    // Sin aceptación no hay cuenta, y esto se revisa AQUÍ aunque el formulario ya lo revise. La
+    // casilla del navegador es una cortesía para la persona, no una garantía para la tienda:
+    // cualquiera puede mandar el registro sin pasar por el formulario.
     if (!esVerdadero(aceptaTerminos)) {
       return res.status(400).json({
         message: "Hay que aceptar los términos y el aviso de privacidad"
@@ -56,19 +46,7 @@ registerClientController.register = async (req, res) => {
       return res.status(400).json({ message: "Ya existe una cuenta con ese nombre de usuario" });
     }
 
-    /*
-     * El DUI es OPCIONAL: si no viene, se guarda como undefined y no como "".
-     *
-     * Hoy la colección Clients no tiene índice único sobre dui (revisado
-     * contra la base: solo existe el índice de _id), pero el día que alguien
-     * se lo ponga, veinte clientes compartiendo la cadena vacía harían que el
-     * segundo registro sin DUI reventara con error de duplicado. Con undefined
-     * el campo ni siquiera se crea y un índice único los deja pasar a todos.
-     *
-     * Por lo mismo, el chequeo de abajo solo corre si de verdad escribió un
-     * DUI: sin eso, buscar `{ dui: undefined }` encontraría al primer cliente
-     * que tampoco tiene uno y lo rechazaría por "duplicado" sin serlo.
-     */
+    // El DUI es OPCIONAL: si no viene, se guarda como undefined y no como "".
     const duiLimpio = dui?.trim() ? dui.trim() : undefined;
 
     if (duiLimpio) {
@@ -100,18 +78,8 @@ registerClientController.register = async (req, res) => {
         email,
         userName,
         password: passwordHashed,
-        /*
-         * El consentimiento viaja dentro del token junto con lo demás, porque
-         * hasta que no se verifica el código no existe ningún documento donde
-         * guardarlo.
-         *
-         * La versión que se guarda es la del SERVIDOR, no la que mandó el
-         * navegador: si se aceptara la del cliente, bastaría con inventarse un
-         * número para dejar registrado un consentimiento de un texto que nunca
-         * existió. Y la fecha es la de AHORA —cuando de verdad marcó la
-         * casilla— y no la de la verificación, que puede ser quince minutos
-         * después.
-         */
+        // El consentimiento viaja dentro del token junto con lo demás, porque hasta que no se verifica el
+        // código no existe ningún documento donde guardarlo.
         terminosVersion: VERSION_TERMINOS,
         aceptadoEn: new Date().toISOString(),
         promociones: esVerdadero(promociones)
@@ -122,10 +90,9 @@ registerClientController.register = async (req, res) => {
 
     res.cookie("registrationCookie", token, opcionesCookie(15 * 60 * 1000));
 
-    // 4. Enviar el correo con el código
-    // Alternativa en texto plano: un correo que es SOLO html es una de las
-    // señales que más pesan para que los filtros de spam lo dejen fuera de
-    // la bandeja principal. Mismo contenido, sin el diseño.
+    // 4. Enviar el correo con el código Alternativa en texto plano: un correo que es SOLO html es una
+    // de las señales que más pesan para que los filtros de spam lo dejen fuera de la bandeja
+    // principal. Mismo contenido, sin el diseño.
     const textoPlano = `Gracias por registrarte en Tienda la 635. Tu código de verificación es: ${randomNumber}. Expira en 15 minutos. Si no solicitaste esto, ignora este correo.`;
     const htmlVerificacion = `
         <!DOCTYPE html>
@@ -241,15 +208,9 @@ registerClientController.verifyCode = async (req, res) => {
       email,
       userName,
       password,
-      /*
-       * Lo que aceptó, tal cual venía en el token.
-       *
-       * Si el token es de ANTES de que existiera el consentimiento —alguien
-       * que empezó el registro justo cuando se actualizó el servidor— el
-       * bloque no se escribe. Es preferible una cuenta sin registro de
-       * consentimiento, que se ve y se puede arreglar, a una con un "aceptó
-       * la versión 1.0" inventado por el código.
-       */
+      // Lo que aceptó, tal cual venía en el token. Si el token es de ANTES de que existiera el
+      // consentimiento —alguien que empezó el registro justo cuando se actualizó el servidor— el bloque
+      // no se escribe.
       ...(terminosVersion
         ? {
             consentimiento: {
@@ -259,14 +220,8 @@ registerClientController.verifyCode = async (req, res) => {
             },
           }
         : {}),
-      /*
-       * La elección de publicidad se copia a las preferencias de notificación,
-       * que es de donde las lee la pantalla de "Mi cuenta > Notificaciones".
-       * Sin esta línea, alguien que dijo que NO en el registro abriría su
-       * cuenta y encontraría las promociones encendidas por el default del
-       * modelo — o sea, la tienda haciendo caso omiso de lo que acababa de
-       * elegir.
-       */
+      // La elección de publicidad se copia a las preferencias de notificación, que es de donde las lee
+      // la pantalla de "Mi cuenta > Notificaciones".
       notificationPrefs: {
         promociones: !!promociones,
         nuevosProductos: true,
@@ -289,16 +244,7 @@ registerClientController.verifyCode = async (req, res) => {
 };
 registerClientController.getAll = async (req, res) => {
   try {
-    /*
-     * ESTA es la ruta que de verdad usa la pantalla de Clientes del panel
-     * (customerService.js pega aquí, no a /api/client), así que es la que
-     * estaba filtrando de verdad: devolvía el hash de la contraseña de cada
-     * cliente junto con su saldo, su DUI, su teléfono y sus direcciones con
-     * coordenadas. Sin autenticación, o sea a quien preguntara.
-     *
-     * El panel nunca usó la contraseña para nada; sacarla no le quita nada a
-     * la pantalla. Ver el mismo arreglo en clientController.getClients.
-     */
+    // La lista de clientes que usa el panel (customerService.js), sin la contraseña de nadie.
     const clients = await clientModel.find().select("-password");
     return res.status(200).json(clients);
   } catch (error) {

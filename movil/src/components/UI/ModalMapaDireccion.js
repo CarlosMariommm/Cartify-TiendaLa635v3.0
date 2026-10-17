@@ -1,38 +1,6 @@
-/*
- * ============================================================
- * MARCAR LA DIRECCIÓN EN EL MAPA — ModalMapaDireccion.js
- * ============================================================
- * Puerto de `frontend/src/components/Store/MapaDireccion.jsx`: el mapa donde
- * el cliente pone el pin en su portón, con los campos de la dirección
- * debajo. Se usa en los dos mismos lugares que la web — Checkout y Mi
- * cuenta → Direcciones — como una sola hoja compartida, no dos copias.
- *
- * ── Por qué es un WebView con MapLibre, y no react-native-maps ──
- * La web dejó Google Maps: la llave de Google del proyecto ya no sirve
- * (venció el trial) y Maps pide facturación con tarjeta (ver
- * `useUbicacion.js`). `react-native-maps` en Android SIEMPRE dibuja con el
- * motor de Google Maps por debajo — así que hubiera chocado con el mismo
- * problema. Un WebView que corre lo MISMO que la web (MapLibre con el estilo
- * de CARTO, como mapcn) no necesita ninguna llave y se ve igual.
- * El HTML que corre adentro está en `mapaDireccionHtml.js`; este archivo solo
- * pone el marco (la hoja, los campos, guardar/cancelar) y escucha los
- * mensajes que manda el mapa.
- *
- * ── Por qué es obligatorio poner el pin ──
- * Sin coordenadas el repartidor sale con un texto y sin saber a qué portón
- * tocar, y el envío no puede cobrarse por distancia. Se puede corregir el
- * TEXTO a mano (Nominatim acierta la calle pero no sabe que es "la casa del
- * portón verde"), pero no se puede guardar sin haber tocado el mapa.
- *
- * ── "Dirección actual" ──
- * Pide el GPS con `expo-location` (permiso de foreground nada más, no hace
- * falta ubicación en segundo plano) y mueve el pin igual que si se hubiera
- * tocado ese punto en el mapa. El mapa vive en el WebView y esto corre en
- * React Native, así que la posición se le manda al revés que un toque
- * normal: por `injectJavaScript`, llamando a `window.marcarPinExterno` (ver
- * mapaDireccionHtml.js) en vez de esperar un mensaje del mapa.
- * ============================================================
- */
+// MARCAR LA DIRECCIÓN EN EL MAPA — ModalMapaDireccion.js
+// Puerto de `frontend/src/components/Store/MapaDireccion.jsx`: el mapa donde el cliente pone el
+// pin en su portón, con los campos de la dirección debajo.
 
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -62,14 +30,9 @@ import { hojaCentrada } from '../../theme/pantalla';
 
 const ALTO_MAPA = 260;
 
-/*
- * `conBarraFlotante`: true solo cuando esta hoja se abre desde una pantalla
- * que vive DENTRO de un apartado del Tab (Mi cuenta → Direcciones) — ahí la
- * píldora de abajo flota por encima y tapa "Guardar esta dirección" si no se
- * le deja hueco. Desde Checkout no hace falta: es una pantalla de Stack que
- * reemplaza el Tab entero, sin píldora detrás. Mismo criterio que
- * `ModalProducto` (ver el comentario grande ahí).
- */
+// `conBarraFlotante`: true solo cuando esta hoja se abre desde una pantalla que vive DENTRO de un
+// apartado del Tab (Mi cuenta → Direcciones) — ahí la píldora de abajo flota por encima y tapa
+// "Guardar esta dirección" si no se le deja hueco.
 const ModalMapaDireccion = ({ alCerrar, alGuardar, guardando = false, conBarraFlotante = false }) => {
   const { t } = useIdioma();
   const { colores } = useTema();
@@ -168,12 +131,9 @@ const ModalMapaDireccion = ({ alCerrar, alGuardar, guardando = false, conBarraFl
     }
   };
 
-  /*
-   * Cada vez que cambia la posición —tocando el mapa o con "Dirección
-   * actual"— se le avisa al mapa por si acaso. Cuando el cambio vino de un
-   * toque dentro del propio mapa esto es un no-op (ya está ahí); cuando vino
-   * del GPS es lo único que lo entera de dónde centrarse y poner el pin.
-   */
+  // Cada vez que cambia la posición —tocando el mapa o con "Dirección actual"— se le avisa al mapa
+  // por si acaso. Cuando el cambio vino de un toque dentro del propio mapa esto es un no-op (ya está
+  // ahí); cuando vino del GPS es lo único que lo entera de dónde centrarse y poner el pin.
   useEffect(() => {
     if (posicion) {
       webviewRef.current?.injectJavaScript(
@@ -236,11 +196,8 @@ const ModalMapaDireccion = ({ alCerrar, alGuardar, guardando = false, conBarraFl
                 javaScriptEnabled
               />
 
-              {/*
-                La instrucción va ENCIMA del mapa: debajo, en una pantalla
-                chica, queda fuera de la vista y nadie se entera de que hay
-                que tocar algo.
-              */}
+              {/* La instrucción va ENCIMA del mapa: debajo, en una pantalla chica, queda fuera de la vista y
+                 nadie se entera de que hay que tocar algo. */}
               {!posicion && (
                 <View style={estilos.avisoSobreMap}>
                   <Text style={estilos.avisoSobreMapTexto}>{t('Toca en el mapa dónde te dejamos tu pedido')}</Text>

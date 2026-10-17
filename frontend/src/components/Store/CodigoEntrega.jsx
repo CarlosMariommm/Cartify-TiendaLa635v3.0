@@ -2,41 +2,16 @@ import { ShieldCheck, Store as StoreFront, Bike } from 'lucide-react';
 import { useTheme } from '../../hooks/useClientTheme';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * ============================================================
- * EL CÓDIGO DE ENTREGA — CodigoEntrega.jsx
- * ============================================================
- * Los cuatro dígitos que el cliente dicta al recibir su pedido.
- *
- * POR QUÉ EXISTE
- * Entregar era cuestión de fe: el repartidor llegaba a un portón, alguien salía
- * y decía "sí, es mío", y listo. En el mostrador, igual. Nada distinguía al
- * cliente que pagó de un vecino que oyó el timbre — ni protegía al repartidor
- * el día que alguien reclame que nunca recibió nada.
- *
- * QUIÉN LO VE
- * Solo el cliente, y solo en SU pedido. El personal NO lo tiene en pantalla a
- * propósito: si lo viera, podría marcar "entregado" desde la moto sin
- * preguntarle nada a nadie, y el código dejaría de probar lo único que tiene
- * que probar. Ver sinCodigoDeEntrega en el controlador de pedidos.
- *
- * CUÁNDO SE PINTA
- * Mientras el pedido está en curso. Un pedido ya entregado o cancelado no
- * necesita código, y dejarlo ahí invita a dictarlo cuando ya no toca. El
- * backend lo emite para TODOS los pedidos, sean de domicilio o de retiro: el
- * mostrador también entrega a quien se presente.
- * ============================================================
- */
+// EL CÓDIGO DE ENTREGA — CodigoEntrega.jsx
+// Los cuatro dígitos que el cliente dicta al recibir su pedido. En el mostrador, igual.
 const CodigoEntrega = ({ codigo, deliveryType, estado, compacto = false, enBurbuja = false }) => {
   const { palette } = useTheme();
   const c = palette.colors;
   const { t } = useIdioma();
 
-  /*
-   * Sin código no se pinta nada. Pasa en los pedidos anteriores a esta función,
-   * que se quedaron sin uno: mejor que no aparezca la tarjeta a que aparezca
-   * vacía y el cliente crea que se le perdió algo.
-   */
+  // Sin código no se pinta nada. Pasa en los pedidos anteriores a esta función, que se quedaron sin
+  // uno: mejor que no aparezca la tarjeta a que aparezca vacía y el cliente crea que se le perdió
+  // algo.
   if (!codigo) return null;
 
   // Ya entregado o cancelado: el código cumplió (o ya no aplica).
@@ -68,17 +43,9 @@ const CodigoEntrega = ({ codigo, deliveryType, estado, compacto = false, enBurbu
     );
   }
 
-  /*
-   * SIN RECUADRO. Antes era una tarjeta con borde y fondo propio metida dentro
-   * de otra tarjeta (el panel de la burbuja, la tarjeta del pedido), y cada
-   * dígito iba en su cajita con borde: recuadros dentro de recuadros, y en
-   * modo oscuro se veía como un bloque apelmazado.
-   *
-   * Ahora va directo sobre lo que tenga debajo. En las páginas lo separa de
-   * lo de arriba una línea fina; en la burbuja no hace falta, porque arriba
-   * ya está el encabezado. Lo que salta a la vista son los dígitos: grandes,
-   * sobre un tono suave de la marca y sin bordes.
-   */
+  // SIN RECUADRO. Ahora va directo sobre lo que tenga debajo. En las páginas lo separa de lo de
+  // arriba una línea fina; en la burbuja no hace falta, porque arriba ya está el encabezado. Lo que
+  // salta a la vista son los dígitos: grandes, sobre un tono suave de la marca y sin bordes.
   return (
     <div
       className={enBurbuja ? 'px-3.5 pt-4' : 'mt-6 pt-5'}

@@ -1,12 +1,6 @@
-/*
- * ============================================================
- * PRUEBAS (solo desarrollo) — al pie de Perfil
- * ============================================================
- * Botones para ver cómo se viven los avisos y un pedido a domicilio sin
- * hacer uno de verdad (ver utils/simulacionPedido.js). Perfil solo lo dibuja
- * con __DEV__: en la app que se publica no existe.
- * ============================================================
- */
+// PRUEBAS (solo desarrollo) — al pie de Perfil Botones para ver cómo se viven los avisos y un
+// pedido a domicilio sin hacer uno de verdad (ver utils/simulacionPedido.js). Perfil solo lo
+// dibuja con __DEV__: en la app que se publica no existe.
 
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';

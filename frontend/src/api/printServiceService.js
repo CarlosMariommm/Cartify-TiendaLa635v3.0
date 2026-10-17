@@ -1,9 +1,7 @@
 import api from './api';
 
-/*
- * SERVICIO DE FORMATOS DE IMPRESIÓN — printServiceService.js
- * Catálogo de formatos (Carta, A4, DUI, Póster…) con su precio. JSON.
- */
+// SERVICIO DE FORMATOS DE IMPRESIÓN — printServiceService.js Catálogo de formatos (Carta, A4, DUI,
+// Póster…) con su precio. JSON.
 export const printServiceService = {
   getServices: async () => (await api.get('/printService')).data,
   createService: async (data) => (await api.post('/printService', data)).data,

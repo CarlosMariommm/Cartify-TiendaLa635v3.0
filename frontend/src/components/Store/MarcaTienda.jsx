@@ -2,34 +2,8 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import { useAjustesCtx } from '../../context/AjustesContext';
 
-/*
- * ============================================================
- * LA MARCA DE LA TIENDA — MarcaTienda.jsx
- * ============================================================
- * El nombre (o el logo) de la tienda, UNA sola vez para toda la aplicación.
- *
- * EL PROBLEMA QUE RESUELVE
- * Cada barra superior se dibujaba su propia versión de la marca, y ninguna
- * coincidía con las otras:
- *
- *   - El menú de la tienda: logo si lo hay, si no el nombre en dos líneas
- *     a 19px.
- *   - Mi Cuenta: dos líneas a 16px, y nunca el logo.
- *   - El checkout y la confirmación: "Tienda" en gris a 11px encima de
- *     "la 635" a 18px, centrado. Ni parecido.
- *   - El login de clientes: dos líneas a 17px.
- *   - El login del panel y la pantalla de bienvenida: el nombre ESCRITO A
- *     MANO en el código.
- *
- * Los dos últimos son el problema de verdad: si el dueño le cambia el nombre
- * a su tienda en Personalización, esas dos pantallas se quedan con el viejo y
- * lo desmienten. Y ninguna de las otras enseñaba el logo, así que subir uno
- * lo hacía aparecer en el menú y en ningún lado más.
- *
- * Ahora todas piden la marca aquí. Cambiar cómo se ve la tienda es cambiar
- * este archivo, y cambia en todas partes a la vez.
- * ============================================================
- */
+// LA MARCA DE LA TIENDA — MarcaTienda.jsx
+// El nombre (o el logo) de la tienda, UNA sola vez para toda la aplicación.
 
 const Envoltura = styled.span`
   display: inline-flex;
@@ -38,10 +12,8 @@ const Envoltura = styled.span`
   line-height: 1.05;
 `;
 
-/*
- * El botón existe solo cuando la marca lleva a algún lado. Se declara aparte
- * para no meterle apariencia de botón a un texto que no se puede tocar.
- */
+// El botón existe solo cuando la marca lleva a algún lado. Se declara aparte para no meterle
+// apariencia de botón a un texto que no se puede tocar.
 const Boton = styled.button`
   background: none;
   border: none;
@@ -83,18 +55,11 @@ const Logo = styled.img`
   }
 `;
 
-/*
- * @param tamano - tamaño de letra del nombre, en px. El del menú es 19.
- * @param alto   - alto del logo, en px. El del menú es 38.
- * @param color  - color del texto; por defecto la tinta de la tienda.
- * @param onClick - si se pasa, la marca se vuelve un botón (volver al inicio).
- */
+// Recibe: tamano, alto, color, onClick.
 const MarcaTienda = ({ tamano = 19, alto = 38, color = 'var(--tinta, #111)', onClick, titulo }) => {
   const { ajustes } = useAjustesCtx();
-  /*
-   * Si la imagen no carga —Cloudinary caído, el archivo borrado— se cae al
-   * nombre escrito. Sin esto la tienda se quedaba sin nombre en ningún lado.
-   */
+  // Si la imagen no carga —Cloudinary caído, el archivo borrado— se cae al nombre escrito. Sin esto
+  // la tienda se quedaba sin nombre en ningún lado.
   const [logoFallo, setLogoFallo] = useState(false);
 
   const nombreCompleto = `${ajustes.nombreLinea1 || ''} ${ajustes.nombreLinea2 || ''}`.trim();

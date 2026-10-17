@@ -2,15 +2,9 @@ import loyaltyLedgerModel from "../models/loyaltyLedger.js";
 
 const loyaltyController = {};
 
-/*
- * Resumen de puntos del cliente (para su tarjeta de fidelidad):
- *   - available:     saldo disponible = suma de lotes NO vencidos
- *   - nextExpiry:    la próxima fecha en que vence un lote
- *   - expiringSoon:  puntos que vencen dentro de los próximos 30 días
- *
- * El vencimiento es "lazy": filtramos por expiresAt > ahora al leer, así no
- * necesitamos un cron que ande marcando lotes vencidos.
- */
+// Resumen de puntos del cliente (para su tarjeta de fidelidad): - available: saldo disponible =
+// suma de lotes NO vencidos - nextExpiry: la próxima fecha en que vence un lote - expiringSoon:
+// puntos que vencen dentro de los próximos 30 días
 loyaltyController.getSummary = async (req, res) => {
   try {
     const now = new Date();

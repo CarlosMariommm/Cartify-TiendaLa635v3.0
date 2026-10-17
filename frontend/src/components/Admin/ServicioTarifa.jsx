@@ -2,15 +2,9 @@ import { useState, useEffect } from 'react';
 import { Receipt } from 'lucide-react';
 import { useAjustesCtx } from '../../context/AjustesContext';
 
-/*
- * ============================================================
- * TARIFA DE SERVICIO (Admin) — ServicioTarifa.jsx
- * ============================================================
- * Un cobro extra opcional de la casa (empaque, comisión, lo que sea). El dueño
- * lo prende o apaga, y elige si es un monto fijo o un porcentaje del subtotal.
- * Apagado, el cliente no ve ninguna línea de servicio.
- * ============================================================
- */
+// TARIFA DE SERVICIO (Admin) — ServicioTarifa.jsx
+// Un cobro extra opcional de la casa (empaque, comisión, lo que sea). El dueño lo prende o apaga,
+// y elige si es un monto fijo o un porcentaje del subtotal.
 const ServicioTarifa = () => {
   const { ajustes, guardar, guardando } = useAjustesCtx();
 

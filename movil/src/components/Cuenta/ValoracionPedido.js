@@ -1,23 +1,6 @@
-/*
- * ============================================================
- * ¿QUÉ LE PARECIÓ SU PEDIDO? — ValoracionPedido.js
- * ============================================================
- * Puerto de `frontend/src/components/Store/ValoracionPedido.jsx`: cuando un
- * pedido ya está ENTREGADO, el cliente lo califica EN GENERAL —unas estrellas
- * y un comentario para todo el pedido, no producto por producto— y esa
- * calificación se guarda como reseña de cada producto que llevó.
- *
- * Así no queda flotando sin destino y de paso alimenta la nota de cada
- * producto, que es la que ve el resto de la tienda.
- *
- * ── "Ahora no" se recuerda ──
- *
- * La web lo guarda en `localStorage` con una clave por pedido; aquí va al
- * almacén de la app (ver utils/almacen.js) con la misma idea: omitir un
- * pedido no esconde el aviso de los demás, y no se vuelve a preguntar cada
- * vez que se abre ese pedido.
- * ============================================================
- */
+// ¿QUÉ LE PARECIÓ SU PEDIDO? — ValoracionPedido.js
+// Cuando el pedido ya se entregó, el cliente lo califica con estrellas y un comentario, y eso se
+// guarda como reseña de cada producto que llevó.
 
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';

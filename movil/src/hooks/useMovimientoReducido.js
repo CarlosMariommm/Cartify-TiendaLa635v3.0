@@ -1,13 +1,6 @@
-/*
- * ============================================================
- * "MENOS MOVIMIENTO" — useMovimientoReducido.js
- * ============================================================
- * Si la persona lo pidió en los ajustes de su teléfono (tercera edad,
- * migrañas, mareo), lo que se mueve por adorno se queda quieto: Tiqui deja de
- * columpiarse y los avisos aparecen sin rebote. Escucha el ajuste en vivo:
- * cambiarlo con la app abierta se nota al instante.
- * ============================================================
- */
+// "MENOS MOVIMIENTO" — useMovimientoReducido.js
+// Si la persona lo pidió en los ajustes de su teléfono (tercera edad, migrañas, mareo), lo que se
+// mueve por adorno se queda quieto: Tiqui deja de columpiarse y los avisos aparecen sin rebote.
 
 import { useEffect, useState } from 'react';
 import { AccessibilityInfo } from 'react-native';

@@ -1,36 +1,6 @@
-/*
- * ============================================================
- * EL ESQUELETO DE LOS CORREOS — correoBase.js
- * ============================================================
- * Lo que comparten todos los correos de la tienda: la armadura contra el modo
- * oscuro, la identidad de arriba y el pie.
- *
- * POR QUÉ EXISTE LA ARMADURA
- * Gmail en el teléfono, con el tema oscuro puesto, NO respeta los colores del
- * correo: los invierte. El encabezado azul marino salía celeste con letra
- * negra, el botón igual, y la tarjeta blanca se volvía gris carbón. El correo
- * se veía como el negativo de sí mismo.
- *
- * No hay una sola bandera que lo apague, así que van tres capas:
- *
- *   1. `color-scheme: light` — le dice al cliente "este correo ya está
- *      diseñado, no lo adaptes". Lo respetan Apple Mail y Outlook.
- *   2. `@media (prefers-color-scheme: dark)` — para los que sí leen el media
- *      query, se vuelven a fijar los colores con !important.
- *   3. `[data-ogsc]` y `[data-ogsb]` — el truco de Gmail. Cuando la app de
- *      Gmail invierte un correo, le cuelga esos atributos al marcado; son el
- *      único gancho que existe para volver a poner el color a mano.
- *
- * Ninguna de las tres funciona en todos lados, y por eso van las tres. Lo que
- * sí es seguro: los estilos EN LÍNEA se quedan como respaldo, así que en el
- * peor de los casos el correo se ve como antes y no roto.
- *
- * POR QUÉ LOS COLORES NO SON LOS DE LA MARCA A SECAS
- * El azul de la tienda (#003049) es casi negro. Sobre el fondo oscuro de Gmail
- * desaparece. Por eso el encabezado del correo usa el azul y el TEXTO va
- * blanco forzado: es la combinación que sobrevive a las dos versiones.
- * ============================================================
- */
+// EL ESQUELETO DE LOS CORREOS — correoBase.js
+// Lo que comparten todos los correos de la tienda: la armadura contra el modo oscuro, la identidad
+// de arriba y el pie.
 
 import { config } from "../../config.js";
 
@@ -39,10 +9,8 @@ export const AZUL_OSCURO = "#00283D";
 
 export const dinero = (n) => `$${(Number(n) || 0).toFixed(2)}`;
 
-/*
- * Escapar lo que escribió una persona en el panel antes de meterlo en el HTML.
- * Un "<" suelto en el nombre de un producto rompe el correo entero.
- */
+// Escapar lo que escribió una persona en el panel antes de meterlo en el HTML. Un "<" suelto en el
+// nombre de un producto rompe el correo entero.
 export const limpio = (texto = "") =>
   String(texto)
     .replace(/&/g, "&amp;")
@@ -50,11 +18,8 @@ export const limpio = (texto = "") =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 
-/*
- * El bloque de estilos del <head>. Va con clases y no con selectores de
- * etiqueta porque Gmail descarta las reglas que no entiende, y una clase es lo
- * más simple que existe.
- */
+// El bloque de estilos del <head>. Va con clases y no con selectores de etiqueta porque Gmail
+// descarta las reglas que no entiende, y una clase es lo más simple que existe.
 export const ESTILOS = `
   <meta name="color-scheme" content="light" />
   <meta name="supported-color-schemes" content="light" />
@@ -93,17 +58,9 @@ export const ESTILOS = `
     [data-ogsb] .boton      { background-color: ${AZUL} !important; }
   </style>`;
 
-/*
- * QUIÉN MANDA ESTE CORREO. Va arriba del todo, antes del asunto de adentro.
- *
- * Faltaba: los correos llegaban con un titular ("Llegaron 3 cosas nuevas") y
- * nada que dijera de qué tienda. Quien recibe cinco correos al día no tiene
- * por qué adivinar cuál de sus tiendas le escribe.
- *
- * Si el dueño cargó un logo en Personalización, manda el logo. Si no, el
- * nombre en dos renglones, igual que en el encabezado de la tienda. Nunca las
- * dos cosas: sería decir el nombre dos veces.
- */
+// QUIÉN MANDA ESTE CORREO. Va arriba del todo, antes del asunto de adentro. Faltaba: los correos
+// llegaban con un titular ("Llegaron 3 cosas nuevas") y nada que dijera de qué tienda. Quien
+// recibe cinco correos al día no tiene por qué adivinar cuál de sus tiendas le escribe.
 export const identidad = ({ nombreLinea1, nombreLinea2, logoUrl }) => {
   if (logoUrl) {
     return `<img src="${limpio(logoUrl)}" alt="${limpio(`${nombreLinea1} ${nombreLinea2}`.trim())}"
@@ -115,11 +72,9 @@ export const identidad = ({ nombreLinea1, nombreLinea2, logoUrl }) => {
     </p>`;
 };
 
-/*
- * El pie. `enlaceBaja` es la dirección de UN clic que apaga ese aviso; si no
- * viene, no se pinta la línea — el aviso de que su pedido va en camino no es
- * publicidad y no lleva salida. Ver plantillasAviso.js.
- */
+// El pie. `enlaceBaja` es la dirección de UN clic que apaga ese aviso; si no viene, no se pinta la
+// línea — el aviso de que su pedido va en camino no es publicidad y no lleva salida. Ver
+// plantillasAviso.js.
 export const pie = ({ nombreTienda, enlaceBaja, motivo }) => `
   <tr>
     <td class="pie" style="background:#f9f9f9;padding:22px 40px;border-top:1px solid #eeeeee;text-align:center;">
@@ -133,10 +88,8 @@ export const pie = ({ nombreTienda, enlaceBaja, motivo }) => `
     </td>
   </tr>`;
 
-/*
- * El botón. En su propia tabla porque Outlook ignora el padding de un <a>
- * suelto y lo deja del tamaño exacto del texto.
- */
+// El botón. En su propia tabla porque Outlook ignora el padding de un <a> suelto y lo deja del
+// tamaño exacto del texto.
 export const boton = ({ texto, url, color = AZUL }) => `
   <table cellpadding="0" cellspacing="0" align="center">
     <tr><td class="boton" style="background:${color};border-radius:10px;">

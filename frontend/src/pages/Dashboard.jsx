@@ -39,10 +39,8 @@ const ServiceGrid = styled.div`
   width: 100%;
 `;
 
-/*
- * Cada servicio es un botón, no un div con clic: al div no se llega con Tab,
- * y quien usa el panel con teclado no podía abrir ningún servicio.
- */
+// Cada servicio es un botón, no un div con clic: al div no se llega con Tab, y quien usa el panel
+// con teclado no podía abrir ningún servicio.
 const ServiceCard = styled.button`
   width: 100%;
   border: none;
@@ -115,12 +113,9 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { modulos, cargando } = useModulos();
 
-  /*
-   * La sesión ya no se lee a mano de localStorage: vive en dos cajones, uno
-   * por área, y quién manda depende de dónde está parada la persona. Leer la
-   * llave 'token' aquí dejaba esta pantalla mandando al login para siempre,
-   * porque esa llave ya no existe. Ver AuthContext.
-   */
+  // La sesión ya no se lee a mano de localStorage: vive en dos cajones, uno por área, y quién manda
+  // depende de dónde está parada la persona. Leer la llave 'token' aquí dejaba esta pantalla
+  // mandando al login para siempre, porque esa llave ya no existe. Ver AuthContext.
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
@@ -129,11 +124,9 @@ const Dashboard = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  /*
-   * A dónde lleva cada módulo. Los pasillos normales van a la MISMA tienda,
-   * ya parada en su estantería; solo los que tienen flujo propio abren otra
-   * pantalla. Por eso agregar la panadería no necesita ruta nueva.
-   */
+  // A dónde lleva cada módulo. Los pasillos normales van a la MISMA tienda, ya parada en su
+  // estantería; solo los que tienen flujo propio abren otra pantalla. Por eso agregar la panadería
+  // no necesita ruta nueva.
   const abrirModulo = (modulo) => {
     if (flujoDeModulo(modulo) === 'impresiones') {
       navigate('/impresiones');
@@ -144,22 +137,15 @@ const Dashboard = () => {
 
   return (
     <Container>
-      {/*
-        El MISMO encabezado de la tienda. Aquí había una barra propia con el
-        nombre escrito a mano y centrado y un "Cerrar Sesión" en rojo: sin
-        buscador, sin carrito y sin logo, parecía otro sitio. Salir de la cuenta
-        sigue a un toque, en Mi Cuenta, como en el resto de la tienda.
-      */}
+      {/* El MISMO encabezado de la tienda. Aquí había una barra propia con el nombre escrito a mano y
+         centrado y un "Cerrar Sesión" en rojo: sin buscador, sin carrito y sin logo, parecía otro sitio.
+         Salir de la cuenta sigue a un toque, en Mi Cuenta, como en el resto de la tienda. */}
       <HeaderTienda />
 
       <Body>
         <SectionTitle>Servicios</SectionTitle>
 
-        {/*
-          Los servicios salen de los módulos de la tienda. Antes estaban
-          escritos aquí a mano, así que abrir la panadería significaba
-          programar otra tarjeta: hoy basta con crear el módulo en el panel.
-        */}
+        {/* Los servicios salen de los módulos de la tienda. */}
         {cargando ? (
           <Vacio>Cargando los servicios…</Vacio>
         ) : modulos.length === 0 ? (

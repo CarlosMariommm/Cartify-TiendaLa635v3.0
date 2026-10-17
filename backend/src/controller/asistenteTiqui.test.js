@@ -1,10 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import jsonwebtoken from "jsonwebtoken";
 
-/*
- * Tiqui de la tienda con su IA propia: lo sencillo lo contesta sola, al
- * instante; lo demás sigue yendo a Gemini. La base y Gemini son de mentira.
- */
+// Tiqui de la tienda con su IA propia: lo sencillo lo contesta sola, al instante; lo demás sigue
+// yendo a Gemini. La base y Gemini son de mentira.
 
 // La IA propia viene apagada; estas pruebas la encienden, y la última la apaga.
 const config = { JWT: { secret: "secreto-de-prueba" }, tiqui: { iaPropia: true } };

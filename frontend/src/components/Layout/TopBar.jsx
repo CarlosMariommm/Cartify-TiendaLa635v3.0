@@ -15,11 +15,8 @@ const TopBar = ({ onAlternarMenu, menuAbierto = false }) => {
   const { pathname } = useLocation();
   const { isOpen, toggle, close, ref } = useDropdown();
 
-  /*
-   * El botón del PANEL cierra las dos sesiones (ver logoutTodo en
-   * AuthContext): quien toca "Cerrar sesión" aquí espera salir del todo, no
-   * encontrarse conectado como cliente al volver a la tienda.
-   */
+  // El botón del PANEL cierra las dos sesiones (ver logoutTodo en AuthContext): quien toca "Cerrar
+  // sesión" aquí espera salir del todo, no encontrarse conectado como cliente al volver a la tienda.
   const handleLogout = () => {
     close();
     logoutTodo();
@@ -38,11 +35,8 @@ const TopBar = ({ onAlternarMenu, menuAbierto = false }) => {
       className="h-20 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 sticky top-0 z-20 transition-colors duration-300"
       style={{ backgroundColor: c.topbarBg, borderBottom: `1px solid ${c.sidebarBorder}` }}
     >
-      {/*
-        La hamburguesa es la única puerta al menú en teléfono, así que se queda
-        en la esquina donde el pulgar la busca. De 1024px para arriba el menú ya
-        está a la vista y el botón sobra.
-      */}
+      {/* La hamburguesa es la única puerta al menú en teléfono, así que se queda en la esquina donde el
+         pulgar la busca. De 1024px para arriba el menú ya está a la vista y el botón sobra. */}
       <div className="flex-1 min-w-0">
         <button
           type="button"
@@ -58,10 +52,8 @@ const TopBar = ({ onAlternarMenu, menuAbierto = false }) => {
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-        {/*
-          La ayuda de ESTA pantalla: abre /ayuda justo en el tema de donde se
-          está parado (o en "Cómo se usa el panel" si la pantalla no tiene uno).
-        */}
+        {/* La ayuda de ESTA pantalla: abre /ayuda justo en el tema de donde se está parado (o en "Cómo se
+           usa el panel" si la pantalla no tiene uno). */}
         <Link
           to={`/ayuda?tema=${temaDeRuta(pathname) || 'primeros-pasos'}`}
           aria-label="Ayuda de esta pantalla"
@@ -87,11 +79,9 @@ const TopBar = ({ onAlternarMenu, menuAbierto = false }) => {
             aria-expanded={isOpen}
             className="flex items-center gap-2 sm:gap-3 min-w-0 press"
           >
-            {/*
-              El nombre se esconde en teléfono: entre la hamburguesa, el selector
-              de paleta y la inicial no queda ancho, y un nombre largo empujaba la
-              barra a lo ancho. La inicial y el rol se recuperan al tocar "Cuenta".
-            */}
+            {/* El nombre se esconde en teléfono: entre la hamburguesa, el selector de paleta y la inicial no
+               queda ancho, y un nombre largo empujaba la barra a lo ancho. La inicial y el rol se recuperan al
+               tocar "Cuenta". */}
             <div className="text-right hidden sm:block min-w-0">
               <p className="text-sm font-semibold leading-tight truncate" style={{ color: c.textPrimary }}>{displayName}</p>
               <p className="text-xs truncate" style={{ color: c.textMuted }}>{roleLabel}</p>

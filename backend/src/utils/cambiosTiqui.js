@@ -10,30 +10,9 @@ import { avisarPromoNuevaEnSegundoPlano } from "./avisoPromo.js";
 import { codigoDePedido, olvidarPanorama, temporadasDisponibles } from "./panoramaNegocio.js";
 import { describirOferta, nombreDePromo, precioEnPromo } from "./consejosVentas.js";
 
-/*
- * ============================================================
- * LO QUE TIQUI DEL PANEL PUEDE CAMBIAR — cambiosTiqui.js
- * ============================================================
- * Tiqui NUNCA cambia nada por su cuenta. El camino es siempre en dos pasos:
- *
- *   1. proponerCambio: lo que entendió el modelo se valida contra la base (que
- *      el pedido exista, que el paso tenga sentido, que el producto sea ese)
- *      y se convierte en una frase: "Paso el pedido #88D230 a listo para
- *      recoger. ¿Lo hago?". La propuesta sale FIRMADA (firmarPropuesta), con
- *      quién la pidió y 5 minutos de vida.
- *   2. aplicarCambio: solo cuando la persona dice que sí. Se vuelve a validar
- *      con lo que hay AHORA (en esos segundos otro empleado pudo mover el
- *      pedido) y se aplica con la misma lógica que las pantallas del panel.
- *
- * El modelo puede entender mal —"el pedido de María" cuando hay tres—, y un
- * pedido mal movido le manda un aviso equivocado a un cliente. Por eso la
- * confirmación no es opcional ni la decide el modelo: la exige el servidor.
- *
- * Quién puede qué: el empleado mueve pedidos (igual que en su pantalla); el
- * resto —existencias, precios, productos, promociones y temporada— es del
- * administrador, como sus pantallas.
- * ============================================================
- */
+// LO QUE TIQUI DEL PANEL PUEDE CAMBIAR — cambiosTiqui.js
+// Nunca cambia nada por su cuenta: primero propone el cambio (firmado, dura 5 minutos) y solo lo
+// aplica si la persona confirma.
 
 export const CAMBIOS_ADMIN = [
   "estado_pedido", "existencias", "precio", "mostrar_producto", "ocultar_producto",
@@ -90,17 +69,9 @@ const buscarPromo = async (titulo) => {
 
 const nombreCliente = (pedido) => String(pedido.clientId?.fullName || "").trim().split(/\s+/)[0] || "";
 
-/*
- * ── Ajustar el precio de una promoción ──
- * Lo que Tiqui sugiere como ayudante de ventas ("con 20% todavía deja 10%")
- * se puede hacer aquí, dentro del MISMO tipo de promo: el descuento de un
- * descuento, el precio de un precio fijo o el NxM de un NxM. Cambiar un 2x1
- * por un descuento es otra promoción (otro sello, otro banner): eso se hace
- * en la pantalla de Promociones.
- *
- * `producto` es opcional: sin él, el cambio va para todos los productos de la
- * promo; con él, solo para ese.
- */
+// ── Ajustar el precio de una promoción ── Lo que Tiqui sugiere como ayudante de ventas ("con 20%
+// todavía deja 10%") se puede hacer aquí, dentro del MISMO tipo de promo: el descuento de un
+// descuento, el precio de un precio fijo o el NxM de un NxM.
 const promoParaAjustar = async (titulo) => {
   const { promo, error } = await buscarPromo(titulo);
   if (error) return { error };
@@ -138,11 +109,9 @@ const comoQueda = (promo, items, nuevo) => {
     : " Con eso ninguno queda por debajo de lo que cuesta.";
 };
 
-/*
- * Revisa que el cambio tenga sentido con lo que hay AHORA y lo describe.
- * Devuelve { ok: true, cambio, resumen } o { ok: false, mensaje }.
- * `cambio` es lo mínimo para aplicarlo después (ids, no nombres).
- */
+// Revisa que el cambio tenga sentido con lo que hay AHORA y lo describe. Devuelve { ok: true,
+// cambio, resumen } o { ok: false, mensaje }. `cambio` es lo mínimo para aplicarlo después (ids,
+// no nombres).
 export const proponerCambio = async (args, { esAdmin }) => {
   const tipo = args.cambio;
   const permitidos = esAdmin ? CAMBIOS_ADMIN : CAMBIOS_EMPLEADO;
@@ -184,11 +153,8 @@ export const proponerCambio = async (args, { esAdmin }) => {
           resumen: `Marco el pedido ${numero}${de} como entregado, con el código correcto.`,
         };
       }
-      /*
-       * Cancelar pide el porqué, igual que el botón de Pedidos: al cliente le
-       * llega en la notificación y en el correo. Si no lo dijeron, se pregunta;
-       * inventarlo sería peor que no decir nada.
-       */
+      // Cancelar pide el porqué, igual que el botón de Pedidos: al cliente le llega en la notificación y
+      // en el correo. Si no lo dijeron, se pregunta; inventarlo sería peor que no decir nada.
       if (estado === "cancelado") {
         const motivo = String(args.motivo || "").trim().replace(/\s+/g, " ");
         if (motivo.length < 4) {
@@ -353,11 +319,9 @@ export const proponerCambio = async (args, { esAdmin }) => {
   }
 };
 
-/*
- * La propuesta firmada: lo que se va a aplicar, quién lo pidió y hasta cuándo
- * vale. El navegador (o la app) solo la guarda y la devuelve si la persona
- * dice que sí; no puede cambiarle nada sin romper la firma.
- */
+// La propuesta firmada: lo que se va a aplicar, quién lo pidió y hasta cuándo vale. El navegador
+// (o la app) solo la guarda y la devuelve si la persona dice que sí; no puede cambiarle nada sin
+// romper la firma.
 const PROPOSITO = "tiqui-panel-cambio";
 
 export const firmarPropuesta = (cambio, usuario) =>
@@ -373,11 +337,9 @@ export const leerPropuesta = (token, usuario) => {
   }
 };
 
-/*
- * Aplica un cambio ya confirmado. Se vuelve a validar desde cero con
- * proponerCambio (el pedido pudo moverse, la promo pudo apagarse) y se aplica
- * con la misma lógica que las pantallas. Devuelve { ok, mensaje }.
- */
+// Aplica un cambio ya confirmado. Se vuelve a validar desde cero con proponerCambio (el pedido
+// pudo moverse, la promo pudo apagarse) y se aplica con la misma lógica que las pantallas.
+// Devuelve { ok, mensaje }.
 export const aplicarCambio = async (cambio, { esAdmin, nombre }) => {
   const permitidos = esAdmin ? CAMBIOS_ADMIN : CAMBIOS_EMPLEADO;
   if (!cambio || !permitidos.includes(cambio.tipo)) {
@@ -451,11 +413,8 @@ export const aplicarCambio = async (cambio, { esAdmin, nombre }) => {
         return { ok: false, mensaje: "Esa promoción ya venció. Cámbiale la fecha en Promociones." };
       }
       await promotionModel.updateOne({ _id: promo._id }, { $set: { isActive: cambio.activa } });
-      /*
-       * La promo que se enciende por primera vez se anuncia, igual que al
-       * encenderla desde la pantalla de Promociones (promotionController): el
-       * propio aviso revisa que no se haya mandado antes.
-       */
+      // La promo que se enciende por primera vez se anuncia, igual que al encenderla desde la pantalla
+      // de Promociones (promotionController): el propio aviso revisa que no se haya mandado antes.
       if (cambio.activa && !promo.avisoEnviadoEn) avisarPromoNuevaEnSegundoPlano(String(promo._id));
       mensaje = `Listo, la promoción ${promo.title || promo.etiqueta} quedó ${cambio.activa ? "encendida" : "apagada"}.`;
       break;
@@ -467,12 +426,9 @@ export const aplicarCambio = async (cambio, { esAdmin, nombre }) => {
       const nombre = nombreDePromo(promo);
       const toca = (item) => !cambio.productoIds || cambio.productoIds.includes(String(item.productId));
       const textos = ["title", "promoDescription"];
-      /*
-       * El título y la descripción los escribió el dueño y a veces traen el
-       * número ("2x1 en Coca", "-40% en lácteos"). Si quedaran con el viejo,
-       * la tarjeta diría una cosa y cobraría otra: se cambia el número ahí
-       * también, solo cuando el cambio es para toda la promo.
-       */
+      // El título y la descripción los escribió el dueño y a veces traen el número ("2x1 en Coca", "-40%
+      // en lácteos"). Si quedaran con el viejo, la tarjeta diría una cosa y cobraría otra: se cambia el
+      // número ahí también, solo cuando el cambio es para toda la promo.
       const reemplazar = (de, a) => {
         if (cambio.productoIds) return;
         for (const campo of textos) {

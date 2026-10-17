@@ -4,11 +4,8 @@ import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/re
 import Notificaciones from './Notificaciones';
 import { clientService } from '../../api/clientService';
 
-/*
- * Mi cuenta › Notificaciones: cada aviso con su interruptor en la app y, si
- * sale por correo, el suyo por correo. Apagar uno manda SOLO ese canal. El
- * servidor y la sesión son de mentira.
- */
+// Mi cuenta › Notificaciones: cada aviso con su interruptor en la app y, si sale por correo, el
+// suyo por correo. Apagar uno manda SOLO ese canal. El servidor y la sesión son de mentira.
 
 vi.mock('../../api/clientService', () => ({
   clientService: { getClientById: vi.fn(), updateNotifications: vi.fn() },

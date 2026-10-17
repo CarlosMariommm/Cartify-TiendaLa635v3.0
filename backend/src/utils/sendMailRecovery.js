@@ -1,11 +1,6 @@
-/*
- * Correo de recuperación de contraseña del cliente. Antes era una plantilla
- * genérica en inglés ("Password Recovery"), con degradado naranja/azul que no
- * pegaba con nada y un footer con support@example.com — un correo de mentira
- * que además es casi una bandera roja para los filtros de spam. Ahora usa la
- * misma cara que el resto de los avisos de la tienda (ver sendMail2FA.js y la
- * verificación de registro en registerClient.js): español, sobrio, café.
- */
+// Correo de recuperación de contraseña del cliente. Ahora usa la misma cara que el resto de los
+// avisos de la tienda (ver sendMail2FA.js y la verificación de registro en registerClient.js):
+// español, sobrio, café.
 const HTMLRecoveryEmail = (code) => {
   return `
     <div style="font-family: Arial, sans-serif; text-align: center; background-color: #F1F6F9; padding: 24px; border: 1px solid #ECE7E1; border-radius: 12px; max-width: 600px; margin: 0 auto;">

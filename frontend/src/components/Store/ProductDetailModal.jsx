@@ -12,46 +12,15 @@ import { foto, ANCHO } from '../../utils/fotos';
 import { enlaceDeProducto, compartirEnlace } from '../../utils/compartir';
 import { useAjustesCtx } from '../../context/AjustesContext';
 
-/*
- * ============================================================
- * FICHA DE UN PRODUCTO — ProductDetailModal.jsx
- * ============================================================
- * La pantalla de UN producto: su foto, su precio y el botón de agregarlo.
- *
- * QUÉ SE ARREGLÓ AQUÍ
- *
- * 1. La barra de arriba era OTRA. Tenía su propio "Volver", unas migas de pan
- *    y un botón de "Ayuda" que no hacía nada: ni buscador, ni pasillos, ni
- *    dirección de entrega, ni carrito. Abrir un producto era salirse de la
- *    tienda. Ahora arriba va el MISMO HeaderTienda de la portada, igual que en
- *    Seccion e Impresiones, y esta pantalla deja de ser una isla.
- *
- * 2. La foto flotaba en un rectángulo gris enorme. La columna de la izquierda
- *    era `1fr` —unos 800px en un monitor— con la imagen limitada a 340px de
- *    alto: quedaba un cuadro gris del ancho de media pantalla con el producto
- *    perdido en el centro. Ahora la galería es un cuadrado acotado y centrado.
- *
- * 3. Las recomendaciones vivían DENTRO de la columna izquierda, debajo de la
- *    foto, mientras la ficha de la derecha era pegajosa. Al bajar a verlas, la
- *    mitad derecha de la pantalla quedaba vacía con un precio flotando solo.
- *    Ahora son una franja a todo el ancho, debajo de las dos columnas.
- *
- * 4. Los colores estaban a mano (#111, #F5F5F5, #888). Se pintaban igual en
- *    Navidad que en agosto, porque no pasaban por las variables de marca.
- *
- * La lógica —el candado del scroll, el "atrás", los recomendados, el +18 y el
- * corazón— vive en useDetalleProducto. Aquí solo se pinta.
- * ============================================================
- */
+// FICHA DE UN PRODUCTO — ProductDetailModal.jsx
+// La pantalla de UN producto: su foto, su precio y el botón de agregarlo. QUÉ SE ARREGLÓ AQUÍ 1.
+// La barra de arriba era OTRA.
 
 const aparecer = keyframes`from { opacity: 0; } to { opacity: 1; }`;
 const subir = keyframes`from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; }`;
 
-/*
- * La capa que tapa la tienda. Ella es la que scrollea —por eso el hook le
- * congela el scroll al body— y por eso recibe el ref: al saltar de un producto
- * a otro hay que devolverla arriba.
- */
+// La capa que tapa la tienda. Ella es la que scrollea —por eso el hook le congela el scroll al
+// body— y por eso recibe el ref: al saltar de un producto a otro hay que devolverla arriba.
 const Capa = styled.div`
   position: fixed;
   inset: 0;
@@ -71,20 +40,7 @@ const Pagina = styled.div`
 
 /* ── Migas de pan ─────────────────────────────────────────── */
 
-/*
- * La franja del "Volver". Va por FUERA del encabezado y no es pegajosa: el
- * encabezado ya lo es, y dos barras clavadas arriba se montan una sobre otra
- * —que es exactamente lo que pasaba antes—. Esta se va con el scroll, como en
- * Seccion.
- */
-/*
- * Sin línea abajo. La tenía, y entre ella y la del encabezado las migas
- * quedaban metidas en un sándwich de dos rayas paralelas a 56px de distancia
- * —una franja que se anunciaba como si fuera una sección, cuando es solo el
- * camino de vuelta—. Con la del encabezado basta para separar la barra
- * pegajosa de lo que se desplaza; el respiro hasta la foto lo pone el padding
- * del contenido.
- */
+// La franja del "Volver": va fuera del encabezado, se va con el scroll y no lleva línea abajo.
 const Franja = styled.div`
   background: var(--papel);
 `;
@@ -101,11 +57,8 @@ const FranjaInterior = styled.div`
   @media (max-width: 620px) { padding: 0 16px; gap: 10px; }
 `;
 
-/*
- * El botón de volver vive DENTRO de la página, no se deja a la flecha del
- * navegador. En el teléfono esa flecha queda lejos del pulgar, y en el kiosco
- * directamente no existe.
- */
+// El botón de volver vive DENTRO de la página, no se deja a la flecha del navegador. En el
+// teléfono esa flecha queda lejos del pulgar, y en el kiosco directamente no existe.
 const Volver = styled.button`
   display: flex;
   align-items: center;
@@ -130,11 +83,8 @@ const Volver = styled.button`
   &:active { transform: scale(0.97); }
 `;
 
-/*
- * Dónde estoy parado. En el teléfono se esconde: con el nombre del producto
- * completo ocupaba dos renglones y empujaba la foto fuera de la pantalla, que
- * es lo único que la persona vino a ver.
- */
+// Dónde estoy parado. En el teléfono se esconde: con el nombre del producto completo ocupaba dos
+// renglones y empujaba la foto fuera de la pantalla, que es lo único que la persona vino a ver.
 const Migas = styled.nav`
   display: flex;
   align-items: center;
@@ -184,14 +134,9 @@ const Contenido = styled.main`
   @media (max-width: 620px) { padding: 22px 16px 36px; }
 `;
 
-/*
- * Las dos columnas de la ficha: la foto y lo que se puede hacer con ella.
- *
- * La segunda columna es FIJA en 420px y la primera se estira, pero con
- * minmax(0, 1fr) para que un nombre larguísimo sin espacios no le gane el
- * ancho a la otra. Debajo de 980px se apilan: a esa altura 420px de ficha
- * dejan a la foto en menos de la mitad de la pantalla.
- */
+// Las dos columnas de la ficha: la foto y lo que se puede hacer con ella. La segunda columna es
+// FIJA en 420px y la primera se estira, pero con minmax(0, 1fr) para que un nombre larguísimo sin
+// espacios no le gane el ancho a la otra.
 const Ficha = styled.section`
   display: grid;
   grid-template-columns: minmax(0, 1fr) 420px;
@@ -202,26 +147,14 @@ const Ficha = styled.section`
   @media (max-width: 980px)  { grid-template-columns: minmax(0, 1fr); gap: 28px; }
 `;
 
-/*
- * La foto, en un cuadrado acotado y centrado.
- *
- * El `max-width` es lo que arregla el rectángulo gris gigante: sin él, con
- * `1fr` de columna, el marco medía 800px de ancho por 380 de alto y el
- * producto quedaba flotando en medio de la nada.
- */
+// La foto, en un cuadrado acotado y centrado. El `max-width` es lo que arregla el rectángulo gris
+// gigante: sin él, con `1fr` de columna, el marco medía 800px de ancho por 380 de alto y el
+// producto quedaba flotando en medio de la nada.
 const Galeria = styled.div`
   position: relative;
   width: 100%;
   max-width: 540px;
-  /*
-   * Pegada a la IZQUIERDA, no centrada en su columna.
-   *
-   * Centrada dejaba unos 70px de aire a su izquierda, y en pantalla ancha eso
-   * la desalineaba de todo lo demás: "Volver", las migas y "Del mismo pasillo"
-   * arrancan en el borde del contenido y la foto arrancaba más adentro, como
-   * si fuera de otra página. Al apilarse en pantalla angosta sí se centra —
-   * ahí no hay borde con quien alinearse.
-   */
+  /* Pegada a la IZQUIERDA, no centrada en su columna. */
   margin: 0;
   aspect-ratio: 1 / 1;
   background: var(--papel-gris);
@@ -283,10 +216,8 @@ const Sello = styled.span`
   border-radius: var(--radio-pill);
 `;
 
-/*
- * El corazón. Se podía guardar un producto desde su tarjeta pero no desde su
- * ficha, que es justo donde uno termina de decidir si lo quiere.
- */
+// El corazón. Se podía guardar un producto desde su tarjeta pero no desde su ficha, que es justo
+// donde uno termina de decidir si lo quiere.
 const Corazon = styled.button`
   position: absolute;
   top: 14px;
@@ -314,10 +245,8 @@ const Corazon = styled.button`
   &:active { transform: scale(0.92); }
 `;
 
-/*
- * Compartir, debajo del corazón y con su misma forma: son las dos cosas que
- * se hacen con un producto que todavía no se va a comprar.
- */
+// Compartir, debajo del corazón y con su misma forma: son las dos cosas que se hacen con un
+// producto que todavía no se va a comprar.
 const BotonCompartir = styled(Corazon)`
   top: 66px;
   color: var(--tinta-tenue);
@@ -378,10 +307,7 @@ const PrecioAntes = styled.span`
   text-decoration: line-through;
 `;
 
-/*
- * Hay o no hay. El cliente NO ve cuántas quedan: el inventario es asunto de la
- * tienda.
- */
+// Hay o no hay. El cliente NO ve cuántas quedan: el inventario es asunto de la tienda.
 const Existencia = styled.span`
   display: inline-flex;
   align-items: center;
@@ -396,10 +322,8 @@ const Existencia = styled.span`
     : 'color-mix(in srgb, var(--exito) 12%, transparent)')};
 `;
 
-/*
- * El aviso de venta restringida. Rojo tenue y con borde: tiene que leerse como
- * una condición, no como una promoción más.
- */
+// El aviso de venta restringida. Rojo tenue y con borde: tiene que leerse como una condición, no
+// como una promoción más.
 const AvisoAdultos = styled.div`
   background: color-mix(in srgb, var(--alerta) 8%, transparent);
   border: 1px solid color-mix(in srgb, var(--alerta) 32%, transparent);
@@ -455,13 +379,9 @@ const Descripcion = styled.div`
     margin: 0 0 10px;
   }
 
-  /*
-   * pre-line respeta los enter que escribió quien cargó el producto. HTML
-   * colapsa los saltos de línea por defecto, así que una descripción escrita
-   * en renglones —"Peso: 500g" en uno, "Origen: nacional" en otro— salía toda
-   * pegada en un párrafo. Es "pre-line" y no "pre" a propósito: respeta los
-   * enter pero sigue acomodando el texto al ancho.
-   */
+  /* pre-line respeta los enter que escribió quien cargó el producto. HTML colapsa los saltos de
+     línea por defecto, así que una descripción escrita en renglones —"Peso: 500g" en uno, "Origen:
+     nacional" en otro— salía toda pegada en un párrafo. */
   p {
     margin: 0;
     font-size: 13.5px;
@@ -485,11 +405,7 @@ const Datos = styled.dl`
 
 /* ── Recomendaciones ──────────────────────────────────────── */
 
-/*
- * A TODO el ancho y debajo de las dos columnas. Antes vivían dentro de la
- * columna de la foto, así que se veían en media pantalla mientras la otra
- * mitad quedaba en blanco.
- */
+// A TODO el ancho y debajo de las dos columnas.
 const Recomendados = styled.section`
   margin-top: 56px;
   padding-top: 32px;
@@ -527,22 +443,13 @@ const ProductDetailModal = ({
   onAgregarAlCarrito,
   onVerProducto,
   todosLosProductos = [],
-  /*
-   * Por dónde pasó para llegar aquí: [{ etiqueta, alTocar }].
-   *
-   * Lo arma la PANTALLA, no la ficha. Solo ella sabe qué filtros tiene
-   * puestos y cómo deshacerlos — el producto por sí solo no distingue "llegué
-   * buscando fruta" de "me apareció en la portada". Si llega vacío, la ficha
-   * dibuja un camino de un solo escalón hasta el producto, que es la verdad
-   * cuando no hay nada más que contar. Ver useRastroTienda.
-   */
+  // Por dónde pasó para llegar aquí: [{ etiqueta, alTocar }]. Lo arma la PANTALLA, no la ficha. Solo
+  // ella sabe qué filtros tiene puestos y cómo deshacerlos — el producto por sí solo no distingue
+  // "llegué buscando fruta" de "me apareció en la portada".
   rastro = [],
-  /*
-   * Lo que el encabezado necesita de la pantalla que abrió esta ficha: el
-   * pasillo, la búsqueda y el carrito. Es opcional a propósito — HeaderTienda
-   * sabe arreglárselas sin ello (navega a la tienda, que es donde esas
-   * acciones existen), igual que en Impresiones. Ver HeaderTienda.
-   */
+  // Lo que el encabezado necesita de la pantalla que abrió esta ficha: el pasillo, la búsqueda y el
+  // carrito. Es opcional a propósito — HeaderTienda sabe arreglárselas sin ello (navega a la tienda,
+  // que es donde esas acciones existen), igual que en Impresiones. Ver HeaderTienda.
   header = {},
 }) => {
   const {
@@ -563,13 +470,8 @@ const ProductDetailModal = ({
   const { t } = useIdioma();
   const { ajustes } = useAjustesCtx();
 
-  /*
-   * La MISMA tarjeta que la tienda. Antes los recomendados tenían su propio
-   * diseño —más chico, con el stock en inglés ("5 Left") y el click vacío,
-   * literalmente un comentario donde debía abrirse el producto—. Reusarla
-   * arregla las tres cosas de una y evita que dentro de la misma pantalla haya
-   * dos formas de mostrar un producto.
-   */
+  // La MISMA tarjeta que la tienda. Reusarla arregla las tres cosas de una y evita que dentro de la
+  // misma pantalla haya dos formas de mostrar un producto.
   const tarjetas = (lista) => lista.map((p, i) => (
     <ProductCard
       key={p.id}
@@ -593,50 +495,32 @@ const ProductDetailModal = ({
     if (resultado === 'error') toast.error(t('No se pudo copiar el enlace'), { id: 'compartir' });
   };
 
-  /*
-   * A dónde cae al cerrar: el último sitio por el que pasó. Si el rastro es
-   * solo "Inicio" —o viene vacío— el botón se queda en "Volver" a secas, que
-   * es lo honesto: prometer "Volver a Inicio" cuando cerrar puede devolver a
-   * media portada scrolleada sería vender otra cosa.
-   */
+  // A dónde cae al cerrar: el último sitio por el que pasó. Si el rastro es solo "Inicio" —o viene
+  // vacío— el botón se queda en "Volver" a secas, que es lo honesto: prometer "Volver a Inicio"
+  // cuando cerrar puede devolver a media portada scrolleada sería vender otra cosa.
   const ultimoEscalon = rastro.length > 1 ? rastro[rastro.length - 1].etiqueta : null;
 
   return (
     <Capa ref={contenedor}>
       <Pagina>
-        {/*
-          El MISMO encabezado de la tienda. Aquí había una barra propia con un
-          "Volver", unas migas y un botón de "Ayuda" que no estaba conectado a
-          nada: quien abría un producto perdía de vista el buscador, los
-          pasillos, su dirección y el carrito.
-        */}
+        {/* El MISMO encabezado de la tienda. Aquí había una barra propia con un "Volver", unas migas y un
+           botón de "Ayuda" que no estaba conectado a nada: quien abría un producto perdía de vista el
+           buscador, los pasillos, su dirección y el carrito. */}
         <HeaderTienda {...header} />
 
         <Franja>
           <FranjaInterior>
-            {/*
-              El botón dice A DÓNDE vuelve. Cerrar la ficha no devuelve a la
-              tienda entera: devuelve a la lista tal como estaba, y si venía
-              filtrada, ahí cae. Un "Volver" a secas escondía eso — la persona
-              apretaba sin saber si perdía el filtro que acababa de poner.
-              El destino es el último escalón del camino, el mismo que se lee
-              a la derecha.
-            */}
+            {/* El botón dice A DÓNDE vuelve. Cerrar la ficha no devuelve a la tienda entera: devuelve a la
+               lista tal como estaba, y si venía filtrada, ahí cae. Un "Volver" a secas escondía eso — la
+               persona apretaba sin saber si perdía el filtro que acababa de poner. */}
             <Volver onClick={cerrar}>
               <ChevronLeft size={17} strokeWidth={2.4} />
               {ultimoEscalon ? t('Volver a {lugar}', { lugar: ultimoEscalon }) : t('Volver')}
             </Volver>
 
-            {/*
-              El camino de verdad, y no una frase fija.
-
-              Antes decía siempre "Inicio › la categoría del producto", aunque
-              la persona hubiera llegado buscando o desde "Más vendidos": le
-              inventaba un paso que nunca dio. Y ninguno de los escalones se
-              podía tocar, así que era un letrero y no un camino. Ahora sale
-              del rastro que arma la pantalla —pasillo, categoría, búsqueda,
-              promo— y cada escalón devuelve a su sitio. Ver useRastroTienda.
-            */}
+            {/* El camino de verdad, y no una frase fija. Y ninguno de los escalones se podía tocar, así que era
+               un letrero y no un camino. Ahora sale del rastro que arma la pantalla —pasillo, categoría,
+               búsqueda, promo— y cada escalón devuelve a su sitio. Ver useRastroTienda. */}
             <Migas aria-label={t('Ruta')}>
               {rastro.map((escalon) => (
                 <Fragment key={escalon.etiqueta}>
@@ -678,11 +562,7 @@ const ProductDetailModal = ({
                 <Share2 size={18} strokeWidth={2.1} />
               </BotonCompartir>
 
-              {/*
-                Una sola imagen: el producto tiene UNA foto. Antes había una
-                tira de tres miniaturas que repetían la misma imagen, dando a
-                entender que había varias vistas cuando no las hay.
-              */}
+              {/* Una sola imagen: el producto tiene UNA foto. */}
               {producto.imagen && !imgError ? (
                 <>
                   <Foto data-foto-detalle src={foto(producto.imagen, ANCHO.ficha)} alt={producto.nombre} onError={marcarImagenRota} />
@@ -697,13 +577,8 @@ const ProductDetailModal = ({
               {producto.marca && <Marca>{producto.marca}</Marca>}
               <Nombre>{producto.nombre}</Nombre>
 
-              {/*
-                Ojo con el "/lb": aquí hubo una vez un "$2.71/lb" CLAVADO, igual
-                para el queso que para las Pringles, y se quitó por mentiroso.
-                El de ahora sale del propio producto, solo aparece en los que de
-                verdad se venden por peso, y el número es el que se cobra.
-                Ver utils/unidades.js.
-              */}
+              {/* El precio por libra ("/lb") sale del propio producto y solo aparece en los que se venden por
+                 peso; el número es el que se cobra. Ver utils/unidades.js. */}
               <Precios>
                 <PrecioHoy>
                   ${Number(producto.precio).toFixed(2)}
@@ -717,38 +592,26 @@ const ProductDetailModal = ({
                 </Existencia>
               </Precios>
 
-              {/*
-                El aviso de +18 va ANTES del botón, no después: enterarse de que
-                le van a pedir documento cuando el repartidor ya está en la
-                puerta es la peor manera de saberlo. Y se dice completo —qué se
-                pide y qué pasa si no lo tiene— porque media advertencia no
-                advierte.
-              */}
+              {/* El aviso de +18 va ANTES del botón, no después: enterarse de que le van a pedir documento cuando
+                 el repartidor ya está en la puerta es la peor manera de saberlo. Y se dice completo —qué se pide
+                 y qué pasa si no lo tiene— porque media advertencia no advierte. */}
               {soloAdultos && (
                 <AvisoAdultos>
                   <strong>{t('Solo para mayores de 18 años.')}</strong> {t('Te pedirán tu documento de identidad al entregar el pedido. Sin él, este producto no se puede entregar.')}
                 </AvisoAdultos>
               )}
 
-              {/*
-                "Añadir al carrito" y punto, también en los que se venden por
-                peso. Decía "Añadir una libra al carrito": era exacto, pero
-                nadie lee un botón, lo reconoce — y un botón que cambia de
-                largo y de texto según el producto hay que volver a leerlo
-                cada vez. Cuánto se lleva ya lo dice el "/lb" del precio, y se
-                ajusta en el carrito.
-              */}
+              {/* "Añadir al carrito" y punto, también en los que se venden por peso. Decía "Añadir una libra al
+                 carrito": era exacto, pero nadie lee un botón, lo reconoce — y un botón que cambia de largo y de
+                 texto según el producto hay que volver a leerlo cada vez. */}
               <Agregar onClick={agregar} disabled={agotado}>
                 <ShoppingBag size={18} strokeWidth={2.2} />
                 {agotado ? t('Agotado por ahora') : t('Añadir al carrito')}
               </Agregar>
 
-              {/*
-                Cómo se vende, dicho con todas sus letras. "Por libra" al lado
-                del "/lb" del precio no es repetirse: uno explica al otro, y es
-                la diferencia entre pedir un queso y pedir una libra de queso.
-                El renglón de las piezas solo sale si el producto las declara.
-              */}
+              {/* Cómo se vende, dicho con todas sus letras. "Por libra" al lado del "/lb" del precio no es
+                 repetirse: uno explica al otro, y es la diferencia entre pedir un queso y pedir una libra de
+                 queso. El renglón de las piezas solo sale si el producto las declara. */}
               <Datos>
                 <dt>{t('Categoría')}</dt>
                 <dd>{producto.categoria}</dd>
@@ -762,12 +625,8 @@ const ProductDetailModal = ({
                 )}
               </Datos>
 
-              {/*
-                Aquí decía "100% Natural" en TODOS los productos, incluidos el
-                cloro y las Pringles. Era una afirmación sobre la mercadería que
-                la tienda nunca hizo y que en varios casos es falsa. Ahora solo
-                se muestra lo que la tienda de verdad escribió.
-              */}
+              {/* Aquí decía "100% Natural" en TODOS los productos, incluidos el cloro y las Pringles. Ahora solo
+                 se muestra lo que la tienda de verdad escribió. */}
               {producto.descripcion && (
                 <Descripcion>
                   <h2>{t('Sobre el producto')}</h2>

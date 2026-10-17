@@ -2,32 +2,13 @@ import { Children, isValidElement } from 'react';
 import { motion } from 'framer-motion';
 import { DUR, EASE_OUT, stagger } from '../../utils/motion';
 
-/*
- * ============================================================
- * DataTable — la vista de catálogo del panel
- * ============================================================
- * Antes era una tabla de verdad: cuatro columnas con py-4 px-4 por celda, así
- * que "Bebidas · Tienda · Activo" ocupaba el ancho completo de la pantalla con
- * tres cuartas partes de aire. Y abajo, una paginación de mentira que siempre
- * decía "Página 1 de 10" con botones que no hacían nada.
- *
- * Ahora son tarjetas en grilla: el nombre manda, los demás datos van debajo
- * con su etiqueta, y las acciones a la derecha del título. Se parece a la
- * pantalla de Pedidos porque comparte la misma familia visual, pero es más
- * densa y en columnas a propósito: Pedidos es una cola de trabajo que se
- * atiende de arriba abajo, esto es un catálogo que se ojea.
- *
- * Lo importante: las páginas que la usan NO cambiaron. Siguen mandando sus
- * columnas y su renderRow con <td>, y el componente los reacomoda. Ocho
- * pantallas mejoran sin tocar ocho archivos.
- * ============================================================
- */
+// DataTable — la vista de catálogo del panel Y abajo, una paginación de mentira que siempre decía
+// "Página 1 de 10" con botones que no hacían nada. Ahora son tarjetas en grilla: el nombre manda,
+// los demás datos van debajo con su etiqueta, y las acciones a la derecha del título.
 
-/*
- * Las celdas traen clases de tabla (py-4 px-4) que aquí sobran y romperían el
- * espaciado de la tarjeta. Se les quita el relleno y se respeta el resto —el
- * text-red-500 del estado "Inactivo", por ejemplo, tiene que sobrevivir.
- */
+// Las celdas traen clases de tabla (py-4 px-4) que aquí sobran y romperían el espaciado de la
+// tarjeta. Se les quita el relleno y se respeta el resto —el text-red-500 del estado "Inactivo",
+// por ejemplo, tiene que sobrevivir.
 const SIN_ESPACIADO = /^(p|px|py|pt|pb|pl|pr|w|min-w|max-w|whitespace)-/;
 
 const limpiarClases = (clases = '') =>
@@ -62,21 +43,16 @@ const DataTable = ({ columns, data, renderRow }) => {
             className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3 transition-colors hover:border-gray-300"
           >
             <div className="flex items-start justify-between gap-3">
-              {/*
-                Un nombre largo sin espacios ("MERMELADA-FRESA-500G") no tiene
-                dónde cortarse y en un teléfono estiraba la tarjeta entera.
-              */}
+              {/* Un nombre largo sin espacios ("MERMELADA-FRESA-500G") no tiene dónde cortarse y en un teléfono
+                 estiraba la tarjeta entera. */}
               <div className={`min-w-0 break-words text-base font-bold text-gray-800 leading-tight ${limpiarClases(titulo?.props?.className)}`}>
                 {titulo?.props?.children}
               </div>
               {acciones && <div className="flex-shrink-0">{acciones.props.children}</div>}
             </div>
 
-            {/*
-              Los datos del medio, en pares etiqueta/valor. Con la etiqueta
-              encima ya no hace falta el encabezado de la tabla para saber que
-              ese "Activo" es el estado y no otra cosa.
-            */}
+            {/* Los datos del medio, en pares etiqueta/valor. Con la etiqueta encima ya no hace falta el
+               encabezado de la tabla para saber que ese "Activo" es el estado y no otra cosa. */}
             {datos.length > 0 && (
               <div className="flex flex-wrap gap-x-6 gap-y-2">
                 {datos.map((celda, i) => (

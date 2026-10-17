@@ -1,42 +1,6 @@
-"""
-============================================================
-EL PRONÓSTICO DE LA TIENDA — pronostico.py
-============================================================
-Con las ventas reales (las manda el servidor de la tienda, ya agrupadas por
-día) responde lo que un administrador se pregunta cada semana:
-
-  1. ¿Cuánto vamos a vender las próximas semanas? (la tienda entera)
-  2. ¿Cuándo se acaba cada producto?
-  3. ¿Cuánto le pido a cada proveedor para llegar a la próxima compra?
-
-Y una cuarta, para no creérselo a ciegas: ¿qué tan bien acierta? Se prueba
-contra semanas que ya pasaron, como si no se supiera lo que se vendió, y se
-compara con la forma ingenua de adivinar (repetir la semana anterior).
-
-── La tienda entera: Holt-Winters ──
-Las ventas por día tienen un nivel, una tendencia y un patrón semanal (en la
-demostración, el domingo se vende el triple que el martes). El suavizamiento
-exponencial de Holt-Winters (ETS, de statsmodels) modela las tres cosas, con
-la tendencia amortiguada para no proyectar una subida para siempre. Con menos
-de tres semanas de historial no hay con qué ajustarlo: se usa el promedio
-reciente con el perfil de la semana.
-
-── Cada producto: TSB, demanda intermitente ──
-Un producto de tienda de barrio no se vende todos los días: hay días en cero
-y de pronto cinco unidades. El promedio simple miente en los dos sentidos. El
-método TSB (Teunter, Syntetos y Babai, 2011) separa las dos preguntas: con qué
-probabilidad se vende en un día y cuánto se lleva la gente cuando lo compra.
-A diferencia del de Croston, baja la probabilidad cuando el producto deja de
-venderse, así que no sigue pronosticando ventas de algo que ya nadie pide.
-
-── El rango: simulación ──
-Para saber cuándo se acaba un producto no basta el promedio. Se simulan 2,000
-futuros posibles (cada día: ¿se vende?, ¿cuánto?, con las cantidades que de
-verdad se han visto) y se mira el día en que se acaba la existencia en la
-mitad de ellos (lo más probable) y en el 10% más rápido (lo pesimista). Lo que
-se sugiere pedir alcanza en el 90% de esos futuros.
-============================================================
-"""
+"""EL PRONÓSTICO DE LA TIENDA — pronostico.py
+Con las ventas reales (las manda el servidor de la tienda, ya agrupadas por día) responde lo que
+un administrador se pregunta cada semana: 1. ¿Cuánto vamos a vender las próximas semanas?"""
 
 from __future__ import annotations
 
@@ -90,17 +54,9 @@ def _cuantil(valores: np.ndarray, q: float) -> float:
 # ── El patrón de la semana ──────────────────────────────────
 
 def perfil_semanal(pedidos: np.ndarray, dias: list[date]) -> np.ndarray:
-    """
-    Cuánto se vende cada día de la semana comparado con un día promedio (1 =
-    normal, 1.5 = la mitad más). Lunes es el 0, como en Python.
-
-    Con pocos pedidos, un sábado bueno por casualidad parecería un patrón. Por
-    eso el perfil se ENCOGE hacia 1 según cuánta información hay (un
-    encogimiento de James-Stein): cada día de la semana se estima con total/7
-    pedidos, y su ruido de conteo (varianza relativa 7/total) se compara con lo
-    que suele variar una tienda de un día a otro (±30%). Con 9 pedidos pesa un
-    10%; con 50, un 40%; con 200, un 70%; con 1,000, más del 90%.
-    """
+    """Cuánto se vende cada día de la semana comparado con un día promedio (1 = normal, 1.5 = la mitad
+    más). Lunes es el 0, como en Python. Con pocos pedidos, un sábado bueno por casualidad parecería
+    un patrón."""
     if len(pedidos) == 0 or pedidos.sum() <= 0:
         return np.ones(SEMANA)
     dia_semana = np.array([d.weekday() for d in dias])
@@ -138,13 +94,8 @@ def _caminos_holt_winters(serie: np.ndarray, horizonte: int, semilla: int):
 
 
 def _caminos_promedio(serie, dias, perfil, futuros, semilla):
-    """
-    Sin historial para Holt-Winters: cada día futuro es uno de los días reales
-    de las últimas 4 semanas, sacado al azar (bootstrap) y ajustado por el día
-    de la semana. Así el rango sale de cómo de verdad varían las ventas —con
-    sus días en cero y sus días buenos— y nunca da ventas negativas, que es lo
-    que pasaba con una campana normal cuando hay pocos pedidos.
-    """
+    """Sin historial para Holt-Winters: cada día futuro es uno de los días reales de las últimas 4
+    semanas, sacado al azar (bootstrap) y ajustado por el día de la semana."""
     rng = np.random.default_rng(semilla)
     ventana = slice(-SEMANA * 4, None)
     factor_pasado = np.array([perfil[d.weekday()] for d in dias])[ventana]
@@ -155,14 +106,8 @@ def _caminos_promedio(serie, dias, perfil, futuros, semilla):
 
 
 def pronostico_tienda(serie, dias, perfil, horizonte, semilla=635):
-    """
-    Lo que se espera vender (en dólares) cada uno de los próximos `horizonte`
-    días, con los futuros simulados para sacar los rangos. Devuelve también
-    el método que se pudo usar.
-
-    Lo esperado de cada día es el promedio de los futuros simulados, ya sin
-    ventas negativas: así siempre cae dentro de su propio rango.
-    """
+    """Lo que se espera vender (en dólares) cada uno de los próximos `horizonte` días, con los futuros
+    simulados para sacar los rangos. Devuelve también el método que se pudo usar."""
     futuros = [dias[-1] + timedelta(days=i + 1) for i in range(horizonte)]
     metodo = "promedio-semanal"
     if len(serie) >= MINIMO_HOLT_WINTERS and serie.sum() > 0:
@@ -181,12 +126,9 @@ def pronostico_tienda(serie, dias, perfil, horizonte, semilla=635):
 # ── Cada producto ───────────────────────────────────────────
 
 def tsb(serie: np.ndarray, alfa: float, beta: float):
-    """
-    Teunter-Syntetos-Babai. Recorre la historia día por día y devuelve:
-      p     la probabilidad de que se venda en un día;
-      z     cuánto se lleva la gente cuando lo compra;
-      error el error cuadrático medio de pronosticar cada día con lo anterior.
-    """
+    """Teunter-Syntetos-Babai. Recorre la historia día por día y devuelve: p la probabilidad de que se
+    venda en un día; z cuánto se lleva la gente cuando lo compra; error el error cuadrático medio de
+    pronosticar cada día con lo anterior."""
     vendio = serie > 0
     if not vendio.any():
         return 0.0, 0.0, math.inf
@@ -216,12 +158,9 @@ def ajustar_tsb(serie: np.ndarray):
 
 
 def simular_producto(p, z, tamanos, factores, rng):
-    """
-    Futuros posibles de UN producto: (simulaciones, días). Cada día se vende o
-    no según su probabilidad (ajustada por el día de la semana) y, si se vende,
-    se lleva una de las cantidades que ya se vieron, escaladas al tamaño
-    típico de ahora.
-    """
+    """Futuros posibles de UN producto: (simulaciones, días). Cada día se vende o no según su
+    probabilidad (ajustada por el día de la semana) y, si se vende, se lleva una de las cantidades
+    que ya se vieron, escaladas al tamaño típico de ahora."""
     prob = np.clip(p * factores, 0, 1)
     ocurre = rng.random((SIMULACIONES, len(factores))) < prob
     escala = z / tamanos.mean() if tamanos.mean() > 0 else 1.0
@@ -230,13 +169,9 @@ def simular_producto(p, z, tamanos, factores, rng):
 
 
 def tope_al_por_mayor(serie: np.ndarray) -> float:
-    """
-    Hasta cuánto cuenta una venta como "de todos los días". Un pedido de 125
-    botellas de agua para una fiesta es real, pero no es lo que se vende cada
-    semana: si entrara entero al pronóstico, se sugeriría llenar la bodega. Por
-    encima de 3 veces la venta típica (la mediana) se cuenta como el tope.
-    Hacen falta al menos 3 ventas para saber qué es "típico".
-    """
+    """Hasta cuánto cuenta una venta como "de todos los días". Un pedido de 125 botellas de agua para
+    una fiesta es real, pero no es lo que se vende cada semana: si entrara entero al pronóstico, se
+    sugeriría llenar la bodega."""
     ventas = serie[serie > 0]
     if len(ventas) < 3:
         return math.inf
@@ -277,17 +212,9 @@ def _wape(real: np.ndarray, pronostico: np.ndarray):
 
 
 def medir_precision(tienda, pedidos, dias, series_productos, semilla=635):
-    """
-    Pronostica las últimas semanas como si no se supieran (hasta 6, de una en
-    una) y compara con lo que de verdad pasó. Con 3 el resultado dependía
-    demasiado de qué semanas tocaron: una semana rara volteaba la conclusión. Al lado, el error de la forma
-    ingenua: decir que esta semana va a ser igual que la anterior. Si el
-    modelo no le gana a eso, el reporte lo dice.
-
-    Se compara el TOTAL de cada semana (de la tienda, y de cada producto), que
-    es lo que el reporte promete. Día por día, con dos o tres pedidos diarios,
-    lo que domina es el azar de cada día y no dice nada del modelo.
-    """
+    """Pronostica las últimas semanas como si no se supieran (hasta 6, de una en una) y compara con lo
+    que de verdad pasó. Con 3 el resultado dependía demasiado de qué semanas tocaron: una semana
+    rara volteaba la conclusión."""
     n = len(tienda)
     semanas = min(SEMANAS_DE_PRUEBA, (n - MINIMO_HOLT_WINTERS) // SEMANA)
     if semanas < 1:
@@ -336,11 +263,9 @@ def medir_precision(tienda, pedidos, dias, series_productos, semilla=635):
 # ── Todo junto ──────────────────────────────────────────────
 
 def pronosticar(solicitud: dict) -> dict:
-    """
-    La entrada (ver app/main.py, Solicitud): el rango de días, las ventas de
-    la tienda por día, las unidades por día de cada producto, los productos
-    con su existencia, los proveedores y las fechas de compra.
-    """
+    """La entrada (ver app/main.py, Solicitud): el rango de días, las ventas de la tienda por día, las
+    unidades por día de cada producto, los productos con su existencia, los proveedores y las fechas
+    de compra."""
     desde, hasta = solicitud["desde"], solicitud["hasta"]
     horizonte = int(solicitud.get("horizonte", 28))
     nivel = float(solicitud.get("nivel", 0.8))

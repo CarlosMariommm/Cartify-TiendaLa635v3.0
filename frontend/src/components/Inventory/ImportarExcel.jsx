@@ -8,24 +8,9 @@ import {
   CAMPOS, MAXIMO_DE_FILAS, PLANTILLA_CSV, aProductos, buscarEncabezado, faltaLoEsencial, leerArchivo, mapearColumnas,
 } from '../../utils/importarExcel';
 
-/*
- * ============================================================
- * IMPORTAR EL INVENTARIO DESDE EXCEL — ImportarExcel.jsx
- * ============================================================
- * Panel › Inventario, solo el dueño. Cinco pasos en la misma ventana:
- *
- *   1. Archivo    elegir el .xlsx o .csv (o bajar la plantilla);
- *   2. Columnas   qué columna es cuál, ya adivinado (por los títulos o por
- *                 la IA) y corregible;
- *   3. Revisando  la IA completa marca, pasillo, categoría, unidad, +18 y
- *                 descripción, y se busca la foto de cada uno, de 20 en 20;
- *   4. Revisar    la vista previa: qué entra, con qué foto, qué ya existe;
- *   5. Listo      cuántos entraron, cuáles se omitieron y por qué.
- *
- * Nada se guarda hasta "Importar". Ver utils/importarExcel.js (leer el
- * archivo) y backend/src/utils/importarProductos.js (lo demás).
- * ============================================================
- */
+// IMPORTAR EL INVENTARIO DESDE EXCEL — ImportarExcel.jsx
+// Panel › Inventario, solo el dueño. Cinco pasos en la misma ventana: 1. Archivo elegir el .xlsx o
+// .csv (o bajar la plantilla); 2.
 
 const TANDA = 20;
 

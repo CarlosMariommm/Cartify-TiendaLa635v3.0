@@ -1,22 +1,6 @@
-/*
- * ============================================================
- * LAS DESCARGAS DEL PANEL EN LA APP — descargasPanel.js
- * ============================================================
- * Los reportes del panel (el PDF del Dashboard, el inventario, el
- * recordatorio para el calendario) se arman en el navegador y se "descargan"
- * con un enlace a un blob. Dentro de la app del teléfono (el panel abierto en
- * un WebView) eso no hace nada: Android solo sabe descargar direcciones de
- * internet de verdad.
- *
- * Así que dentro de la app el panel sube el archivo aquí, recibe una dirección
- * de un solo rato y navega a ella; el WebView le pasa la descarga al gestor de
- * descargas de Android, que la guarda en Descargas con su aviso de siempre.
- *
- * El archivo vive en memoria dos minutos y se puede bajar unas pocas veces (el
- * WebView y el gestor de descargas piden cada uno la suya). La dirección lleva
- * una clave al azar: sin ella no se encuentra nada.
- * ============================================================
- */
+// LAS DESCARGAS DEL PANEL EN LA APP — descargasPanel.js
+// Los reportes del panel (el PDF del Dashboard, el inventario, el recordatorio para el calendario)
+// se arman en el navegador y se "descargan" con un enlace a un blob.
 
 import crypto from "crypto";
 
@@ -48,10 +32,8 @@ export const nombreSeguro = (nombre) => {
   return limpio || "archivo";
 };
 
-/*
- * Guarda un archivo y devuelve { clave } o { error }. `tipo` es el
- * Content-Type con el que llegó; se le quita lo de "; charset=…".
- */
+// Guarda un archivo y devuelve { clave } o { error }. `tipo` es el Content-Type con el que llegó;
+// se le quita lo de "; charset=…".
 export const guardarDescarga = ({ nombre, tipo, datos }, ahora = Date.now()) => {
   const tipoLimpio = String(tipo ?? "").split(";")[0].trim().toLowerCase();
   if (!TIPOS_PERMITIDOS.includes(tipoLimpio)) return { error: "Ese tipo de archivo no se puede descargar" };

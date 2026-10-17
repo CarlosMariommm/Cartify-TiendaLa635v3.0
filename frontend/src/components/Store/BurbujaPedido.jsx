@@ -12,35 +12,15 @@ import Mascota from '../UI/Mascota';
 import { useTiempoPorZona } from '../../hooks/useTiempoPorZona';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * ============================================================
- * BURBUJA DE PEDIDO — el seguimiento sin salir de la tienda
- * ============================================================
- * Mientras un pedido no esté entregado, el cliente lo ve flotando en la
- * esquina. Antes había que entrar a Mi Cuenta → Mis pedidos para saber si ya
- * lo estaban preparando, y nadie hace eso: se quedaban mirando el teléfono
- * sin novedad de que algo estuviera pasando.
- *
- * Va abajo a la IZQUIERDA porque el botón de WhatsApp ya ocupa la derecha.
- * Dos burbujas en la misma esquina se tapan entre ellas.
- *
- * La burbuja ES la mascota: cada estado tiene su ilustración (mira el recibo,
- * llena la bolsa, va en patineta…; ver `pose` en utils/pasosPedido.js), con
- * el nombre del estado en una etiqueta chica debajo. Se entiende de un
- * vistazo qué está pasando, sin leer.
- * ============================================================
- */
+// BURBUJA DE PEDIDO — el seguimiento sin salir de la tienda
+// Mientras un pedido no esté entregado, el cliente lo ve flotando en la esquina. Va abajo a la
+// IZQUIERDA porque el botón de WhatsApp ya ocupa la derecha.
 
 // La sombra que separa a la mascota de lo que tenga detrás en la tienda.
 const SOMBRA_MASCOTA = { filter: 'drop-shadow(0 6px 10px rgba(0,0,0,0.18))' };
 
-/*
- * "En camino" solo aplica a domicilio — un retiro en local no tiene
- * repartidor que seguir — así que se filtra abajo según el pedido. Mismo
- * orden que el estado real: pagado → preparando → en_camino → entregado.
- */
-// Los pasos viven en utils/pasosPedido.js: estaban copiados en tres
-// pantallas y una de las copias se habia quedado sin "En camino".
+// Los pasos del pedido salen de utils/pasosPedido.js; "En camino" solo aplica a domicilio, así que
+// se filtra según el pedido.
 
 const BROWN = 'var(--marca-600)';
 
@@ -53,28 +33,14 @@ const BurbujaPedido = () => {
   const { orders } = usePedidoActivoCtx();
   const [abierta, setAbierta] = useState(false);
 
-  /*
-   * Cerrar NO desaparece la burbuja: la encoge.
-   *
-   * Antes la X la quitaba para siempre y no había manera de traerla de
-   * vuelta; con el seguimiento en vivo adentro eso significaba perder el mapa
-   * del repartidor por un toque sin querer. Ahora queda un botón chiquito, y
-   * si el pedido avanza (lo empiezan a preparar, sale el repartidor) se
-   * reabre sola: eso es justo lo que la persona quería saber.
-   */
+  // Cerrar NO desaparece la burbuja: la encoge. Ahora queda un botón chiquito, y si el pedido avanza
+  // (lo empiezan a preparar, sale el repartidor) se reabre sola: eso es justo lo que la persona
+  // quería saber.
   const [encogidaEn, setEncogidaEn] = useState(null); // { id, estado }
 
-  /*
-   * Los pedidos en curso, del que más importa ahora al que menos: primero el
-   * que va en camino, después el listo para recoger (ver
-   * utils/pedidosEnCurso.js). Antes se seguía solo el más reciente, y un
-   * pedido para recoger hecho después tapaba al de domicilio que ya iba en
-   * camino: el cliente se quedaba sin mapa.
-   *
-   * Se sigue el que el cliente eligió en la tarjeta; si no eligió (o ese ya
-   * se cerró), el primero. Se calcula ANTES de cualquier return porque el
-   * hook de seguimiento de abajo necesita su id.
-   */
+  // Los pedidos en curso, del que más importa ahora al que menos: primero el que va en camino,
+  // después el listo para recoger (ver utils/pedidosEnCurso.js). Se sigue el que el cliente eligió
+  // en la tarjeta; si no eligió (o ese ya se cerró), el primero.
   const lista = user?.type === 'client' ? pedidosEnCurso(orders) : [];
   const [elegidoId, setElegidoId] = useState(null);
   const enCurso = lista.find((o) => String(o._id) === elegidoId) || lista[0] || null;
@@ -91,12 +57,9 @@ const BurbujaPedido = () => {
 
   const seguimiento = useSeguimientoEnVivo(enCurso?._id, !!enCurso);
 
-  /*
-   * Cuánto se ha tardado en llegar a esa zona, según las entregas pasadas.
-   * Es la respuesta para el rato en que todavía nadie ha salido: el pedido
-   * está "Preparando" y no hay puntito que mirar, pero la persona igual
-   * quiere saber si le da tiempo de bañarse.
-   */
+  // Cuánto se ha tardado en llegar a esa zona, según las entregas pasadas. Es la respuesta para el
+  // rato en que todavía nadie ha salido: el pedido está "Preparando" y no hay puntito que mirar,
+  // pero la persona igual quiere saber si le da tiempo de bañarse.
   const zona = useTiempoPorZona(enCurso?.deliveryLat, enCurso?.deliveryLng);
   const { t } = useIdioma();
 
@@ -104,11 +67,8 @@ const BurbujaPedido = () => {
   if (user?.type !== 'client') return null;
   if (!enCurso) return null;
 
-  /*
-   * El estado que manda es el que acaba de traer el seguimiento: la lista de
-   * pedidos se cargó una vez al abrir la tienda y para cuando la tienda
-   * empieza a preparar, ya está vieja.
-   */
+  // El estado que manda es el que acaba de traer el seguimiento: la lista de pedidos se cargó una
+  // vez al abrir la tienda y para cuando la tienda empieza a preparar, ya está vieja.
   const estado = seguimiento.estado || enCurso.status;
   const esDomicilio = enCurso.deliveryType === 'delivery';
   const PASOS = pasosDe(enCurso.deliveryType);
@@ -123,13 +83,7 @@ const BurbujaPedido = () => {
   // lista de domicilio, y `paso` cae al primero si el estado no está en ella.
   const pose = estaEnCamino ? 'en-camino' : paso.pose;
 
-  /*
-   * Entregado o cancelado: la burbuja se va sola. Antes solo se checaba
-   * cancelado — un pedido recién entregado se quedaba flotando para
-   * siempre, porque `enCurso` se calculó UNA vez con la lista vieja de
-   * pedidos y nunca se recalculaba con la novedad que sí trae el
-   * seguimiento en vivo.
-   */
+  // Entregado o cancelado: la burbuja se va sola.
   if (estado === 'cancelado' || estado === 'entregado') return null;
 
   // La "novedad" del pedido: si cambió desde que la encogieron, se reabre.
@@ -146,10 +100,8 @@ const BurbujaPedido = () => {
     setAbierta(true);
   };
 
-  /*
-   * Encogida: la mascota sola y más chica, sin la etiqueta. Ocupa poco, no
-   * tapa la tienda y siempre se puede volver.
-   */
+  // Encogida: la mascota sola y más chica, sin la etiqueta. Ocupa poco, no tapa la tienda y siempre
+  // se puede volver.
   if (encogida) {
     return (
       <button
@@ -211,11 +163,8 @@ const BurbujaPedido = () => {
             </button>
           </div>
 
-          {/*
-            Con más de un pedido abierto, todos aquí: el icono dice si es a
-            domicilio o para recoger, y el texto en qué paso va. Tocar uno lo
-            sigue en la tarjeta (con su mapa, si va en camino).
-          */}
+          {/* Con más de un pedido abierto, todos aquí: el icono dice si es a domicilio o para recoger, y el
+             texto en qué paso va. Tocar uno lo sigue en la tarjeta (con su mapa, si va en camino). */}
           {lista.length > 1 && (
             <div role="tablist" aria-label={t('Tienes {n} pedidos en curso', { n: lista.length })} style={{ display: 'flex', flexWrap: 'wrap', gap: 6, padding: '10px 12px 0' }}>
               {lista.map((o) => {
@@ -252,13 +201,9 @@ const BurbujaPedido = () => {
             </div>
           )}
 
-          {/*
-            El mapa solo aparece cuando de verdad hay alguien en camino con la
-            novedad fresca. Un mapa con un punto viejo es peor que no tener
-            mapa: el cliente sale a la banqueta a esperar a alguien que va
-            tres calles atrás. Sin ese punto, la ruta desde la tienda y un
-            tiempo que dice que es aproximado, sin repartidor dibujado.
-          */}
+          {/* El mapa solo aparece cuando de verdad hay alguien en camino con la novedad fresca. Un mapa con
+             un punto viejo es peor que no tener mapa: el cliente sale a la banqueta a esperar a alguien que
+             va tres calles atrás. */}
           {enCamino && (
             <div>
               {/* Sin arrastrar ni zoom: es una miniatura que se mira de reojo,
@@ -272,11 +217,8 @@ const BurbujaPedido = () => {
                 borde="transparent"
                 interactivo={false}
               />
-              {/*
-                En las últimas cuadras la franja se pone verde y cambia el
-                texto. No es adorno: es la diferencia entre "está en camino"
-                (información) y "levántese" (una instrucción).
-              */}
+              {/* En las últimas cuadras la franja se pone verde y cambia el texto. No es adorno: es la diferencia
+                 entre "está en camino" (información) y "levántese" (una instrucción). */}
               <div style={{
                 padding: '10px 14px',
                 background: seguimiento.yaCasi ? 'var(--exito-fondo)' : 'var(--info-fondo)',
@@ -304,12 +246,9 @@ const BurbujaPedido = () => {
             </div>
           )}
 
-          {/*
-            El tiempo real a su zona, mientras nadie ha salido todavía.
-            Desaparece en cuanto hay repartidor en vivo: ahí el dato bueno es
-            el de arriba, calculado con dónde va de verdad, y dos tiempos
-            distintos en la misma tarjeta solo confunden.
-          */}
+          {/* El tiempo real a su zona, mientras nadie ha salido todavía. Desaparece en cuanto hay repartidor
+             en vivo: ahí el dato bueno es el de arriba, calculado con dónde va de verdad, y dos tiempos
+             distintos en la misma tarjeta solo confunden. */}
           {!enCamino && esDomicilio && estado !== 'entregado' && zona.hayDatos && (
             <div style={{
               padding: '10px 14px', background: 'var(--exito-fondo)',
@@ -325,12 +264,9 @@ const BurbujaPedido = () => {
             </div>
           )}
 
-          {/*
-            El código con el que recibe el pedido. Mismo lugar que en
-            EstadoPedido: justo después de lo que se está mirando ahora mismo
-            —el mapa o el tiempo estimado—, para no tener que ir a buscarlo
-            cuando el repartidor ya está tocando el timbre.
-          */}
+          {/* El código con el que recibe el pedido. Mismo lugar que en EstadoPedido: justo después de lo que
+             se está mirando ahora mismo —el mapa o el tiempo estimado—, para no tener que ir a buscarlo
+             cuando el repartidor ya está tocando el timbre. */}
           <CodigoEntrega
             codigo={enCurso.deliveryCode}
             deliveryType={enCurso.deliveryType}
@@ -369,11 +305,8 @@ const BurbujaPedido = () => {
               );
             })}
 
-            {/*
-              La honestidad del seguimiento: si el repartidor salió pero su
-              teléfono dejó de reportar (se bloqueó la pantalla, se quedó sin
-              novedad), se dice tal cual en vez de disimular.
-            */}
+            {/* La honestidad del seguimiento: si el repartidor salió pero su teléfono dejó de reportar (se
+               bloqueó la pantalla, se quedó sin novedad), se dice tal cual en vez de disimular. */}
             {esDomicilio && seguimiento.senalFria && (
               <p style={{ fontSize: 11.5, color: 'var(--tinta-tenue)', margin: '10px 0 0', lineHeight: 1.45 }}>
                 {t('Tu pedido va en camino. La última novedad del repartidor fue hace {n} min.', { n: seguimiento.minutosDesdeUltimoDato || 1 })}
@@ -436,11 +369,9 @@ const BurbujaPedido = () => {
           fontWeight: 700,
           whiteSpace: 'nowrap',
         }}>
-          {/*
-            Cuando alguien ya va en la calle con el pedido, la burbuja cerrada
-            lo dice sin que haya que abrirla: es la información que el cliente
-            está esperando, y hacerlo tocar para verla sería mezquino.
-          */}
+          {/* Cuando alguien ya va en la calle con el pedido, la burbuja cerrada lo dice sin que haya que
+             abrirla: es la información que el cliente está esperando, y hacerlo tocar para verla sería
+             mezquino. */}
           {enCamino ? (seguimiento.yaCasi ? t('Ya casi llega') : seguimiento.espera) : t(paso.label)}
           {/* Con más de un pedido abierto, cuántos: los demás están en la tarjeta. */}
           {lista.length > 1 && (

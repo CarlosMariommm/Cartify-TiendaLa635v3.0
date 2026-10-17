@@ -8,12 +8,9 @@ import { useGiftCards } from '../hooks/useGiftCards';
 import { bloquearTeclasNumero } from '../utils/validaciones';
 import { modalTransition, modalInitial, modalAnimate } from '../utils/motion';
 
-/*
- * GiftCards (Admin) — tarjetas de regalo que cargan saldo al cliente.
- *
- * El gerente crea tarjetas por un monto, se imprimen o se dictan, y el cliente
- * canjea el código para cargar saldo. La lógica vive en useGiftCards.
- */
+// GiftCards (Admin) — tarjetas de regalo que cargan saldo al cliente. El gerente crea tarjetas por
+// un monto, se imprimen o se dictan, y el cliente canjea el código para cargar saldo. La lógica
+// vive en useGiftCards.
 const formVacio = { amount: '', cantidad: 1, note: '', expiresAt: '' };
 
 const GiftCards = () => {
@@ -107,11 +104,8 @@ const GiftCards = () => {
       </AnimatePresence>
 
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        {/*
-          Las canjeadas ya no son trabajo pendiente: solo estorban al buscar
-          una que sirva. Por eso la pantalla abre en "Disponibles" y las
-          canjeadas quedan a un click, sin desaparecer.
-        */}
+        {/* Las canjeadas ya no son trabajo pendiente: solo estorban al buscar una que sirva. Por eso la
+           pantalla abre en "Disponibles" y las canjeadas quedan a un click, sin desaparecer. */}
         <div className="flex flex-wrap items-center gap-3 mb-5">
           <div className="flex flex-wrap gap-2 flex-1">
             {[

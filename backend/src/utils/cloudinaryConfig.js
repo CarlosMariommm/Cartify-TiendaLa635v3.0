@@ -25,12 +25,9 @@ const storage = new CloudinaryStorage({
 //#3- Configurar multer
 const upload = multer({
     storage,
-    /*
-     * Tope de 8 MB. Sin límite, una foto pesada se subía entera a Cloudinary
-     * antes de que la rechazara: el empleado esperaba y al final veía un error
-     * genérico. Ahora falla al instante y con un motivo claro (lo traduce el
-     * manejador de errores de app.js).
-     */
+    // Tope de 8 MB. Sin límite, una foto pesada se subía entera a Cloudinary antes de que la
+    // rechazara: el empleado esperaba y al final veía un error genérico. Ahora falla al instante y con
+    // un motivo claro (lo traduce el manejador de errores de app.js).
     limits: { fileSize: 8 * 1024 * 1024 }
 })
 

@@ -1,12 +1,5 @@
-/*
- * PANTALLA DE CARGA — la pantalla de bienvenida adicional al Splash Screen.
- *
- * El Splash Screen de app.json es el que pinta el sistema operativo mientras
- * el JS todavía no cargó; en cuanto React ya está corriendo, esa pantalla se
- * va sola y no se puede volver a mostrar. Esta es la que la reemplaza mientras
- * se revisa si hay una sesión guardada (ver useSplashTimer), con la marca de
- * la tienda en vez de un blanco vacío.
- */
+// PANTALLA DE CARGA — la pantalla de bienvenida adicional al Splash Screen.
+// Se muestra con la marca de la tienda mientras se revisa si hay una sesión guardada.
 
 import { StyleSheet, Text, View } from 'react-native';
 import { useEstilos } from '../context/ModoContext';

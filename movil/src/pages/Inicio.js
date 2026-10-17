@@ -1,33 +1,6 @@
-/*
- * ============================================================
- * INICIO — la portada de la tienda
- * ============================================================
- * El equivalente de `frontend/src/pages/Store.jsx`, en el corte que le toca a
- * esta pantalla: encabezado con buscador y carrito, pastillas de categoría,
- * carrusel de promociones, la fila de "Más vendidos" y la cuadrícula con todo
- * el catálogo.
- *
- * ── Por qué la cuadrícula es un FlatList y no un ScrollView con vistas ──
- *
- * Es LA decisión de esta pantalla. Una tienda puede tener cientos de
- * productos, y un ScrollView monta todos sus hijos de una vez: se abriría con
- * varios segundos de pantalla en blanco y el desplazamiento iría a tirones.
- * FlatList solo dibuja lo que se ve.
- *
- * De ahí sale la forma rara del archivo: todo lo que va ARRIBA de la
- * cuadrícula —barra, pastillas, promos, más vendidos— es el
- * `ListHeaderComponent` de esa misma lista, en vez de vivir en un contenedor
- * aparte. Puesto aparte, la parte de arriba se quedaría fija y solo se
- * desplazaría la cuadrícula, que no es como se lee una tienda.
- *
- * ── Lo que decide qué se ve ──
- *
- * Con una categoría elegida, una búsqueda escrita o una promo filtrando, la
- * portada se calla: se van las promos y los más vendidos, y queda la lista de
- * lo que se pidió. Mismo criterio que la web (`showTrending`) — quien está
- * buscando "leche" no quiere que le sigan ofreciendo otra cosa.
- * ============================================================
- */
+// INICIO — la portada de la tienda
+// Buscador, carrito, categorías, carrusel de promociones, "Más vendidos" y la cuadrícula del
+// catálogo (en un FlatList, para que no se trabe con muchos productos).
 
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -100,35 +73,25 @@ const Inicio = ({ irACarrito, irASeccion }) => {
   const { avisar } = useAviso();
   // En la tablet caben más columnas (ver hooks/useDisposicion.js).
   const { columnas, anchoCelda } = useDisposicion();
-  /*
-   * Lo que mide la barra de abajo, que flota ENCIMA de la lista. Sin este
-   * aire al final, la última fila de productos se quedaba debajo de la
-   * barra para siempre y su "+" no se alcanzaba. Ver useAireBarraFlotante.
-   */
+  // Lo que mide la barra de abajo, que flota ENCIMA de la lista. Sin este aire al final, la última
+  // fila de productos se quedaba debajo de la barra para siempre y su "+" no se alcanzaba. Ver
+  // useAireBarraFlotante.
   const aireAbajo = useAireBarraFlotante();
 
-  /*
-   * Jalar para recargar: los productos Y la temporada (si el dueño la cambió
-   * en el panel, se ve aquí sin cerrar la app). Si no se pudo, se dice; si
-   * salió bien, se ve solo.
-   */
+  // Jalar para recargar: los productos Y la temporada (si el dueño la cambió en el panel, se ve aquí
+  // sin cerrar la app). Si no se pudo, se dice; si salió bien, se ve solo.
   const refrescar = useCallback(async () => {
     const [catalogo] = await Promise.all([refrescarCatalogo(), recargarAjustes?.()]);
     if (!catalogo) avisar(t('No se pudo recargar la tienda. Revisa tu conexión.'), 'error');
   }, [refrescarCatalogo, recargarAjustes, avisar, t]);
   const [menuPasillosAbierto, setMenuPasillosAbierto] = useState(false);
 
-  /*
-   * Un producto se mira en su propia página (pages/Producto.js), como en la
-   * web; antes era una hoja que subía encima de la tienda.
-   */
+  // Un producto se mira en su propia página (pages/Producto.js), como en la web; antes era una hoja
+  // que subía encima de la tienda.
   const verDetalle = abrirProducto;
 
-  /*
-   * Un producto que llegó por enlace (ver components/UI/EnlacesEntrantes.js).
-   * Se abre cuando el catálogo ya está; si el producto ya no existe, se dice
-   * en vez de no hacer nada.
-   */
+  // Un producto que llegó por enlace (ver components/UI/EnlacesEntrantes.js). Se abre cuando el
+  // catálogo ya está; si el producto ya no existe, se dice en vez de no hacer nada.
   const productoPedido = useProductoPedido();
   useEffect(() => {
     if (!productoPedido || cargando) return;
@@ -143,12 +106,9 @@ const Inicio = ({ irACarrito, irASeccion }) => {
 
   const encabezado = (
     <View>
-      {/*
-        La cinta va DENTRO del encabezado de la lista y no arriba, junto a la
-        barra: la barra se queda fija y la cinta tiene que irse con el scroll.
-        Pegada arriba se llevaría su alto en todas las pantallas, todo el año,
-        para nada.
-      */}
+      {/* La cinta va DENTRO del encabezado de la lista y no arriba, junto a la barra: la barra se queda
+         fija y la cinta tiene que irse con el scroll. Pegada arriba se llevaría su alto en todas las
+         pantallas, todo el año, para nada. */}
       <CintaTemporada />
 
       <PastillasCategoria
@@ -209,12 +169,9 @@ const Inicio = ({ irACarrito, irASeccion }) => {
         </View>
       )}
 
-      {/*
-        Las filas que se arman solas con el inventario ("Se están acabando",
-        "Nuevos en la tienda"). Si en este momento no hay datos para armar
-        alguna —una tienda con todo el stock lleno no tiene nada acabándose—
-        sencillamente no se pinta. Ver utils/secciones.js.
-      */}
+      {/* Las filas que se arman solas con el inventario ("Se están acabando", "Nuevos en la tienda"). Si
+         en este momento no hay datos para armar alguna —una tienda con todo el stock lleno no tiene nada
+         acabándose— sencillamente no se pinta. Ver utils/secciones.js. */}
       {mostrarPortada &&
         secciones.map((seccion) => (
           <FilaProductos
@@ -265,10 +222,8 @@ const Inicio = ({ irACarrito, irASeccion }) => {
       {/* Como en Store.jsx de la web: buscando con su lupa si se filtró algo,
           perdida si la tienda de verdad está vacía. */}
       <Mascota pose={terminoBusqueda || categoriaSeleccionada || filtrosPuestos ? 'buscando' : 'perdida'} alto={130} />
-      {/*
-        Una tienda recién montada está vacía hasta que le carguen productos.
-        Decir 'No hay productos para ""' hacía parecer que la tienda estaba rota.
-      */}
+      {/* Una tienda recién montada está vacía hasta que le carguen productos. Decir 'No hay productos
+         para ""' hacía parecer que la tienda estaba rota. */}
       <Text style={estilos.vacioTexto}>
         {filtrosPuestos > 0 && !terminoBusqueda
           ? t('Ningún producto coincide con los filtros')
@@ -288,12 +243,9 @@ const Inicio = ({ irACarrito, irASeccion }) => {
 
   return (
     <View style={estilos.pantalla}>
-      {/*
-        Las figuras de temporada van PRIMERAS en el árbol para quedar detrás de
-        todo: en React Native pinta encima lo que va después. La lista no tiene
-        fondo propio, así que los copos se ven por los huecos entre tarjetas —
-        que es exactamente donde tienen que verse.
-      */}
+      {/* Las figuras de temporada van PRIMERAS en el árbol para quedar detrás de todo: en React Native
+         pinta encima lo que va después. La lista no tiene fondo propio, así que los copos se ven por los
+         huecos entre tarjetas — que es exactamente donde tienen que verse. */}
       <DecoracionTemporada />
 
       <BarraTienda
@@ -309,11 +261,9 @@ const Inicio = ({ irACarrito, irASeccion }) => {
           <CargandoMascota texto={t('Cargando la tienda…')} />
         </View>
       ) : errorCarga ? (
-        /*
-         * El error se muestra con su texto y con un botón para reintentar. En
-         * un teléfono "no hay productos" y "no hay internet" se ven igual, y
-         * el segundo tiene arreglo — pero solo si se dice cuál de los dos es.
-         */
+        // El error se muestra con su texto y con un botón para reintentar. En un teléfono "no hay
+        // productos" y "no hay internet" se ven igual, y el segundo tiene arreglo — pero solo si se dice
+        // cuál de los dos es.
         <View style={estilos.centro}>
           {/* Como en la web: se le cortó el cordón y se cayó. */}
           <Mascota pose="error" alto={150} style={{ marginBottom: 12 }} />
@@ -329,10 +279,8 @@ const Inicio = ({ irACarrito, irASeccion }) => {
           </View>
         </View>
       ) : (
-        /*
-         * Jalar la lista hacia abajo la recarga: baja Tiqui colgada en vez
-         * del círculo que gira. Ver JalarParaRecargar.
-         */
+        // Jalar la lista hacia abajo la recarga: baja Tiqui colgada en vez del círculo que gira. Ver
+        // JalarParaRecargar.
         <JalarParaRecargar alRecargar={refrescar}>
         {({ alDesplazar, propsLista }) => (
         <FlatList
@@ -350,14 +298,9 @@ const Inicio = ({ irACarrito, irASeccion }) => {
           contentContainerStyle={[estilos.lista, { paddingBottom: aireAbajo + 16 }]}
           onScrollBeginDrag={avisarActividad}
           renderItem={({ item, index }) => (
-            /*
-             * El tope de ancho es lo que arregla la última fila impar. Con
-             * `flex: 1` a secas —que es lo que la tarjeta necesita para que
-             * las dos de una fila midan igual— un producto solo en la última
-             * fila se estiraba a lo ancho de la pantalla, del doble de tamaño
-             * que todos los demás. El tope es el ancho que ya tiene cuando
-             * está acompañado, así que en las filas completas no cambia nada.
-             */
+            // El tope de ancho es lo que arregla la última fila impar. Con `flex: 1` a secas —que es lo que la
+            // tarjeta necesita para que las dos de una fila midan igual— un producto solo en la última fila se
+            // estiraba a lo ancho de la pantalla, del doble de tamaño que todos los demás.
             <View style={[estilos.celda, { maxWidth: anchoCelda }]}>
               <TarjetaProducto producto={item} alVerDetalle={verDetalle} alAgregar={agregarAlCarrito} indice={index} />
             </View>
@@ -420,20 +363,8 @@ const crearEstilos = (COLORES) => StyleSheet.create({
     marginTop: 12,
     alignSelf: 'stretch',
   },
-  /*
-   * ── Dónde vive el relleno lateral ──
-   *
-   * NO en el contenedor de la lista, aunque sea lo primero que uno escribe.
-   * El encabezado va DENTRO de ese contenedor, y las pastillas de categoría y
-   * el carrusel de promos tienen que ir de orilla a orilla: con el relleno
-   * puesto arriba, las pastillas arrancaban a 32 px del borde y la última
-   * quedaba cortada sin poder alcanzarla, porque el recorte de la lista le
-   * caía encima antes de terminar de deslizarse.
-   *
-   * Así que el relleno se reparte: las filas de la cuadrícula lo ponen ellas
-   * (`fila`), y cada pieza del encabezado que no sea deslizable lo pone la
-   * suya. Las que sí se deslizan traen el suyo por dentro y llegan al borde.
-   */
+  // ── Dónde vive el relleno lateral ──
+  // NO en el contenedor de la lista, aunque sea lo primero que uno escribe.
   lista: {
     paddingBottom: 28,
   },

@@ -1,9 +1,6 @@
-/*
- * useAuth — atajo para leer el contexto de sesión.
- *
- * Vive aparte del contexto por la misma razón que en la web: así una pantalla
- * importa `useAuth` y no tiene que saber que por debajo hay un createContext.
- */
+// useAuth — atajo para leer el contexto de sesión. Vive aparte del contexto por la misma razón que
+// en la web: así una pantalla importa `useAuth` y no tiene que saber que por debajo hay un
+// createContext.
 
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';

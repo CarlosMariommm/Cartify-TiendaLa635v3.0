@@ -1,18 +1,6 @@
-# Mantiene despierto el servidor de la tienda.
-#
-# Render, en el plan gratis, apaga el servidor tras 15 minutos sin visitas, y
-# el primer cliente que llega después espera ~30 segundos viendo cargar (se
-# midió: 31,5 s). Esto le toca la puerta cada 10 minutos para que nunca se
-# duerma. Una sola instancia encendida todo el mes son ~744 horas, dentro de
-# las 750 que regala Render.
-#
-# La ruta es la de los ajustes de la tienda: una lectura chica que no gasta IA
-# ni voz (la de /ai/listo prueba la voz de ElevenLabs y gastaría créditos).
-#
-# GitHub corre los horarios solo desde la rama principal (main) y a veces con
-# unos minutos de atraso; también los pausa si el repositorio pasa 60 días
-# sin actividad. La solución definitiva es el plan Starter de Render, que no
-# se duerme: con él, este archivo se puede borrar.
+# Mantiene despierto el servidor de la tienda. Render, en el plan gratis, apaga el servidor tras
+# 15 minutos sin visitas, y el primer cliente que llega después espera ~30 segundos viendo cargar
+# (se midió: 31,5 s). Esto le toca la puerta cada 10 minutos para que nunca se duerma.
 name: Despertar servidor
 
 on:

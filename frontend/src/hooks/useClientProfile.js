@@ -4,11 +4,8 @@ import { tAhora } from '../utils/idioma';
 import { clientService } from '../api/clientService';
 import { useAuth } from './useAuth';
 
-/*
- * useClientProfile — carga y guarda el perfil del cliente logueado.
- * Toda la lógica (fetch + update) vive aquí; la página DetallesCuenta solo
- * pinta el formulario y llama a guardar().
- */
+// useClientProfile — carga y guarda el perfil del cliente logueado. Toda la lógica (fetch +
+// update) vive aquí; la página DetallesCuenta solo pinta el formulario y llama a guardar().
 export const useClientProfile = () => {
   const { user, esCliente, actualizarUsuario } = useAuth();
   const [profile, setProfile] = useState(null);
@@ -50,12 +47,9 @@ export const useClientProfile = () => {
     }
   };
 
-  /*
-   * Subir/reemplazar la foto de perfil. El endpoint multipart exige también los
-   * datos básicos, así que se mandan los que ya están guardados en `profile`
-   * (no los del formulario sin guardar): la foto no debe arrastrar cambios de
-   * texto a medio escribir.
-   */
+  // Subir/reemplazar la foto de perfil. El endpoint multipart exige también los datos básicos, así
+  // que se mandan los que ya están guardados en `profile` (no los del formulario sin guardar): la
+  // foto no debe arrastrar cambios de texto a medio escribir.
   const subirFoto = async (archivo) => {
     if (!esCliente || !profile || !archivo) return;
 

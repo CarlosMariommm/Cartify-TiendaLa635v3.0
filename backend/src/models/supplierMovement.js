@@ -1,22 +1,8 @@
 import mongoose, { Schema, model } from "mongoose";
 
-/*
- * ============================================================
- * MOVIMIENTO DE CUENTA CON UN PROVEEDOR
- * ============================================================
- * La deuda con un proveedor NO se guarda como un número. Se guarda cada
- * movimiento (una compra al crédito suma, un pago resta) y el saldo se calcula
- * sumándolos.
- *
- * Por qué así y no un campo "deuda" en el proveedor:
- *   - Un número no dice CUÁNDO vence cada factura. Con movimientos se puede
- *     avisar "le debe $340, y $120 vencen el viernes".
- *   - Si alguien registra un pago mal, con un número no hay forma de saber qué
- *     pasó; con movimientos se ve el historial y se corrige el movimiento.
- *   - Dos personas registrando cosas a la vez sobre un mismo campo se pisan.
- *     Cada movimiento es su propio documento y no se estorban.
- * ============================================================
- */
+// MOVIMIENTO DE CUENTA CON UN PROVEEDOR
+// La deuda con un proveedor NO se guarda como un número. Se guarda cada movimiento (una compra al
+// crédito suma, un pago resta) y el saldo se calcula sumándolos.
 const supplierMovementSchema = new Schema(
   {
     supplierId: {

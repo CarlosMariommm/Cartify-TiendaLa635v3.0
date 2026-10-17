@@ -47,11 +47,7 @@ const ForgotPassword = () => {
     <div className="min-h-screen flex bg-[var(--papel)]">
       {/* Left Column - Image */}
       <div className="hidden lg:block lg:w-1/2 relative bg-[var(--papel-gris)]">
-        {/*
-          Tiqui sobre el fondo de la marca. Antes era una foto de Unsplash cargada
-          desde sus servidores: cada visita le avisaba a un tercero, y si la foto
-          cambiaba de dirección la columna quedaba vacía.
-        */}
+        {/* Tiqui sobre el fondo de la marca. */}
         <div className="absolute inset-0 flex items-center justify-center bg-[var(--marca-50)]" aria-hidden="true">
           <Mascota pose="perdida" alto={260} />
         </div>

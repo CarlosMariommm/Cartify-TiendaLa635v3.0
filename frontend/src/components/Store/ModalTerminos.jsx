@@ -6,20 +6,8 @@ import { useDocumentoLegal } from '../../hooks/useTerminos';
 import { DOCUMENTOS_LEGALES } from '../../utils/legales';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * ============================================================
- * TÉRMINOS EN UNA VENTANA — ModalTerminos.jsx
- * ============================================================
- * El mismo documento de /terminos, encima del formulario de registro y sin
- * navegar a ningún lado. El porqué está en useModalTerminos: en el navegador
- * de WhatsApp, un enlace "en pestaña nueva" a veces navega encima y se lleva
- * todo lo que la persona llevaba escrito.
- *
- * Igual queda la salida a la página completa, para quien quiera guardarla,
- * compartirla o leerla con calma. Es un enlace de verdad, así que también se
- * puede copiar o abrir con el botón del medio.
- * ============================================================
- */
+// TÉRMINOS EN UNA VENTANA — ModalTerminos.jsx
+// El mismo documento de /terminos, encima del formulario de registro y sin navegar a ningún lado.
 
 const Velo = styled.div`
   position: fixed;
@@ -163,15 +151,9 @@ const BotonListo = styled.button`
 `;
 
 const ModalTerminos = ({ abierto, onCerrar, clave = 'terminos' }) => {
-  /*
-   * Qué documento se lee. Arranca con el que pidió el registro (términos o
-   * privacidad) y cambia si adentro se toca "Ver la política de…". Al
-   * cerrarse vuelve a empezar: la próxima vez abre el que se pida.
-   *
-   * Se reinicia comparando con el valor anterior de `abierto` durante el
-   * render, y no con un efecto: así no se pinta un cuadro con el documento
-   * viejo antes de corregirse.
-   */
+  // Qué documento se lee. Arranca con el que pidió el registro (términos o privacidad) y cambia si
+  // adentro se toca "Ver la política de…". Al cerrarse vuelve a empezar: la próxima vez abre el que
+  // se pida.
   const [elegido, setElegido] = useState(null);
   const [abiertoAntes, setAbiertoAntes] = useState(abierto);
   if (abierto !== abiertoAntes) {
@@ -237,11 +219,9 @@ const ModalTerminos = ({ abierto, onCerrar, clave = 'terminos' }) => {
           />
         </Contenido>
 
-        {/*
-          "Listo" y no "Acepto": el modal no marca la casilla por nadie. Quien
-          lo cierra vuelve al formulario y decide ahí. Un botón de aceptar aquí
-          dentro convertiría "cerré la ventana" en "estuve de acuerdo".
-        */}
+        {/* "Listo" y no "Acepto": el modal no marca la casilla por nadie. Quien lo cierra vuelve al
+           formulario y decide ahí. Un botón de aceptar aquí dentro convertiría "cerré la ventana" en
+           "estuve de acuerdo". */}
         <Pie>
           <BotonListo onClick={onCerrar}>{t('Listo')}</BotonListo>
         </Pie>

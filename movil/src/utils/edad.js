@@ -1,12 +1,5 @@
-/*
- * ============================================================
- * EDAD — edad.js
- * ============================================================
- * Puerto de `frontend/src/utils/edad.js`. Solo se usa `EDAD_MINIMA` por
- * ahora — el candado +18 de móvil pide DUI, no fecha de nacimiento — pero
- * se porta completo por si algún día hace falta calcular una edad de verdad.
- * ============================================================
- */
+// EDAD — edad.js
+// Puerto de `frontend/src/utils/edad.js`.
 
 export const EDAD_MINIMA = 18;
 

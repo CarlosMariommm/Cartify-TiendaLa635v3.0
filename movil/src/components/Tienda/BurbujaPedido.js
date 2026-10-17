@@ -20,30 +20,9 @@ import ModalMapaSeguimiento from './ModalMapaSeguimiento';
 import { suscribirseAActividad } from '../../utils/actividadUsuario';
 import { useIdioma } from '../../context/IdiomaContext';
 
-/*
- * ============================================================
- * BURBUJA DE PEDIDO — el seguimiento sin salir de la tienda
- * ============================================================
- * Copia de `frontend/src/components/Store/BurbujaPedido.jsx`: mientras un
- * pedido no esté entregado, el cliente lo ve flotando en la esquina en
- * cualquier apartado en el que esté — no solo en "Pedidos", que es la
- * pestaña donde iría a buscarlo si no existiera esto.
- *
- * Vive montada junto al navegador (ver App.js), no dentro de una pantalla:
- * así sigue ahí al cambiar de apartado o al abrir el carrito, en vez de
- * desaparecer y tener que ir a buscar el estado a mano.
- *
- * ── Varios pedidos a la vez ──
- * Si el cliente tiene más de uno abierto (uno a domicilio y otro para
- * recoger), la burbuja muestra primero el que más importa ahora —el que va
- * en camino, después el listo para recoger— y no el más reciente (ver
- * utils/pedidosEnCurso.js). En la tarjeta abierta salen todos, para cambiar
- * de uno a otro con un toque.
- *
- * Va abajo a la IZQUIERDA porque no hay nada propio de la app en esa
- * esquina (el asistente de voz y el carrito viven en la barra de arriba).
- * ============================================================
- */
+// BURBUJA DE PEDIDO — el seguimiento sin salir de la tienda
+// Mientras un pedido no esté entregado, flota en la esquina de cualquier pantalla con su avance y
+// el mapa del repartidor. Copia de la burbuja de la web.
 
 const VERDE_LATIDO = '#8ee6a8';
 
@@ -61,20 +40,13 @@ const BurbujaPedido = () => {
   const arranqueResuelto = useArranqueResuelto();
   const [abierta, setAbierta] = useState(false);
 
-  /*
-   * Cerrar NO desaparece la burbuja: la encoge. Si el pedido avanza (lo
-   * empiezan a preparar, sale el repartidor) se reabre sola.
-   */
+  // Cerrar NO desaparece la burbuja: la encoge. Si el pedido avanza (lo empiezan a preparar, sale el
+  // repartidor) se reabre sola.
   const [encogidaEn, setEncogidaEn] = useState(null); // { id, novedad }
 
-  /*
-   * Aparte de "encogida" (la decide el cliente, tocando la X): "oculta" la
-   * decide la propia pantalla, cuando el cliente está haciendo otra cosa
-   * —scrolleando, cambiando de pestaña— y la burbuja se corre casi entera
-   * fuera de la pantalla para no estorbar. Un pedacito se queda a la vista a
-   * propósito: sigue ahí, se puede volver a sacar con un toque, y no es un
-   * "cerrar" del todo.
-   */
+  // Aparte de "encogida" (la decide el cliente, tocando la X): "oculta" la decide la propia
+  // pantalla, cuando el cliente está haciendo otra cosa —scrolleando, cambiando de pestaña— y la
+  // burbuja se corre casi entera fuera de la pantalla para no estorbar.
   const [oculta, setOculta] = useState(false);
   const [anchoPildora, setAnchoPildora] = useState(0);
 
@@ -84,11 +56,8 @@ const BurbujaPedido = () => {
 
   const esCliente = user?.type === 'client';
 
-  /*
-   * Los pedidos abiertos, del que más importa al que menos (ver
-   * utils/pedidosEnCurso.js). Se sigue el que eligió el cliente en la
-   * tarjeta; si no eligió (o el que eligió ya se cerró), el primero.
-   */
+  // Los pedidos abiertos, del que más importa al que menos (ver utils/pedidosEnCurso.js). Se sigue
+  // el que eligió el cliente en la tarjeta; si no eligió (o el que eligió ya se cerró), el primero.
   const lista = esCliente ? pedidosEnCurso(orders) : [];
   const [elegidoId, setElegidoId] = useState(null);
   const enCurso = lista.find((o) => String(o._id) === elegidoId) || lista[0] || null;
@@ -96,12 +65,9 @@ const BurbujaPedido = () => {
   // Los hooks necesitan el id ANTES de cualquier return: no se llaman a medias.
   const seguimiento = useSeguimientoEnVivo(enCurso?._id, !!enCurso);
 
-  /*
-   * Tocaron el aviso de "va en camino": se despliega la tarjeta con el mapa
-   * aunque la burbuja estuviera encogida u oculta. Se espera a que el pedido
-   * esté en la lista (al abrir la app desde el aviso, todavía se está
-   * cargando).
-   */
+  // Tocaron el aviso de "va en camino": se despliega la tarjeta con el mapa aunque la burbuja
+  // estuviera encogida u oculta. Se espera a que el pedido esté en la lista (al abrir la app desde
+  // el aviso, todavía se está cargando).
   const idsAbiertos = lista.map((o) => String(o._id)).join(',');
   useEffect(() => {
     if (!pedidoASeguir || !idsAbiertos.split(',').includes(pedidoASeguir)) return;
@@ -143,13 +109,8 @@ const BurbujaPedido = () => {
     }).start();
   }, [oculta, desplazamiento]);
 
-  /*
-   * El último pedido visto, para seguir pintando algo coherente MIENTRAS la
-   * burbuja entera se desvanece. Sin esto, en cuanto el pedido se entrega
-   * `enCurso` pasa a `undefined` de golpe y la animación de salida no tiene
-   * qué mostrar durante esos 180ms — se vería un hueco en blanco, no un
-   * desvanecido.
-   */
+  // El último pedido visto, para seguir pintando algo coherente MIENTRAS la burbuja entera se
+  // desvanece.
   const ultimoPedidoRef = useRef(null);
   if (enCurso) ultimoPedidoRef.current = enCurso;
   const pedido = enCurso || ultimoPedidoRef.current;
@@ -162,13 +123,8 @@ const BurbujaPedido = () => {
   const hayPedidoActivo =
     arranqueResuelto && esCliente && !!enCurso && estado !== 'cancelado' && estado !== 'entregado';
 
-  /*
-   * Presencia de TODA la burbuja: entra con un resorte al aparecer el
-   * primer pedido en curso, y sale con un fundido al entregarse o
-   * cancelarse. `montada` mantiene el árbol vivo durante esos 180ms de
-   * salida; sin él, el `return null` de más abajo la borraría de un
-   * frame a otro y no habría nada que animar.
-   */
+  // Presencia de TODA la burbuja: entra con un resorte al aparecer el primer pedido en curso, y sale
+  // con un fundido al entregarse o cancelarse.
   const [montada, setMontada] = useState(false);
   const presencia = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -194,13 +150,8 @@ const BurbujaPedido = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hayPedidoActivo]);
 
-  /*
-   * Quien avisa "el usuario se movió" no sabe nada de esta burbuja —son
-   * media docena de listas sueltas y la barra de pestañas, ver
-   * utils/actividadUsuario.js—; aquí solo se escucha. Si la tarjeta estaba
-   * abierta se cierra de una vez: no tiene sentido correr 290px de tarjeta
-   * fuera de pantalla, cuando lo que se guarda es la píldora chica.
-   */
+  // Quien avisa "el usuario se movió" no sabe nada de esta burbuja —son media docena de listas
+  // sueltas y la barra de pestañas, ver utils/actividadUsuario.js—; aquí solo se escucha.
   useEffect(() => {
     if (!montada) return;
     return suscribirseAActividad(() => {
@@ -209,13 +160,8 @@ const BurbujaPedido = () => {
     });
   }, [montada]);
 
-  /*
-   * Presencia de la TARJETA (el panel expandido) aparte de la burbuja: se
-   * abre y se cierra muchas más veces de las que la burbuja entera aparece
-   * o desaparece, así que tiene su propio fundido con un empujoncito desde
-   * abajo — la misma idea que `.card-in` en la web, pero disparada por
-   * `abierta` en vez de por el montaje.
-   */
+  // La tarjeta abierta tiene su propio fundido con un empujoncito desde abajo, aparte del de la
+  // burbuja entera (como `.card-in` en la web).
   const [tarjetaMontada, setTarjetaMontada] = useState(false);
   const presenciaTarjeta = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -240,17 +186,9 @@ const BurbujaPedido = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [abierta]);
 
-  /*
-   * Si se hace un pedido NUEVO mientras otro TODAVÍA sigue activo (no
-   * entregado), `hayPedidoActivo` sigue en `true` todo el tiempo: nunca pasa
-   * por `false`, así que el efecto de arriba (el que resetea `oculta` al
-   * aparecer un pedido) no se entera. Sin este aparte, la tarjeta o el
-   * detalle que se habían quedado abiertos seguían abiertos igual — se veían
-   * "aparecer solos" encima de la pantalla de confirmación recién abierta.
-   *
-   * Solo cuenta un pedido que no estaba antes: cambiar de pedido en la
-   * tarjeta, o que uno avance de paso, no cierra nada.
-   */
+  // Si se hace un pedido NUEVO mientras otro TODAVÍA sigue activo (no entregado), `hayPedidoActivo`
+  // sigue en `true` todo el tiempo: nunca pasa por `false`, así que el efecto de arriba (el que
+  // resetea `oculta` al aparecer un pedido) no se entera.
   const idsAnterioresRef = useRef(idsAbiertos ? idsAbiertos.split(',') : []);
   useEffect(() => {
     const ahora = idsAbiertos ? idsAbiertos.split(',') : [];
@@ -299,15 +237,8 @@ const BurbujaPedido = () => {
   };
   const variosPedidos = lista.length > 1;
 
-  /*
-   * Arriba de la píldora flotante, no encima. `ALTURA_BARRA_FLOTANTE` es el
-   * mismo alto que usan las hojas para no tapar su botón de abajo —
-   * ver components/UI/BarraInferior.js. Se suma siempre, aunque en las
-   * pantallas sueltas (Carrito, Checkout...) esa píldora no exista: ahí la
-   * burbuja queda con un poco más de aire abajo de lo estrictamente
-   * necesario, que es preferible a que tape el menú en las pantallas donde
-   * sí está.
-   */
+  // Arriba de la píldora flotante, no encima. `ALTURA_BARRA_FLOTANTE` es el mismo alto que usan las
+  // hojas para no tapar su botón de abajo — ver components/UI/BarraInferior.js.
   const posicion = {
     left: Math.max(20, insets.left),
     bottom: Math.max(insets.bottom, AIRE_ABAJO_MINIMO) + ALTURA_BARRA_FLOTANTE - 2,
@@ -317,35 +248,23 @@ const BurbujaPedido = () => {
   // (el texto de la píldora cambia — "Preparando", "Ya casi llega"... — así
   // que su ancho no se puede saber de antemano, hay que preguntarle).
   const ANCHO_ENCOGIDA = 44;
-  /*
-   * Lo mínimo para que asome el puntito verde y ni una letra del texto — a
-   * ojo contra el dibujo real, no contra la cuenta de paddings de memoria,
-   * que salió corta. La confianza al tocarlo no depende de este número: la
-   * da el hitSlop de abajo, pensado para una tira angosta.
-   */
+  // Lo mínimo para que asome el puntito verde y ni una letra del texto — a ojo contra el dibujo
+  // real, no contra la cuenta de paddings de memoria, que salió corta. La confianza al tocarlo no
+  // depende de este número: la da el hitSlop de abajo, pensado para una tira angosta.
   const PEDACITO_VISIBLE = 15;
   const anchoActual = encogida ? ANCHO_ENCOGIDA : anchoPildora;
   const maxDesplazamiento = Math.max(anchoActual - PEDACITO_VISIBLE, 0);
 
-  /*
-   * La capa de toque de "oculta" (más abajo) va anclada al borde de la
-   * PANTALLA (left: 0), no a `posicion.left` como el resto de la burbuja.
-   * Ojo con esto: el pedacito visible queda a la IZQUIERDA de
-   * `posicion.left` (ahí es donde termina el filo de la píldora ya
-   * trasladada), no a la derecha — anclarla en `posicion.left` como el resto
-   * dejaba la capa entera tapando el hueco de al lado en vez del filo.
-   */
+  // La capa de toque de "oculta" (más abajo) va anclada al borde de la PANTALLA (left: 0), no a
+  // `posicion.left` como el resto de la burbuja.
   const estiloCapturaOculta = {
     position: 'absolute',
     left: 0,
     bottom: posicion.bottom,
     width: posicion.left + PEDACITO_VISIBLE + 24,
     height: (encogida ? ANCHO_ENCOGIDA : 52) + 24,
-    // Mismo o más alto que estilos.contenedor (elevation 12, zIndex 900):
-    // sin esto, en Android la píldora sigue ganando el toque en su lugar
-    // ORIGINAL (sin trasladar) del layout aunque su contenido ya se haya
-    // deslizado fuera de la vista — la elevación decide quién responde,
-    // no dónde se ve pintado el contenido.
+    // Elevación igual o mayor que la del contenedor: en Android quien recibe el toque lo decide la
+    // elevación, no dónde se ve pintado.
     zIndex: 901,
     elevation: 20,
   };
@@ -363,10 +282,8 @@ const BurbujaPedido = () => {
     ],
   };
 
-  /*
-   * Encogida: un botón redondo con el icono del paso, nada más. Ocupa poco,
-   * no tapa la tienda y siempre se puede volver.
-   */
+  // Encogida: un botón redondo con el icono del paso, nada más. Ocupa poco, no tapa la tienda y
+  // siempre se puede volver.
   if (encogida) {
     return (
       <>
@@ -421,11 +338,8 @@ const BurbujaPedido = () => {
               </Pressable>
             </View>
 
-            {/*
-              Con más de un pedido abierto, todos aquí: el icono dice si es a
-              domicilio o para recoger, y el texto en qué paso va. Tocar uno
-              lo sigue en la tarjeta (con su mapa, si va en camino).
-            */}
+            {/* Con más de un pedido abierto, todos aquí: el icono dice si es a domicilio o para recoger, y el
+               texto en qué paso va. Tocar uno lo sigue en la tarjeta (con su mapa, si va en camino). */}
             {variosPedidos && (
               <View style={estilos.selectorPedidos} accessibilityRole="tablist">
                 {lista.map((o) => {
@@ -460,21 +374,13 @@ const BurbujaPedido = () => {
 
             {enCamino && (
               <>
-                {/*
-                  132 de alto, sin borde propio: mismas medidas que la web
-                  para la burbuja (alto={132} borde="transparent"). Va con
-                  margen propio en vez de heredar el `gap` de estilos.cuerpo
-                  porque ese padding es horizontal Y vertical, y el mapa sí
-                  necesita tocar los bordes laterales del bloqueInfo de abajo
-                  para leerse como una sola pieza con él.
-                */}
+                {/* 132 de alto, sin borde propio: mismas medidas que la web para la burbuja (alto={132}
+                   borde="transparent"). */}
                 <View style={estilos.marcoMapa}>
                   <MapaSeguimiento
-                    // Al volver de ModalMapaSeguimiento.js, Android a veces
-                    // deja la miniatura con una franja gris a medio pintar
-                    // (el WebView grande le pisó la superficie mientras
-                    // estuvo encima) — cambiar la key fuerza un remontaje
-                    // limpio apenas se cierra.
+                    // Al volver de ModalMapaSeguimiento.js, Android a veces deja la miniatura con una franja gris a
+                    // medio pintar (el WebView grande le pisó la superficie mientras estuvo encima) — cambiar la key
+                    // fuerza un remontaje limpio apenas se cierra.
                     key={mapaGrande ? 'grande' : 'chica'}
                     punto={seguimiento.punto}
                     destino={seguimiento.destino}
@@ -517,11 +423,8 @@ const BurbujaPedido = () => {
               </>
             )}
 
-            {/*
-              El tiempo real a su zona, mientras nadie ha salido todavía. Se
-              apaga en cuanto hay repartidor en vivo (arriba): dos tiempos
-              distintos en la misma tarjeta solo confunden.
-            */}
+            {/* El tiempo real a su zona, mientras nadie ha salido todavía. Se apaga en cuanto hay repartidor en
+               vivo (arriba): dos tiempos distintos en la misma tarjeta solo confunden. */}
             {!enCamino && esDomicilio && zona.hayDatos && (
               <View style={[estilos.bloqueInfo, { backgroundColor: COLORES.exitoFondo }]}>
                 <View style={estilos.filaIconoTexto}>
@@ -564,13 +467,8 @@ const BurbujaPedido = () => {
         accessibilityState={{ expanded: abierta }}
         accessibilityLabel={enCamino ? t('Tu pedido va en camino. {espera}', { espera: seguimiento.espera }) : t('Tu pedido: {estado}', { estado: paso.label })}
         style={[estilos.botonBurbuja, { backgroundColor: seguimiento.yaCasi ? '#14663A' : colores.marca }]}
-        /*
-         * Generoso arriba y abajo a propósito: la píldora tiene las puntas
-         * totalmente redondeadas (borderRadius 999), así que el filito que
-         * queda a la vista al estar "oculta" se angosta cerca del borde
-         * superior e inferior — sin este margen, tocar un poco fuera del
-         * centro vertical del filo caía fuera de la forma real.
-         */
+        // Área de toque más alta que el filo visible de la píldora escondida, para que tocar cerca de sus
+        // puntas redondeadas también la abra.
         hitSlop={{ top: 22, bottom: 22, left: 10, right: 14 }}
       >
         <Mascota pose={estaEnCamino ? 'en-camino' : paso.pose} alto={40} sobre="color" />
@@ -599,17 +497,8 @@ const BurbujaPedido = () => {
       </Pressable>
     </Animated.View>
 
-    {/*
-      Un Modal transparente de pantalla completa (probado antes que esto)
-      funcionaba para tocar el pedacito asomado, pero en Android se quedaba
-      comiéndose TODOS los toques de la pantalla mientras la burbuja estaba
-      escondida, sin importar dónde tocara el usuario — ni
-      `pointerEvents:'box-none'` por `style` en su envoltorio lo arregló, y
-      Android trataba la ventana del Modal entera como modal de cualquier
-      forma. Sin Modal, con `zIndex`/`elevation` iguales o más altos que
-      `estilos.contenedor` (ver estiloCapturaOculta), esta capa sí gana la
-      negociación del toque contra el FlatList de atrás.
-    */}
+    {/* Con la burbuja escondida, solo esta franja recibe el toque para traerla de vuelta; el resto de
+       la pantalla sigue respondiendo normal. */}
     {oculta && (
       <View style={estiloCapturaOculta}>
         <Pressable

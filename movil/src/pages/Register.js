@@ -1,51 +1,6 @@
-/*
- * ============================================================
- * REGISTRARSE — la versión móvil de Register.jsx
- * ============================================================
- * Los mismos campos y el mismo orden que la web, que no es casual: nombre y
- * usuario primero (lo fácil), después los datos que hay que ir a buscar (DUI,
- * teléfono, dirección) y al final el correo y la contraseña, que son las que
- * de verdad abren la cuenta.
- *
- * Dos cosas se hacen distinto que en la web, y por buenas razones:
- *
- *   1. El DUI, el teléfono y la fecha de nacimiento se formatean solos
- *      mientras se escriben, con las máscaras del proyecto: en un teclado de
- *      celular, donde el guion y la barra están en otra pantalla del teclado,
- *      dejarlo a mano garantiza que la base termine con "12345678-9" y
- *      "123456789" conviviendo. El DUI es OPCIONAL, igual que en la web; si
- *      se escribe, se valida el dígito verificador (ver utils/validaciones.js
- *      `validarDui`). La fecha de nacimiento SÍ es obligatoria (ver el
- *      comentario de `puedeDui` más abajo, y `frontend/src/pages/Register.jsx`).
- *
- *   2. La foto de perfil usa `expo-image-picker` directo, sin el recorte
- *      "cover" que arma `SubidorArchivo` en la web con CSS: acá el mismo
- *      efecto lo hace `contentFit="cover"` de expo-image sobre la miniatura.
- *      El límite de peso (8 MB) es el mismo que `SubidorArchivo` porque es el
- *      límite real de multer en el servidor (ver upload.js), no un número
- *      inventado para esta pantalla.
- *
- * ── Ya no se pide la dirección ──
- *
- * La tenía, y no servía para nada. El backend dejó de leerla (ver el comentario
- * al inicio de `backend/src/controller/Clients/registerClient.js`): mandaba un
- * texto suelto a un campo que después no leía nadie, porque las direcciones de
- * entrega viven en su propio apartado y se administran desde "Mi cuenta". Aquí
- * seguía siendo obligatoria, así que la app obligaba a escribir una dirección
- * para tirarla.
- *
- * Enviar NO crea la cuenta: el backend guarda los datos 15 minutos y manda un
- * código de 6 caracteres al correo. Por eso de aquí se sale a Verificación y
- * no a la tienda.
- *
- * ── Registrarse con Google ──
- *
- * Ese camino SÍ crea la cuenta de una, como en la web: el correo ya viene
- * confirmado por Google, así que no hay código que mandar y se entra directo
- * a la tienda. Si el correo ya tenía cuenta, simplemente inicia esa sesión
- * (el backend la enlaza).
- * ============================================================
- */
+// REGISTRARSE — la versión móvil de Register.jsx
+// Los mismos campos y en el mismo orden que la web: nombre y usuario, después DUI, teléfono y
+// dirección, y al final el correo y la contraseña.
 
 import { useRef, useState } from 'react';
 import {
@@ -108,18 +63,8 @@ const VALORES_INICIALES = {
   password: '',
 };
 
-/*
- * Fecha de nacimiento: igual que en la web, obligatoria y con el mismo rango
- * (0 a 120 años) — ver el `validate` de `fechaNacimiento` en
- * `frontend/src/pages/Register.jsx`. Se queda aquí y no en validaciones.js
- * porque así vive también en la web: es de este formulario, no una regla de
- * campo genérica.
- *
- * La diferencia real con la web es que allá el selector nativo del navegador
- * ya impide escribir un 31 de febrero; aquí es texto libre, así que esa
- * comprobación la hace `fechaISO` (ver utils/mascaras.js) antes de que
- * `calcularEdad` vea la fecha.
- */
+// Fecha de nacimiento: igual que en la web, obligatoria y con el mismo rango (0 a 120 años) — ver
+// el `validate` de `fechaNacimiento` en `frontend/src/pages/Register.jsx`.
 const validarFechaNacimiento = (valor) => {
   const iso = fechaISO(valor);
   if (!iso) {
@@ -150,12 +95,9 @@ const Register = ({ irALogin, alPedirCodigo }) => {
   const COLORES = useColores();
   const estilos = useEstilos(crearEstilos);
   const [valores, setValores] = useState(VALORES_INICIALES);
-  /*
-   * Una ref por campo, para que "Siguiente" en el teclado lleve de uno al
-   * otro en orden (ver CampoTexto). El nombre no la necesita: es el primero.
-   * En iOS el teclado numérico no trae esa tecla, así que en la fecha, el DUI
-   * y el teléfono se sigue tocando el campo que viene.
-   */
+  // Una ref por campo, para que "Siguiente" en el teclado lleve de uno al otro en orden (ver
+  // CampoTexto). El nombre no la necesita: es el primero. En iOS el teclado numérico no trae esa
+  // tecla, así que en la fecha, el DUI y el teléfono se sigue tocando el campo que viene.
   const campos = {
     userName: useRef(null),
     fechaNacimiento: useRef(null),
@@ -170,15 +112,8 @@ const Register = ({ irALogin, alPedirCodigo }) => {
   const { login } = useAuth();
   const [cargandoGoogle, setCargandoGoogle] = useState(false);
 
-  /*
-   * El consentimiento va aparte de `valores` porque no son campos de texto y
-   * no pasan por `validarFormulario`.
-   *
-   * Son DOS casillas separadas a propósito, igual que en la web: aceptar las
-   * condiciones y querer publicidad son dos cosas distintas, y meterlas en una
-   * sola es cobrarle a alguien el permiso de mandarle promociones a cambio de
-   * poder tener cuenta.
-   */
+  // El consentimiento va aparte de `valores` porque no son campos de texto y no pasan por
+  // `validarFormulario`.
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [promociones, setPromociones] = useState(false);
   const [errorTerminos, setErrorTerminos] = useState('');
@@ -188,11 +123,8 @@ const Register = ({ irALogin, alPedirCodigo }) => {
   const [foto, setFoto] = useState(null);
   const [errorFoto, setErrorFoto] = useState('');
 
-  /*
-   * Mismo tope que `SubidorArchivo` en la web (8 MB) — y el mismo que de
-   * verdad hace cumplir multer en el servidor (ver
-   * backend/src/utils/cloudinaryConfig.js), no un número puesto a ojo.
-   */
+  // Mismo tope que `SubidorArchivo` en la web (8 MB) — y el mismo que de verdad hace cumplir multer
+  // en el servidor (ver backend/src/utils/cloudinaryConfig.js), no un número puesto a ojo.
   const PESO_MAXIMO_FOTO = 8 * 1024 * 1024;
 
   const elegirFoto = async () => {
@@ -218,10 +150,8 @@ const Register = ({ irALogin, alPedirCodigo }) => {
     setFoto(elegida);
   };
 
-  /*
-   * `formateador` es opcional: los campos normales guardan lo que se teclea y
-   * el DUI, el teléfono y la fecha pasan primero por su máscara.
-   */
+  // `formateador` es opcional: los campos normales guardan lo que se teclea y el DUI, el teléfono y
+  // la fecha pasan primero por su máscara.
   const cambiar = (campo, formateador) => (texto) => {
     const valor = formateador ? formateador(texto) : texto;
     setValores((v) => ({ ...v, [campo]: valor }));
@@ -233,11 +163,8 @@ const Register = ({ irALogin, alPedirCodigo }) => {
     const encontrados = validarFormulario(valores, REGLAS);
     setErrores(encontrados);
 
-    /*
-     * Los términos se revisan junto con lo demás y no antes: así quien no
-     * llenó nada ve TODO lo que le falta de una vez, en vez de que el
-     * formulario le vaya sacando un problema por intento.
-     */
+    // Los términos se revisan junto con lo demás y no antes: así quien no llenó nada ve TODO lo que le
+    // falta de una vez, en vez de que el formulario le vaya sacando un problema por intento.
     const faltaAceptar = !aceptaTerminos;
     setErrorTerminos(faltaAceptar ? t('Hay que aceptar los términos para crear la cuenta') : '');
 
@@ -267,15 +194,9 @@ const Register = ({ irALogin, alPedirCodigo }) => {
     }
   };
 
-  /*
-   * Registrarse con Google. El consentimiento viaja TAMBIÉN por este camino,
-   * igual que en la web: sin la casilla de los términos no se molesta al
-   * servidor (y el servidor lo vuelve a exigir por su cuenta).
-   *
-   * Lo que Google no da —teléfono, fecha de nacimiento, DUI— se aprovecha si
-   * ya lo escribió arriba y está bien; si no, la cuenta nace sin eso, como en
-   * la web. Uno a medio escribir no se manda: guardaría basura.
-   */
+  // Registrarse con Google. El consentimiento viaja TAMBIÉN por este camino, igual que en la web:
+  // sin la casilla de los términos no se molesta al servidor (y el servidor lo vuelve a exigir por
+  // su cuenta).
   const conGoogle = async () => {
     if (!aceptaTerminos) {
       setErrorTerminos(t('Marca primero que aceptas los términos y la política de privacidad'));
@@ -379,10 +300,8 @@ const Register = ({ irALogin, alPedirCodigo }) => {
             redondo
           />
 
-          {/*
-            Igual que en la web: opcional, y solo aparece cuando la fecha de
-            nacimiento ya alcanza para ser mayor de edad.
-          */}
+          {/* Igual que en la web: opcional, y solo aparece cuando la fecha de nacimiento ya alcanza para ser
+             mayor de edad. */}
           {puedeDui && (
             <CampoTexto
               etiqueta={t('DUI (opcional)')}
@@ -480,13 +399,9 @@ const Register = ({ irALogin, alPedirCodigo }) => {
           </Pressable>
           {errorFoto ? <Text style={estilos.errorFoto}>{errorFoto}</Text> : null}
 
-          {/*
-            El consentimiento. La casilla y el enlace van en la MISMA fila
-            porque una casilla que no dice qué se está aceptando no es un
-            consentimiento: es un trámite. Tocar "los términos" abre el
-            documento encima, sin salir del formulario — ir a otra pantalla
-            haría perder todo lo escrito.
-          */}
+          {/* El consentimiento. La casilla y el enlace van en la MISMA fila porque una casilla que no dice
+             qué se está aceptando no es un consentimiento: es un trámite. Tocar "los términos" abre el
+             documento encima, sin salir del formulario — ir a otra pantalla haría perder todo lo escrito. */}
           <View style={estilos.consentimiento}>
             <View style={estilos.filaTerminos}>
               <Casilla
@@ -516,11 +431,8 @@ const Register = ({ irALogin, alPedirCodigo }) => {
 
             {errorTerminos ? <Text style={estilos.errorTerminos}>{errorTerminos}</Text> : null}
 
-            {/*
-              Opcional de verdad: se puede tener cuenta sin marcarla, y se
-              apaga después desde "Mi cuenta > Notificaciones". Los avisos de
-              sus pedidos no dependen de esto, porque esos no son publicidad.
-            */}
+            {/* Opcional de verdad: se puede tener cuenta sin marcarla, y se apaga después desde "Mi cuenta >
+               Notificaciones". Los avisos de sus pedidos no dependen de esto, porque esos no son publicidad. */}
             <Casilla
               marcada={promociones}
               alCambiar={setPromociones}
@@ -650,11 +562,9 @@ const crearEstilos = (COLORES) => StyleSheet.create({
     gap: 12,
     marginBottom: 16,
   },
-  /*
-   * La casilla y el enlace en la misma línea, con `flexWrap`: en un teléfono
-   * angosto "los términos y el aviso de privacidad" no cabe al lado de "He
-   * leído y acepto", y sin el wrap el enlace se cortaba a la mitad.
-   */
+  // La casilla y el enlace en la misma línea, con `flexWrap`: en un teléfono angosto "los términos y
+  // el aviso de privacidad" no cabe al lado de "He leído y acepto", y sin el wrap el enlace se
+  // cortaba a la mitad.
   filaTerminos: {
     flexDirection: 'row',
     alignItems: 'center',

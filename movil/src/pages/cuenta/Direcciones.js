@@ -1,22 +1,6 @@
-/*
- * ============================================================
- * DIRECCIONES — a dónde le llevamos los pedidos
- * ============================================================
- * El equivalente de `frontend/src/pages/cliente/Direcciones.jsx`: la lista de
- * direcciones guardadas, con su nombre, su texto y su referencia. A diferencia
- * de la web, aquí también se agregan: mismo endpoint que usa Checkout.js al
- * escribir una nueva al elegir el envío, y el mismo mapa de las dos —
- * `ModalMapaDireccion`, ver ese archivo para el porqué de un WebView con
- * MapLibre en vez de react-native-maps.
- *
- * ── Borrar (y agregar) es mandar la lista completa ──
- *
- * El endpoint reemplaza el arreglo entero (ver api/clienteApi.js), así que
- * tanto quitar una como sumar una nueva es guardar la lista completa ya
- * modificada. Borrar va con confirmación, que la web no pide: en un teléfono
- * el basurero queda a un centímetro del renglón que se quería tocar.
- * ============================================================
- */
+// DIRECCIONES — a dónde le llevamos los pedidos
+// El equivalente de `frontend/src/pages/cliente/Direcciones.jsx`: la lista de direcciones
+// guardadas, con su nombre, su texto y su referencia.
 
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -41,11 +25,9 @@ import ModalConfirmar from '../../components/UI/ModalConfirmar';
 import { useIdioma } from '../../context/IdiomaContext';
 import { contenidoCentrado } from '../../theme/pantalla';
 
-/*
- * Las direcciones viejas son texto suelto y las nuevas son un objeto. Se
- * normaliza al leer, igual que en la web (`normalizarDireccion`): así lo de
- * antes sigue viéndose y lo de ahora trae su nombre y su referencia.
- */
+// Las direcciones viejas son texto suelto y las nuevas son un objeto. Se normaliza al leer, igual
+// que en la web (`normalizarDireccion`): así lo de antes sigue viéndose y lo de ahora trae su
+// nombre y su referencia.
 const normalizar = (item) => {
   if (typeof item === 'string') {
     return { nombre: '', direccion: item, referencia: '' };

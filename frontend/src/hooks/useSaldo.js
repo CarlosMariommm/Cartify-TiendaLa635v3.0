@@ -4,20 +4,13 @@ import { tAhora } from '../utils/idioma';
 import { giftCardService } from '../api/giftCardService';
 import { useAuth } from './useAuth';
 
-/*
- * useSaldo — el saldo digital del cliente y el canje de tarjetas.
- *
- * El saldo NUNCA se calcula acá: siempre viene del servidor. Si lo lleváramos
- * en el navegador, cualquiera lo edita desde las herramientas del desarrollador
- * y se regala dinero.
- */
+// useSaldo — el saldo digital del cliente y el canje de tarjetas. El saldo NUNCA se calcula acá:
+// siempre viene del servidor. Si lo lleváramos en el navegador, cualquiera lo edita desde las
+// herramientas del desarrollador y se regala dinero.
 export const useSaldo = () => {
-  /*
-   * `esCliente` y no `user?.id`: en la tienda la sesión activa puede ser la del
-   * personal, y pedir el saldo con el id de un administrador devuelve 404
-   * "Cliente no encontrado" — que el interceptor pinta como un toast rojo en la
-   * cara de alguien que solo abrió su carrito. Ver useAuth.
-   */
+  // `esCliente` y no `user?.id`: en la tienda la sesión activa puede ser la del personal, y pedir el
+  // saldo con el id de un administrador devuelve 404 "Cliente no encontrado" — que el interceptor
+  // pinta como un toast rojo en la cara de alguien que solo abrió su carrito. Ver useAuth.
   const { user, esCliente } = useAuth();
   const [saldo, setSaldo] = useState(0);
   const [cargando, setCargando] = useState(true);

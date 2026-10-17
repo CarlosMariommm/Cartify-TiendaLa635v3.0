@@ -1,45 +1,21 @@
-/*
- * ============================================================
- * ICONOS — dibujados a mano con Views
- * ============================================================
- * Los iconos de los FORMULARIOS de sesión (correo, contraseña, DUI, teléfono,
- * la tienda de "seguir viendo"...) ya NO viven aquí: usan `lucide-react-native`,
- * que son los MISMOS iconos que la web dibuja con `lucide-react`. Lo mismo pasó
- * con la bolsa del carrito, el basurero de quitar un artículo y la lupa del
- * buscador: para esos lo que se buscaba era calzar con el diseño de la web, y
- * nada calza como el mismo trazo.
- *
- * Lo que queda aquí son los iconos de la TIENDA y la decoración de temporada:
- * formas simples (un copo, un corazón) armadas con rectángulos, círculos y
- * rayas. Cuesta más leerlas que un SVG, pero pesan cero y no atan la tienda a
- * un set concreto — a un copo de fondo no le hace falta ser "el" copo de
- * ninguna librería.
- *
- * Regla al dibujar: solo bordes uniformes (los cuatro lados iguales) y radios
- * uniformes. Android renderiza mal los bordes a medias con esquinas
- * redondeadas, así que las medias lunas se hacen tapando un círculo entero con
- * un contenedor `overflow: 'hidden'`, no con medio borde.
- * ============================================================
- */
+// ICONOS — dibujados a mano con Views
+// Los pocos iconos que no salen de lucide-react-native; los de formularios, carrito, basurero y
+// lupa ya son de lucide.
 
 import { View } from 'react-native';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
 import { useColores } from '../../context/ModoContext';
 
-/*
- * El color por defecto sale de la paleta del modo (claro u oscuro), no de una
- * constante: un gris fijo pensado para fondo blanco se pierde en el oscuro.
- * Quien pasa `color` explícito manda, como siempre.
- */
+// El color por defecto sale de la paleta del modo (claro u oscuro), no de una constante: un gris
+// fijo pensado para fondo blanco se pierde en el oscuro. Quien pasa `color` explícito manda, como
+// siempre.
 const useTono = (color, token) => {
   const COLORES = useColores();
   return color || COLORES[token];
 };
 
-/*
- * Una raya. Es la pieza con la que se arma casi todo: el palito de un numeral,
- * la diagonal del ojo tachado, cada lado de un check.
- */
+// Una raya. Es la pieza con la que se arma casi todo: el palito de un numeral, la diagonal del ojo
+// tachado, cada lado de un check.
 const Trazo = ({ largo, grosor = 1.6, color, estilo }) => (
   <View
     style={[
@@ -54,10 +30,8 @@ const Trazo = ({ largo, grosor = 1.6, color, estilo }) => (
   />
 );
 
-/*
- * Media luna: un círculo completo dentro de una caja que le corta la mitad de
- * abajo. Sirve para el arco del candado y para los hombros de la persona.
- */
+// Media luna: un círculo completo dentro de una caja que le corta la mitad de abajo. Sirve para el
+// arco del candado y para los hombros de la persona.
 const Arco = ({ ancho, alto, grosor = 1.6, color, estilo }) => (
   <View style={[{ width: ancho, height: alto, overflow: 'hidden' }, estilo]}>
     <View
@@ -129,11 +103,8 @@ export const Pin = ({ size = 18, color: colorPedido }) => {
   );
 };
 
-/*
- * El ojo de "mostrar contraseña" NO se dibuja aquí: usa `Eye`/`EyeOff` de
- * lucide-react-native directamente en CampoTexto —los mismos iconos que la web—.
- * Ver components/UI/CampoTexto.js.
- */
+// El ojo de "mostrar contraseña" NO se dibuja aquí: usa `Eye`/`EyeOff` de lucide-react-native
+// directamente en CampoTexto —los mismos iconos que la web—. Ver components/UI/CampoTexto.js.
 
 // ── Los de adorno (barra de arriba y lista de ventajas) ─────
 
@@ -209,14 +180,8 @@ export const Bici = ({ size = 16, color: colorPedido }) => {
   );
 };
 
-/*
- * La estrella son cinco puntas iguales giradas de 72 en 72 grados.
- *
- * Cada punta se empuja hacia afuera con un `translateY` DESPUÉS del giro, que
- * es lo que la manda a lo largo de su propio eje. Sin ese empujón las cinco se
- * pisan en el centro y el dibujo queda hecho un pentágono relleno; y anchas
- * tampoco sirven, porque el relleno se come los huecos entre puntas.
- */
+// La estrella son cinco puntas iguales giradas de 72 en 72 grados. Cada punta se empuja hacia
+// afuera con un `translateY` DESPUÉS del giro, que es lo que la manda a lo largo de su propio eje.
 export const Estrella = ({ size = 16, color: colorPedido }) => {
   const color = useTono(colorPedido, 'marca');
   return (
@@ -242,12 +207,9 @@ export const Estrella = ({ size = 16, color: colorPedido }) => {
   );
 };
 
-/*
- * El corazón clásico: un cuadrado girado 45 grados y dos bolitas del mismo
- * ancho apoyadas en sus dos lados de arriba. Las cuentas de abajo son las que
- * dejan las bolitas justo sobre esos lados —a ojo quedan descentradas y el
- * dibujo se ve como un borrón.
- */
+// El corazón clásico: un cuadrado girado 45 grados y dos bolitas del mismo ancho apoyadas en sus
+// dos lados de arriba. Las cuentas de abajo son las que dejan las bolitas justo sobre esos lados
+// —a ojo quedan descentradas y el dibujo se ve como un borrón.
 export const Corazon = ({ size = 16, color: colorPedido }) => {
   const color = useTono(colorPedido, 'marca');
   const lado = size * 0.55;
@@ -353,10 +315,8 @@ export const Equis = ({ size = 16, color: colorPedido, grosor = 1.8 }) => {
   );
 };
 
-/*
- * El marcador de "este producto no tiene foto". La caja con la raya del centro
- * es lo que la hace leerse como un paquete y no como un cuadrado a secas.
- */
+// El marcador de "este producto no tiene foto". La caja con la raya del centro es lo que la hace
+// leerse como un paquete y no como un cuadrado a secas.
 export const Paquete = ({ size = 30, color: colorPedido, grosor = 1.5 }) => {
   const color = useTono(colorPedido, 'tintaTenue');
   return (
@@ -436,13 +396,8 @@ export const Reloj = ({ size = 12, color: colorPedido, grosor = 1.4 }) => {
   );
 };
 
-// ── Las figuras que caen en temporada ──────────────────────
-/*
- * Van muy tenues y de fondo (ver DecoracionTemporada), así que aquí importa la
- * silueta y no el detalle: a 14 píxeles y al 30% de opacidad, un copo con seis
- * brazos y un copo con tres se ven igual. Lo que sí tiene que leerse es QUÉ
- * cosa es, de un vistazo y de reojo.
- */
+// ── Las figuras que caen en temporada ── Van tenues y de fondo (ver DecoracionTemporada), así
+// que importa la silueta: que se lea qué cosa es de un vistazo.
 
 export const Copo = ({ size = 14, color = '#FFFFFF' }) => (
   <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
@@ -458,11 +413,9 @@ export const Copo = ({ size = 14, color = '#FFFFFF' }) => (
   </View>
 );
 
-/*
- * El murciélago: el cuerpo al centro y las alas como dos triángulos que salen
- * hacia arriba y afuera. Con los triángulos apuntando hacia abajo parecía un
- * moño, que era lo que salía al primer intento.
- */
+// El murciélago: el cuerpo al centro y las alas como dos triángulos que salen hacia arriba y
+// afuera. Con los triángulos apuntando hacia abajo parecía un moño, que era lo que salía al primer
+// intento.
 export const Murcielago = ({ size = 16, color = '#FFFFFF' }) => {
   const ala = size * 0.42;
   return (
@@ -510,13 +463,9 @@ export const Confeti = ({ size = 10, color = '#FFFFFF' }) => (
   />
 );
 
-/*
- * El logo de Google del botón "Continuar con Google". Este SÍ es un SVG y no
- * un dibujo a mano como el resto del archivo: son cuatro curvas de color, no
- * hay forma de armarlas con rectángulos y círculos, y `react-native-svg` ya
- * es dependencia del proyecto (lo trae lucide-react-native). Es el trazo
- * oficial de Google para este mismo uso — un botón de inicio de sesión.
- */
+// El logo de Google del botón "Continuar con Google". Este SÍ es un SVG y no un dibujo a mano como
+// el resto del archivo: son cuatro curvas de color, no hay forma de armarlas con rectángulos y
+// círculos, y `react-native-svg` ya es dependencia del proyecto (lo trae lucide-react-native).
 export const LogoGoogle = ({ size = 18 }) => (
   <Svg width={size} height={size} viewBox="0 0 48 48">
     <Path
@@ -539,11 +488,8 @@ export const LogoGoogle = ({ size = 18 }) => (
 );
 
 /* La flecha de "atrás" de la barra del carrito. */
-/*
- * Compartir: tres puntos unidos, el mismo dibujo que usa la web (Share2 de
- * lucide). Con react-native-svg porque son círculos huecos y diagonales que
- * con rectángulos quedaban chuecos.
- */
+// Compartir: tres puntos unidos, el mismo dibujo que usa la web (Share2 de lucide). Con
+// react-native-svg porque son círculos huecos y diagonales que con rectángulos quedaban chuecos.
 export const Compartir = ({ size = 18, color: colorPedido, grosor = 2 }) => {
   const color = useTono(colorPedido, 'texto');
   return (

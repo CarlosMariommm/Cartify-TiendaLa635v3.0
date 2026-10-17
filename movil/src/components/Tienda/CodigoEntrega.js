@@ -4,19 +4,8 @@ import { useColores, useEstilos } from '../../context/ModoContext';
 import { useTema } from '../../context/TemaContext';
 import { useIdioma } from '../../context/IdiomaContext';
 
-/*
- * ============================================================
- * EL CÓDIGO DE ENTREGA — CodigoEntrega.js
- * ============================================================
- * Los cuatro dígitos que el cliente dicta al recibir su pedido. Puerto de
- * `frontend/src/components/Store/CodigoEntrega.jsx`, con sus dos versiones:
- * la compacta (una fila chica, para BurbujaPedido y ModalPedido, donde no
- * hay lugar para las cajitas grandes) y la completa (dígitos grandes en
- * cajas, con la explicación de qué es y quién NO lo ve), para Confirmacion.
- *
- * Mismas reglas que la web: sin código no se pinta nada, y un pedido ya
- * entregado o cancelado tampoco lo necesita.
- */
+// EL CÓDIGO DE ENTREGA — CodigoEntrega.js
+// Los cuatro dígitos que el cliente dicta al recibir su pedido.
 const CodigoEntrega = ({ codigo, deliveryType, estado, compacto = false }) => {
   const { t } = useIdioma();
   const { colores } = useTema();

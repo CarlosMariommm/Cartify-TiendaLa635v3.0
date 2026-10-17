@@ -1,15 +1,8 @@
 import api from './api';
 
-/*
- * AJUSTES DE LA TIENDA — storeSettingsService.js
- *
- * Nombre, logo, orden de la portada y tema de temporada. Un solo documento
- * para toda la tienda, así que no hay ids de por medio.
- *
- * El logo va aparte porque viaja como archivo (multipart) y no como JSON:
- * meterlo en el mismo PUT obligaría a mandar la ficha entera cada vez que se
- * cambia la imagen.
- */
+// AJUSTES DE LA TIENDA — storeSettingsService.js
+// Nombre, logo, orden de la portada y tema de temporada. Un solo documento para toda la tienda,
+// así que no hay ids de por medio.
 export const storeSettingsService = {
   getAjustes: async () => (await api.get('/storeSettings')).data,
 

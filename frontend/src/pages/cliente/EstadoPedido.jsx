@@ -16,28 +16,14 @@ import Mascota, { CargandoMascota } from '../../components/UI/Mascota';
 import { foto, ANCHO } from '../../utils/fotos';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * ============================================================
- * ESTADO DEL PEDIDO — la pantalla completa de "Orden en curso"
- * ============================================================
- * Lo que la burbuja muestra en pequeño, aquí en grande y con TODO: la línea de
- * tiempo, los productos, el resumen de cobro (con el envío real que ahora sí se
- * cobra) y, si va en camino, el mapa en vivo del repartidor.
- *
- * Todos los datos salen del pedido de verdad (orderService.getOrderById); no
- * hay nada inventado. Se llega desde "Mis pedidos" y desde la burbuja.
- * ============================================================
- */
+// ESTADO DEL PEDIDO — la pantalla completa de "Orden en curso"
+// Lo de la burbuja, en grande y completo: línea de tiempo, productos, resumen de cobro y, si va
+// en camino, el mapa del repartidor.
 
 const BROWN = 'var(--marca-600)';
 
-/*
- * Los pasos del pedido, iguales que en la burbuja para que la persona vea lo
- * mismo en los dos lados. "En camino" se filtra abajo para retiro en local
- * —no hay repartidor que seguirle— así que ese solo ve tres.
- */
-// Los pasos viven en utils/pasosPedido.js: estaban copiados en tres
-// pantallas y una de las copias se habia quedado sin "En camino".
+// Los pasos del pedido salen de utils/pasosPedido.js, los mismos de la burbuja; en retiro en local
+// no va "En camino".
 
 // Cómo se nombra cada forma de pago de cara al cliente.
 const PAGO = {
@@ -169,11 +155,8 @@ const EstadoPedido = () => {
               {t('Pedido recibido el {fecha}', { fecha: formatFechaLarga(pedido.createdAt, locale) })}
             </p>
 
-            {/*
-              La mascota contando en qué va el pedido: mira el recibo, llena
-              la bolsa, va en patineta, festeja la entrega… o se pone triste si
-              se canceló. Reemplaza al círculo con el ícono del paso.
-            */}
+            {/* La mascota contando en qué va el pedido: mira el recibo, llena la bolsa, va en patineta, festeja
+               la entrega… o se pone triste si se canceló. Reemplaza al círculo con el ícono del paso. */}
             <div className="flex flex-col items-center my-6">
               <div className="mb-3">
                 <Mascota pose={poseDeEstado(estado)} alto={140} />
@@ -186,11 +169,9 @@ const EstadoPedido = () => {
                     : t((PASOS[pasoActual] || PASOS[0]).detalle)}
               </div>
 
-              {/*
-                El porqué, que es lo primero que uno se pregunta, y lo que se
-                le devolvió. Los pedidos cancelados antes de que se pidiera un
-                motivo no traen ninguno: ahí solo queda la invitación a escribir.
-              */}
+              {/* El porqué, que es lo primero que uno se pregunta, y lo que se le devolvió. Los pedidos
+                 cancelados antes de que se pidiera un motivo no traen ninguno: ahí solo queda la invitación a
+                 escribir. */}
               {cancelado && (
                 <div className="mt-3 max-w-md text-center text-sm" style={{ color: c.textSecondary }}>
                   {pedido.cancelReason && (
@@ -240,12 +221,9 @@ const EstadoPedido = () => {
               </>
             )}
 
-            {/*
-              El código con el que recibirá el pedido. Va DEBAJO de la línea de
-              tiempo y encima del mapa a propósito: es lo que hace falta en el
-              momento exacto en que el repartidor toca el timbre, así que tiene
-              que estar donde ya se está mirando y sin tener que bajar.
-            */}
+            {/* El código con el que recibirá el pedido. Va DEBAJO de la línea de tiempo y encima del mapa a
+               propósito: es lo que hace falta en el momento exacto en que el repartidor toca el timbre, así
+               que tiene que estar donde ya se está mirando y sin tener que bajar. */}
             <CodigoEntrega
               codigo={pedido.deliveryCode}
               deliveryType={pedido.deliveryType}
@@ -377,11 +355,8 @@ const EstadoPedido = () => {
             {t('Volver a la tienda')}
           </button>
 
-          {/*
-            Cancelar, solo mientras está por preparar: después ya hay alguien
-            juntando la bolsa (el servidor lo revisa igual). Va debajo y sin
-            relleno: es la salida, no lo que se espera que haga.
-          */}
+          {/* Cancelar, solo mientras está por preparar: después ya hay alguien juntando la bolsa (el servidor
+             lo revisa igual). Va debajo y sin relleno: es la salida, no lo que se espera que haga. */}
           {estado === 'pagado' && (
             <button
               type="button"

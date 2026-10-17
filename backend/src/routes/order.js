@@ -4,13 +4,9 @@ import uploadPrint from "../utils/printUpload.js";
 import { soloPersonal, soloCliente, conSesion } from "../middlewares/validarSesion.js";
 import { identificarComprador } from "../middlewares/identificarComprador.js";
 
-/*
- * ── Documentación de la API (Swagger) ──
- *
- * Viene de main. Va agrupada aquí y no pegada a cada ruta porque
- * swagger-jsdoc rastrea el archivo entero: dónde esté no cambia lo que
- * documenta, y así el código de las rutas se lee sin interrupciones.
- */
+// ── Documentación de la API (Swagger) ──
+// Va agrupada aquí y no pegada a cada ruta porque swagger-jsdoc rastrea el archivo entero: dónde
+// esté no cambia lo que documenta, y así el código de las rutas se lee sin interrupciones.
 
 /**
  * @swagger
@@ -178,20 +174,9 @@ import { identificarComprador } from "../middlewares/identificarComprador.js";
 
 const router = express.Router();
 
-/*
- * Estas rutas estaban TODAS abiertas. Devolvían, a quien preguntara, el
- * historial de compras de cualquier cliente con su dirección y sus coordenadas,
- * y dejaban cambiar el estado de un pedido ajeno.
- *
- * Quién puede qué:
- *   soloPersonal → cosa de la tienda (la lista completa, mover estados, el
- *                  punto del repartidor).
- *   conSesion    → hace falta ser alguien; el controlador comprueba ADEMÁS
- *                  que el pedido sea suyo. Tener sesión no alcanza: sin esa
- *                  segunda comprobación, un cliente leería los pedidos de otro
- *                  cambiando el id de la URL.
- *   sin candado  → solo lo que no es de nadie (ver tiempo-zona).
- */
+// Estas rutas estaban TODAS abiertas. Devolvían, a quien preguntara, el historial de compras de
+// cualquier cliente con su dirección y sus coordenadas, y dejaban cambiar el estado de un pedido
+// ajeno.
 
 router
   .route("/")
@@ -201,23 +186,14 @@ router
   // kiosco por su código, y el personal a nombre de quien cobra en caja.
   .post(identificarComprador, orderController.createOrder);
 
-/*
- * Pedido de impresión. El identificador va DESPUÉS de multer a propósito: hasta
- * que multer no procesa el multipart, req.body viene vacío y el código del
- * kiosco no se podría leer.
- */
+// Pedido de impresión. El identificador va DESPUÉS de multer a propósito: hasta que multer no
+// procesa el multipart, req.body viene vacío y el código del kiosco no se podría leer.
 router
   .route("/print")
   .post(uploadPrint.single("file"), identificarComprador, orderController.createPrintOrder);
 
-/*
- * Cuánto tardamos de verdad en llegar a un punto, según las entregas pasadas.
- * Va ANTES de /:id/... para que "tiempo-zona" no se lea como un id de pedido.
- *
- * Se queda SIN candado a propósito: devuelve una mediana de la zona, un número
- * agregado que no es de ningún cliente en particular, y se consulta desde el
- * checkout antes de que exista el pedido.
- */
+// Cuánto tardamos de verdad en llegar a un punto, según las entregas pasadas. Va ANTES de /:id/...
+// para que "tiempo-zona" no se lea como un id de pedido.
 router
   .route("/tiempo-zona")
   .get(orderController.getTiempoPorZona);
@@ -227,12 +203,8 @@ router
   .route("/client/:clientId")
   .get(conSesion, orderController.getOrdersByClient);
 
-/*
- * UN pedido completo (pantalla de estado del pedido). conSesion deja pasar a
- * quien tenga sesión; el controlador comprueba además que el pedido sea suyo.
- * Va con el sufijo pelado "/:id" pero después de /client y /tiempo-zona: como
- * las demás rutas de :id llevan sufijo (/status, /rating, /courier), no choca.
- */
+// UN pedido completo (pantalla de estado del pedido). conSesion deja pasar a quien tenga sesión;
+// el controlador comprueba además que el pedido sea suyo.
 router
   .route("/:id")
   .get(conSesion, orderController.getOrderById);
@@ -241,11 +213,8 @@ router
   .route("/:id/status")
   .put(soloPersonal, orderController.updateOrderStatus);
 
-/*
- * El cliente valora el servicio de entrega de SU pedido. conSesion deja pasar a
- * quien tenga sesión; el controlador comprueba además que el pedido sea suyo y
- * que ya esté entregado.
- */
+// El cliente valora el servicio de entrega de SU pedido. conSesion deja pasar a quien tenga
+// sesión; el controlador comprueba además que el pedido sea suyo y que ya esté entregado.
 /**
  * @swagger
  * /order/{id}/cancelar:
@@ -286,11 +255,9 @@ router
   .route("/:id/rating")
   .patch(conSesion, orderController.rateService);
 
-/*
- * Seguimiento en vivo: el repartidor escribe su punto, el cliente lo lee.
- * Escribir es del personal; leer lo necesita el cliente que está esperando su
- * pedido, y el controlador comprueba que el pedido sea suyo.
- */
+// Seguimiento en vivo: el repartidor escribe su punto, el cliente lo lee. Escribir es del
+// personal; leer lo necesita el cliente que está esperando su pedido, y el controlador comprueba
+// que el pedido sea suyo.
 router
   .route("/:id/courier")
   .get(conSesion, orderController.getCourierPosition)

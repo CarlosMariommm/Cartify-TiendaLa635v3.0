@@ -11,33 +11,9 @@ import ModalEliminarCliente from '../components/Admin/ModalEliminarCliente';
 import { useClientes, ESTADOS } from '../hooks/useClientes';
 import { DUR, EASE_OUT, stagger } from '../utils/motion';
 
-/*
- * ============================================================
- * CLIENTES (Admin) — Customers.jsx
- * ============================================================
- * Pasaba por la DataTable genérica con NUEVE columnas. Esa pieza pinta cada
- * columna del medio como un par etiqueta/valor, así que cada cliente salía con
- * siete pares apretados en una tarjeta: teléfono, dirección, correo, DUI,
- * usuario, verificado y puntos, todos del mismo tamaño y del mismo gris. Nada
- * mandaba sobre nada, y las tarjetas quedaban desparejas porque una dirección
- * larga estiraba la suya al doble que las demás.
- *
- * Funciona bien en Marcas o Categorías, que tienen tres columnas. Con nueve se
- * ahoga. Por eso esta pantalla se sale de la DataTable y usa tarjeta propia.
- *
- * LO QUE CAMBIA, que es una decisión y no un adorno:
- *   - Manda la IDENTIDAD: el redondel con las iniciales, el nombre y su
- *     usuario. Es lo que se busca cuando alguien llega al mostrador.
- *   - Solo el contacto queda a la vista (teléfono y correo), que es lo que uno
- *     necesita para hacer algo con un cliente.
- *   - El DUI, la dirección y la fecha se esconden detrás de "Ver más". Existen
- *     y se consultan de vez en cuando; no merecen pelearle el espacio al
- *     nombre en todas las tarjetas, todo el tiempo.
- *   - Arriba, cuatro números del negocio. Antes había que contar a mano.
- *
- * La lógica vive en useClientes.
- * ============================================================
- */
+// CLIENTES (Admin) — Customers.jsx
+// Tarjetas propias en vez de la DataTable: manda el nombre con sus iniciales, a la vista solo el
+// contacto, y el DUI, la dirección y la fecha detrás de "Ver más". La lógica vive en useClientes.
 
 /* Una cifra del resumen. Misma familia visual que las tarjetas del Dashboard. */
 const Cifra = ({ icono: Icono, valor, etiqueta, ayuda }) => (
@@ -89,11 +65,8 @@ const TarjetaCliente = ({ cliente, indice, onEliminar }) => {
     >
       {/* ── Identidad ── */}
       <div className="flex items-start gap-3">
-        {/*
-          Las iniciales en vez de una foto: los clientes no suben foto, y un
-          avatar gris genérico repetido veinte veces no ayuda a distinguir a
-          nadie. Dos letras sí.
-        */}
+        {/* Las iniciales en vez de una foto: los clientes no suben foto, y un avatar gris genérico repetido
+           veinte veces no ayuda a distinguir a nadie. Dos letras sí. */}
         <div
           className="w-11 h-11 flex-none rounded-full grid place-items-center text-sm font-extrabold"
           style={{
@@ -115,12 +88,9 @@ const TarjetaCliente = ({ cliente, indice, onEliminar }) => {
                 @{cliente.userName}
               </span>
             )}
-            {/*
-              "Verificado" como marca junto al nombre y no como campo aparte:
-              es una propiedad de la cuenta, no un dato que se consulta. Y sin
-              verificar importa más que verificado —es lo que hay que atender—,
-              así que ese lleva color y el otro no.
-            */}
+            {/* "Verificado" como marca junto al nombre y no como campo aparte: es una propiedad de la cuenta,
+               no un dato que se consulta. Y sin verificar importa más que verificado —es lo que hay que
+               atender—, así que ese lleva color y el otro no. */}
             {cliente.verificado ? (
               <span className="inline-flex items-center gap-1 text-xs"
                     style={{ color: 'var(--theme-text-muted)' }}>
@@ -185,11 +155,8 @@ const TarjetaCliente = ({ cliente, indice, onEliminar }) => {
         </button>
       </div>
 
-      {/*
-        Lo que se consulta de vez en cuando. Se monta y desmonta en vez de
-        esconderse con CSS: son dos o tres renglones, no vale la pena tenerlos
-        en el documento de los veinte clientes a la vez.
-      */}
+      {/* Lo que se consulta de vez en cuando. Se monta y desmonta en vez de esconderse con CSS: son dos o
+         tres renglones, no vale la pena tenerlos en el documento de los veinte clientes a la vez. */}
       {abierta && (
         <div
           className="flex flex-col gap-2 pt-3 border-t"
@@ -198,11 +165,8 @@ const TarjetaCliente = ({ cliente, indice, onEliminar }) => {
           <Contacto icono={IdCard} vacio={!cliente.duiFormateado}>
             {cliente.duiFormateado || 'Sin DUI registrado'}
           </Contacto>
-          {/*
-            La dirección es la única que puede ser larga de verdad (llega a
-            traer dos direcciones juntas), así que se le deja envolver en vez
-            de recortarla: recortada no sirve para llevarle nada a nadie.
-          */}
+          {/* La dirección es la única que puede ser larga de verdad (llega a traer dos direcciones juntas),
+             así que se le deja envolver en vez de recortarla: recortada no sirve para llevarle nada a nadie. */}
           <div className="flex items-start gap-2 min-w-0">
             <MapPin className="w-3.5 h-3.5 flex-none mt-0.5" style={{ color: 'var(--theme-text-muted)' }} />
             <span
@@ -213,11 +177,9 @@ const TarjetaCliente = ({ cliente, indice, onEliminar }) => {
             </span>
           </div>
 
-          {/*
-            Eliminar va aquí, detrás de "Ver más", y no junto al contacto: no
-            se deshace, y no tiene que quedar a un toque de distancia de lo que
-            se usa todos los días. Pide confirmación (ModalEliminarCliente).
-          */}
+          {/* Eliminar va aquí, detrás de "Ver más", y no junto al contacto: no se deshace, y no tiene que
+             quedar a un toque de distancia de lo que se usa todos los días. Pide confirmación
+             (ModalEliminarCliente). */}
           <button
             type="button"
             onClick={() => onEliminar(cliente)}
@@ -329,11 +291,8 @@ const Customers = () => {
             Cargando clientes…
           </p>
         ) : clientes.length === 0 ? (
-          /*
-            Dos vacíos distintos. "No hay clientes todavía" es un estado del
-            negocio; "no encontré nada" es un resultado de la búsqueda, y
-            confundirlos hace pensar que se borró la base.
-          */
+          // Dos vacíos distintos. "No hay clientes todavía" es un estado del negocio; "no encontré nada" es
+          // un resultado de la búsqueda, y confundirlos hace pensar que se borró la base.
           <div className="text-center py-12">
             <Search className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--theme-text-muted)' }} />
             <p className="text-sm" style={{ color: 'var(--theme-text-secondary)' }}>

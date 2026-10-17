@@ -4,24 +4,9 @@ import { areaDeRuta } from '../../utils/sesion';
 import Mascota from './Mascota';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * ============================================================
- * AVISO SIN CONEXIÓN — AvisoSinConexion.jsx
- * ============================================================
- * Antes, si se caía el internet, la tienda no decía nada: los botones dejaban
- * de responder o aparecían errores sueltos, y no había forma de saber si era
- * la tienda o la conexión. Ahora, apenas el navegador avisa que no hay red,
- * sale la mascota con el cordón desenchufado y se aclara que el carrito no se
- * pierde (vive en el navegador; ver useStore).
- *
- * Cuando vuelve la conexión se dice un momento que ya se puede seguir, y el
- * aviso se va solo. No hay botón de reintentar: el navegador avisa por su
- * cuenta cuando la red regresa.
- *
- * Solo en la tienda y Mi Cuenta. El panel tiene su propio manejo de errores y
- * otra paleta; la frontera es la misma de utils/sesion.js.
- * ============================================================
- */
+// AVISO SIN CONEXIÓN — AvisoSinConexion.jsx
+// Si se cae el internet, sale Tiqui con el cordón desenchufado y se aclara que el carrito no se
+// pierde; el aviso se va solo cuando vuelve la conexión.
 
 const MS_DE_VUELTA = 2400;
 

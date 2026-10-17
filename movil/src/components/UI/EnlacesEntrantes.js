@@ -3,16 +3,9 @@ import { Linking } from 'react-native';
 import { irATabs, useArranqueResuelto } from '../../navigation/navigationRef';
 import { idDeProductoEnEnlace, pedirProducto } from '../../utils/enlaces';
 
-/*
- * EnlacesEntrantes — el enlace con el que se abrió la app, o que llegó con la
- * app ya abierta, lleva a donde apunta. Hoy: un producto (/producto/:id). Es
- * el mismo trabajo que hace AvisosTocados con los avisos, y vive a su lado
- * en App.js.
- *
- * Espera al arranque (la sesión restaurada o no): antes, la navegación todavía
- * está decidiendo entre la bienvenida y la tienda, y mover a alguien de ahí
- * lo dejaba en la pantalla equivocada.
- */
+// EnlacesEntrantes — el enlace con el que se abrió la app, o que llegó con la app ya abierta,
+// lleva a donde apunta. Hoy: un producto (/producto/:id). Es el mismo trabajo que hace
+// AvisosTocados con los avisos, y vive a su lado en App.js.
 const EnlacesEntrantes = () => {
   const arranque = useArranqueResuelto();
   const [enlace, setEnlace] = useState(null);

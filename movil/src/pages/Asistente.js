@@ -1,12 +1,6 @@
-/*
- * ============================================================
- * ASISTENTE POR VOZ — el apartado, ahora de verdad
- * ============================================================
- * Reemplaza al placeholder ("Todavía no está disponible"). La lógica vive en
- * useAsistenteVoz; aquí solo se pinta. Ver ese archivo para lo que se dejó
- * afuera a propósito (elegir voz, ir a un producto específico, el upsell).
- * ============================================================
- */
+// ASISTENTE POR VOZ — el apartado, ahora de verdad
+// Reemplaza al placeholder ("Todavía no está disponible"). La lógica vive en useAsistenteVoz; aquí
+// solo se pinta.
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -38,17 +32,13 @@ const Asistente = () => {
     productos, carrito, totalCarrito, agregarAlCarrito, eliminarDelCarrito, actualizarCantidad, limpiarCarrito,
     setCategoriaSeleccionada, setTerminoBusqueda, setPromoSeleccionada,
   } = useTienda();
-  /*
-   * Lo que pidió VER por voz ("muéstrame las manzanas"), no lo que agregó.
-   * Aquí SÍ sigue siendo una hoja y no la página del producto: la persona
-   * está hablando con Tiqui, y cambiar de pantalla le cortaría la charla.
-   */
+  // Lo que pidió VER por voz ("muéstrame las manzanas"), no lo que agregó. Aquí SÍ sigue siendo una
+  // hoja y no la página del producto: la persona está hablando con Tiqui, y cambiar de pantalla le
+  // cortaría la charla.
   const [productoAbierto, setProductoAbierto] = useState(null);
 
-  /*
-   * La bienvenida escrita saluda por el nombre más o menos la mitad de las
-   * veces que se entra: siempre igual se vuelve fórmula. Ver nombreTiqui.js.
-   */
+  // La bienvenida escrita saluda por el nombre más o menos la mitad de las veces que se entra:
+  // siempre igual se vuelve fórmula. Ver nombreTiqui.js.
   const { user } = useAuth();
   const nombre = user?.type === 'client' ? primerNombre(user?.fullName) : '';
   const [saludaConNombre] = useState(() => Math.random() < 0.5);
@@ -62,11 +52,8 @@ const Asistente = () => {
   } = useAsistenteVoz({
     productos, carrito, totalCarrito, agregarAlCarrito, eliminarDelCarrito, actualizarCantidad, limpiarCarrito,
     mostrarProducto: setProductoAbierto,
-    /*
-     * "Las promociones": se cierra la ficha que estaba abierta (antes se
-     * quedaba encima) y se va a la tienda sin filtros, donde está el
-     * carrusel de promociones.
-     */
+    // "Las promociones": se cierra la ficha que estaba abierta (antes se quedaba encima) y se va a la
+    // tienda sin filtros, donde está el carrusel de promociones.
     irAPromociones: () => {
       setProductoAbierto(null);
       setPromoSeleccionada?.(null);
@@ -77,12 +64,9 @@ const Asistente = () => {
     },
   });
 
-  /*
-   * Si la persona se va por su cuenta de esta pantalla (otra pestaña, el
-   * carrito, la presentación), Tiqui deja de escuchar pero sigue despierta, y
-   * al volver retoma sola. Si la llevó Tiqui ("enséñame las promociones"), la
-   * charla sigue: le están hablando a ella. Ver pausar en useAsistenteVoz.
-   */
+  // Si la persona se va por su cuenta de esta pantalla (otra pestaña, el carrito, la presentación),
+  // Tiqui deja de escuchar pero sigue despierta, y al volver retoma sola. Si la llevó Tiqui
+  // ("enséñame las promociones"), la charla sigue: le están hablando a ella.
   useFocusEffect(
     useCallback(() => {
       reanudar();
@@ -95,11 +79,9 @@ const Asistente = () => {
 
   const chatRef = useRef(null);
 
-  /*
-   * La primera vez que se entra aquí, Tiqui se presenta sola (ConoceATiqui).
-   * Es lo que distingue a la tienda: no se deja a que alguien la descubra
-   * por casualidad. Después se puede volver a ver con "¿Quién es Tiqui?".
-   */
+  // La primera vez que se entra aquí, Tiqui se presenta sola (ConoceATiqui). Es lo que distingue a
+  // la tienda: no se deja a que alguien la descubra por casualidad. Después se puede volver a ver
+  // con "¿Quién es Tiqui?".
   useEffect(() => {
     let vivo = true;
     leer(LLAVE_TIQUI_PRESENTADO).then((visto) => {
@@ -114,13 +96,9 @@ const Asistente = () => {
 
   const items = carrito.reduce((a, i) => a + i.cantidad, 0);
 
-  /*
-   * Tiqui ES el botón. Ya no hay micrófono: se le habla a ella. Mientras nadie
-   * le habla, duerme colgada de su cordón; tocarla la despierta y se pone a
-   * escuchar, y lo próximo que dice lo dice recién despertada. Se queda
-   * despierta aunque nadie hable: se duerme si la tocan, al ir a pagar o si
-   * la app se va a segundo plano. Su última respuesta se queda en el chat.
-   */
+  // Tiqui ES el botón. Ya no hay micrófono: se le habla a ella. Mientras nadie le habla, duerme
+  // colgada de su cordón; tocarla la despierta y se pone a escuchar, y lo próximo que dice lo dice
+  // recién despertada.
   const dormida = !activo && !pensando && !hablando;
   // Con la respuesta lista pero su voz en camino, todavía piensa: el mensaje
   // y la boca arrancan junto con el sonido.
@@ -173,10 +151,8 @@ const Asistente = () => {
       </View>
 
       <View style={estilos.cuerpo}>
-        {/*
-          Tiqui colgando del borde de arriba, agarrada con su broche. Más
-          chica cuando ya hay charla, para dejarle lugar al chat.
-        */}
+        {/* Tiqui colgando del borde de arriba, agarrada con su broche. Más chica cuando ya hay charla, para
+           dejarle lugar al chat. */}
         <Pressable
           onPress={alTocarTiqui}
           accessibilityRole="button"
@@ -230,10 +206,9 @@ const Asistente = () => {
           {
             borderColor: colores.marcaSuave,
             backgroundColor: colores.marcaTenue,
-            // Esta barra es el último hijo de la pantalla, no contenido que
-            // se desliza: si no le deja hueco a la píldora de abajo (que
-            // flota por ENCIMA, pintada por el propio Tab Navigator), el
-            // toque en "Tu carrito" lo captura la píldora y no esto.
+            // Esta barra es el último hijo de la pantalla, no contenido que se desliza: si no le deja hueco a
+            // la píldora de abajo (que flota por ENCIMA, pintada por el propio Tab Navigator), el toque en "Tu
+            // carrito" lo captura la píldora y no esto.
             paddingBottom: 14 + Math.max(bottom, AIRE_ABAJO_MINIMO) + ALTURA_BARRA_FLOTANTE,
           },
         ]}

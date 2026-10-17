@@ -6,18 +6,8 @@ import MapaDireccion from '../../components/Store/MapaDireccion';
 import Mascota, { CargandoMascota } from '../../components/UI/Mascota';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * Direcciones — el cliente gestiona sus direcciones de entrega (área "Mi Cuenta").
- * La lógica (cargar/eliminar) vive en useAddresses; aquí solo pintamos.
- *
- * Agregar es SIEMPRE con el mapa: escribir la dirección a ciegas en una caja
- * de texto daba direcciones que el repartidor después no encontraba, que se
- * cobraban solo la tarifa base en vez de por distancia y que el cliente no podía
- * seguir en el mapa. Ver MapaDireccion.jsx.
- *
- * El mapa se abre AQUÍ MISMO, en un panel. Antes mandaba a /bienvenida —otra
- * pantalla, con su viaje de ida y vuelta— para hacer algo que cabe en esta.
- */
+// Direcciones — el cliente gestiona sus direcciones de entrega (área "Mi Cuenta"). La lógica
+// (cargar/eliminar) vive en useAddresses; aquí solo pintamos.
 const Direcciones = () => {
   const { palette } = useTheme();
   const c = palette.colors;
@@ -45,10 +35,8 @@ const Direcciones = () => {
         </button>
       </div>
 
-      {/*
-        El mapa, incrustado. Va arriba de la lista porque cuando está abierto
-        es lo único que importa en la pantalla.
-      */}
+      {/* El mapa, incrustado. Va arriba de la lista porque cuando está abierto es lo único que importa en
+         la pantalla. */}
       {agregando && (
         <div
           className="mb-6 p-4 rounded-2xl"

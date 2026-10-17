@@ -1,8 +1,5 @@
-"""
-El pronóstico con datos inventados de los que se sabe la respuesta: un fin
-de semana fuerte, un producto que se vende un día sí y otro no, otro que dejó
-de venderse.
-"""
+"""El pronóstico con datos inventados de los que se sabe la respuesta: un fin de semana fuerte, un
+producto que se vende un día sí y otro no, otro que dejó de venderse."""
 
 from datetime import date, timedelta
 

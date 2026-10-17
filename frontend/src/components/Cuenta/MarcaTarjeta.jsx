@@ -1,11 +1,8 @@
 import { CreditCard } from 'lucide-react';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * El logo de la red de la tarjeta, dibujado aquí mismo (sin imágenes que
- * descargar). `sobreColor` es para ponerlo encima de la tarjeta de colores
- * de la vista previa: ahí va en blanco.
- */
+// El logo de la red de la tarjeta, dibujado aquí mismo (sin imágenes que descargar). `sobreColor`
+// es para ponerlo encima de la tarjeta de colores de la vista previa: ahí va en blanco.
 const MarcaTarjeta = ({ marca = 'otra', sobreColor = false, alto = 30 }) => {
   const { t } = useIdioma();
   const ancho = Math.round(alto * 1.5);

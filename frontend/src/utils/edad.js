@@ -1,16 +1,6 @@
-/*
- * ============================================================
- * EDAD — edad.js
- * ============================================================
- * La cuenta de años para el candado de los productos +18.
- *
- * Es una barrera BLANDA a propósito: una fecha de nacimiento se puede mentir.
- * Su trabajo no es probar la edad, es (a) no mostrarle licores ni cigarros a un
- * menor por defecto, (b) obligar a afirmar activamente que es mayor y (c)
- * dejar registro de esa afirmación. La verificación de verdad sigue siendo el
- * DUI físico al momento de la entrega.
- * ============================================================
- */
+// EDAD — edad.js
+// La cuenta de años para el candado de los productos +18. Es una barrera BLANDA a propósito: una
+// fecha de nacimiento se puede mentir.
 
 export const EDAD_MINIMA = 18;
 

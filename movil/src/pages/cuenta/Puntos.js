@@ -1,31 +1,6 @@
-/*
- * ============================================================
- * PUNTOS DE FIDELIDAD — la tarjeta del cliente
- * ============================================================
- * El equivalente de `frontend/src/pages/cliente/PuntosFidelidad.jsx`: cuántos
- * puntos tiene disponibles, cuánto valen en dinero, cuándo vence el lote que
- * vence primero, y las tres preguntas de siempre.
- *
- * ── Los números no se inventan ──
- *
- * Ni el "cada 100 puntos es $1" ni el "vencen a los 3 meses" están escritos
- * aquí: salen de `/loyaltyConfig`, que es lo que la tienda tiene configurado de
- * verdad. Los respaldos del `??` son los mismos que usa la web y solo entran
- * cuando el servidor no contesta — un texto que promete una tasa distinta de la
- * que se aplica en la caja es una discusión en el mostrador.
- *
- * Y el saldo sale del resumen, no del `loyaltyPoints` del cliente: ese es todo
- * lo que ganó en su vida, y lo que se le puede prometer hoy es solo lo que no
- * ha vencido ni canjeado. Ver api/fidelidadApi.js.
- *
- * ── Las dos peticiones van juntas ──
- *
- * Con `Promise.all`, como la web. En serie son dos viajes al servidor uno tras
- * otro, y en una red de datos del teléfono eso se nota: la tarjeta aparecería
- * con el saldo pero sin saber cuánto vale, y se acomodaría sola un segundo
- * después con el cliente mirándola.
- * ============================================================
- */
+// PUNTOS DE FIDELIDAD — la tarjeta del cliente
+// Cuántos puntos tiene, cuánto valen y cuándo vence el primer lote; las reglas salen del servidor
+// (`/loyalty`), no están escritas aquí.
 
 import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -122,11 +97,9 @@ const Puntos = ({ alVolver }) => {
         <ScrollView contentContainerStyle={[estilos.cuerpo, { paddingBottom: aireAbajo }]}>
           {/* ── La tarjeta ── */}
           <View style={estilos.tarjeta}>
-            {/*
-              El degradado de la web va de `primary` a `accent` y termina en el
-              hover del primario. Aquí se arma con los tres de la temporada, así
-              que en Navidad la tarjeta es verde sin tocar este archivo.
-            */}
+            {/* El degradado de la web va de `primary` a `accent` y termina en el hover del primario. Aquí se
+               arma con los tres de la temporada, así que en Navidad la tarjeta es verde sin tocar este
+               archivo. */}
             <LinearGradient
               colors={[colores.marca, colores.acento, colores.marcaOscuro]}
               locations={[0, 0.55, 1]}

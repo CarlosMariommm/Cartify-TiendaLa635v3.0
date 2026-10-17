@@ -3,46 +3,17 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useModo } from '../../hooks/useModo';
 import { Map, MapMarker, MarkerContent, MapControls, MapRoute, useMap } from '../mapcn/map';
 
-/*
- * ============================================================
- * EL MAPA DE LA TIENDA — MapaTienda.jsx
- * ============================================================
- * Un solo mapa para toda la web: marcar la dirección, seguir al repartidor,
- * el mapa del reparto y la ubicación de la tienda en el panel. Por dentro es
- * mapcn (MapLibre, mapas vectoriales de CARTO); por fuera, cada pantalla solo
- * dice QUÉ quiere ver, con datos:
- *
- *   <Mapa
- *     centro={{ lat, lng }} zoom={15}
- *     pines={[{ id: 'casa', lat, lng, tipo: 'gota', arrastrable, onSoltar }]}
- *     onTocar={({ lat, lng }) => ...}
- *     seguir={{ punto, zoomMinimo: 16, volar: true }}
- *     encuadrar={[punto, destino]}
- *     interactivo={false}
- *   />
- *
- * Antes cada pantalla armaba su propio Leaflet, con sus pines escritos como
- * HTML en texto. Cambiar de mapa obligaba a tocar cinco archivos; ahora es
- * este.
- *
- * OJO CON EL ORDEN DE LAS COORDENADAS: MapLibre usa [lng, lat] y el resto de
- * la app {lat, lng}. La traducción pasa SOLO aquí adentro; las pantallas
- * nunca ven un arreglo de coordenadas.
- *
- * No se importa directo: se usa Mapa.jsx, que lo carga solo cuando hace falta
- * (MapLibre pesa mucho para bajarlo en cada visita a la portada).
- * ============================================================
- */
+// EL MAPA DE LA TIENDA — MapaTienda.jsx
+// Un solo mapa para toda la web: marcar la dirección, seguir al repartidor, el mapa del reparto y
+// la ubicación de la tienda en el panel.
 
 const esCoord = (v) => v !== null && v !== undefined && v !== '' && Number.isFinite(Number(v));
 const valido = (p) => !!p && esCoord(p.lat) && esCoord(p.lng);
 
 /* ── Los pines ─────────────────────────────────────────────── */
 
-/*
- * La gota: el pin de "aquí". Un cuadrado con tres esquinas redondas girado
- * 45°, del color de la marca (sigue a la temporada).
- */
+// La gota: el pin de "aquí". Un cuadrado con tres esquinas redondas girado 45°, del color de la
+// marca (sigue a la temporada).
 const Gota = ({ tamano = 22, color = 'var(--marca-600)' }) => (
   <div
     style={{
@@ -57,10 +28,8 @@ const Gota = ({ tamano = 22, color = 'var(--marca-600)' }) => (
   />
 );
 
-/*
- * El repartidor: un punto azul con halo que late, como el "usted está aquí"
- * de cualquier app de mapas. Se distingue de la gota de un vistazo.
- */
+// El repartidor: un punto azul con halo que late, como el "usted está aquí" de cualquier app de
+// mapas. Se distingue de la gota de un vistazo.
 const PuntoEnVivo = ({ tamano = 16 }) => (
   <div style={{ position: 'relative', width: tamano, height: tamano }}>
     <span
@@ -106,17 +75,9 @@ const AlTocar = ({ onTocar }) => {
   return null;
 };
 
-/*
- * Mueve la cámara cuando cambian los puntos que importan.
- *
- * - encuadrar: que se vean todos a la vez (el repartidor Y la casa). Conforme
- *   se acercan el encuadre se cierra solo, y eso cuenta el avance sin barra.
- * - seguir: centrar en un punto (el GPS encontró a la persona, o movió el pin).
- *
- * Se dispara por los NÚMEROS de las coordenadas y no por el objeto: cada render
- * trae un objeto nuevo con los mismos valores, y re-encuadrar por eso haría
- * temblar el mapa en cada tecla que se escribe al lado.
- */
+// Mueve la cámara cuando cambian los puntos que importan. - encuadrar: que se vean todos a la vez
+// (el repartidor Y la casa). Conforme se acercan el encuadre se cierra solo, y eso cuenta el
+// avance sin barra. - seguir: centrar en un punto (el GPS encontró a la persona, o movió el pin).
 const Camara = ({ encuadrar, seguir }) => {
   const { map } = useMap();
 
@@ -155,11 +116,9 @@ const Camara = ({ encuadrar, seguir }) => {
   return null;
 };
 
-/*
- * El crédito de los mapas ("© CARTO, © OpenStreetMap") es obligatorio, pero
- * MapLibre lo muestra desplegado al cargar y en una miniatura de 132px tapaba
- * medio mapa. Se deja plegado en su botón "i": sigue ahí para quien lo toque.
- */
+// El crédito de los mapas ("© CARTO, © OpenStreetMap") es obligatorio, pero MapLibre lo muestra
+// desplegado al cargar y en una miniatura de 132px tapaba medio mapa. Se deja plegado en su botón
+// "i": sigue ahí para quien lo toque.
 const CreditoPlegado = () => {
   const { map, isLoaded } = useMap();
   useEffect(() => {
@@ -171,19 +130,7 @@ const CreditoPlegado = () => {
 
 /* ── El mapa ────────────────────────────────────────────────── */
 
-/**
- * @param centro      {lat,lng} donde arranca la cámara.
- * @param zoom        zoom inicial.
- * @param pines       [{ id, lat, lng, tipo: 'gota'|'repartidor', tamano, color, arrastrable, onSoltar }]
- * @param onTocar     ({lat,lng}) al tocar el mapa. Sin él, tocar no hace nada.
- * @param seguir      { punto, zoomMinimo, volar } centra cuando cambia el punto.
- * @param encuadrar   [puntos] encuadra para que se vean todos.
- * @param interactivo si se puede arrastrar y hacer zoom (falso en miniaturas:
- *                    en un mapa chico el dedo quiere desplazar la PÁGINA).
- * @param controles   muestra los botones de zoom.
- * @param ruta        [{lat,lng}…] una línea por las calles (la que le falta al
- *                    repartidor). Va debajo de los pines.
- */
+// Recibe: centro, zoom, pines, onTocar, seguir, encuadrar, interactivo, controles, ruta.
 const MapaTienda = ({
   centro,
   zoom = 15,
@@ -216,10 +163,8 @@ const MapaTienda = ({
       <Camara encuadrar={encuadrar} seguir={seguir} />
       <CreditoPlegado />
 
-      {/*
-        La ruta, en el azul del punto del repartidor (es SU camino), con un
-        borde del color de las calles debajo para que se despegue del mapa.
-      */}
+      {/* La ruta, en el azul del punto del repartidor (es SU camino), con un borde del color de las
+         calles debajo para que se despegue del mapa. */}
       {lineaDeRuta.length > 1 && (
         <>
           <MapRoute id="ruta-borde" coordinates={lineaDeRuta} color={oscuro ? '#0F172A' : '#FFFFFF'} width={8} opacity={0.95} interactive={false} />

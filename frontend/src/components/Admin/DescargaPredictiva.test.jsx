@@ -7,10 +7,8 @@ import { descargarArchivo } from '../../utils/descargar';
 import { construirReportePredictivo } from '../../utils/reportePredictivo';
 import toast from 'react-hot-toast';
 
-/*
- * El botón del reporte predictivo: pide el pronóstico, arma el PDF con los
- * datos de la tienda y lo descarga. El servidor y el PDF son de mentira.
- */
+// El botón del reporte predictivo: pide el pronóstico, arma el PDF con los datos de la tienda y lo
+// descarga. El servidor y el PDF son de mentira.
 
 vi.mock('../../api/dashboardService', () => ({ dashboardService: { getPronostico: vi.fn() } }));
 vi.mock('../../utils/descargar', () => ({ descargarArchivo: vi.fn() }));

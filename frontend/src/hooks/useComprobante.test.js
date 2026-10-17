@@ -4,10 +4,8 @@ import { renderHook, act } from '@testing-library/react';
 import { useComprobante } from './useComprobante';
 import { descargarArchivo } from '../utils/descargar';
 
-/*
- * Bajar el comprobante desde Pedidos: se arma con el pedido en pantalla y los
- * datos de la tienda, y se baja con el nombre de siempre.
- */
+// Bajar el comprobante desde Pedidos: se arma con el pedido en pantalla y los datos de la tienda,
+// y se baja con el nombre de siempre.
 
 vi.mock('../utils/descargar', () => ({ descargarArchivo: vi.fn() }));
 vi.mock('../context/AjustesContext', () => ({ useAjustesCtx: () => ({ ajustes: { nombreLinea1: 'Tienda', nombreLinea2: 'la 635' } }) }));

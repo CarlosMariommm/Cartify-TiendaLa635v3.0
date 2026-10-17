@@ -4,13 +4,9 @@ import toast from 'react-hot-toast';
 import { useLoyaltyConfig } from '../hooks/useLoyaltyConfig';
 import { numeroEnRango, bloquearTeclasNumero } from '../utils/validaciones';
 
-/*
- * Fidelidad (Admin) — el gerente configura el programa de puntos:
- *   - cuántos puntos se ganan por cada $1
- *   - a los cuántos meses vencen
- *   - encender/apagar el programa
- * La lógica vive en useLoyaltyConfig; aquí solo está el formulario.
- */
+// Fidelidad (Admin) — el gerente configura el programa de puntos: - cuántos puntos se ganan por
+// cada $1 - a los cuántos meses vencen - encender/apagar el programa La lógica vive en
+// useLoyaltyConfig; aquí solo está el formulario.
 const Fidelidad = () => {
   const { config, loading, saving, guardar } = useLoyaltyConfig();
   const [form, setForm] = useState({
@@ -33,11 +29,7 @@ const Fidelidad = () => {
   const onSubmit = (e) => {
     e.preventDefault();
 
-    /*
-     * Cada número tiene que tener sentido antes de guardarse. Ojo con la tasa
-     * de canje: si llegara a 0 la división para calcular el descuento se
-     * rompería (Infinity) y el cliente podría "pagar" todo con puntos.
-     */
+    // Cada número tiene que tener sentido antes de guardarse.
     const ganancia = numeroEnRango(form.pointsPerDollar, { min: 0.01, max: 1000 });
     if (ganancia === null) { toast.error('Los puntos por cada $1 deben ser mayores que 0'); return; }
 

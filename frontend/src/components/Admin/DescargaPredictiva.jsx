@@ -5,20 +5,9 @@ import { useAjustesCtx } from '../../context/AjustesContext';
 import { descargarReportePredictivo } from '../../utils/descargarPredictivo';
 import { pronosticoParaMostrar } from '../../utils/reportePredictivo';
 
-/*
- * ============================================================
- * DESCARGAR EL REPORTE PREDICTIVO — DescargaPredictiva.jsx
- * ============================================================
- * El bloque del modal "Descargar" del tablero (solo el administrador): pide
- * el pronóstico al servidor —que lo calcula con el servicio de analítica— y
- * lo arma en PDF (ver utils/descargarPredictivo.js). La pantalla Pronóstico
- * tiene su propio botón con el mismo PDF.
- *
- * El servicio de analítica duerme cuando nadie lo usa (Render gratis): la
- * primera vez del día puede tardar cerca de un minuto, y eso se dice
- * mientras espera, para que nadie crea que se trabó.
- * ============================================================
- */
+// DESCARGAR EL REPORTE PREDICTIVO — DescargaPredictiva.jsx
+// Bloque del modal "Descargar" del tablero (solo el administrador): pide el pronóstico al
+// servidor y lo arma en PDF (ver utils/descargarPredictivo.js).
 const DescargaPredictiva = ({ alTerminar }) => {
   const { ajustes } = useAjustesCtx();
   const [calculando, setCalculando] = useState(false);

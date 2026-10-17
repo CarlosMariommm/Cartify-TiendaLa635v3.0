@@ -1,19 +1,6 @@
-/*
- * ============================================================
- * MODO CLARO / OSCURO — modo.js
- * ============================================================
- * Lo que elige cada persona en Mi cuenta → Preferencias. Copia de
- * `frontend/src/utils/modo.js`, con el mismo criterio: vive en ESTE teléfono
- * (el almacén de la app), no en la cuenta. Se tiene que poder aplicar antes de
- * que cargue nada, incluso sin sesión, y cada aparato tiene su luz (el
- * teléfono de noche, la compu de la oficina).
- *
- *   'claro'   — como siempre (el de fábrica).
- *   'oscuro'  — fondo oscuro en toda la app.
- *   'sistema' — el que tenga puesto el teléfono, y cambia solo cuando ese
- *               cambia.
- * ============================================================
- */
+// MODO CLARO / OSCURO — modo.js
+// Lo que elige cada persona en Mi cuenta → Preferencias. Copia de `frontend/src/utils/modo.js`,
+// con el mismo criterio: vive en ESTE teléfono (el almacén de la app), no en la cuenta.
 
 import { leer, guardar, llave } from './almacen';
 
@@ -26,10 +13,8 @@ export const leerModoGuardado = async () => {
   return MODOS.includes(guardado) ? guardado : 'claro';
 };
 
-/*
- * Si no se pudo guardar, el modo se aplica igual: solo que no se recuerda la
- * próxima vez que abra la app. No vale la pena un aviso por eso.
- */
+// Si no se pudo guardar, el modo se aplica igual: solo que no se recuerda la próxima vez que abra
+// la app. No vale la pena un aviso por eso.
 export const guardarModo = (modo) => guardar(LLAVE_MODO, modo);
 
 // `esquema` es lo que dice el teléfono (useColorScheme): 'dark', 'light' o null.

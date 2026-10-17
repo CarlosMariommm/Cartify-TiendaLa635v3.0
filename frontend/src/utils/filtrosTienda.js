@@ -1,21 +1,6 @@
-/*
- * ============================================================
- * LOS FILTROS DE LA TIENDA — filtrosTienda.js
- * ============================================================
- * Lo que el cliente puede elegir sobre la lista de productos, además del
- * pasillo, la categoría y la búsqueda:
- *
- *   orden            recomendados (como la tienda los acomoda), menor o mayor
- *                    precio, nombre o lo más nuevo;
- *   precio           hasta $4, de $4 a $12, más de $12;
- *   soloOferta       con descuento, precio especial o 2x1;
- *   soloDisponibles  sin lo agotado;
- *   marca            una marca de las que hay en la lista.
- *
- * ⚠️  ESPEJADO en movil/src/utils/filtrosTienda.js: la web y la app filtran
- *     igual. Si cambia una regla aquí, cámbiala allá.
- * ============================================================
- */
+// LOS FILTROS DE LA TIENDA — filtrosTienda.js
+// Orden, rango de precio, solo ofertas y demás filtros que el cliente aplica a la lista de
+// productos, además del pasillo, la categoría y la búsqueda.
 
 export const FILTROS_VACIOS = { orden: 'recomendados', precio: 'todos', soloOferta: false, soloDisponibles: false, marca: '' };
 

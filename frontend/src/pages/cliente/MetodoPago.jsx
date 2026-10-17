@@ -22,27 +22,13 @@ import {
   vencimientoEnTexto,
 } from '../../utils/tarjetas';
 
-/*
- * MetodoPago — el cliente gestiona sus métodos de pago (área "Mi Cuenta").
- *
- * AGREGAR UNA TARJETA se hace como en cualquier tienda seria: número completo
- * con la marca reconocida al vuelo, titular y vencimiento, con una tarjeta de
- * vista previa que se va llenando. El número se valida con el dígito
- * verificador (Luhn) y el vencimiento no puede estar en el pasado.
- *
- * Importante: el número completo NUNCA sale de este formulario. Al servidor
- * viajan la marca, el tipo, los últimos 4, el titular y el vencimiento; el CVV
- * ni siquiera se pide: lo pide la pasarela (Wompi) al momento de pagar.
- *
- * Sin recuadros alrededor de las secciones: el saldo, la lista y el
- * formulario van directo sobre el fondo, separados con aire y líneas finas.
- */
+// MetodoPago — el cliente gestiona sus métodos de pago (área "Mi Cuenta"). AGREGAR UNA TARJETA se
+// hace como en cualquier tienda seria: número completo con la marca reconocida al vuelo, titular y
+// vencimiento, con una tarjeta de vista previa que se va llenando.
 
-/*
- * "Visa crédito", "Mastercard débito"... o "Tarjeta" para las guardadas antes de
- * conocer la marca. Sin `t`, en español: así es como se guarda el nombre que
- * se pone solo, y con `t` se muestra en el idioma elegido.
- */
+// "Visa crédito", "Mastercard débito"... o "Tarjeta" para las guardadas antes de conocer la marca.
+// Sin `t`, en español: así es como se guarda el nombre que se pone solo, y con `t` se muestra en
+// el idioma elegido.
 const nombreMarcaTipo = (m, t = (x) => x) =>
   `${NOMBRE_MARCA[m.brand] && m.brand !== 'otra' ? NOMBRE_MARCA[m.brand] : t('Tarjeta')}${m.cardType ? ` ${m.cardType === 'debito' ? t('débito') : t('crédito')}` : ''}`;
 

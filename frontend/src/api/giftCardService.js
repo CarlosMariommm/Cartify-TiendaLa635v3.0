@@ -1,9 +1,7 @@
 import api from './api';
 
-/*
- * SERVICIO DE GIFT CARDS — giftCardService.js
- * El admin crea y anula tarjetas; el cliente canjea y consulta su saldo.
- */
+// SERVICIO DE GIFT CARDS — giftCardService.js El admin crea y anula tarjetas; el cliente canjea y
+// consulta su saldo.
 export const giftCardService = {
   getGiftCards: async () => {
     const response = await api.get('/giftCard');

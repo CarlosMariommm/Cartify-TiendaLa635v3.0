@@ -3,14 +3,8 @@ import toast from 'react-hot-toast';
 import { creditoService } from '../api/creditoService';
 import { numeroEnRango } from '../utils/validaciones';
 
-/*
- * useCreditoProveedor — estado de cuenta de UN proveedor.
- * Trae la deuda, las facturas pendientes y permite registrar compras y pagos.
- *
- * Los cálculos (qué se debe, qué venció) los hace el servidor: acá replicarlos
- * sería tener la misma regla escrita dos veces, y en cuentas por pagar eso
- * termina con dos cifras distintas y nadie sabiendo cuál creer.
- */
+// useCreditoProveedor — estado de cuenta de UN proveedor. Trae la deuda, las facturas pendientes y
+// permite registrar compras y pagos.
 export const useCreditoProveedor = (supplierId) => {
   const [cuenta, setCuenta] = useState(null);
   const [cargando, setCargando] = useState(false);
@@ -34,11 +28,8 @@ export const useCreditoProveedor = (supplierId) => {
     const monto = numeroEnRango(amount, { min: 0.01, max: 1000000 });
     if (monto === null) { toast.error('El monto debe ser mayor que 0'); return false; }
 
-    /*
-     * Avisamos si el pago supera lo que se debe, pero no lo bloqueamos: pagar
-     * por adelantado es normal con un proveedor de confianza, y el servidor lo
-     * guarda como saldo a favor.
-     */
+    // Avisamos si el pago supera lo que se debe, pero no lo bloqueamos: pagar por adelantado es normal
+    // con un proveedor de confianza, y el servidor lo guarda como saldo a favor.
     if (type === 'pago' && cuenta && monto > cuenta.deuda + 0.005) {
       toast(`Está pagando $${monto.toFixed(2)} y la deuda es de $${cuenta.deuda.toFixed(2)}. La diferencia queda a favor.`,
         { duration: 5000 });

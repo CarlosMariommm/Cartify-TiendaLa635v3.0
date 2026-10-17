@@ -1,33 +1,6 @@
-/*
- * ============================================================
- * CARRITO
- * ============================================================
- * Lo que lleva, cuánto lleva de cada cosa y cuánto suma. Es la "CART VIEW" de
- * `ShoppingCart.jsx` — la primera de sus tres vistas.
- *
- * Las otras dos vistas de ese archivo —el checkout y la confirmación— ya
- * existen: pages/Checkout.js y pages/Confirmacion.js. Esta pantalla se queda
- * con lo suyo, que es qué lleva y cuánto suma, y pasa el relevo con el botón
- * de abajo.
- *
- * ── Por qué el resumen no menciona el envío ──
- *
- * Porque todavía no se sabe si lo hay, ni cuánto. El renglón de "Costo de
- * envío" sale de haber elegido domicilio y una dirección (se cobra por
- * distancia), y las dos cosas se eligen en la pantalla siguiente; aquí un
- * "$0.00" fijo diría que el envío es gratis, y cualquier otro número cobraría
- * de más a quien piensa pasar a traerlo. Por eso el total de aquí se llama
- * Subtotal —es lo que valen los productos— y el de verdad se arma en el
- * checkout.
- *
- * ── Una corrección respecto de la web ──
- *
- * Allá el total de cada línea se pinta como `precio × cantidad`, pero el total
- * de abajo sí aplica el NxM. En un 2x1 eso deja las líneas sumando más que el
- * total, y quien revisa su carrito encuentra una resta que no cuadra. Aquí las
- * dos cuentas salen de `totalDeLinea` (ver utils/catalogo.js), así que suman.
- * ============================================================
- */
+// CARRITO
+// Lo que lleva, cuánto lleva de cada cosa y cuánto suma. Es la "CART VIEW" de `ShoppingCart.jsx` —
+// la primera de sus tres vistas.
 
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -98,12 +71,9 @@ const LineaCarrito = ({ item, pasillos, alActualizar, alEliminar, alAbrir, color
           </View>
         </Pressable>
 
-        {/*
-          El "+" y el "−" se mueven al paso de SU unidad: de uno en uno las
-          piezas, de media en media las libras. Pedir media libra de queso es
-          lo normal en el mostrador, y obligar a llevar una libra entera es
-          cobrar de más. Ver utils/unidades.js.
-        */}
+        {/* El "+" y el "−" se mueven al paso de SU unidad: de uno en uno las piezas, de media en media las
+           libras. Pedir media libra de queso es lo normal en el mostrador, y obligar a llevar una libra
+           entera es cobrar de más. Ver utils/unidades.js. */}
         <View style={estilos.controles}>
           <View style={estilos.insigniaModulo} accessibilityElementsHidden importantForAccessibility="no">
             <IconoModulo size={16} color={colores.marca} strokeWidth={2} />
@@ -252,11 +222,8 @@ const Carrito = ({ irAInicio, irAPagar }) => {
             )}
           />
 
-          {/*
-            El resumen vive FUERA de la lista: es el número por el que se abrió
-            esta pantalla, y al final de una lista de quince productos habría
-            que desplazarse hasta abajo para verlo.
-          */}
+          {/* El resumen vive FUERA de la lista: es el número por el que se abrió esta pantalla, y al final de
+             una lista de quince productos habría que desplazarse hasta abajo para verlo. */}
           <View style={[estilos.pie, { paddingBottom: Math.max(bottom + 10, 26) }]}>
             <View style={estilos.resumen}>
               <Text style={estilos.resumenTitulo}>{t('Resumen de orden')}</Text>
@@ -273,12 +240,9 @@ const Carrito = ({ irAInicio, irAPagar }) => {
               </View>
             </View>
 
-            {/*
-              "Vaciar" y "Ir a pagar" en el mismo renglón, con los pesos
-              cambiados respecto del tamaño: el que se lleva el ancho es el que
-              sigue el camino, y el que borra todo se queda del tamaño justo
-              para tocarlo a propósito y no de pasada.
-            */}
+            {/* "Vaciar" y "Ir a pagar" en el mismo renglón, con los pesos cambiados respecto del tamaño: el que
+               se lleva el ancho es el que sigue el camino, y el que borra todo se queda del tamaño justo para
+               tocarlo a propósito y no de pasada. */}
             <View style={estilos.botones}>
               <Pressable
                 onPress={limpiarCarrito}
@@ -454,10 +418,9 @@ const crearEstilos = (COLORES) => StyleSheet.create({
     gap: 6,
     marginTop: 5,
   },
-  // El pasillo del producto, al frente de la fila. No es un botón -no hace
-  // nada al tocarlo, solo dice de dónde es-, así que sin ancho de "botón"
-  // ni fondo propio: el mismo alto de 30 que sus vecinos, para que la fila
-  // no salte.
+  // El pasillo del producto, al frente de la fila. No es un botón -no hace nada al tocarlo, solo
+  // dice de dónde es-, así que sin ancho de "botón" ni fondo propio: el mismo alto de 30 que sus
+  // vecinos, para que la fila no salte.
   insigniaModulo: {
     width: 22,
     height: 30,

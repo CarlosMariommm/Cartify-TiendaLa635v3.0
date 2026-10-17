@@ -1,19 +1,7 @@
 import { ListFilter, ChevronDown } from 'lucide-react';
 
-/**
- * FilterSelect — looks like "⊽ Filtros" when at default, 
- * and shows the active value when something is selected.
- * 
- * Props:
- *  value        - current selected value
- *  onChange     - (value) => void
- *  defaultValue - the value that counts as "nothing selected" (default: 'Todos')
- *  defaultLabel - label shown when at default (default: 'Filtros')
- *  options      - [{ value, label }]
- *  icon         - ícono de lucide a la izquierda (por defecto, el de filtrar).
- *                 Se puede cambiar porque esta misma píldora también ordena, y
- *                 un embudo sobre "Ordenar: Nombre" dice otra cosa.
- */
+// FilterSelect — looks like "⊽ Filtros" when at default, and shows the active value when something
+// is selected.
 const FilterSelect = ({
   value,
   onChange,

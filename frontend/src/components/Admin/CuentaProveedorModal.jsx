@@ -8,12 +8,9 @@ import { bloquearTeclasNumero } from '../../utils/validaciones';
 import { modalTransition, modalInitial, modalAnimate } from '../../utils/motion';
 import { descargarEventoIcs, urlAgregarCalendario } from '../../utils/calendario';
 
-/*
- * CuentaProveedorModal — el estado de cuenta con un proveedor.
- *
- * Lo primero que ve el gerente es lo VENCIDO, porque es lo que le cuesta plata
- * si lo deja pasar. La deuda total y el cupo van después.
- */
+// CuentaProveedorModal — el estado de cuenta con un proveedor. Lo primero que ve el gerente es lo
+// VENCIDO, porque es lo que le cuesta plata si lo deja pasar. La deuda total y el cupo van
+// después.
 const hoyISO = () => new Date().toISOString().slice(0, 10);
 const dinero = (n) => `$${(Number(n) || 0).toFixed(2)}`;
 const fecha = (d) => (d ? new Date(d).toLocaleDateString('es-SV', { day: '2-digit', month: 'short', year: 'numeric' }) : '—');
@@ -35,12 +32,9 @@ const CuentaProveedorModal = ({ isOpen, onClose, proveedor }) => {
     }
   };
 
-  /*
-   * Convierte un crédito pendiente en un evento .ics con recordatorio, para que
-   * el vencimiento le caiga al calendario del teléfono (y el calendario le
-   * avise). No se puede escribir directo en el calendario del sistema desde una
-   * web; ver utils/calendario.js.
-   */
+  // Convierte un crédito pendiente en un evento .ics con recordatorio, para que el vencimiento le
+  // caiga al calendario del teléfono (y el calendario le avise). No se puede escribir directo en el
+  // calendario del sistema desde una web; ver utils/calendario.js.
   const agregarAlCalendario = async (p) => {
     const nombre = cuenta?.supplier?.name || proveedor?.name || 'proveedor';
     try {
@@ -58,10 +52,8 @@ const CuentaProveedorModal = ({ isOpen, onClose, proveedor }) => {
     }
   };
 
-  /*
-   * Muestra un QR que lleva a "agregar al calendario". Sirve cuando el dueño
-   * está en la computadora: escanea con el teléfono y el evento cae allá.
-   */
+  // Muestra un QR que lleva a "agregar al calendario". Sirve cuando el dueño está en la computadora:
+  // escanea con el teléfono y el evento cae allá.
   const mostrarQR = async (p) => {
     const nombre = cuenta?.supplier?.name || proveedor?.name || 'proveedor';
     const titulo = `Pagar a ${nombre}: ${dinero(p.pendiente)}`;
@@ -218,12 +210,9 @@ const CuentaProveedorModal = ({ isOpen, onClose, proveedor }) => {
                         <input type="date" value={form.date}
                           onChange={(e) => setForm({ ...form, date: e.target.value })} className={inputCls} />
                       </div>
-                      {/*
-                        El número se pone solo (F-0001, R-0001…, lo calcula el
-                        servidor por proveedor) y ya viene escrito en el campo.
-                        Si el papel del proveedor trae otro, se escribe encima y
-                        manda ese; si se borra todo, vuelve el automático.
-                      */}
+                      {/* El número se pone solo (F-0001, R-0001…, lo calcula el servidor por proveedor) y ya viene
+                         escrito en el campo. Si el papel del proveedor trae otro, se escribe encima y manda ese; si se
+                         borra todo, vuelve el automático. */}
                       <div>
                         <label className="block text-xs text-gray-500 mb-1">
                           {form.type === 'compra' ? 'N.º factura' : 'N.º recibo'}

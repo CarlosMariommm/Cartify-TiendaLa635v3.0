@@ -1,16 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 
-/*
- * useDropdown — encapsula TODA la lógica de un menú desplegable:
- * abrir/cerrar, cerrar al hacer clic afuera y cerrar con la tecla Escape.
- *
- * Así el componente que lo use queda "tonto": solo pinta y consume esto.
- * (Sigue la regla del proyecto: la lógica va en hooks, no en el componente.)
- *
- * Uso:
- *   const { isOpen, toggle, close, ref } = useDropdown();
- *   <div ref={ref}> ...boton + panel... </div>
- */
+// useDropdown — encapsula TODA la lógica de un menú desplegable: abrir/cerrar, cerrar al hacer
+// clic afuera y cerrar con la tecla Escape. Así el componente que lo use queda "tonto": solo pinta
+// y consume esto. (Sigue la regla del proyecto: la lógica va en hooks, no en el componente.)
 export const useDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef(null); // se ancla al contenedor para detectar clics "afuera"

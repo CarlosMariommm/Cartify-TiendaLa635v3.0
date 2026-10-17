@@ -1,43 +1,6 @@
-/*
- * ============================================================
- * CHECKOUT — cómo lo recibe, con qué paga, y el pedido
- * ============================================================
- * La segunda vista de `frontend/src/components/Store/ShoppingCart.jsx`, la que
- * en el carrito de móvil faltaba entera: hasta ahora el carrito sumaba y ahí
- * se acababa.
- *
- * Trae las mismas cuatro decisiones que la web, en el mismo orden:
- *
- *   1. Retiro en el local o envío a domicilio (cobrado por distancia, y solo
- *      si es a domicilio; más allá de la zona de entrega no se acepta)
- *   2. A qué dirección — elegida de las guardadas, o escrita aquí mismo
- *   3. Efectivo, tarjeta o saldo
- *   4. Si usa sus puntos, que no son un método de pago sino un descuento
- *
- * ── Sobre la pasarela de pago ──
- *
- * No falta nada de Wompi aquí, porque la web tampoco lo usa: su propio
- * `handlePlaceOrder` dice "el cobro con pasarela todavía no se conecta", y el
- * modelo Order lo repite — efectivo y tarjeta "se cobran en el local o al
- * entregar". Así que "tarjeta" es la intención de pagar con tarjeta, no un
- * cobro: el dinero se toma en el mostrador o en la puerta. El único método que
- * mueve dinero de verdad es "saldo", y ese lo descuenta el backend de un saldo
- * que ya estaba cargado con una tarjeta de regalo — no hay pasarela de por
- * medio.
- *
- * ── El total que se ve no es el que se cobra ──
- *
- * Bueno, sí, pero no es el que se manda. Aquí se calcula para enseñárselo al
- * cliente; al servidor solo le viajan los productos, sus precios y cuántos
- * puntos quiere canjear, y él vuelve a sumar. Es a propósito: un total que sale
- * del teléfono es un total que se puede editar por el camino. Si las dos cuentas
- * discreparan, manda la del servidor — y esta pantalla usa las MISMAS funciones
- * (`totalDeLinea`) que el carrito, para que no discrepen. Por eso mismo el
- * envío y la tarifa de servicio salen de copias de las cuentas del servidor
- * (utils/envio.js y utils/servicio.js) con los ajustes de la tienda, y no de
- * un número escrito aquí.
- * ============================================================
- */
+// CHECKOUT — cómo lo recibe, con qué paga, y el pedido
+// La segunda vista de `frontend/src/components/Store/ShoppingCart.jsx`, la que en el carrito de
+// móvil faltaba entera: hasta ahora el carrito sumaba y ahí se acababa.
 
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -77,12 +40,9 @@ import { formatoCodigoTarjeta, LARGO_CODIGO_TARJETA } from '../utils/tarjetaRega
 // Cuántas fotos de producto caben en la tira del resumen antes del "+3".
 const MINIATURAS = 6;
 
-/*
- * Una opción de las que se eligen tocando: los dos modos de entrega y los tres
- * de pago. En la web son botones que caben de dos en dos a lo ancho; aquí van
- * en renglones completos, que es donde el pulgar no falla, con el visto a la
- * derecha en vez del relleno de color.
- */
+// Una opción de las que se eligen tocando: los dos modos de entrega y los tres de pago. En la web
+// son botones que caben de dos en dos a lo ancho; aquí van en renglones completos, que es donde el
+// pulgar no falla, con el visto a la derecha en vez del relleno de color.
 const Opcion = ({ icono: Icono, titulo, detalle, activa, apagada, alTocar, colores }) => {
   const COLORES = useColores();
   const estilos = useEstilos(crearEstilos);
@@ -149,13 +109,9 @@ const Checkout = ({ alVolver, alConfirmar }) => {
 
   const [cargando, setCargando] = useState(true);
   const [procesando, setProcesando] = useState(false);
-  /*
-   * Qué miniaturas de "Tu orden" fallaron al cargar (por id de producto).
-   * Sin esto, un WebP/AVIF que expo-image no decodifica —el mismo problema
-   * que Carrito.js y TarjetaProducto.js ya cubren con su propio
-   * `fallóImagen`— se quedaba en blanco para siempre en vez de caer al
-   * icono de repuesto.
-   */
+  // Qué miniaturas de "Tu orden" fallaron al cargar (por id de producto). Sin esto, un WebP/AVIF que
+  // expo-image no decodifica —el mismo problema que Carrito.js y TarjetaProducto.js ya cubren con su
+  // propio `fallóImagen`— se quedaba en blanco para siempre en vez de caer al icono de repuesto.
   const [fallosImagen, setFallosImagen] = useState({});
 
   // ── Cómo lo recibe ──
@@ -183,16 +139,9 @@ const Checkout = ({ alVolver, alConfirmar }) => {
 
   const direccionElegida = direcciones[indiceDireccion] || null;
 
-  /*
-   * Las cinco cosas que hay que saber para pagar, en paralelo: sus direcciones,
-   * su saldo, sus puntos, la configuración del programa y las tarifas de la
-   * tienda. En serie serían cinco viajes seguidos y la pantalla se iría
-   * acomodando sola a pedazos mientras el cliente ya está decidiendo.
-   *
-   * Las tarifas se piden aquí y no se reusan las que trajo la app al abrir:
-   * si el dueño cambió el precio por km hace un rato, el número de esta
-   * pantalla tiene que ser el que va a cobrar el servidor ahora.
-   */
+  // Las cinco cosas que hay que saber para pagar, en paralelo: sus direcciones, su saldo, sus
+  // puntos, la configuración del programa y las tarifas de la tienda. En serie serían cinco viajes
+  // seguidos y la pantalla se iría acomodando sola a pedazos mientras el cliente ya está decidiendo.
   useEffect(() => {
     if (!esCliente) {
       setCargando(false);
@@ -202,11 +151,9 @@ const Checkout = ({ alVolver, alConfirmar }) => {
     let vivo = true;
 
     (async () => {
-      /*
-       * Cada una con su propio catch. Con un solo try envolviendo el
-       * Promise.all, que fallara la consulta del saldo —la más prescindible de
-       * las cuatro— dejaba la pantalla sin direcciones y sin poder pedir nada.
-       */
+      // Cada una con su propio catch. Con un solo try envolviendo el Promise.all, que fallara la
+      // consulta del saldo —la más prescindible de las cuatro— dejaba la pantalla sin direcciones y sin
+      // poder pedir nada.
       const [cliente, saldoRes, resumen, config, tarifas] = await Promise.all([
         getCliente(user.id).catch(() => null),
         getSaldo(user.id).catch(() => null),
@@ -231,11 +178,8 @@ const Checkout = ({ alVolver, alConfirmar }) => {
     };
   }, [esCliente, user?.id]);
 
-  /*
-   * Cuánto se tarda en llegar a SU zona. Solo se pregunta cuando hay punto en
-   * el mapa: las direcciones viejas se guardaron como texto suelto y no tienen
-   * coordenadas que consultar.
-   */
+  // Cuánto se tarda en llegar a SU zona. Solo se pregunta cuando hay punto en el mapa: las
+  // direcciones viejas se guardaron como texto suelto y no tienen coordenadas que consultar.
   useEffect(() => {
     const { lat, lng } = direccionElegida || {};
     if (entrega !== 'delivery' || lat == null || lng == null) {
@@ -256,17 +200,8 @@ const Checkout = ({ alVolver, alConfirmar }) => {
   }, [entrega, direccionElegida?.lat, direccionElegida?.lng]);
 
   // ── Las cuentas ──
-  /*
-   * El envío se cobra por DISTANCIA desde la tienda hasta el punto de la
-   * dirección elegida (zona → por km → solo la base), con la misma cuenta que
-   * hace el servidor. Antes aquí había $4.78 fijos: a quien vive a la vuelta se
-   * le enseñaba de más y a quien vive lejos de menos, y el total del pedido
-   * confirmado no era el de esta pantalla.
-   *
-   * Sin ajustes (la consulta falló) no se sabe cuánto es, y un número de relleno
-   * sería justo el problema que se está quitando: se dice que se calcula al
-   * confirmar, que es cuando lo pone el servidor.
-   */
+  // El envío se cobra por DISTANCIA desde la tienda hasta el punto de la dirección elegida (zona →
+  // por km → solo la base), con la misma cuenta que hace el servidor.
   const envioCalc = ajustes
     ? calcularEnvio(ajustes, { lat: direccionElegida?.lat, lng: direccionElegida?.lng })
     : null;
@@ -294,12 +229,9 @@ const Checkout = ({ alVolver, alConfirmar }) => {
 
   const saldoAlcanza = saldo >= totalAPagar;
 
-  /*
-   * Si el saldo deja de alcanzar —porque sumó un producto, o porque marcó los
-   * puntos y el total bajó y volvió a subir— el método vuelve a efectivo. Sin
-   * esto se podía quedar seleccionado "Mi saldo" con el botón deshabilitado
-   * debajo, y el pedido fallaba al final con un error del servidor.
-   */
+  // Si el saldo deja de alcanzar —porque sumó un producto, o porque marcó los puntos y el total bajó
+  // y volvió a subir— el método vuelve a efectivo. Sin esto se podía quedar seleccionado "Mi saldo"
+  // con el botón deshabilitado debajo, y el pedido fallaba al final con un error del servidor.
   useEffect(() => {
     if (metodoPago === 'saldo' && !saldoAlcanza) setMetodoPago('efectivo');
   }, [metodoPago, saldoAlcanza]);
@@ -322,11 +254,9 @@ const Checkout = ({ alVolver, alConfirmar }) => {
     }
   };
 
-  /*
-   * Canjear la tarjeta sin salir de aquí: si tuviera que irse a otra pantalla a
-   * canjearla, pierde el carrito de vista y muchos no vuelven. Si el saldo
-   * queda alcanzando, se selecciona solo como método.
-   */
+  // Canjear la tarjeta sin salir de aquí: si tuviera que irse a otra pantalla a canjearla, pierde el
+  // carrito de vista y muchos no vuelven. Si el saldo queda alcanzando, se selecciona solo como
+  // método.
   const canjear = async () => {
     const limpio = codigoTarjeta.trim().toUpperCase();
     if (!limpio) return;
@@ -368,14 +298,9 @@ const Checkout = ({ alVolver, alConfirmar }) => {
         items: carrito.map((i) => ({
           productId: i.id,
           name: i.nombre,
-          /*
-           * El precio POR UNIDAD que de verdad se paga. En un 2x1 el cliente se
-           * lleva dos y paga una, así que el precio de lista multiplicado por la
-           * cantidad daría de más — y el servidor, que suma precio × cantidad,
-           * cobraría un total distinto del que dice esta pantalla. Se reparte el
-           * total de la línea (el mismo `totalDeLinea` del carrito) entre las
-           * unidades que se lleva.
-           */
+          // El precio POR UNIDAD que de verdad se paga. En un 2x1 el cliente se lleva dos y paga una, así
+          // que el precio de lista multiplicado por la cantidad daría de más — y el servidor, que suma
+          // precio × cantidad, cobraría un total distinto del que dice esta pantalla.
           price: Number((totalDeLinea(i) / i.cantidad).toFixed(4)),
           amount: i.cantidad,
         })),
@@ -399,11 +324,9 @@ const Checkout = ({ alVolver, alConfirmar }) => {
       // sin este aviso no se enteraría de que hay uno nuevo hasta reabrirla.
       refrescarPedidoActivo();
     } catch (e) {
-      /*
-       * Aquí caen los mensajes que valen: "Solo quedan 3 de Leche", "Saldo
-       * insuficiente", "se acaba de agotar". El backend los escribe en español
-       * y con el nombre del producto, así que se muestran tal cual.
-       */
+      // Aquí caen los mensajes que valen: "Solo quedan 3 de Leche", "Saldo insuficiente", "se acaba de
+      // agotar". El backend los escribe en español y con el nombre del producto, así que se muestran tal
+      // cual.
       avisar(e?.message || t('No se pudo crear el pedido'), 'error');
     } finally {
       setProcesando(false);
@@ -663,12 +586,9 @@ const Checkout = ({ alVolver, alConfirmar }) => {
         </Seccion>
       </ScrollView>
 
-      {/*
-        El resumen y el botón viven FUERA del scroll: son el número por el que
-        se abrió esta pantalla y la acción que la cierra. Al final de una
-        columna larga habría que desplazarse hasta abajo cada vez que se cambia
-        una opción para ver cuánto quedó.
-      */}
+      {/* El resumen y el botón viven FUERA del scroll: son el número por el que se abrió esta pantalla y
+         la acción que la cierra. Al final de una columna larga habría que desplazarse hasta abajo cada
+         vez que se cambia una opción para ver cuánto quedó. */}
       <View style={[estilos.pie, { paddingBottom: Math.max(bottom + 10, 18) }]}>
         <Fila etiqueta={t('Total de artículos')} valor={`$${subtotal.toFixed(2)}`} />
         <Fila etiqueta={t('Costo de envío')} valor={valorEnvio(entrega, envioCalc, envio, t)} />
@@ -738,11 +658,9 @@ const Fila = ({ etiqueta, valor, verde }) => {
   );
 };
 
-/*
- * El renglón de debajo de "Envío a domicilio": cuánto sale a la dirección
- * elegida y de dónde sale ("a 3.2 km", o el nombre de la zona), para que el
- * número no parezca puesto al azar ahora que cambia de una dirección a otra.
- */
+// El renglón de debajo de "Envío a domicilio": cuánto sale a la dirección elegida y de dónde sale
+// ("a 3.2 km", o el nombre de la zona), para que el número no parezca puesto al azar ahora que
+// cambia de una dirección a otra.
 const detalleEnvio = (calc, t) => {
   if (!calc) return t('El costo se calcula al confirmar');
   if (calc.fueraDeCobertura) return t('La dirección elegida queda fuera de la zona');
@@ -759,10 +677,8 @@ const valorEnvio = (entrega, calc, envio, t) => {
   return `$${envio.toFixed(2)}`;
 };
 
-/*
- * Las direcciones viejas son texto suelto y las nuevas un objeto. Se normaliza
- * al leer, igual que en la web y que en la pantalla de Direcciones.
- */
+// Las direcciones viejas son texto suelto y las nuevas un objeto. Se normaliza al leer, igual que
+// en la web y que en la pantalla de Direcciones.
 const normalizarDireccion = (item) =>
   typeof item === 'string'
     ? { nombre: '', direccion: item, referencia: '', lat: null, lng: null }

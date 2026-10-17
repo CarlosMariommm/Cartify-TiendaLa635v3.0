@@ -1,9 +1,7 @@
 import api from './api';
 
-/*
- * SERVICIO DEL DASHBOARD — dashboardService.js
- * Una sola llamada trae todo el resumen del admin ya agregado por el backend.
- */
+// SERVICIO DEL DASHBOARD — dashboardService.js Una sola llamada trae todo el resumen del admin ya
+// agregado por el backend.
 export const dashboardService = {
   // periodo: 'semana' | 'mes' | 'anio' (afecta la gráfica de ventas vs compras)
   getSummary: async (periodo = 'mes') => {
@@ -17,19 +15,9 @@ export const dashboardService = {
     return response.data;
   },
 
-  /*
-   * El pronóstico del servicio de analítica (solo el administrador). Con
-   * espera larga: si el servicio estaba dormido en Render, despertar le toma
-   * cerca de un minuto, y el servidor de la tienda lo espera hasta 90 s.
-   */
-  // `demo`: con la demostración (ventas inventadas de varios meses), no con la tienda real.
-  /*
-   * Si el cálculo tarda (Render gratis con historia larga), el servidor
-   * contesta "calculando" y lo sigue haciendo: aquí se vuelve a preguntar
-   * cada pocos segundos hasta que esté. Solo la primera pregunta fuerza a
-   * recalcular; las demás esperan ESE cálculo, no empiezan otro.
-   */
-  // `alcanza(datos)`: con un "calculando" que ya basta (ver pronosticoParaMostrar), se deja de esperar.
+  // El pronóstico del servicio de analítica (solo el administrador). `demo` usa la demostración.
+  // Si el servidor contesta "calculando", se vuelve a preguntar cada pocos segundos hasta que esté;
+  // `alcanza(datos)` deja de esperar cuando ya basta.
   getPronostico: async ({ forzar = false, demo = false } = {}, { cada = 4000, maximo = 6 * 60 * 1000, alcanza = null } = {}) => {
     const inicio = Date.now();
     let conForzar = forzar;

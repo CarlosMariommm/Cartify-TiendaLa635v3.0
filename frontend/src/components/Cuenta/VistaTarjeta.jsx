@@ -4,14 +4,9 @@ import MarcaTarjeta from './MarcaTarjeta';
 import { useIdioma } from '../../hooks/useIdioma';
 import { detectarMarca, formatearNumero, largoDe, soloDigitos } from '../../utils/tarjetas';
 
-/*
- * La tarjeta de plástico, dibujada mientras se llenan los datos: el número
- * aparece dígito a dígito, el nombre y el vencimiento en su lugar, y el color
- * cambia con la marca apenas se reconoce por los primeros dígitos.
- *
- * No es adorno: es la forma más rápida de que la persona compare lo que
- * escribió con la tarjeta que tiene en la mano.
- */
+// La tarjeta de plástico, dibujada mientras se llenan los datos: el número aparece dígito a
+// dígito, el nombre y el vencimiento en su lugar, y el color cambia con la marca apenas se
+// reconoce por los primeros dígitos.
 
 const FONDOS = {
   visa: 'linear-gradient(135deg, #1A1F71 0%, #2A3AA8 55%, #0B1447 100%)',

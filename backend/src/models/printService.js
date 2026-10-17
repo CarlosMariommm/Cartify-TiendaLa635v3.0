@@ -56,28 +56,7 @@
 
 import { Schema, model } from 'mongoose';
 
-/*
- Servicio de Impresión — un formato del catálogo de impresiones (módulo Impresiones).
-   name:           ej. "Carta", "A4", "Póster", "DUI"
-   widthCm/heightCm: medidas reales de la plantilla — la hoja del editor y el
-                   archivo exportado se ajustan a esta proporción.
-   pricePerCopy:   precio por copia
-   allowsColor:    si se puede imprimir a color
-   colorSurcharge: recargo por copia cuando es a color
-   isActive:       si se ofrece en la tienda
-   materialId:     en qué papel se imprime este formato. Es lo que permite
-                   apagar el formato solo cuando ese papel se acaba, en vez de
-                   dejar que el cliente pague y se entere en el mostrador.
-                   Puede quedar vacío: un formato sin material declarado se
-                   comporta como antes (siempre disponible), para no romper los
-                   que ya estaban cargados.
-   esBase:         formato de arranque (Carta, Oficio, DUI...) sembrado por
-                   scripts/seedFormatosBaseImpresion.js, para que el panel no
-                   empiece vacío. Solo separa la tabla del admin en "Formatos
-                   base" y "Tus formatos" — no cambia en nada cómo se usan ni
-                   se cobran. No se edita desde el formulario: nace así al
-                   sembrarse y se queda así, aunque el admin edite el resto.
-*/
+// Servicio de Impresión — un formato del catálogo de impresiones (módulo Impresiones). name: ej.
 const printServiceSchema = new Schema(
   {
     name: { type: String, required: true },

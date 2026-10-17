@@ -1,31 +1,6 @@
-/*
- * ============================================================
- * EL INVENTARIO DESDE UN EXCEL — importarProductos.js
- * ============================================================
- * El encargado sube su Excel en Inventario y la web lee las filas (ver
- * frontend/src/utils/importarExcel.js). Aquí, por tandas de 20:
- *
- *   1. columnasConIA   si la web no reconoció qué columna es cuál (nombre,
- *                      precio…), la IA lo decide viendo los encabezados y
- *                      unas filas de ejemplo.
- *   2. analizarLote    la IA completa lo que el Excel no trae: el nombre como
- *                      se ve en la tienda, la marca, el pasillo y la categoría
- *                      (las que ya existen, si alguna encaja), si se vende por
- *                      libra, si es +18 y una descripción corta. Se busca la
- *                      foto (fotosDeProductos.js) y se marca lo que ya existe.
- *                      No guarda nada: es la vista previa.
- *   3. importarLote    lo que el encargado aprobó: crea los pasillos,
- *                      categorías, marcas y proveedores que falten, sube la
- *                      foto a Cloudinary y crea el producto.
- *
- * Lo que trae el Excel manda sobre lo que diga la IA: si dice la categoría o
- * la marca, esas quedan. Sin IA (sin llave o sin respuesta) se importa igual,
- * con lo que traiga el Excel y "General" donde falte, y se avisa.
- *
- * Al importar NO se avisa a los clientes de "productos nuevos": cargar el
- * inventario de golpe no es una novedad que contar.
- * ============================================================
- */
+// EL INVENTARIO DESDE UN EXCEL — importarProductos.js
+// Por tandas de 20: la IA completa lo que el Excel no trae, se busca la foto de cada producto y
+// se guarda lo que el encargado aprobó.
 
 import { Type } from "@google/genai";
 import { v2 as cloudinary } from "cloudinary";
@@ -56,10 +31,8 @@ const ADULTOS = /\b(cervezas?|pilsener|ron|vodka|whiske?y|tequila|vinos?|licor(e
 export const pareceDeAdultos = (nombre) => ADULTOS.test(sinTildes(nombre));
 export const pareceDeLibra = (unidad) => /^(lb|lbs|libra|libras)$/i.test(texto(unidad).replace(/\./g, ""));
 
-/*
- * Una fila tal como llega de la web, limpia: textos recortados, números que
- * sean números (o null) y el código solo con lo que puede tener un código.
- */
+// Una fila tal como llega de la web, limpia: textos recortados, números que sean números (o null)
+// y el código solo con lo que puede tener un código.
 export const limpiarFila = (f) => ({
   fila: Number.isInteger(f?.fila) ? f.fila : null,
   nombre: texto(f?.nombre, 100),
@@ -202,12 +175,9 @@ const completarConIA = async (filas, catalogo) => {
   });
 };
 
-/*
- * Los pasillos y categorías que ya existen, para que la IA los reuse (y no
- * invente "Bebida" junto a "Bebidas"). Las marcas NO se le pasan: con la lista
- * a la vista le ponía a la Coca-Cola la marca de otro producto. Se le pide la
- * del fabricante y al guardar se junta con la que ya exista (ver normalizar).
- */
+// Los pasillos y categorías que ya existen, para que la IA los reuse (y no invente "Bebida" junto
+// a "Bebidas"). Las marcas NO se le pasan: con la lista a la vista le ponía a la Coca-Cola la
+// marca de otro producto.
 const leerCatalogo = async () => {
   const [pasillos, categorias] = await Promise.all([
     moduleModel.find({ isActive: { $ne: false } }).select("name").lean(),
@@ -234,10 +204,8 @@ const yaExiste = (existentes, f, nombre) => {
   return p ? { id: String(p._id), nombre: p.name } : null;
 };
 
-/*
- * La vista previa de una tanda: cada fila completada, con su foto propuesta,
- * si ya existe y qué le falta. `ia` dice si contestó la IA.
- */
+// La vista previa de una tanda: cada fila completada, con su foto propuesta, si ya existe y qué le
+// falta. `ia` dice si contestó la IA.
 export const analizarLote = async (entrada) => {
   const filas = entrada.slice(0, POR_TANDA).map(limpiarFila);
   const [catalogo, existentes] = await Promise.all([leerCatalogo(), leerExistentes()]);
@@ -267,12 +235,7 @@ export const analizarLote = async (entrada) => {
 
 /* ══════════ 3. Guardar lo aprobado ══════════ */
 
-/*
- * Busca por nombre (sin importar mayúsculas ni tildes) o lo crea. `cache`
- * vive lo que dura la tanda y guarda la PROMESA, no el resultado: las filas
- * se guardan de a cuatro a la vez, y con el resultado dos filas de un pasillo
- * nuevo lo buscarían al mismo tiempo, no lo encontrarían y crearían dos.
- */
+// Busca por nombre (sin importar mayúsculas ni tildes) o lo crea.
 const buscarOCrear = (cache, clave, buscar, crear) => {
   if (!cache.has(clave)) cache.set(clave, buscar().then((encontrado) => encontrado || crear()));
   return cache.get(clave);

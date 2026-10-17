@@ -3,23 +3,9 @@ import { CUERPO, AGUJERO } from '../UI/mascotaFormas';
 import { giroHasta, porcionEnLaFlecha } from '../../utils/juegoTiqui';
 import { sonarTic } from '../../utils/sonidosJuego';
 
-/*
- * ============================================================
- * LA RULETA DEL RETO DE TIQUI — RuletaTiqui.jsx
- * ============================================================
- * Dibuja las porciones que le pasan (utils/juegoTiqui.js → armarRuleta) con
- * el ancho que tienen de verdad: el premio mayor se ve tan chico como es
- * de difícil.
- *
- * El giro corre en JavaScript, cuadro a cuadro, y no con una transición de
- * CSS: así se sabe en todo momento qué porción pasa bajo la flecha, que es
- * lo que hace sonar el tic y saltar la flecha. Se frena de a poco (ease-out)
- * y se detiene en el ángulo que ya eligió el juego antes de empezar.
- *
- *   girando + premio  gira hasta premio.angulo y avisa con alParar.
- *   lento             da vueltas despacio (la pantalla de inicio, para llamar).
- * ============================================================
- */
+// LA RULETA DEL RETO DE TIQUI — RuletaTiqui.jsx
+// Dibuja las porciones que le pasan (utils/juegoTiqui.js → armarRuleta) con el ancho que tienen de
+// verdad: el premio mayor se ve tan chico como es de difícil.
 
 const R = 180;
 const FOCOS = 24;

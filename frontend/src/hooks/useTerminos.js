@@ -5,22 +5,8 @@ import { useAjustesCtx } from '../context/AjustesContext';
 import { enlaceWhatsApp } from '../utils/tienda';
 import { documentoLegal, VERSION_LEGAL, FECHA_LEGAL, MENSAJE_BORRADO, DOCUMENTOS_LEGALES } from '../utils/legales';
 
-/*
- * ============================================================
- * useDocumentoLegal — todo lo que necesita una página legal
- * ============================================================
- * Sirve para los cuatro documentos (términos, privacidad, cookies y
- * devoluciones). La pantalla solo pinta; aquí se resuelve lo que no es texto
- * quieto:
- *
- *   1. El nombre, la dirección y los DATOS DEL NEGOCIO salen de los ajustes
- *      de la tienda (Personalización), no escritos a mano. Un documento legal
- *      que sigue diciendo el nombre viejo ya no habla de nadie.
- *   2. El índice se arma solo con los títulos de las secciones.
- *   3. El enlace para pedir el borrado va con el mensaje YA escrito, y con el
- *      correo puesto si hay sesión.
- * ============================================================
- */
+// useDocumentoLegal — todo lo que necesita una página legal (términos, privacidad, cookies y
+// devoluciones): el documento, su versión y lo que no es texto quieto. La pantalla solo pinta.
 
 export const useDocumentoLegal = (clave = 'terminos') => {
   const { user } = useAuth();
@@ -37,12 +23,9 @@ export const useDocumentoLegal = (clave = 'terminos') => {
     [documento]
   );
 
-  /*
-   * Saltar a una sección sin cambiar la dirección del navegador (con un ancla
-   * el botón "atrás" se llena de paradas), y SIN `behavior: 'smooth'`: donde
-   * el navegador tiene apagadas las animaciones, esa opción se descarta entera
-   * y el botón deja de hacer nada. Llegar sin animación es mejor que no llegar.
-   */
+  // Saltar a una sección sin cambiar la dirección del navegador (con un ancla el botón "atrás" se
+  // llena de paradas), y SIN `behavior: 'smooth'`: donde el navegador tiene apagadas las
+  // animaciones, esa opción se descarta entera y el botón deja de hacer nada.
   const irASeccion = (id) => {
     const destino = document.getElementById(id);
     if (destino) destino.scrollIntoView({ block: 'start' });

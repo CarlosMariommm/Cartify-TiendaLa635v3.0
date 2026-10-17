@@ -1,31 +1,6 @@
-/*
- * ============================================================
- * UN PRODUCTO, A PANTALLA COMPLETA — Producto.js
- * ============================================================
- * La ficha de un producto como su propia página, igual que en la web
- * (ProductDetailModal.jsx): "‹ Volver" arriba, la foto en grande con el
- * corazón y compartir encima, la marca, el nombre, el precio con su
- * existencia, el botón de añadir, cómo se vende, la descripción y, debajo,
- * "Quien compra esto también lleva" y "Del mismo pasillo" con la misma
- * tarjeta de la tienda.
- *
- * Antes era una hoja que subía desde abajo y quedaba encima de la tienda, a
- * medias. Ahora se navega a ella (pila de pantallas): el botón atrás de
- * Android y el gesto de iOS vuelven a donde se estaba, y tocar un
- * recomendado abre SU página encima, como en la web.
- *
- * ── Una diferencia con la web, a propósito ──
- *
- * La web agrega de uno en uno. Aquí hay un selector de cantidad que se mueve
- * al PASO de la unidad: de una en una las piezas, de media en media las
- * libras. En la web, quien quiere media libra de queso la corrige en el
- * carrito; en un teléfono ese viaje son dos pantallas de ida y dos de vuelta.
- * Ver utils/unidades.js.
- *
- * La ficha de Tiqui (Asistente.js) sigue siendo una hoja: ahí la persona está
- * hablando con ella, y cambiar de pantalla le cortaría la conversación.
- * ============================================================
- */
+// UN PRODUCTO, A PANTALLA COMPLETA — Producto.js
+// La ficha de un producto como página propia, igual que en la web: foto, precio, botón de añadir,
+// descripción, "Quien compra esto también lleva" y "Del mismo pasillo".
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
@@ -82,11 +57,8 @@ const Producto = ({ route, navigation }) => {
     [juntos, catalogo, producto]
   );
 
-  /*
-   * Del mismo pasillo: la misma categoría, sin repetir el que se está viendo
-   * ni lo que ya salió arriba. Cinco, como la web: más y la ficha se vuelve
-   * un catálogo.
-   */
+  // Del mismo pasillo: la misma categoría, sin repetir el que se está viendo ni lo que ya salió
+  // arriba. Cinco, como la web: más y la ficha se vuelve un catálogo.
   const delMismoPasillo = useMemo(() => {
     if (!producto) return [];
     const yaSalen = new Set(tambienLlevan.map((p) => p.id));
@@ -134,11 +106,8 @@ const Producto = ({ route, navigation }) => {
     setCantidad(Math.max(paso, Math.min(siguiente, producto.stock)));
   };
 
-  /*
-   * Compartir manda el enlace de la WEB (/producto/:id): lo abre cualquiera,
-   * tenga o no la app, y en WhatsApp llega con la foto, el nombre y el precio
-   * (frontend/middleware.js).
-   */
+  // Compartir manda el enlace de la WEB (/producto/:id): lo abre cualquiera, tenga o no la app, y en
+  // WhatsApp llega con la foto, el nombre y el precio (frontend/middleware.js).
   const compartir = () => {
     const precio = `$${ahora.toFixed(2)}${esPorLibra(producto) ? '/lb' : ''}`;
     const url = `${URL_WEB_LEGAL}/producto/${producto.id}`;
@@ -149,13 +118,9 @@ const Producto = ({ route, navigation }) => {
     }).catch(() => {});
   };
 
-  /*
-   * Añadir y volver, como la web: la foto grande sale volando al carrito
-   * (se mide ANTES de irse: con la página ya cerrándose no hay de dónde
-   * volar) y se regresa a donde se estaba. El candado +18 pregunta aquí
-   * también, porque esta página se abre desde enlaces que no pasan por la
-   * tarjeta.
-   */
+  // Añadir y volver, como la web: la foto grande sale volando al carrito (se mide ANTES de irse: con
+  // la página ya cerrándose no hay de dónde volar) y se regresa a donde se estaba. El candado +18
+  // pregunta aquí también, porque esta página se abre desde enlaces que no pasan por la tarjeta.
   const añadir = () => {
     const meter = () => {
       agregarAlCarrito(producto, cantidad, { origenRef: marcoRef });
@@ -257,10 +222,8 @@ const Producto = ({ route, navigation }) => {
             </View>
           </View>
 
-          {/*
-            El aviso de +18 va ANTES del botón: enterarse de que le van a pedir
-            documento con el repartidor en la puerta es la peor manera de saberlo.
-          */}
+          {/* El aviso de +18 va ANTES del botón: enterarse de que le van a pedir documento con el repartidor
+             en la puerta es la peor manera de saberlo. */}
           {esSoloAdultos(producto) && (
             <Text style={estilos.avisoAdultos}>
               <Text style={estilos.avisoAdultosFuerte}>{t('Solo para mayores de 18 años.')}</Text>{' '}

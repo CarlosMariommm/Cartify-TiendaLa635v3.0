@@ -1,14 +1,8 @@
 import api from './api';
 
-/*
- * ============================================================
- * SERVICIO DE PEDIDOS — orderService.js
- * ============================================================
- * Centraliza las peticiones HTTP de los pedidos de cliente
- * (el modelo Order del backend). Lo usan los hooks del área
- * cliente (Mis Pedidos) y la pantalla del empleado.
- * ============================================================
- */
+// SERVICIO DE PEDIDOS — orderService.js
+// Centraliza las peticiones HTTP de los pedidos de cliente (el modelo Order del backend). Lo usan
+// los hooks del área cliente (Mis Pedidos) y la pantalla del empleado.
 export const orderService = {
   // Pedidos de UN cliente (su historial) — para "Mis Pedidos" / "Recibidos".
   getMyOrders: async (clientId) => {
@@ -37,25 +31,15 @@ export const orderService = {
     return response.data;
   },
 
-  /*
-   * Cambiar el estado de un pedido (preparando, entregado, cancelado).
-   * `quien` deja constancia de quién movió el pedido (lo sella el servidor).
-   *
-   * `extras` es lo que hace falta SOLO para entregar: el código que el cliente
-   * dictó en la puerta ({ codigoEntrega }), o la omisión razonada cuando no lo
-   * puede mostrar ({ omitirCodigo, motivoOmision }). El backend lo exige en el
-   * salto a "entregado" y responde 400 si no cuadra. Ver ModalCodigoEntrega.
-   */
+  // Cambiar el estado de un pedido (preparando, entregado, cancelado). `quien` deja constancia de
+  // quién movió el pedido (lo sella el servidor).
   updateStatus: async (id, status, quien, extras = {}) => {
     const response = await api.put(`/order/${id}/status`, { status, quien, ...extras });
     return response.data;
   },
 
-  /*
-   * El cliente cancela SU pedido, solo mientras está por preparar. Devuelve el
-   * pedido ya cancelado (con lo que se le devolvió en `reembolso`). Ver
-   * orderController.cancelarPorCliente.
-   */
+  // El cliente cancela SU pedido, solo mientras está por preparar. Devuelve el pedido ya cancelado
+  // (con lo que se le devolvió en `reembolso`). Ver orderController.cancelarPorCliente.
   cancelarPorCliente: async (id, motivo) => {
     const response = await api.patch(`/order/${id}/cancelar`, { motivo });
     return response.data;
@@ -67,21 +51,15 @@ export const orderService = {
     return response.data;
   },
 
-  /*
-   * Seguimiento en vivo. El punto del repartidor lo escribe la app (su
-   * Reparto, ver movil/src/hooks/useRepartoPersonal.js); aquí solo se lee.
-   */
-  // Dónde va el repartidor de un pedido. Se consulta cada pocos segundos,
-  // por eso el backend devuelve solo el punto y no el pedido completo.
+  // Seguimiento en vivo: dónde va el repartidor de un pedido (lo escribe la app, aquí solo se lee).
+  // Se consulta cada pocos segundos, por eso el servidor devuelve solo el punto.
   getCourierPosition: async (id) => {
     const response = await api.get(`/order/${id}/courier`);
     return response.data;
   },
 
-  /*
-   * Cuánto tardamos de verdad en llegar a un punto, según las entregas ya
-   * hechas por esa zona. Devuelve { hayDatos, entregas, tipico, holgado }.
-   */
+  // Cuánto tardamos de verdad en llegar a un punto, según las entregas ya hechas por esa zona.
+  // Devuelve { hayDatos, entregas, tipico, holgado }.
   getTiempoPorZona: async (lat, lng) => {
     const response = await api.get('/order/tiempo-zona', { params: { lat, lng } });
     return response.data;

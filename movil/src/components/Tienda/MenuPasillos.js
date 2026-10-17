@@ -1,25 +1,5 @@
-/*
- * ============================================================
- * MENÚ DE PASILLOS — la lista de pasillos de la tienda
- * ============================================================
- * Puerto de `frontend/src/components/Store/MenuTienda.jsx`, pero como hoja
- * que sube desde abajo en vez de un dropdown bajo el botón: aquí ya está el
- * patrón probado en ModalProducto/ModalConfirmarEdad (asa que se arrastra,
- * fondo que se aclara), y un dropdown anclado en el botón necesitaría medir
- * dónde quedó ese botón en pantalla — más trabajo para el mismo resultado.
- *
- * Elegir un pasillo NORMAL no navega a otra pantalla: solo cambia qué deja
- * ver `productosFiltrados` en TiendaContext, igual que en la web — el
- * carrito y la posición en la tienda no se pierden.
- *
- * Impresiones es distinto: pide su propia pantalla (archivo, tamaño, color,
- * copias) antes de comprar, así que tocarlo NAVEGA en vez de filtrar — mismo
- * criterio que `abrir()` en `frontend/src/components/Store/MenuTienda.jsx`.
- * Por eso este componente recibe la lista COMPLETA de módulos (`modulos`,
- * de TiendaContext) y no la ya filtrada `pasillos`: esa nunca trae los de
- * flujo propio, y aquí sí hace falta poder listarlos — ver utils/modulos.js.
- * ============================================================
- */
+// MENÚ DE PASILLOS — la lista de pasillos de la tienda
+// Como el menú de la web (MenuTienda.jsx), pero como hoja que sube desde abajo.
 
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, PanResponder, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -98,10 +78,9 @@ const MenuPasillos = ({ modulos, moduloSeleccionado, alElegir, alCerrar }) => {
 
   useBotonAtras(cerrarConAnimacion);
 
-  // El asa se arrastra igual que en ModalProducto: baja con el dedo, y al
-  // soltar decide sola si cierra o vuelve a subir, según si pasó la mitad
-  // del panel. Ver el comentario largo en ModalProducto.js sobre por qué
-  // hace falta onPanResponderTerminationRequest.
+  // El asa se arrastra igual que en ModalProducto: baja con el dedo, y al soltar decide sola si
+  // cierra o vuelve a subir, según si pasó la mitad del panel. Ver el comentario largo en
+  // ModalProducto.js sobre por qué hace falta onPanResponderTerminationRequest.
   const panelAlturaRef = useRef(0);
   const panResponder = useRef(
     PanResponder.create({
@@ -163,11 +142,9 @@ const MenuPasillos = ({ modulos, moduloSeleccionado, alElegir, alCerrar }) => {
 
           <ScrollView
             style={estilos.lista}
-            // No alcanza con el margen de seguridad de siempre: la píldora
-            // flotante la pinta el Tab Navigator, por ENCIMA de esta hoja,
-            // así que si el último renglón cae bajo ella el toque ahí lo
-            // captura la píldora, no la opción. Ver el comentario en
-            // BarraInferior.js.
+            // No alcanza con el margen de seguridad de siempre: la píldora flotante la pinta el Tab Navigator,
+            // por ENCIMA de esta hoja, así que si el último renglón cae bajo ella el toque ahí lo captura la
+            // píldora, no la opción. Ver el comentario en BarraInferior.js.
             contentContainerStyle={{ paddingBottom: Math.max(bottom, AIRE_ABAJO_MINIMO) + ALTURA_BARRA_FLOTANTE }}
             bounces={false}
             showsVerticalScrollIndicator={false}

@@ -1,19 +1,5 @@
-/*
- * ============================================================
- * LA TIENDA EN INGLÉS — en.js
- * ============================================================
- * "Así en español" → "así en inglés". La clave es el texto exacto que sale
- * en la pantalla en español (ver utils/idioma.js): si en una pantalla cambia
- * el texto en español, aquí hay que cambiar la clave también, o esa frase
- * vuelve a salir en español (en desarrollo, la consola avisa).
- *
- * Las llaves {n}, {nombre}… se reemplazan con el dato: van igual en los dos
- * idiomas. Ordenado por pantalla, como se recorre la tienda.
- *
- * El inglés es de Estados Unidos (es el que más se lee en la región) y trata
- * de "you" a todos: no hay "usted" ni "tú" que distinguir.
- * ============================================================
- */
+// LA TIENDA EN INGLÉS — en.js
+// "Así en español" → "así en inglés".
 const EN = {
   // ── Preferencias ──
   'Preferencias': 'Preferences',
@@ -837,12 +823,8 @@ const EN = {
   'Inicia sesión para dejar tu opinión': 'Sign in to leave your review',
   'Se quitó tu valoración': 'Your review was removed',
 
-  /*
-   * ── Asistente de voz ──
-   * Tiqui entiende y habla español: lo que ELLA dice no se traduce. El saludo
-   * escrito lo avisa y deja los ejemplos en español, que es lo que hay que
-   * decirle.
-   */
+  // ── Asistente de voz ── Tiqui entiende y habla español: lo que ELLA dice no se traduce. El saludo
+  // escrito lo avisa y deja los ejemplos en español, que es lo que hay que decirle.
   '¡Hola! Soy Tiqui. Toca el botón y dime qué necesitas. Por ejemplo: “quiero dos manzanas y una leche” o “¿qué ofertas hay?”.':
     'Hi! I\'m Tiqui. For now I only understand and speak Spanish. Tap the button and tell me what you need, for example: “quiero dos manzanas y una leche” or “¿qué ofertas hay?”.',
   '¡Hola, {nombre}! Soy Tiqui. Toca el botón y dime qué necesitas. Por ejemplo: “quiero dos manzanas y una leche” o “¿qué ofertas hay?”.':

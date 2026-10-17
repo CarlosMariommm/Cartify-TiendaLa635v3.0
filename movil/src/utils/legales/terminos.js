@@ -1,24 +1,5 @@
-/*
- * COPIA de frontend/src/utils/legales/ — la app y la web no comparten código.
- * Si se cambia allá, se cambia aquí (y al revés), con la misma versión.
- */
-/*
- * ============================================================
- * TÉRMINOS Y CONDICIONES — legales/terminos.js
- * ============================================================
- * Las reglas del trato entre la tienda y quien compra. Lo que hacemos con
- * los datos vive aparte (privacidad.js), igual que las cookies (cookies.js)
- * y los cambios y devoluciones (devoluciones.js): un solo documento con todo
- * adentro no lo lee nadie.
- *
- * Los bloques van tipados (parrafo, lista, nota, destacado, tabla, negocio,
- * enlace...) y los pinta components/Store/TextoTerminos.jsx.
- *
- * Esto es un texto claro y de buena fe, apoyado en la Ley de Protección al
- * Consumidor de El Salvador. NO es un documento revisado por un abogado: antes
- * de darlo por definitivo, conviene que uno lo lea.
- * ============================================================
- */
+// TÉRMINOS Y CONDICIONES — copia de frontend/src/utils/legales/ (se cambia en los dos lados, con
+// la misma versión). Las reglas del trato entre la tienda y quien compra.
 
 export const TERMINOS = {
   clave: 'terminos',

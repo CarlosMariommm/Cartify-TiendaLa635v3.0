@@ -1,24 +1,5 @@
-/*
- * COPIA de frontend/src/utils/legales/ — la app y la web no comparten código.
- * Si se cambia allá, se cambia aquí (y al revés), con la misma versión.
- */
-/*
- * ============================================================
- * POLÍTICA DE PRIVACIDAD — legales/privacidad.js
- * ============================================================
- * Qué datos se piden, para qué, quién más los ve, cuánto se guardan y cómo
- * pedir que se borren. Escrita según la Ley para la Protección de Datos
- * Personales de El Salvador (Decreto Legislativo 144, vigente desde el 24 de
- * noviembre de 2024).
- *
- * El corazón es la TABLA: un muro de párrafos legales lo salta todo el mundo;
- * cuatro columnas se leen de una pasada. Y los terceros van CON NOMBRE:
- * "podemos compartir sus datos con proveedores" es la forma elegante de no
- * decir nada. Si se agrega un servicio que toque datos de clientes, va aquí.
- *
- * Texto de buena fe, no revisado por un abogado.
- * ============================================================
- */
+// POLÍTICA DE PRIVACIDAD — copia de frontend/src/utils/legales/ (se cambia en los dos lados, con
+// la misma versión). Qué datos se piden, para qué, quién los ve, cuánto se guardan y cómo borrarlos.
 
 const COLUMNAS_DATOS = ['Dato', 'Para qué', 'Quién más lo ve', 'Cuánto se guarda'];
 
@@ -37,10 +18,8 @@ const FILAS_DATOS = [
   ['Su contraseña', 'Entrar a su cuenta.', 'Nadie. No la guardamos: guardamos una huella cifrada de la que no se puede volver atrás.', 'Mientras tenga su cuenta.'],
 ];
 
-/*
- * Los servicios que de verdad tocan algo, con nombre y con lo que ven. Es
- * la lista que se revisa cada vez que se agrega una integración.
- */
+// Los servicios que de verdad tocan algo, con nombre y con lo que ven. Es la lista que se revisa
+// cada vez que se agrega una integración.
 const TERCEROS = [
   'MongoDB Atlas (la base de datos) y Render (el servidor): guardan y procesan todo lo de la tabla de arriba para que la tienda funcione.',
   'Vercel: publica este sitio y, solo si usted lo acepta, mide las visitas de forma anónima, sin cookies.',

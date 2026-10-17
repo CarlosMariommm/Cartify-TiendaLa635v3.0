@@ -6,20 +6,8 @@ import { ICONOS } from '../utils/iconosAviso';
 import { clientService } from '../api/clientService';
 import { useAuth } from './useAuth';
 
-/*
- * useFavoritos — el corazón de las tarjetas de producto.
- *
- * Antes el corazón era un useState local: se pintaba de rojo y se olvidaba al
- * recargar. Ahora vive en la cuenta del cliente.
- *
- * Sin sesión no se guarda nada y se manda a iniciar sesión. La alternativa
- * era guardarlos en el navegador, pero eso los pierde al cambiar de teléfono
- * y obliga a resolver el choque cuando la persona entra y ya tenía otros en
- * su cuenta. Marcar favoritos es de quien tiene cuenta.
- *
- * El cambio se pinta ANTES de que responda el servidor y se revierte si algo
- * falla: un corazón que tarda medio segundo en encenderse se siente roto.
- */
+// useFavoritos — el corazón de las tarjetas de producto. Ahora vive en la cuenta del cliente. Sin
+// sesión no se guarda nada y se manda a iniciar sesión.
 export const useFavoritos = () => {
   const { user } = useAuth();
   const navigate = useNavigate();

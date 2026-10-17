@@ -3,13 +3,9 @@ import wompiController from "../controller/wompiController.js";
 
 import { conSesion } from "../middlewares/validarSesion.js";
 
-/*
- * ── Documentación de la API (Swagger) ──
- *
- * Viene de main. Va agrupada aquí y no pegada a cada ruta porque
- * swagger-jsdoc rastrea el archivo entero: dónde esté no cambia lo que
- * documenta, y así el código de las rutas se lee sin interrupciones.
- */
+// ── Documentación de la API (Swagger) ──
+// Va agrupada aquí y no pegada a cada ruta porque swagger-jsdoc rastrea el archivo entero: dónde
+// esté no cambia lo que documenta, y así el código de las rutas se lee sin interrupciones.
 
 /**
  * @swagger
@@ -145,11 +141,9 @@ import { conSesion } from "../middlewares/validarSesion.js";
 
 const router = express.Router()
 
-/*
- * La pasarela de pago. Todavía no cobra de verdad, pero estas rutas hablan con
- * un servicio externo con las credenciales de la tienda: abiertas, cualquiera
- * las dispara desde afuera. Como mínimo, hay que ser alguien.
- */
+// La pasarela de pago. Todavía no cobra de verdad, pero estas rutas hablan con un servicio externo
+// con las credenciales de la tienda: abiertas, cualquiera las dispara desde afuera. Como mínimo,
+// hay que ser alguien.
 router.route("/token").post(conSesion, wompiController.generarToken)
 router.route("/paymentTest").post(conSesion, wompiController.paymentTest)
 router.route("/payment3DS").post(conSesion, wompiController.payment3DS)

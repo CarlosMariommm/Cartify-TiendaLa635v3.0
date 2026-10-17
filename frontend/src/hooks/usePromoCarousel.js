@@ -2,41 +2,19 @@ import { useState, useEffect, useCallback, useMemo, useRef, useSyncExternalStore
 import { promotionService } from '../api/promotionService';
 import { promosVisibles, promoEnModulo } from '../utils/promos';
 
-/*
- * usePromoCarousel — el cerebro del carrusel 3D de promociones.
- *
- * Trae las promos que se anuncian, lleva cuál está al centro, avanza sola y
- * calcula la posición de cada tarjeta en el anillo. La vista solo pinta.
- *
- * El giro es circular: desde la última se sigue a la primera sin saltos.
- */
+// usePromoCarousel — el cerebro del carrusel 3D de promociones. Trae las promos que se anuncian,
+// lleva cuál está al centro, avanza sola y calcula la posición de cada tarjeta en el anillo. La
+// vista solo pinta. El giro es circular: desde la última se sigue a la primera sin saltos.
 const INTERVALO = 5000; // cada cuánto avanza sola
 
-/*
- * Cuántas promos entran al carrusel.
- *
- * Antes eran tres, porque se veía UNA a la vez y con más el carrusel se
- * volvía papel tapiz que nadie espera a que dé la vuelta. Ahora se ven tres
- * de frente, así que caben más en la rotación sin que la primera tarde una
- * eternidad en volver: con nueve, el anillo da la vuelta en tres pasos.
- *
- * Si hay más promociones activas igual aplican su descuento en los precios —
- * lo que se limita es el anuncio, no la promo.
- */
+// Cuántas promos entran al carrusel. Ahora se ven tres de frente, así que caben más en la rotación
+// sin que la primera tarde una eternidad en volver: con nueve, el anillo da la vuelta en tres
+// pasos.
 const MAXIMO = 9;
 
-/*
- * ¿Caben las tres promos de frente?
- *
- * En pantalla ancha se muestran las tres completas, una al lado de otra: son
- * pocas y todas valen, así que esconder dos detrás de un giro era regalar
- * espacio. En un teléfono no caben tres tarjetas legibles, así que ahí se
- * vuelve al anillo con una al centro.
- *
- * Se lee con useSyncExternalStore porque el ancho de la ventana es estado que
- * vive fuera de React; con un efecto habría que sincronizarlo a mano y el
- * primer render saldría con el valor equivocado.
- */
+// ¿Caben las tres promos de frente? En pantalla ancha se muestran las tres completas, una al lado
+// de otra: son pocas y todas valen, así que esconder dos detrás de un giro era regalar espacio. En
+// un teléfono no caben tres tarjetas legibles, así que ahí se vuelve al anillo con una al centro.
 const ANCHO_PARA_TRES = 1000;
 
 const suscribirAncho = (avisar) => {
@@ -54,11 +32,9 @@ export const useCabenTres = () =>
 export const usePromoCarousel = ({ autoplay = true, moduloId = null } = {}) => {
   // Todas las anunciables; el filtro por pasillo se aplica después.
   const [todas, setTodas] = useState([]);
-  /*
-   * Mientras llegan, el carrusel guarda su lugar (ver PromoBanners). Sin esto
-   * no pintaba nada y, al llegar, aparecía de golpe empujando toda la tienda
-   * hacia abajo: el producto que alguien iba a tocar se le corría del dedo.
-   */
+  // Mientras llegan, el carrusel guarda su lugar (ver PromoBanners). Sin esto no pintaba nada y, al
+  // llegar, aparecía de golpe empujando toda la tienda hacia abajo: el producto que alguien iba a
+  // tocar se le corría del dedo.
   const [cargando, setCargando] = useState(true);
   const [activa, setActiva] = useState(0);
   const [pausada, setPausada] = useState(false);
@@ -81,10 +57,8 @@ export const usePromoCarousel = ({ autoplay = true, moduloId = null } = {}) => {
     return () => { vivo = false; };
   }, []);
 
-  /*
-   * Filtro por pasillo: en la Panadería salen solo las promos de panadería.
-   * Sin pasillo elegido (toda la tienda) se ven todas. Ver promoEnModulo.
-   */
+  // Filtro por pasillo: en la Panadería salen solo las promos de panadería. Sin pasillo elegido
+  // (toda la tienda) se ven todas. Ver promoEnModulo.
   const promos = useMemo(
     () => todas.filter((p) => promoEnModulo(p, moduloId)),
     [todas, moduloId]
@@ -119,18 +93,14 @@ export const usePromoCarousel = ({ autoplay = true, moduloId = null } = {}) => {
     return () => clearInterval(temporizador.current);
   }, [autoplay, pausada, total]);
 
-  /*
-   * Si se borra una promo, el índice guardado puede quedar fuera de rango.
-   * Se corrige AL LEERLO en vez de con un efecto que llame a setState: así no
-   * hay un render intermedio apuntando a una tarjeta que ya no existe.
-   */
+  // Si se borra una promo, el índice guardado puede quedar fuera de rango. Se corrige AL LEERLO en
+  // vez de con un efecto que llame a setState: así no hay un render intermedio apuntando a una
+  // tarjeta que ya no existe.
   const activaSegura = total > 0 ? Math.min(activa, total - 1) : 0;
 
-  /*
-   * Distancia de una tarjeta respecto al centro, por el camino más corto.
-   * Con 5 promos y la 0 activa, la 4 está a -1 (no a +4): así el anillo gira
-   * para el lado que menos se mueve y nunca pega un salto raro.
-   */
+  // Distancia de una tarjeta respecto al centro, por el camino más corto. Con 5 promos y la 0
+  // activa, la 4 está a -1 (no a +4): así el anillo gira para el lado que menos se mueve y nunca
+  // pega un salto raro.
   const distancia = useCallback((i) => {
     if (total === 0) return 0;
     let d = i - activaSegura;

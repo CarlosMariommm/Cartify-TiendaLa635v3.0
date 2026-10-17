@@ -10,26 +10,8 @@ import { useFilaDeslizable } from '../../hooks/useFilaDeslizable';
 import HeaderTienda from '../Store/HeaderTienda';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * ClienteLayout — el "marco" compartido del área "Mi Cuenta" del cliente.
- *
- * Antes cada página del cliente repetía su propio nav + sidebar inline. Ahora
- * viven aquí una sola vez y cada página solo coloca su contenido en <Outlet />.
- * Usa el tema (ThemeContext), así que también se adapta a las paletas de
- * accesibilidad — útil para el público de la tienda.
- *
- * `ready` marca los ítems ya cableados; los demás se muestran deshabilitados
- * ("Pronto") mientras se conectan en los siguientes pasos de la Fase 1.
- */
-/*
- * `label` es el nombre corto que se ve en la barra; `titulo` es el largo, que
- * queda como ayuda al dejar el cursor encima.
- *
- * En vertical cabía "Detalles de la Cuenta" completo, pero en horizontal esos
- * nombres largos empujaban las últimas secciones fuera de la pantalla y había
- * que deslizar para descubrir que existían. Un menú que esconde la mitad de
- * sus opciones es medio menú.
- */
+// ClienteLayout — el marco compartido de "Mi Cuenta": cada página pone su contenido en <Outlet />.
+// En el menú, `label` es el nombre corto y `titulo` el largo, que sale al pasar el cursor.
 const navItems = [
   { to: '/mi-cuenta',                label: 'Mis datos',      titulo: 'Detalles de la cuenta', icon: User,        ready: true },
   { to: '/mi-cuenta/pedidos',        label: 'Pedidos',        titulo: 'Mis pedidos',           icon: ShoppingBag, ready: true },
@@ -45,11 +27,9 @@ const navItems = [
 // Lo que tapa cada flecha: al llevar la pestaña activa a la vista, se deja ese margen.
 const ANCHO_FLECHA = 48;
 
-/*
- * La flecha de cada orilla, sobre un degradado del color de la barra: el
- * degradado dice "aquí sigue" aunque la flecha no se mire, y deja ver que la
- * pestaña de abajo está cortada en vez de taparla de golpe.
- */
+// La flecha de cada orilla, sobre un degradado del color de la barra: el degradado dice "aquí
+// sigue" aunque la flecha no se mire, y deja ver que la pestaña de abajo está cortada en vez de
+// taparla de golpe.
 const FlechaMenu = ({ lado, onClick, etiqueta, c }) => {
   const izquierda = lado === 'izquierda';
   const Icono = izquierda ? ChevronLeft : ChevronRight;
@@ -82,31 +62,13 @@ const ClienteLayout = () => {
   const location = useLocation();
   const reduce = useReducedMotion();
 
-  /*
-   * Mi Cuenta es SOLO del cliente.
-   *
-   * Aquí vivía también el Reparto del personal: quien entraba con su cuenta de
-   * empleado veía solo esa pestaña (primero con un interruptor, "Estoy
-   * trabajando", y después según el tipo de cuenta). Se fue a la app, que es
-   * donde se reparte: el GPS, la pantalla encendida y la app de mapas están en
-   * el teléfono. En la web el personal entra al panel por /admin (ver
-   * "¿Trabajas en la tienda?" en LoginClient).
-   *
-   * "Cerrar sesión" tampoco vive aquí: está en Mis datos, al lado de
-   * "Guardar cambios" (ver BotonCerrarSesion). Como última pestaña era la que
-   * siempre se quedaba fuera de la pantalla.
-   */
+  // Mi Cuenta es SOLO del cliente. Aquí vivía también el Reparto del personal: quien entraba con su
+  // cuenta de empleado veía solo esa pestaña (primero con un interruptor, "Estoy trabajando", y
+  // después según el tipo de cuenta).
 
-  /*
-   * EL MENÚ CON EL MOUSE.
-   *
-   * La barra se desliza de lado cuando no caben todas las secciones, pero con
-   * la barra de desplazamiento escondida y la rueda moviendo la página, con
-   * el mouse no había forma de llegar a las últimas. Ahora hay tres caminos:
-   * las flechas de las orillas (solo cuando hay algo escondido de ese lado),
-   * la rueda del mouse encima del menú, y la pestaña abierta, que se trae
-   * sola a la vista al cambiar de sección.
-   */
+  // EL MENÚ CON EL MOUSE.
+  // Si las secciones no caben, se llega a las escondidas con las flechas de las orillas, la rueda
+  // del mouse encima del menú o trayendo sola a la vista la pestaña abierta.
   const { fila, puedeIzq, puedeDer, izquierda, derecha } = useFilaDeslizable({ rueda: true });
   const nav = useRef(null);
   const engancharNav = useCallback((el) => {
@@ -128,59 +90,35 @@ const ClienteLayout = () => {
     }
   }, [location.pathname, reduce]);
 
-  /*
-   * El sombreado al pasar el mouse se fue con el menú lateral: en pestañas
-   * horizontales el subrayado ya dice cuál está activa, y pintarles el fondo
-   * encima las volvía botones apretados uno contra otro.
-   */
+  // El sombreado al pasar el mouse se fue con el menú lateral: en pestañas horizontales el subrayado
+  // ya dice cuál está activa, y pintarles el fondo encima las volvía botones apretados uno contra
+  // otro.
 
   const enAyuda = location.pathname === '/mi-cuenta/ayuda';
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: c.mainBg, color: c.textPrimary }}>
-      {/*
-        ── Barra superior ──
-        La MISMA de la tienda. Antes Mi Cuenta tenía una barra propia —nombre,
-        foto y "Ir a la tienda"— y era la única pantalla del cliente sin
-        buscador ni carrito: entrar a la cuenta se sentía como salirse del
-        negocio, y para volver a comprar había que buscar la salida. Con
-        HeaderTienda el carrito y el buscador siguen donde siempre (llevan a la
-        tienda, igual que en Impresiones).
-      */}
+      {/* ── Barra superior ── La MISMA de la tienda. Con HeaderTienda el carrito y el buscador siguen
+         donde siempre (llevan a la tienda, igual que en Impresiones). */}
       <HeaderTienda />
 
-      {/*
-        ── Menú de secciones ──
-        Va ARRIBA, en horizontal, y el contenido al centro con aire a los
-        lados. Con el menú de lado, cada página arrancaba corrida a la derecha
-        y el ojo tenía que saltar la columna del menú antes de llegar a lo que
-        venía a ver.
-
-        Sin raya abajo: la barra de arriba ya trae la suya, y dos líneas
-        paralelas a pocos píxeles una de otra dejaban el menú metido en una
-        franja aparte en vez de leerse como parte de la página.
-      */}
+      {/* ── Menú de secciones ── Va ARRIBA, en horizontal, y el contenido al centro con aire a los lados.
+         Con el menú de lado, cada página arrancaba corrida a la derecha y el ojo tenía que saltar la
+         columna del menú antes de llegar a lo que venía a ver. */}
       <div className="px-4 sm:px-6" style={{ backgroundColor: c.topbarBg }}>
         <div className="relative max-w-6xl mx-auto">
-          {/*
-            Deslizable cuando no cabe: en un teléfono no caben las pestañas,
-            y partirlas en dos filas movía el contenido hacia abajo cada vez.
-            `relative` es para que cada pestaña mida su posición desde aquí
-            (ver el efecto que trae la activa a la vista).
-          */}
+          {/* Deslizable cuando no cabe: en un teléfono no caben las pestañas, y partirlas en dos filas movía
+             el contenido hacia abajo cada vez. `relative` es para que cada pestaña mida su posición desde
+             aquí (ver el efecto que trae la activa a la vista). */}
           <nav
             ref={engancharNav}
             aria-label={t('Mi cuenta')}
             className="relative flex items-center gap-1 overflow-x-auto"
             style={{ scrollbarWidth: 'none' }}
           >
-            {/*
-              La vuelta a comprar, primera y siempre a la vista. Con el
-              encabezado de la tienda arriba parecía que ya no hacía falta, pero
-              ahí el nombre abre los pasillos (no lleva a la tienda) y el
-              buscador y el carrito solo llevan de rebote: no había un "volver"
-              que se viera como tal.
-            */}
+            {/* La vuelta a comprar, primera y siempre a la vista. Con el encabezado de la tienda arriba parecía
+               que ya no hacía falta, pero ahí el nombre abre los pasillos (no lleva a la tienda) y el buscador
+               y el carrito solo llevan de rebote: no había un "volver" que se viera como tal. */}
             <Link
               to="/"
               title={t('Volver a la tienda')}

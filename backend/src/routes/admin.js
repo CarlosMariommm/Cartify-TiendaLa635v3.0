@@ -3,13 +3,9 @@ import adminController from '../controller/Admin/adminController.js';
 
 import { soloPersonal } from '../middlewares/validarSesion.js';
 
-/*
- * ── Documentación de la API (Swagger) ──
- *
- * Viene de main. Va agrupada aquí y no pegada a cada ruta porque
- * swagger-jsdoc rastrea el archivo entero: dónde esté no cambia lo que
- * documenta, y así el código de las rutas se lee sin interrupciones.
- */
+// ── Documentación de la API (Swagger) ──
+// Va agrupada aquí y no pegada a cada ruta porque swagger-jsdoc rastrea el archivo entero: dónde
+// esté no cambia lo que documenta, y así el código de las rutas se lee sin interrupciones.
 
 /**
  * @swagger
@@ -126,10 +122,8 @@ import { soloPersonal } from '../middlewares/validarSesion.js';
 
 const router = express.Router();
 
-/*
- * Las cuentas de administrador: la llave del panel entero. Con esto abierto,
- * la lista de admins —y su hash— se consultaba sin nada.
- */
+// Las cuentas de administrador: la llave del panel entero. Con esto abierto, la lista de admins —y
+// su hash— se consultaba sin nada.
 router.use(soloPersonal);
 
 router.route("/")

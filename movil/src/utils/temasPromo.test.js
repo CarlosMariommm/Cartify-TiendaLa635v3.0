@@ -1,10 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { difuminadoDelFondo, puntoEnDiagonal } from './temasPromo';
 
-/*
- * El color con que se funde la foto de una promo contra su fondo: tiene que
- * ser el del degradado en ese punto, no el último color a secas.
- */
+// El color con que se funde la foto de una promo contra su fondo: tiene que ser el del degradado
+// en ese punto, no el último color a secas.
 
 describe('el difuminado de la foto de una promo', () => {
   it('mezcla los dos colores del fondo en el punto pedido', () => {

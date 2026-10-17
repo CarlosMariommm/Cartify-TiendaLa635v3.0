@@ -2,27 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import QRCode from 'qrcode';
 import { kioscoService } from '../api/kioscoService';
 
-/*
- * ============================================================
- * KIOSCO — useKiosco.js
- * ============================================================
- * "¿A nombre de quién va esta compra?", resuelto con la cámara del cliente.
- *
- * El kiosco de la tienda es como el de las cadenas de comida rápida: una
- * pantalla pública donde cualquiera se acerca y pide. El problema es que no
- * sabe quién está enfrente, así que sin esto ninguna compra del kiosco suma
- * puntos ni queda en el historial de nadie.
- *
- * La salida NO es pedirle a la gente que escriba su correo y su contraseña
- * en una pantalla que está a la vista de toda la tienda —eso es regalar
- * contraseñas—, sino que la persona escanee un QR con SU teléfono, donde ya
- * tiene la sesión abierta. El kiosco nunca ve una credencial: recibe un
- * código de seis caracteres que muere en diez minutos.
- *
- * El QR se dibuja aquí mismo, sin salir a internet: nada de mandarle el
- * código a un servicio ajeno para que nos devuelva la imagen.
- * ============================================================
- */
+// KIOSCO — useKiosco.js
+// "¿A nombre de quién va esta compra?", resuelto con la cámara del cliente.
 
 const CADA_CUANTO_MS = 3000; // se pregunta si ya escanearon
 
@@ -35,13 +16,9 @@ export const useKiosco = () => {
 
   const codigoRef = useRef('');
 
-  /*
-   * Abre la sesión y dibuja el QR.
-   *
-   * El QR lleva la dirección completa —no solo el código— para que el
-   * teléfono abra la página de una vez. Un QR que muestra "C265B4" y espera
-   * que la persona adivine qué hacer con eso no le sirve a nadie.
-   */
+  // Abre la sesión y dibuja el QR. El QR lleva la dirección completa —no solo el código— para que el
+  // teléfono abra la página de una vez. Un QR que muestra "C265B4" y espera que la persona adivine
+  // qué hacer con eso no le sirve a nadie.
   const abrir = useCallback(async () => {
     setAbriendo(true);
     setError('');
@@ -68,11 +45,8 @@ export const useKiosco = () => {
     }
   }, []);
 
-  /*
-   * Mientras el QR está en pantalla, se pregunta si ya lo escanearon. Se
-   * corta solo en cuanto alguien la reclama: seguir preguntando por una
-   * sesión ya vinculada es gastar por gusto.
-   */
+  // Mientras el QR está en pantalla, se pregunta si ya lo escanearon. Se corta solo en cuanto
+  // alguien la reclama: seguir preguntando por una sesión ya vinculada es gastar por gusto.
   useEffect(() => {
     if (!codigo || cliente) return;
 
