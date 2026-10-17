@@ -1,27 +1,5 @@
-/*
- * ============================================================
- * CLIENTE HTTP — api.js
- * ============================================================
- * El equivalente móvil de `frontend/src/api/api.js`, pero con `fetch` en vez
- * de axios. No es una limitación: el authApi de la web ya usa `fetch` pelado
- * para las rutas de sesión, y React Native lo trae de fábrica. Traer axios
- * seria una dependencia mas para hacer exactamente lo mismo.
- *
- * ── La dirección del backend ──
- *
- * Por defecto la app le pega al backend real en Render, así que no hace
- * falta tener el backend corriendo en la compu para probar la app.
- *
- * Para desarrollar contra un backend local: escriba su URL en HOST_MANUAL.
- * Ojo con el detalle que atasca a todo el mundo en móvil: "localhost" dentro
- * del emulador de Android NO es la computadora, es el propio teléfono
- * virtual. El emulador llega a la computadora por la dirección especial
- * 10.0.2.2. En un teléfono de verdad conectado por WiFi no sirve ninguna de
- * las dos: hay que poner la IP de la computadora en la red (la que Expo
- * muestra al arrancar, tipo 192.168.1.23).
- * Ejemplo: const HOST_MANUAL = 'http://10.0.2.2:4000/api';
- * ============================================================
- */
+// CLIENTE HTTP — api.js
+// El equivalente móvil de `frontend/src/api/api.js`, pero con `fetch` en vez de axios.
 
 import { tAhora } from '../utils/idioma';
 import { URL_WEB_LEGAL } from '../utils/legales';
@@ -32,39 +10,21 @@ const HOST_RENDER = 'https://cartify-tiendala635.onrender.com/api';
 
 export const URL_API = HOST_MANUAL || HOST_RENDER;
 
-/*
- * La web del panel, que el administrador abre dentro de la app
- * (pages/personal/PanelWeb.js). Si HOST_MANUAL apunta a un backend local,
- * aquí va la web que habla con ESE backend: el pase con el que se abre el
- * panel solo lo reconoce el servidor que lo dio.
- * Ejemplo: const WEB_MANUAL = 'http://192.168.1.23:5173';
- */
+// La web del panel, que el administrador abre dentro de la app (pages/personal/PanelWeb.js). Si
+// HOST_MANUAL apunta a un backend local, aquí va la web que habla con ESE backend: el pase con el
+// que se abre el panel solo lo reconoce el servidor que lo dio.
 const WEB_MANUAL = null;
 
 export const URL_WEB = WEB_MANUAL || URL_WEB_LEGAL;
 
-/*
- * El token de sesión vigente, para mandarlo por Authorization en cada
- * petición. Aquí no hay cookies como en el navegador —fetch en React Native
- * no las administra solo—, así que este es su reemplazo: AuthContext llama a
- * establecerToken() cada vez que la sesión cambia (al restaurarla del
- * almacén, al entrar, al salir), y de ahí lo toma peticion() sin que cada
- * pantalla tenga que pasarlo a mano.
- */
+// El token de sesión vigente, para mandarlo por Authorization en cada petición.
 let tokenActual = null;
 
 export const establecerToken = (token) => {
   tokenActual = token;
 };
 
-/*
- * Un error que ya trae el mensaje que va a leer el cliente.
- *
- * El backend contesta en español ("El correo o contraseña son incorrectos",
- * "Ya existe una cuenta con ese correo"), así que aquí no hace falta el
- * traductor que tiene la web: se muestra tal cual y solo se inventa un texto
- * cuando el servidor no dijo nada.
- */
+// Un error que ya trae el mensaje que va a leer el cliente.
 export class ErrorApi extends Error {
   constructor(mensaje, estado) {
     super(mensaje);
@@ -81,15 +41,8 @@ const RESPALDO_POR_ESTADO = {
   500: 'Error interno del servidor',
 };
 
-/*
- * Una petición al backend. Devuelve el JSON ya parseado, o lanza un ErrorApi
- * con el mensaje del servidor.
- *
- * El "error de conexión" merece su propio texto porque en desarrollo es el que
- * más se ve, y decir "algo salió mal" cuando lo que pasa es que el backend
- * está apagado hace perder media hora buscando el error en el lugar
- * equivocado.
- */
+// Una petición al backend. Devuelve el JSON ya parseado, o lanza un ErrorApi con el mensaje del
+// servidor.
 export const peticion = async (ruta, { metodo = 'GET', cuerpo, cabeceras, tiempoMaximo } = {}) => {
   let respuesta;
 
@@ -98,11 +51,8 @@ export const peticion = async (ruta, { metodo = 'GET', cuerpo, cabeceras, tiempo
   // multipart y el backend no puede separar los campos.
   const esFormData = cuerpo instanceof FormData;
 
-  /*
-   * `tiempoMaximo` (ms), para lo que no puede quedarse esperando para
-   * siempre: el asistente de voz tiene a alguien parado mirando el teléfono.
-   * fetch no trae tope propio, así que se corta a mano.
-   */
+  // `tiempoMaximo` (ms), para lo que no puede quedarse esperando para siempre: el asistente de voz
+  // tiene a alguien parado mirando el teléfono. fetch no trae tope propio, así que se corta a mano.
   const corte = tiempoMaximo ? new AbortController() : null;
   const reloj = corte ? setTimeout(() => corte.abort(), tiempoMaximo) : null;
 
@@ -138,19 +88,14 @@ export const peticion = async (ruta, { metodo = 'GET', cuerpo, cabeceras, tiempo
   }
 
   if (!respuesta.ok) {
-    /*
-     * El servidor escribe en español. En inglés se traduce con el mismo
-     * diccionario de la web (que ya trae sus mensajes); lo que no esté ahí
-     * sale tal cual. En el modo del personal tAhora es siempre español.
-     */
+    // El servidor escribe en español. En inglés se traduce con el mismo diccionario de la web (que ya
+    // trae sus mensajes); lo que no esté ahí sale tal cual. En el modo del personal tAhora es siempre
+    // español.
     const mensaje = tAhora(
       datos?.message || RESPALDO_POR_ESTADO[respuesta.status] || 'Ocurrió un error inesperado'
     );
     const error = new ErrorApi(mensaje, respuesta.status);
-    // El resto del cuerpo viaja pegado al error (p.ej. `requiereConsentimiento`
-    // y `sugerido` de /loginClient/google): así quien llama puede leerlo sin
-    // que este helper tenga que conocer de antemano los campos de cada ruta,
-    // igual que hace la web con su propio fetch a mano en authApi.js.
+    // El resto del cuerpo viaja pegado al error (p.ej.
     if (datos && typeof datos === 'object') Object.assign(error, datos, { message: mensaje });
     throw error;
   }

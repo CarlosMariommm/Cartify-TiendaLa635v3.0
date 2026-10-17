@@ -43,21 +43,16 @@ import perfilRoutes from "./src/routes/perfil.js";
 //cosas
 const app = express();
 
-/*
- * En Render el servidor está detrás de un proxy: sin esto, todas las visitas
- * llegan con la IP del proxy y los topes por persona (limiter y los del
- * asistente) se vuelven un tope para TODA la tienda junta.
- */
+// En Render el servidor está detrás de un proxy: sin esto, todas las visitas llegan con la IP del
+// proxy y los topes por persona (limiter y los del asistente) se vuelven un tope para TODA la
+// tienda junta.
 app.set("trust proxy", 1);
 
 app.use(
     cors({
-        /*
-         * Los orígenes salen de una variable, no escritos a mano: al desplegar,
-         * el dominio de la tienda no se sabe hasta que existe. Se separan por
-         * coma. Sin la variable —o sea, en local— se queda con los puertos de
-         * Vite de siempre y nada cambia.
-         */
+        // Los orígenes salen de una variable, no escritos a mano: al desplegar, el dominio de la tienda no
+        // se sabe hasta que existe. Se separan por coma. Sin la variable —o sea, en local— se queda con
+        // los puertos de Vite de siempre y nada cambia.
         origin: (process.env.CORS_ORIGINS || "http://localhost:5173,http://localhost:5174")
           .split(",")
           .map((o) => o.trim())
@@ -121,14 +116,9 @@ app.use("/api/perfil", perfilRoutes);
 
 //enpoint
 
-/*
- * ── Manejador de errores ──
- * Sin esto, cualquier error lanzado en un middleware (típicamente la subida de
- * imágenes) devolvía la página HTML por defecto de Express con "[object Object]",
- * y el empleado solo veía "Internal Server Error" sin saber que el problema era
- * su foto. Va al final a propósito: Express reconoce como manejador de errores
- * la función que recibe cuatro argumentos, y solo entra aquí si algo falló.
- */
+// ── Manejador de errores ── Sin esto, cualquier error lanzado en un middleware (típicamente la
+// subida de imágenes) devolvía la página HTML por defecto de Express con "[object Object]", y el
+// empleado solo veía "Internal Server Error" sin saber que el problema era su foto.
 app.use((err, req, res, next) => {
     if (res.headersSent) return next(err);
 

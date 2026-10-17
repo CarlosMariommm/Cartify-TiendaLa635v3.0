@@ -1,10 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { aProductos, buscarEncabezado, faltaLoEsencial, leerCsv, leerNumero, mapearColumnas, PLANTILLA_CSV } from './importarExcel';
 
-/*
- * Leer el Excel del inventario: qué columna es cuál, los números como se
- * escriben aquí y las filas como productos.
- */
+// Leer el Excel del inventario: qué columna es cuál, los números como se escriben aquí y las filas
+// como productos.
 
 describe('qué columna es cuál', () => {
   it('por los títulos de siempre, sin confundir el costo con el precio', () => {

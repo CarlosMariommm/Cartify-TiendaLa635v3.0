@@ -3,24 +3,9 @@ import { Lock, ArrowLeft, Store, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useVolver } from '../hooks/useVolver';
 
-/*
- * ============================================================
- * SIN PERMISO — SinPermiso.jsx
- * ============================================================
- * Cuando alguien con sesión abre una pantalla que no le toca.
- *
- * El caso real: la misma persona administra la tienda Y es clienta de su
- * propia tienda, con el mismo correo en las dos tablas. Entrando como cliente
- * y abriendo /dashboard, antes se le mostraba el panel completo —o se le
- * caía a pedazos, porque el panel pide datos que una sesión de cliente no
- * puede leer—.
- *
- * Por qué NO se le manda al login: ya inició sesión. Pedirle que vuelva a
- * entrar cuando su sesión está perfecta es mentirle sobre lo que pasa, y lo
- * deja dando vueltas en un login que va a superar sin llegar a ningún lado.
- * Lo honesto es decirle que esa puerta no es la suya.
- * ============================================================
- */
+// SIN PERMISO — SinPermiso.jsx
+// Cuando alguien con sesión abre una pantalla que no le toca. El caso real: la misma persona
+// administra la tienda Y es clienta de su propia tienda, con el mismo correo en las dos tablas.
 
 const Fondo = styled.div`
   min-height: 100vh;
@@ -36,14 +21,8 @@ const Caja = styled.div`
   text-align: center;
 `;
 
-/*
- * El color de marca real, inyectado por el propio componente (ver
- * escalaMarca en SinPermiso, más abajo) en vez de leído de --marca-* en
- * :root — en las rutas del panel, useTemporada() apaga esa variable a
- * propósito (es decoración de la tienda, no herramienta del panel), y esta
- * pantalla SÍ puede aparecer ahí. Con el valor puesto localmente en el
- * envoltorio, estas reglas se quedan tal cual sin que la ruta les afecte.
- */
+// El color de marca va puesto en el propio componente (escalaMarca) y no en :root, porque en las
+// rutas del panel useTemporada() apaga esa variable.
 const Icono = styled.div`
   width: 74px;
   height: 74px;
@@ -108,19 +87,12 @@ const Boton = styled.button`
 const SinPermiso = () => {
   const { esCliente, haySesionDeCliente } = useAuth();
   const { volver, hayAtras, casa } = useVolver();
-  /*
-   * Sin escala derivada. Esta pantalla la calculaba del color que el dueño
-   * hubiera elegido y la pintaba en línea, porque en las rutas del panel
-   * useTemporada() borra las variables de marca. Pero solo borra los estilos EN
-   * LÍNEA; la regla :root de index.css se queda, y ahora la marca vive ahí fija.
-   * Así que var(--marca-*) ya resuelve bien sin ayuda de nadie.
-   */
+  // Sin escala derivada. Esta pantalla la calculaba del color que el dueño hubiera elegido y la
+  // pintaba en línea, porque en las rutas del panel useTemporada() borra las variables de marca.
 
-  /*
-   * "Viene con cuenta de cliente" es la misma situación de las dos maneras de
-   * llegar aquí: con la sesión de cliente puesta en esta pantalla, o sin
-   * sesión de personal pero con una de cliente abierta en la tienda.
-   */
+  // "Viene con cuenta de cliente" es la misma situación de las dos maneras de llegar aquí: con la
+  // sesión de cliente puesta en esta pantalla, o sin sesión de personal pero con una de cliente
+  // abierta en la tienda.
   const conCuentaDeCliente = esCliente || haySesionDeCliente;
 
   return (
@@ -142,11 +114,8 @@ const SinPermiso = () => {
               : <><LayoutDashboard size={16} strokeWidth={2.2} /> Ir al panel</>}
           </Boton>
 
-          {/*
-            La salida que de verdad sirve cuando quien mira ES del personal:
-            entrar por su puerta. Las dos sesiones conviven, así que hacerlo
-            no le cierra la de cliente que tiene abierta en la tienda.
-          */}
+          {/* La salida que de verdad sirve cuando quien mira ES del personal: entrar por su puerta. Las dos
+             sesiones conviven, así que hacerlo no le cierra la de cliente que tiene abierta en la tienda. */}
           {conCuentaDeCliente && (
             <Boton onClick={() => { window.location.href = '/admin'; }}>
               <LayoutDashboard size={16} strokeWidth={2.2} /> Entrar como personal

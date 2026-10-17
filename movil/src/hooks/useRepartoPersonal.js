@@ -1,30 +1,6 @@
-/*
- * ============================================================
- * EL REPARTO EN EL TELÉFONO — useRepartoPersonal.js
- * ============================================================
- * El único Reparto que queda (el de la web se quitó: repartir es cosa del
- * teléfono), en la app del personal:
- *
- *   - Los pedidos a domicilio que faltan por entregar.
- *   - Moverlos de estado con el mismo PUT que el panel (la entrega pide el
- *     código de 4 dígitos que dicta el cliente).
- *   - Compartir la ubicación mientras se reparte: al salir con un pedido, el
- *     teléfono manda dónde va y el cliente lo ve avanzar en su mapa.
- *
- * ── La ubicación, solo con la app abierta ──
- * Se lee con la app a la vista (permiso "mientras se usa"), no en segundo
- * plano: pedir la ubicación siempre, aun con la app cerrada, es un permiso más
- * delicado y otra compilación de la app. Por eso, mientras hay un viaje, la
- * pantalla no se apaga sola (expo-keep-awake).
- *
- * ── No se manda de más ──
- * Como en la web: no más de un envío cada 10 segundos, ni por moverse menos de
- * 15 metros. Parado en un semáforo no hay nada nuevo que contar.
- *
- * Lo que se está compartiendo se guarda: si la app se cierra a medio viaje,
- * al volver a abrirla se retoma sola.
- * ============================================================
- */
+// EL REPARTO EN EL TELÉFONO — useRepartoPersonal.js
+// El único Reparto que queda (el de la web se quitó: repartir es cosa del teléfono), en la app del
+// personal: - Los pedidos a domicilio que faltan por entregar.
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as Location from 'expo-location';
@@ -35,6 +11,8 @@ import { borrar, guardar, leer, llave } from '../utils/almacen';
 
 const CADA_CUANTO_MS = 10000;
 const MOVIMIENTO_MINIMO_M = 15;
+// Quieto, igual manda su punto cada 30 s: el cliente lo da por viejo a los 90 s.
+const LATIDO_MS = 30000;
 const LLAVE_VIAJE = llave('cartify', 'viaje-reparto');
 const TAG_PANTALLA = 'reparto';
 const ESTADOS_DEL_REPARTO = ['pagado', 'preparando', 'en_camino'];
@@ -65,6 +43,7 @@ export const useRepartoPersonal = () => {
 
   const enViajeRef = useRef([]);
   const vigiaRef = useRef(null);
+  const latidoRef = useRef(null);
   const ultimoEnvioRef = useRef({ t: 0, punto: null });
   const posicionRef = useRef(null);
 
@@ -122,12 +101,15 @@ export const useRepartoPersonal = () => {
           enviar(punto);
         }
       );
-      /*
-       * La primera señal precisa puede tardar más de un minuto adentro de la
-       * tienda, y mientras tanto el cliente no ve al repartidor. La última
-       * ubicación que el teléfono ya conoce (de hace poco y no muy gruesa) sale
-       * al instante; el GPS fino la corrige en cuanto agarra señal.
-       */
+      // El GPS solo avisa al moverse: el latido reenvía el último punto.
+      clearInterval(latidoRef.current);
+      latidoRef.current = setInterval(() => {
+        const punto = posicionRef.current;
+        if (punto && Date.now() - ultimoEnvioRef.current.t >= LATIDO_MS) enviar(punto, true);
+      }, LATIDO_MS / 3);
+      // La primera señal precisa puede tardar más de un minuto adentro de la tienda, y mientras tanto el
+      // cliente no ve al repartidor. La última ubicación que el teléfono ya conoce (de hace poco y no
+      // muy gruesa) sale al instante; el GPS fino la corrige en cuanto agarra señal.
       if (!posicionRef.current) {
         const conocida = await Location.getLastKnownPositionAsync({ maxAge: 2 * 60 * 1000, requiredAccuracy: 150 })
           .catch(() => null);
@@ -146,6 +128,8 @@ export const useRepartoPersonal = () => {
   const apagarGps = useCallback(() => {
     vigiaRef.current?.remove?.();
     vigiaRef.current = null;
+    clearInterval(latidoRef.current);
+    latidoRef.current = null;
     ultimoEnvioRef.current = { t: 0, punto: null };
     posicionRef.current = null;
     setPosicion(null);
@@ -203,6 +187,7 @@ export const useRepartoPersonal = () => {
   // Al salir del modo personal: nada sigue leyendo el GPS ni con la pantalla prendida.
   useEffect(() => () => {
     vigiaRef.current?.remove?.();
+    clearInterval(latidoRef.current);
     deactivateKeepAwake(TAG_PANTALLA).catch(() => {});
   }, []);
 
@@ -218,11 +203,9 @@ export const useRepartoPersonal = () => {
     }
   }, [token, quien, cargar]);
 
-  /*
-   * "Salí a repartir": marca en camino Y empieza a compartir la ubicación, en
-   * un solo toque (igual que la web). Dos botones separados se hacían a medias
-   * y el cliente se quedaba viendo "Preparando" toda la entrega.
-   */
+  // "Salí a repartir": marca en camino Y empieza a compartir la ubicación, en un solo toque (igual
+  // que la web). Dos botones separados se hacían a medias y el cliente se quedaba viendo
+  // "Preparando" toda la entrega.
   const salirEnCamino = useCallback(async (pedido) => {
     await avanzar(pedido, 'en_camino');
     if (pedido.deliveryLat != null && pedido.deliveryLng != null) empezarViaje(pedido._id);

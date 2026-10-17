@@ -1,20 +1,6 @@
-/*
- * ============================================================
- * MASCOTA — Tiqui en los momentos de la tienda
- * ============================================================
- * La misma Tiqui de frontend/src/components/UI/Mascota.jsx, con las MISMAS
- * poses: cargando, buscando, vacío, sin conexión, error, perdida, fiesta,
- * saludo, posando y los cinco estados del pedido. Donde la web la muestra, la
- * app también, y con el disfraz de la temporada puesto.
- *
- * Tres capas del mismo tamaño, una encima de otra: lo de atrás (las líneas de
- * velocidad), Tiqui (lo único que se mueve) y lo de adelante (el carrito, la
- * bolsa, el confeti), que se queda quieto como en la web.
- *
- * Es de adorno: quien la usa dice con texto lo que pasa, así que el lector de
- * pantalla la salta.
- * ============================================================
- */
+// MASCOTA — Tiqui en los momentos de la tienda
+// Las mismas poses que en la web (cargando, buscando, vacío, error, fiesta, los estados del
+// pedido…), con el disfraz de la temporada.
 
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Text } from 'react-native';
@@ -26,10 +12,8 @@ import {
   useColoresTiqui, useDisfrazTiqui, useMovimientoReducido, useParpadeo,
 } from './piezas';
 
-/*
- * Cada pose: la cara, el cordón, cómo se mueve y qué la acompaña. `vista` es
- * el encuadre (viewBox): cada una deja el aire justo para lo que tiene alrededor.
- */
+// Cada pose: la cara, el cordón, cómo se mueve y qué la acompaña. `vista` es el encuadre
+// (viewBox): cada una deja el aire justo para lo que tiene alrededor.
 const POSES = {
   cargando: { vista: [0, 0, 400, 400], cordon: 'colgado', mov: 'pendulo' },
   buscando: { vista: [80, 26, 240, 370], ojos: 'lupa', mira: [4, -2], cejas: 'una', boca: 'lado', mov: 'balanceo', delante: 'lupa' },
@@ -55,10 +39,8 @@ const POSES = {
 // En los botones va solo la etiqueta colgando, sin aire alrededor.
 const VISTA_MINI = [110, 0, 180, 392];
 
-/*
- * Los movimientos (index.css de la web, sección MASCOTA). `eje` es el punto
- * del dibujo sobre el que gira o se estira.
- */
+// Los movimientos (index.css de la web, sección MASCOTA). `eje` es el punto del dibujo sobre el
+// que gira o se estira.
 const MOVIMIENTOS = {
   pendulo: { eje: [200, 0], ms: 1700, alterna: true, a: { rotate: ['12deg', '-12deg'] } },
   'pendulo-corto': { eje: [200, 0], ms: 1200, alterna: true, a: { rotate: ['7deg', '-7deg'] } },
@@ -292,11 +274,9 @@ const Aparte = ({ tipo, c }) => {
   }
 };
 
-/*
- * `disfraz`: lo que lleva puesto. Sin pasarlo, el de la temporada; `null` la
- * deja sin nada. `mini` es la versión de los botones (sin disfraz: a la altura
- * de una línea de texto, el gorro sería una mancha junto a "Entrar").
- */
+// `disfraz`: lo que lleva puesto. Sin pasarlo, el de la temporada; `null` la deja sin nada. `mini`
+// es la versión de los botones (sin disfraz: a la altura de una línea de texto, el gorro sería una
+// mancha junto a "Entrar").
 const Mascota = ({ pose = 'cargando', alto = 120, mini = false, sobre, disfraz, style }) => {
   const p = POSES[pose] || POSES.cargando;
   const [vx, vy, vw, vh] = mini ? VISTA_MINI : p.vista;
@@ -364,17 +344,13 @@ const Mascota = ({ pose = 'cargando', alto = 120, mini = false, sobre, disfraz, 
   );
 };
 
-/*
- * Para las esperas cortas dentro de un botón ("Entrando…", "Procesando…"):
- * la etiqueta colgando, del alto de una línea de texto.
- */
+// Para las esperas cortas dentro de un botón ("Entrando…", "Procesando…"): la etiqueta colgando,
+// del alto de una línea de texto.
 export const EsperaMascota = ({ alto = 22, sobre }) => <Mascota pose="cargando" mini alto={alto} sobre={sobre} />;
 
-/*
- * Para cuando una pantalla entera está cargando: Tiqui balanceándose y el
- * texto de lo que se está trayendo. Aparece con un poquito de retraso: si
- * los datos llegan rápido, no alcanza a verse y no queda un parpadeo.
- */
+// Para cuando una pantalla entera está cargando: Tiqui balanceándose y el texto de lo que se está
+// trayendo. Aparece con un poquito de retraso: si los datos llegan rápido, no alcanza a verse y no
+// queda un parpadeo.
 export const CargandoMascota = ({ texto, alto = 92, style }) => {
   const { t } = useIdioma();
   const COLORES = useColores();

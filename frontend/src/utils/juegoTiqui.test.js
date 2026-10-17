@@ -7,11 +7,8 @@ import {
   leerGuardado, AJUSTES_INICIALES,
 } from './juegoTiqui';
 
-/*
- * El reto de Tiqui del stand: lo que no se puede probar a ojo en la Expo.
- * Sobre todo la ruleta: que el premio mayor salga con la probabilidad que
- * se ve, y que nunca salga si ya no queda.
- */
+// El reto de Tiqui del stand: lo que no se puede probar a ojo en la Expo. Sobre todo la ruleta:
+// que el premio mayor salga con la probabilidad que se ve, y que nunca salga si ya no queda.
 
 // Un azar que se repite, para que las pruebas den siempre lo mismo.
 const azarFijo = (semilla = 7) => {

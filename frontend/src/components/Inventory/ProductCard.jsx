@@ -11,11 +11,8 @@ const ProductCard = ({ product, onEdit, onDelete, onView, index = 0 }) => {
 
   const imageUrl = Array.isArray(product.image) ? product.image[0] : product.image;
 
-  /*
-   * Hay productos que no vencen (o a los que nadie les puso fecha). Antes se
-   * formateaban igual y salían con "31/12/1969", el instante cero de Unix
-   * disfrazado de vencimiento. Si no hay fecha se dice, no se inventa una.
-   */
+  // Hay productos que no vencen (o a los que nadie les puso fecha). Si no hay fecha se dice, no se
+  // inventa una.
   const vence = formatearFecha(product.expirationDate);
 
   // Por unidad o por libra: cambia cómo se lee el precio y la existencia.

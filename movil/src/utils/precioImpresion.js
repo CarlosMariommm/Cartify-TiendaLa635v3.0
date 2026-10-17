@@ -1,22 +1,6 @@
-/*
- * ============================================================
- * PRECIO DE UNA IMPRESIÓN — precioImpresion.js
- * ============================================================
- * Puerto verbatim de `frontend/src/utils/precioImpresion.js` (que a su vez
- * está espejado en el backend — ver ese archivo para el porqué de tenerlo
- * duplicado). Aquí solo se MUESTRA el precio antes de enviar; el que vale es
- * el que calcula el backend al crear el pedido.
- *
- * Cómo se cobra, en cristiano:
- *
- *   Se cobra por HOJA, no por página. Una hoja a doble cara lleva dos páginas,
- *   así que 10 páginas a doble cara son 5 hojas. Por eso doble cara sale más
- *   barato — que es exactamente la razón por la que uno lo elige.
- *
- *   Cada hoja cuesta el precio del formato, más el recargo de color si se
- *   imprime a color. Todo eso por la cantidad de copias.
- * ============================================================
- */
+// PRECIO DE UNA IMPRESIÓN — precioImpresion.js
+// Puerto verbatim de `frontend/src/utils/precioImpresion.js` (que a su vez está espejado en el
+// backend — ver ese archivo para el porqué de tenerlo duplicado).
 
 // Páginas -> hojas de papel. A doble cara caben 2 páginas por hoja.
 export const hojasNecesarias = (paginas, dobleCara) => {

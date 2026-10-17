@@ -1,23 +1,6 @@
-/*
- * ============================================================
- * EL COMPROBANTE DE UN PEDIDO — comprobantePedido.js
- * ============================================================
- * Un PDF con el formato formal de los reportes del panel (ver reportesPdf.js):
- * el encabezado de la tienda, los datos del pedido, el detalle con cantidades
- * y precios, los totales tal como se cobraron y una nota al pie.
- *
- * Solo para el personal: se baja desde Pedidos, para imprimirlo o mandárselo
- * al cliente si lo pide. El cliente no lo baja por su cuenta, a propósito.
- *
- * Los montos salen del pedido guardado, no se recalculan: `price × amount` de
- * cada renglón ya es lo que se cobró (ver backend/src/utils/precioPedido.js),
- * y el subtotal, el descuento por puntos, el envío, la tarifa de servicio y
- * el total son los del momento de la compra.
- *
- * Es un comprobante de compra, no una factura: en El Salvador la factura y el
- * crédito fiscal son documentos tributarios aparte, y así se dice al pie.
- * ============================================================
- */
+// EL COMPROBANTE DE UN PEDIDO — comprobantePedido.js
+// PDF formal de un pedido (datos, detalle y totales) que el personal baja desde Pedidos para
+// imprimirlo o mandarlo. El cliente no lo baja por su cuenta.
 
 import { COLOR, MARGEN, asegurarEspacio, dinero, fechaLarga, hoyLocal, nuevoReporte, parrafo, pie, seccion, tabla } from './reportesPdf';
 
@@ -88,10 +71,8 @@ const totales = (doc, filas, y) => {
   return y + 4;
 };
 
-/*
- * `pedido`: como lo trae Pedidos (con `clientId` e `items.productId`
- * poblados). `tienda`: lo que devuelve datosDeLaTienda.
- */
+// `pedido`: como lo trae Pedidos (con `clientId` e `items.productId` poblados). `tienda`: lo que
+// devuelve datosDeLaTienda.
 export const construirComprobante = (pedido, tienda) => {
   const numero = numeroDePedido(pedido._id);
   const { doc, y: inicio } = nuevoReporte({

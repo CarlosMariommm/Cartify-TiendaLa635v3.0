@@ -1,41 +1,6 @@
-/*
- * ============================================================
- * BARRA DE LA TIENDA
- * ============================================================
- * El equivalente de `HeaderTienda.jsx`: el nombre de la tienda, el buscador y
- * el carrito con su contador.
- *
- * En la web las tres cosas caben en un renglón. Aquí no: un buscador usable
- * necesita casi todo el ancho del teléfono, y apretarlo entre el nombre y el
- * carrito lo dejaba en unos 120 px, donde no cabe ni "gaseosa". Por eso van en
- * dos pisos — marca y carrito arriba, buscador abajo— que es como resuelven
- * esto las tiendas que se usan desde el teléfono.
- *
- * ── Por qué aquí arriba solo queda el carrito ──
- *
- * Había un segundo botón, el de la persona, que era la única puerta a la cuenta
- * y a cerrar sesión. Dejó de serlo cuando llegó la barra de abajo: la cuenta es
- * uno de sus cuatro apartados, está siempre en el mismo sitio y al alcance del
- * pulgar. Dos botones que llevan al mismo lugar, a un centímetro uno del otro,
- * no son dos caminos: son uno mal contado.
- *
- * El carrito sí se queda arriba, y no es incoherencia. La barra de abajo es
- * para CAMBIAR de apartado; el carrito no es un apartado, es lo que uno lleva
- * en la mano mientras recorre este. Su contador tiene que verse desde la
- * tienda, junto a los productos que lo van llenando.
- *
- * El asistente de voz no está aquí — tiene su propio apartado en la barra
- * de abajo.
- *
- * ── El menú de pasillos, que sí se sumó ──
- *
- * En la web tocar el nombre de la tienda despliega sus módulos (panadería,
- * farmacia...). Aquí lo mismo: el nombre es un botón con un icono de
- * hamburguesa al lado, y abre MenuPasillos — la hoja que sube desde abajo en
- * vez del dropdown de la web. Ver Inicio.js para quién guarda si está
- * abierto y utils/modulos.js para qué pasillos existen.
- * ============================================================
- */
+// BARRA DE LA TIENDA
+// El equivalente de `HeaderTienda.jsx`: el nombre de la tienda, el buscador y el carrito con su
+// contador. En la web las tres cosas caben en un renglón.
 
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -59,13 +24,9 @@ const BarraTienda = ({ busqueda, alBuscar, cantidadItems = 0, alAbrirCarrito, al
   const COLORES = useColores();
   const estilos = useEstilos(crearEstilos);
 
-  /*
-   * El ícono del carrito es el destino de `volarAlCarrito.js`: se registra
-   * solo al montarse (y se borra al desmontarse) para que quien agregue
-   * desde CUALQUIER pantalla sepa hacia dónde volar, sin que esta barra
-   * tenga que recibir esa referencia por props. Ver el comentario grande de
-   * ese archivo para el porqué completo.
-   */
+  // El ícono del carrito es el destino de `volarAlCarrito.js`: se registra solo al montarse (y se
+  // borra al desmontarse) para que quien agregue desde CUALQUIER pantalla sepa hacia dónde volar,
+  // sin que esta barra tenga que recibir esa referencia por props.
   const botonCarritoRef = useRef(null);
   useEffect(() => {
     registrarDestinoCarrito(botonCarritoRef);
@@ -142,10 +103,8 @@ const BarraTienda = ({ busqueda, alBuscar, cantidadItems = 0, alAbrirCarrito, al
           <Animated.View style={{ transform: [{ rotate: rotacion }, { scale: escalaIcono }] }}>
             <ShoppingBag size={21} color={COLORES.texto} strokeWidth={2.2} />
           </Animated.View>
-          {/*
-            El contador solo aparece cuando hay algo. Un "0" permanente sobre el
-            icono se lee como un error del sistema, no como un carrito vacío.
-          */}
+          {/* El contador solo aparece cuando hay algo. Un "0" permanente sobre el icono se lee como un error
+             del sistema, no como un carrito vacío. */}
           {cantidadItems > 0 && (
             <Animated.View
               style={[estilos.contador, { backgroundColor: colores.marca, transform: [{ scale: escalaContador }] }]}
@@ -182,11 +141,9 @@ const BarraTienda = ({ busqueda, alBuscar, cantidadItems = 0, alAbrirCarrito, al
         // En iOS aparece su propia equis; se apaga para no tener dos.
         clearButtonMode="never"
       />
-      {/*
-        La equis para borrar. En un teléfono, dejar la búsqueda limpia con el
-        teclado son ocho retrocesos; sin ella, mucha gente se queda con el
-        filtro puesto y cree que la tienda solo tiene esos cuatro productos.
-      */}
+      {/* La equis para borrar. En un teléfono, dejar la búsqueda limpia con el teclado son ocho
+         retrocesos; sin ella, mucha gente se queda con el filtro puesto y cree que la tienda solo tiene
+         esos cuatro productos. */}
       {!!busqueda && (
         <Pressable
           onPress={() => alBuscar('')}

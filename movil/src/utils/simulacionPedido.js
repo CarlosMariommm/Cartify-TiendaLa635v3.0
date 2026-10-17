@@ -1,25 +1,6 @@
-/*
- * ============================================================
- * SIMULADOR DE PEDIDO — solo en desarrollo
- * ============================================================
- * Para ver de punta a punta cómo se vive un pedido a domicilio —la burbuja,
- * el mapa con el repartidor acercándose, el "ya casi", el código de entrega
- * y los avisos que suenan— sin hacer un pedido de verdad.
- *
- * NO escribe nada en ningún lado. La base es la de producción: un pedido de
- * prueba ahí descontaría inventario y le llegaría al personal. En cambio, la
- * API de pedidos (api/pedidosApi.js) pregunta aquí antes de ir al servidor:
- *   · la lista de pedidos lleva este pedido de prueba adelante de los reales;
- *   · la posición del repartidor de este pedido sale de aquí.
- *
- * Los avisos salen del mismo teléfono (avisoLocal), con los MISMOS textos que
- * manda el servidor (backend/src/utils/avisosCliente.js y avisoPromo.js).
- * Si allá cambian, se cambian aquí.
- *
- * Solo existe con __DEV__: en la app que se publica, el menú que lo arranca
- * no aparece y la API nunca lo consulta.
- * ============================================================
- */
+// SIMULADOR DE PEDIDO — solo en desarrollo
+// Simula un pedido a domicilio de punta a punta (burbuja, mapa, "ya casi", código y avisos) sin
+// escribir nada en la base.
 
 import { avisoLocal } from './notificaciones';
 import { distanciaMetros } from './geo';
@@ -29,15 +10,9 @@ import { distanciaMetros } from './geo';
 export const ID_SIMULADO = 'pedido-de-prueba';
 export const esPedidoSimulado = (id) => id === ID_SIMULADO;
 
-/*
- * El recorrido, en segundos desde que se arranca. Comprimido: un pedido de
- * verdad tarda media hora; aquí dos minutos y medio. El viaje dura 90
- * segundos para que el repartidor se vea avanzar varias veces en el mapa
- * (la app pregunta su posición cada 10).
- *
- * A domicilio: recibido → preparando → en camino → entregado.
- * Para recoger: recibido → preparando → listo → entregado (en el mostrador).
- */
+// El recorrido, en segundos desde que se arranca. Comprimido: un pedido de verdad tarda media
+// hora; aquí dos minutos y medio. El viaje dura 90 segundos para que el repartidor se vea avanzar
+// varias veces en el mapa (la app pregunta su posición cada 10).
 const EN_CAMINO_EN = 35;
 const DURACION_VIAJE = 90;
 const RECORRIDOS = {
@@ -50,10 +25,8 @@ const SALIDA = { lat: 0.0115, lng: 0.0105 };
 // Si no hay una dirección de verdad con coordenadas, una en San Salvador.
 const DESTINO_POR_DEFECTO = { lat: 13.7035, lng: -89.2244 };
 
-/*
- * Los textos que manda el servidor en cada paso (TEXTOS_PEDIDO en
- * backend/src/utils/avisosCliente.js). Si allá cambian, se cambian aquí.
- */
+// Los textos que manda el servidor en cada paso (TEXTOS_PEDIDO en
+// backend/src/utils/avisosCliente.js). Si allá cambian, se cambian aquí.
 export const TEXTOS_PEDIDO = {
   preparando: { titulo: 'Estamos preparando tu pedido', cuerpo: 'Ya estamos juntando tus productos.' },
   en_camino: {
@@ -88,11 +61,8 @@ const estadoActual = () => {
   return estado;
 };
 
-/*
- * Arranca un pedido de prueba. `plantilla` es un pedido real del cliente (si
- * tiene alguno): de ahí salen los productos y el total, para que se vea como
- * uno de verdad. `destino` es a dónde va.
- */
+// Arranca un pedido de prueba. `plantilla` es un pedido real del cliente (si tiene alguno): de ahí
+// salen los productos y el total, para que se vea como uno de verdad. `destino` es a dónde va.
 export const iniciarSimulacion = ({ plantilla = null, destino = null, tipo = 'delivery' } = {}) => {
   detenerSimulacion();
   const casa =
@@ -165,12 +135,9 @@ export const pedidoSimulado = () => {
   };
 };
 
-/*
- * El camino del repartidor de prueba: dos calles en L y no una línea recta,
- * para que se vea la ruta como la dibuja el servidor (ver
- * backend/src/utils/rutaReparto.js). Devuelve dónde va según el avance (0 a 1)
- * y la ruta que le falta, con la misma forma que la del servidor.
- */
+// El camino del repartidor de prueba: dos calles en L y no una línea recta, para que se vea la
+// ruta como la dibuja el servidor (ver backend/src/utils/rutaReparto.js). Devuelve dónde va según
+// el avance (0 a 1) y la ruta que le falta, con la misma forma que la del servidor.
 const sobreElCamino = (avance) => {
   const camino = [sim.salida, { lat: sim.salida.lat, lng: sim.destino.lng }, sim.destino];
   const tramos = camino.slice(1).map((p, i) => distanciaMetros(camino[i], p) || 0);
@@ -219,10 +186,8 @@ export const repartidorSimulado = () => {
   return { status, deliveryType: 'delivery', destino: sim.destino, courier, ruta };
 };
 
-/*
- * Los otros dos avisos que manda el servidor, para ver cómo se ven. Mismos
- * textos y la misma carga que en avisosCliente.js y avisoPromo.js.
- */
+// Los otros dos avisos que manda el servidor, para ver cómo se ven. Mismos textos y la misma carga
+// que en avisosCliente.js y avisoPromo.js.
 export const probarAvisoProductosNuevos = () =>
   avisoLocal({
     titulo: '3 productos nuevos',

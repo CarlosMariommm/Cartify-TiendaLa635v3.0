@@ -15,22 +15,9 @@ import PieTienda from '../components/Store/PieTienda';
 import EsqueletoProductos from '../components/Store/EsqueletoProductos';
 import { useIdioma } from '../hooks/useIdioma';
 
-/*
- * ============================================================
- * SECCIÓN COMPLETA — Seccion.jsx
- * ============================================================
- * La pantalla que abre "Ver todos" (y tocar el nombre de la sección).
- *
- * Las filas de la portada muestran 12 productos y se corren de lado. Está bien
- * para ojear, pero es pésimo para buscar: nadie encuentra el queso que quiere
- * empujando una fila con el dedo veinte veces. Aquí se ven todos de una, en
- * cuadrícula, sin nada más compitiendo por la pantalla.
- *
- * Las secciones se vuelven a armar con el mismo hook de la portada en vez de
- * pasarse por el enrutador. Así, entrar directo por la URL —o recargar, o
- * compartirle el enlace a alguien— funciona igual que llegar desde la tienda.
- * ============================================================
- */
+// SECCIÓN COMPLETA — Seccion.jsx
+// La pantalla que abre "Ver todos" (y tocar el nombre de la sección). Las filas de la portada
+// muestran 12 productos y se corren de lado.
 
 const Contenedor = styled.div`
   min-height: 100vh;
@@ -41,18 +28,8 @@ const Contenedor = styled.div`
 
 /* La barra cruza toda la pantalla —es el techo de la página— pero lo que lleva
    adentro se alinea con los productos, no con la orilla del monitor. */
-/*
- * Ya NO es sticky: el encabezado de la tienda lo es, y dos barras pegadas
- * arriba a la vez se montan una encima de la otra. Esta se queda quieta y se
- * va con el scroll — es un botón de volver, no una barra de navegación.
- */
-/*
- * Y sin línea abajo. Con la del encabezado justo encima, esta franja quedaba
- * encerrada entre dos rayas paralelas a 56px: se anunciaba como una sección
- * cuando es solo el camino de vuelta. La del encabezado ya separa la barra
- * pegajosa de lo que se desplaza; el respiro hasta los productos lo pone el
- * padding del contenido.
- */
+// La barra de volver no es pegajosa (el encabezado ya lo es): se va con el scroll y no lleva
+// línea abajo.
 const Barra = styled.header`
   background: var(--papel);
   height: 56px;
@@ -72,11 +49,8 @@ const BarraInterior = styled.div`
   @media (max-width: 560px) { padding: 0 16px; }
 `;
 
-/*
- * El botón de volver vive DENTRO de la página, no se deja a la flecha del
- * navegador. En el teléfono esa flecha queda lejos del pulgar, y en el kiosco
- * directamente no existe.
- */
+// El botón de volver vive DENTRO de la página, no se deja a la flecha del navegador. En el
+// teléfono esa flecha queda lejos del pulgar, y en el kiosco directamente no existe.
 const Volver = styled.button`
   display: flex;
   align-items: center;
@@ -165,44 +139,27 @@ const Seccion = () => {
   // `todos` trae la lista sin el corte de 12 que se le hace a la fila.
   const lista = seccion?.todos || seccion?.productos || [];
 
-  /*
-   * Volver de verdad, no "ir a la portada".
-   *
-   * Quien llegó desde la tienda venía bajando por las filas: mandarlo a "/" lo
-   * deja arriba del todo y con la sección perdida de vista. Retroceder lo
-   * devuelve donde estaba, a la altura donde estaba.
-   *
-   * Y quien llegó por un enlace compartido no tiene a dónde retroceder, así
-   * que ahí sí va a la portada. El hook distingue los dos casos.
-   */
+  // Volver de verdad, no "ir a la portada". Quien llegó desde la tienda venía bajando por las filas:
+  // mandarlo a "/" lo deja arriba del todo y con la sección perdida de vista. Retroceder lo devuelve
+  // donde estaba, a la altura donde estaba.
   const { volver } = useVolver('/');
   const { t } = useIdioma();
 
   return (
     <Contenedor>
-      {/*
-        El MISMO encabezado de la tienda, siempre arriba. Esta pantalla tenía
-        una barra propia con un solo botón, así que al abrir una sección se
-        perdían de vista el buscador, los pasillos y el carrito — y para
-        volver a comprar había que retroceder primero.
-      */}
-      {/*
-        El globo del carrito también aquí. Sin la cuenta, quien venía cargado
-        desde la portada entraba a una sección y veía el carrito vacío: el
-        pedido estaba intacto, pero el encabezado decía lo contrario. Los demás
-        mandos siguen sin pasarse a propósito — esta pantalla no monta el
-        carrito, así que tocarlo lleva a la tienda, que es donde sí se abre.
-      */}
+      {/* El MISMO encabezado de la tienda, siempre arriba. Esta pantalla tenía una barra propia con un
+         solo botón, así que al abrir una sección se perdían de vista el buscador, los pasillos y el
+         carrito — y para volver a comprar había que retroceder primero. */}
+      {/* El globo del carrito también aquí. Sin la cuenta, quien venía cargado desde la portada entraba a
+         una sección y veía el carrito vacío: el pedido estaba intacto, pero el encabezado decía lo
+         contrario. */}
       <HeaderTienda cantidadItems={cantidadItems} />
 
       <Barra>
         <BarraInterior>
-          {/*
-            Dice "Volver" a secas y no "Volver a la tienda": lleva a donde
-            estabas, que puede ser la tienda filtrada por una búsqueda. Prometer
-            "la tienda" y devolver una lista de resultados es mentir en el
-            botón. Para ir a la tienda limpia está el nombre en el encabezado.
-          */}
+          {/* Dice "Volver" a secas y no "Volver a la tienda": lleva a donde estabas, que puede ser la tienda
+             filtrada por una búsqueda. Prometer "la tienda" y devolver una lista de resultados es mentir en
+             el botón. Para ir a la tienda limpia está el nombre en el encabezado. */}
           <Volver onClick={volver}>
             <ArrowLeft size={17} strokeWidth={2.3} />
             {t('Volver')}
@@ -211,18 +168,12 @@ const Seccion = () => {
       </Barra>
 
       <Contenido>
-        {/*
-          Mientras carga no se dice "no encontramos la sección": el catálogo
-          todavía no llegó, así que ninguna sección existe todavía. Anunciar un
-          error que se va a desmentir solo en medio segundo es peor que esperar.
-        */}
+        {/* Mientras carga no se dice "no encontramos la sección": el catálogo todavía no llegó, así que
+           ninguna sección existe todavía. Anunciar un error que se va a desmentir solo en medio segundo es
+           peor que esperar. */}
         {cargando ? (
-          /*
-            Antes aquí decía "Cargando…" a secas: una línea de texto donde
-            después aparece una cuadrícula entera, así que al llegar los datos
-            todo se recorría de golpe. Los esqueletos ocupan desde el principio
-            el lugar exacto de las tarjetas.
-          */
+          // Mientras carga, esqueletos en el lugar exacto de las tarjetas, para que nada salte al llegar
+          // los datos.
           <Cuadricula>
             <EsqueletoProductos cuantos={10} />
           </Cuadricula>

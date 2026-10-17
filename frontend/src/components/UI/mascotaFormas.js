@@ -1,12 +1,6 @@
-/*
- * La forma de la mascota: la etiqueta del logo.
- *
- * Vive aparte porque la dibujan dos componentes —Mascota (las ilustraciones
- * de la tienda) y MascotaAsistente (el asistente de voz)— y la etiqueta tiene
- * que ser exactamente la misma en los dos. Las coordenadas son de un lienzo de
- * 400 × 470: la base de la etiqueta cae en y=382 y el agujero del cordón está
- * en (200, 160).
- */
+// La forma de la mascota: la etiqueta del logo. Vive aparte porque la dibujan dos componentes
+// —Mascota (las ilustraciones de la tienda) y MascotaAsistente (el asistente de voz)— y la
+// etiqueta tiene que ser exactamente la misma en los dos.
 
 export const CUERPO =
   'M183,127 Q200,110 217,127 L261.6,171.6 Q280,190 280,216 C284,258 284,302 280,344 ' +

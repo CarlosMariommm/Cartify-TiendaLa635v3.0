@@ -1,21 +1,6 @@
-"""
-============================================================
-EL SERVICIO DE ANALÍTICA — main.py
-============================================================
-Un servidor aparte, en Python, para los cálculos de estadística: aquí están
-las librerías que hacen falta (numpy, pandas, statsmodels) y nada de eso
-tiene que vivir en el servidor de la tienda.
-
-No toca la base de datos ni sabe de sesiones: el servidor de la tienda
-(backend/src/utils/pronostico.js) junta los datos, los manda y muestra la
-respuesta. Por eso solo le contesta a quien trae la clave compartida
-(ANALITICA_CLAVE, la misma en los dos servicios de Render): sin ella,
-cualquiera en internet podría ponerlo a simular miles de futuros.
-
-  GET  /salud       para que Render sepa que está vivo
-  POST /pronostico  el pronóstico (ver app/pronostico.py)
-============================================================
-"""
+"""EL SERVICIO DE ANALÍTICA — main.py
+Servidor en Python (FastAPI) con dos rutas: GET /salud y POST /pronostico. No toca la base:
+recibe las ventas por día y solo le contesta a quien trae la clave compartida."""
 
 from __future__ import annotations
 

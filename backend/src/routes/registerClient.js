@@ -6,13 +6,9 @@ import upload from "../utils/cloudinaryConfig.js";
 import registerclients from "../controller/Clients/registerClient.js";
 import { soloAdmin } from "../middlewares/validarSesion.js";
 
-/*
- * ── Documentación de la API (Swagger) ──
- *
- * Viene de main. Va agrupada aquí y no pegada a cada ruta porque
- * swagger-jsdoc rastrea el archivo entero: dónde esté no cambia lo que
- * documenta, y así el código de las rutas se lee sin interrupciones.
- */
+// ── Documentación de la API (Swagger) ──
+// Va agrupada aquí y no pegada a cada ruta porque swagger-jsdoc rastrea el archivo entero: dónde
+// esté no cambia lo que documenta, y así el código de las rutas se lee sin interrupciones.
 
 /**
  * @swagger
@@ -93,12 +89,9 @@ router.route("/").post(
 
 router.route("/verifyCodeEmail").post(registerclients.verifyCode);
 
-/*
- * La lista completa de clientes. Es la que consume la pantalla de Clientes del
- * panel, así que es de PERSONAL y de nadie más: aquí van nombres, teléfonos,
- * DUI, saldos y direcciones con coordenadas de toda la clientela de la tienda.
- * Estaba abierta a internet. Ver middlewares/validarSesion.js.
- */
+// La lista completa de clientes. Es la que consume la pantalla de Clientes del panel, así que es
+// de PERSONAL y de nadie más: aquí van nombres, teléfonos, DUI, saldos y direcciones con
+// coordenadas de toda la clientela de la tienda. Ver middlewares/validarSesion.js.
 router.route("/all").get(soloAdmin, registerclients.getAll);
 
 export default router;

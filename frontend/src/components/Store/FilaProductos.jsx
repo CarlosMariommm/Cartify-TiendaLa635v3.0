@@ -4,18 +4,8 @@ import ProductCard from './ProductCard';
 import { useFilaDeslizable } from '../../hooks/useFilaDeslizable';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * FilaProductos — una sección de la portada: título, flechas y la fila que se
- * corre de lado.
- *
- * Es un componente y no un bucle dentro de Store porque cada fila necesita su
- * propio useFilaDeslizable, y los hooks no se pueden llamar dentro de un map.
- */
-/*
- * Sin recuadro blanco: las filas se separan con aire, no con bordes. Con la
- * tarjeta la portada quedaba partida en cajas, cada sección se leía como una
- * página aparte.
- */
+// FilaProductos — una sección de la portada: título, flechas y la fila que se corre de lado. Es un
+// componente aparte porque cada fila necesita su propio useFilaDeslizable. Sin recuadro: va sobre el fondo.
 const Seccion = styled.section`
   margin-bottom: 34px;
 `;
@@ -37,15 +27,9 @@ const Titulo = styled.h2`
   margin: 0;
 `;
 
-/*
- * El título como botón: tocarlo abre la sección completa.
- *
- * Se hereda todo del <h2> (tamaño, peso, color) para que siga LEYÉNDOSE como
- * un título y no como un enlace disfrazado; lo único que delata que se puede
- * tocar es la flechita, que aparece al acercar el cursor y se corre un pelo.
- * En pantalla táctil no hay hover, así que ahí la flecha se queda quieta y
- * visible desde el principio — el pulgar no puede "acercarse" a nada.
- */
+// El título como botón: tocarlo abre la sección completa. Se hereda todo del <h2> (tamaño, peso,
+// color) para que siga LEYÉNDOSE como un título y no como un enlace disfrazado; lo único que
+// delata que se puede tocar es la flechita, que aparece al acercar el cursor y se corre un pelo.
 const TituloBoton = styled.button`
   display: flex;
   align-items: center;
@@ -77,11 +61,9 @@ const TituloBoton = styled.button`
   &:active { transform: scale(0.99); }
 `;
 
-/*
- * "Ver todos" con la cuenta adentro: decir cuántos hay convierte el botón en
- * información. "Ver todos (28)" se toca; "Ver todos" a secas puede que solo
- * lleve a los mismos seis que ya se están viendo.
- */
+// "Ver todos" con la cuenta adentro: decir cuántos hay convierte el botón en información. "Ver
+// todos (28)" se toca; "Ver todos" a secas puede que solo lleve a los mismos seis que ya se están
+// viendo.
 const VerTodos = styled.button`
   flex-shrink: 0;
   background: none;
@@ -100,11 +82,8 @@ const VerTodos = styled.button`
   }
   &:active { transform: scale(0.97); }
 
-  /*
-   * En el teléfono no cabía junto al título: "Nuevos en la tienda" se partía
-   * en tres renglones. Ahí el título mismo, con su flechita siempre visible,
-   * ya es la puerta a la sección completa.
-   */
+  /* En el teléfono no cabía junto al título: "Nuevos en la tienda" se partía en tres renglones. Ahí
+     el título mismo, con su flechita siempre visible, ya es la puerta a la sección completa. */
   @media (max-width: 560px) { display: none; }
 `;
 
@@ -155,26 +134,14 @@ const Fila = styled.div`
   overflow-x: auto;
   scroll-snap-type: x proximity;
 
-  /*
-   * Aire arriba y abajo, comido con márgenes negativos.
-   *
-   * Un contenedor con overflow-x recorta también por ARRIBA y por ABAJO (el
-   * navegador no deja tener un eje recortado y el otro suelto). Sin este
-   * respiro, la tarjeta que crece al pasar el cursor se quedaba con la
-   * sombra cortada a filo, como pegada sobre una línea.
-   *
-   * Los márgenes negativos devuelven el espacio: el aire existe para la
-   * sombra pero no separa la fila del resto de la página.
-   */
+  /* Aire arriba y abajo, comido con márgenes negativos. Un contenedor con overflow-x recorta también
+     por ARRIBA y por ABAJO (el navegador no deja tener un eje recortado y el otro suelto). */
   padding: 24px 16px 44px;
   margin: -24px -16px -40px;
 
-  /*
-   * Fundido en las orillas: el aire lateral se desplaza con el contenido, así
-   * que al hacer scroll la tarjeta que sale se cortaba a filo. Con el
-   * degradado se desvanece. Mide lo mismo que el padding, para que en reposo
-   * caiga sobre espacio vacío y no toque la primera tarjeta.
-   */
+  /* Fundido en las orillas: el aire lateral se desplaza con el contenido, así que al hacer scroll la
+     tarjeta que sale se cortaba a filo. Con el degradado se desvanece. Mide lo mismo que el padding,
+     para que en reposo caiga sobre espacio vacío y no toque la primera tarjeta. */
   mask-image: linear-gradient(to right, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
   -webkit-mask-image: linear-gradient(to right, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
 

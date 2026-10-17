@@ -1,18 +1,5 @@
-/*
- * Seed de CRÉDITOS DE PROVEEDOR de prueba.
- *
- * Crea (o reutiliza) un proveedor de ejemplo y le registra unas compras al
- * crédito con distintos vencimientos, para poder probar el estado de cuenta y
- * el botón "Agregar al calendario" de cada vencimiento.
- *
- * Cómo correrlo:
- *   cd backend
- *   node src/scripts/seedCreditosProveedor.js
- *
- * Es idempotente para el proveedor de prueba: si ya lo creó antes, borra sus
- * movimientos y los vuelve a poner frescos (con fechas relativas a hoy). No
- * toca a ningún proveedor real.
- */
+// Seed de CRÉDITOS DE PROVEEDOR de prueba: un proveedor de ejemplo con compras al crédito y
+// distintos vencimientos. Se corre con: node src/scripts/seedCreditosProveedor.js
 import dotenv from "dotenv";
 dotenv.config();
 import mongoose from "mongoose";

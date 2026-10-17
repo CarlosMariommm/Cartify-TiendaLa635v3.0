@@ -1,22 +1,5 @@
-/*
- * ============================================================
- * TIQUI Y EL NOMBRE DEL CLIENTE — nombreTiqui.js
- * ============================================================
- * Con la sesión iniciada, Tiqui a veces llama a la persona por su nombre:
- * "¡Listo, María! Te agregué dos manzanas." A veces, no siempre: el nombre en
- * cada frase suena a vendedor por teléfono, y se gasta.
- *
- * SE VE Y SE ESCUCHA, PERO LA IA NO LO RECIBE.
- * El nombre se pone aquí, en el teléfono, sobre la respuesta ya armada: la
- * burbuja y la voz de Tiqui (ElevenLabs) llevan el nombre, y la memoria que
- * viaja a la IA (Gemini) con la siguiente pregunta guarda la frase sin él.
- * Así lo dice la política de privacidad desde la versión 3.1: si esto cambia,
- * cambia también la política (utils/legales/privacidad.js) y su versión.
- *
- * La web tiene la misma pieza en frontend/src/utils/nombreTiqui.js: si cambia
- * una, cambia la otra.
- * ============================================================
- */
+// TIQUI Y EL NOMBRE DEL CLIENTE — nombreTiqui.js
+// Con la sesión iniciada, Tiqui a veces llama a la persona por su nombre: "¡Listo, María!
 
 // "MARÍA José Pérez" → "María". Vacío si no parece un nombre (un correo, un número).
 export const primerNombre = (completo) => {
@@ -27,14 +10,8 @@ export const primerNombre = (completo) => {
   return primero.charAt(0).toUpperCase() + primero.slice(1).toLowerCase();
 };
 
-/*
- * Dónde cabe el nombre sin forzar la frase. Si no hay un lugar natural, no se
- * pone: mejor sin nombre que "María, 2 Coca-Cola agregadas".
- *   "¡Listo! Te agregué…"   → "¡Listo, María! Te agregué…"
- *   "…¿Te lo agrego?"       → "…¿Te lo agrego, María?"
- * No se usan palabras que dependan de si es hombre o mujer ("bienvenida"): el
- * nombre no dice eso.
- */
+// Dónde cabe el nombre sin forzar la frase. Si no hay un lugar natural, no se pone: mejor sin
+// nombre que "María, 2 Coca-Cola agregadas". "¡Listo! Te agregué…" → "¡Listo, María!
 export const ponerNombre = (texto, nombre) => {
   const t = String(texto || '');
   if (!nombre || !t || t.includes(nombre)) return null;
@@ -44,14 +21,8 @@ export const ponerNombre = (texto, nombre) => {
   return null;
 };
 
-/*
- * Cuándo. La primera respuesta de la charla, algo más de la mitad de las
- * veces (hace de saludo); después, más o menos una de cada tres, y nunca en
- * dos respuestas seguidas ni en dos de tres.
- *
- * `estado` es un objeto que el asistente guarda en una ref durante la charla:
- * { respuestas, ultimaConNombre }. `azar` se puede cambiar para probar.
- */
+// Cuándo. La primera respuesta de la charla, algo más de la mitad de las veces (hace de saludo);
+// después, más o menos una de cada tres, y nunca en dos respuestas seguidas ni en dos de tres.
 export const conNombreAVeces = (texto, nombre, estado, azar = Math.random) => {
   estado.respuestas = (estado.respuestas || 0) + 1;
   if (!nombre) return texto;

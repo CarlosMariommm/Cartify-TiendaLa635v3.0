@@ -11,26 +11,9 @@ import { cantidad, pronosticoParaMostrar, rango, resumenDelPronostico } from '..
 import { descargarReportePredictivo } from '../utils/descargarPredictivo';
 import { comoPedir, copiarTexto } from '../utils/pedidoProveedor';
 
-/*
- * ============================================================
- * PRONÓSTICO — Ventas › Pronóstico (solo administrador)
- * ============================================================
- * Lo mismo que el reporte predictivo en PDF, pero en pantalla y sin
- * descargar nada: cuánto se espera vender las próximas 4 semanas (con su
- * rango), qué se agotaría y qué conviene pedirle a cada proveedor. Lo
- * calcula el servicio de analítica en Python (analitica/) con el historial de
- * ventas; el resumen en palabras es el mismo del PDF (resumenDelPronostico).
- *
- * El servicio duerme si nadie lo usa: la primera vez del día puede tardar
- * cerca de un minuto, y la pantalla lo dice mientras espera. Después queda
- * guardado un rato en el servidor y abre al instante; "Actualizar" lo vuelve
- * a calcular con las ventas más recientes.
- *
- * "Demostración": el mismo pronóstico con ventas inventadas de varios meses
- * (la Expo), para ver todo lo que hace cuando hay historia, sin mezclar nada
- * con la tienda real. Lo dice arriba y en el PDF.
- * ============================================================
- */
+// PRONÓSTICO — Ventas › Pronóstico (solo administrador)
+// Cuánto se espera vender las próximas 4 semanas, qué se agotaría y qué pedirle a cada proveedor.
+// Lo calcula el servicio de Python (analitica/).
 
 const CONFIANZA = {
   alta: { texto: 'Alta', clase: 'text-green-700' },
@@ -87,11 +70,9 @@ const Cifra = ({ etiqueta, valor, detalle }) => (
   </div>
 );
 
-/*
- * El pedido de un proveedor, con un toque: por WhatsApp con el mensaje escrito,
- * en su app (BEES…) con la lista copiada, o llamándole. Si todavía no se dijo
- * por dónde se le pide, lleva a Proveedores. Ver utils/pedidoProveedor.js.
- */
+// El pedido de un proveedor, con un toque: por WhatsApp con el mensaje escrito, en su app (BEES…)
+// con la lista copiada, o llamándole. Si todavía no se dijo por dónde se le pide, lleva a
+// Proveedores. Ver utils/pedidoProveedor.js.
 const ICONO_DEL_CANAL = { whatsapp: MessageCircle, app: ExternalLink, llamada: Phone };
 
 const BotonPedir = ({ grupo, tienda, demo }) => {
@@ -137,10 +118,8 @@ const Pronostico = () => {
   // La tienda real o la demostración; el servidor dice si hay demostración.
   const [demo, setDemo] = useState(false);
   const [hayDemo, setHayDemo] = useState(false);
-  /*
-   * Se abrió con la demostración porque la tienda real todavía no junta 4
-   * semanas de ventas (ver pronosticoParaMostrar). El aviso lo dice.
-   */
+  // Se abrió con la demostración porque la tienda real todavía no junta 4 semanas de ventas (ver
+  // pronosticoParaMostrar). El aviso lo dice.
   const [porFaltaDeHistoria, setPorFaltaDeHistoria] = useState(false);
   // O porque la tienda real no se pudo calcular en ese momento: el porqué.
   const [avisoReal, setAvisoReal] = useState('');
@@ -323,11 +302,8 @@ const Pronostico = () => {
           <Seccion titulo="Venta por semana">
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                {/*
-                  Una sola serie, cada barra con su color: gris lo que se vendió,
-                  azul lo pronosticado (con la línea del rango). Con dos series
-                  apiladas, recharts corría las barras y la línea del rango.
-                */}
+                {/* Una sola serie, cada barra con su color: gris lo que se vendió, azul lo pronosticado (con la
+                   línea del rango). Con dos series apiladas, recharts corría las barras y la línea del rango. */}
                 <BarChart data={barras} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <CartesianGrid vertical={false} stroke={c.cardBorder} />
                   <XAxis dataKey="semana" tick={{ fontSize: 12, fill: c.textSecondary }} axisLine={false} tickLine={false} />

@@ -1,23 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
-/*
- * ============================================================
- * EL MENÚ DEL PANEL EN PANTALLA CHICA — useMenuPanel.js
- * ============================================================
- * El menú medía 256px fijos pegados a la izquierda, siempre. En un escritorio
- * eso es una barra lateral; en un teléfono de 375px son dos tercios de la
- * pantalla ocupados por navegación, con el contenido empujado fuera del
- * viewport. Y el encargado de la tienda administra desde el teléfono.
- *
- * Así que en pantalla chica el mismo menú pasa a ser un cajón: vive fuera de
- * la pantalla y entra por encima del contenido cuando se pide. En pantalla
- * ancha no cambia nada — sigue siendo la barra de siempre.
- *
- * Aquí vive TODO el comportamiento de ese cajón (cuándo está abierto, cuándo
- * se cierra solo, el bloqueo del scroll). Los componentes solo lo consumen.
- * ============================================================
- */
+// EL MENÚ DEL PANEL EN PANTALLA CHICA — useMenuPanel.js
+// El menú medía 256px fijos pegados a la izquierda, siempre.
 
 // El mismo corte que usa `lg:` en Tailwind. Si se cambia uno hay que cambiar
 // el otro: la clase decide cómo se ve y esto decide cómo se comporta.
@@ -27,12 +12,8 @@ export const useMenuPanel = () => {
   const { pathname } = useLocation();
   const [abierto, setAbierto] = useState(false);
 
-  /*
-   * El ancho se consulta en el primer render y no en un efecto, porque de esto
-   * dependen el aria-hidden y el inert del menú: si arrancara siempre en
-   * "pantalla chica", en un escritorio habría un parpadeo en el que la barra
-   * lateral —visible— estaría anunciada como oculta para el lector de pantalla.
-   */
+  // El ancho de la pantalla se mide en el primer render y no en un efecto, para que en escritorio
+  // el menú no parpadee como oculto para el lector de pantalla.
   const [esEscritorio, setEsEscritorio] = useState(
     () => typeof window !== 'undefined' && window.matchMedia(ESCRITORIO).matches
   );
@@ -49,28 +30,17 @@ export const useMenuPanel = () => {
     return () => consulta.removeEventListener('change', alCambiar);
   }, []);
 
-  /*
-   * Al ensancharse la ventana el cajón deja de existir como tal. Si no se
-   * apagara el estado, el bloqueo del scroll se quedaría puesto en una pantalla
-   * donde ya no hay nada que bloquear, y al volver a angostarla el menú
-   * aparecería abierto sin que nadie lo pidiera.
-   */
-  // Al navegar, el cajón también se va. Si no, uno toca "Inventario" y se
-  // queda mirando el menú encima de lo que acaba de pedir.
-  //
-  // Se ajusta en el mismo pintado y no en un efecto: con el efecto salía un
-  // cuadro con el cajón todavía abierto sobre la pantalla nueva.
+  // El cajón del menú se cierra solo al ensanchar la ventana y al navegar a otra pantalla. Se ajusta
+  // en el mismo pintado, no en un efecto, para que no quede un cuadro con el cajón abierto.
   const [visto, setVisto] = useState({ esEscritorio, pathname });
   if (visto.esEscritorio !== esEscritorio || visto.pathname !== pathname) {
     setVisto({ esEscritorio, pathname });
     if (esEscritorio || visto.pathname !== pathname) setAbierto(false);
   }
 
-  /*
-   * Escape. Solo se escucha mientras está abierto: dejar el listener puesto
-   * todo el tiempo haría que esta pantalla se quedara con la tecla aunque el
-   * menú no tenga nada que ver con lo que el usuario está haciendo.
-   */
+  // Escape. Solo se escucha mientras está abierto: dejar el listener puesto todo el tiempo haría que
+  // esta pantalla se quedara con la tecla aunque el menú no tenga nada que ver con lo que el usuario
+  // está haciendo.
   useEffect(() => {
     if (!abierto) return;
     const alTeclear = (evento) => { if (evento.key === 'Escape') setAbierto(false); };
@@ -78,12 +48,9 @@ export const useMenuPanel = () => {
     return () => window.removeEventListener('keydown', alTeclear);
   }, [abierto]);
 
-  /*
-   * Sin esto, el dedo que quiere recorrer el menú termina arrastrando la
-   * página de atrás y el cajón se queda flotando sobre contenido que se movió.
-   * Se guarda el valor previo en vez de asumir que era vacío, para no pisar un
-   * bloqueo que ya hubiera puesto otra cosa (un modal, por ejemplo).
-   */
+  // Sin esto, el dedo que quiere recorrer el menú termina arrastrando la página de atrás y el cajón
+  // se queda flotando sobre contenido que se movió. Se guarda el valor previo en vez de asumir que
+  // era vacío, para no pisar un bloqueo que ya hubiera puesto otra cosa (un modal, por ejemplo).
   useEffect(() => {
     if (!abierto) return;
     const previo = document.body.style.overflow;
@@ -91,12 +58,8 @@ export const useMenuPanel = () => {
     return () => { document.body.style.overflow = previo; };
   }, [abierto]);
 
-  /*
-   * Tocar un enlace del grupo donde uno YA está no cambia la ruta, así que el
-   * cierre por navegación no se entera y el cajón se queda abierto. Se mira si
-   * el clic cayó sobre un enlace y no sobre el botón que despliega un grupo:
-   * ese tiene que poder abrirse sin que el menú se cierre debajo del dedo.
-   */
+  // Tocar un enlace del grupo donde uno YA está no cambia la ruta, así que el cierre por navegación
+  // no se entera y el cajón se queda abierto.
   const alTocarNavegacion = useCallback((evento) => {
     if (evento.target.closest('a')) setAbierto(false);
   }, []);

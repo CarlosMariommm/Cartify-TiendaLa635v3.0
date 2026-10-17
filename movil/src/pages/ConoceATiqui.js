@@ -1,22 +1,6 @@
-/*
- * ============================================================
- * CONOCE A TIQUI — el tutorial de la mascota
- * ============================================================
- * Seis ilustraciones donde Tiqui se presenta a sí misma: quién es, cómo se le
- * habla, qué sabe hacer y dónde encontrarla. Habla en primera persona y
- * tuteando, como en la web y en su video. Tiqui es ELLA.
- *
- * Tiqui es lo que distingue a esta tienda, así que no se deja a que alguien
- * la descubra por casualidad: el tutorial se abre la primera vez que se entra
- * a la pestaña del asistente, y se puede volver a ver desde ahí ("¿Quién es
- * Tiqui?"). Ver ConoceATiquiRoute en navigation/RootNavigator.js.
- *
- * Cómo se ve (fondo claro, Tiqui en navy, titular con su palabra en azul,
- * botón navy) vive en components/Tiqui/TutorialTiqui.js: el mismo molde de la
- * bienvenida de la app (Onboarding), para que los dos se vean iguales. Las
- * ilustraciones, en components/Tiqui/EscenasTiqui.js.
- * ============================================================
- */
+// CONOCE A TIQUI — el tutorial de la mascota
+// Seis ilustraciones donde Tiqui se presenta a sí misma: quién es, cómo se le habla, qué sabe
+// hacer y dónde encontrarla. Habla en primera persona y tuteando, como en la web y en su video.
 
 import TutorialTiqui from '../components/Tiqui/TutorialTiqui';
 import { ESCENAS_TIQUI } from '../components/Tiqui/EscenasTiqui';
@@ -26,11 +10,9 @@ import { llave } from '../utils/almacen';
 // lo graba ConoceATiquiRoute (navigation/RootNavigator.js) al cerrar.
 export const LLAVE_TIQUI_PRESENTADO = llave('tiqui', 'presentado');
 
-/*
- * Lo que cuenta Tiqui. Solo promete lo que la app de verdad hace: pedir por
- * voz, ofertas y recomendaciones, avisar lo que no hay (nunca agrega algo que
- * no se pidió), llevar a pagar y seguir el pedido en el mapa.
- */
+// Lo que cuenta Tiqui. Solo promete lo que la app de verdad hace: pedir por voz, ofertas y
+// recomendaciones, avisar lo que no hay (nunca agrega algo que no se pidió), llevar a pagar y
+// seguir el pedido en el mapa.
 const DIAPOSITIVAS = [
   {
     clave: 'hola',

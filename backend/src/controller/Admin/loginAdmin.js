@@ -13,10 +13,8 @@ const loginAdminController = {};
 
 const TREINTA_DIAS_MS = 30 * 24 * 60 * 60 * 1000;
 
-/*
- * Abre la sesión del personal: firma el token, deja la cookie y arma lo que
- * espera el login del panel. La usan el código del correo y el pase de la app.
- */
+// Abre la sesión del personal: firma el token, deja la cookie y arma lo que espera el login del
+// panel. La usan el código del correo y el pase de la app.
 const abrirSesion = (res, cuenta, rol, vidaMs = TREINTA_DIAS_MS) => {
   const token = jsonwebtoken.sign(
     { id: cuenta._id, userType: rol },
@@ -51,36 +49,15 @@ const mismaHuella = (a, b) => {
   return x.length === y.length && crypto.timingSafeEqual(x, y);
 };
 
-/*
- * ============================================================
- * LOGIN DEL PERSONAL (Admin Y Empleado) CON DOBLE FACTOR (2FA)
- * ============================================================
- * Una sola puerta para las dos cuentas de personal. El correo dice de cuál se
- * trata: se busca primero en admins y, si no está ahí, en empleados. El resto
- * es igual para los dos — misma contraseña hasheada, mismo bloqueo por
- * intentos, mismo código por correo — pero el ROL que gana la búsqueda es el
- * que queda firmado en el token final, y de ese rol depende qué ve cada quien
- * en el panel (ver validarSesion.js → soloAdmin).
- *
- *   Paso 1 (login):     correo + contraseña. Si están bien, NO se abre la
- *                       sesión: se genera un código, se manda al correo y se
- *                       guarda —firmado, con el rol adentro— en una cookie
- *                       corta.
- *   Paso 2 (verify2FA): la persona escribe el código. Si coincide, ahí sí se
- *                       abre la sesión, con el rol que quedó en la cookie.
- *
- * El código NO se guarda en la base: viaja dentro de un JWT en cookie (igual
- * que la recuperación de contraseña), así que expira solo.
- * ============================================================
- */
+// LOGIN DEL PERSONAL (Admin Y Empleado) CON DOBLE FACTOR (2FA)
+// Una sola puerta para las dos cuentas de personal. El correo dice de cuál se trata: se busca
+// primero en admins y, si no está ahí, en empleados.
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/*
- * Busca la cuenta en UN modelo y aplica las mismas reglas (activa, bloqueo,
- * contraseña) que antes solo vivían para el admin. Devuelve { error, message }
- * si algo no pasa, o { cuenta } si todo está bien — nunca las dos cosas.
- */
+// Busca la cuenta en UN modelo y aplica las mismas reglas (activa, bloqueo, contraseña) que antes
+// solo vivían para el admin. Devuelve { error, message } si algo no pasa, o { cuenta } si todo
+// está bien — nunca las dos cosas.
 const buscarYValidar = async (modelo, email, password) => {
   const cuenta = await modelo.findOne({ email });
   if (!cuenta) return { error: 404 };
@@ -144,13 +121,8 @@ loginAdminController.login = async (req, res) => {
 
     const code = ("" + crypto.randomInt(100000, 1000000));
 
-    /*
-     * En el token va la HUELLA del código, nunca el código. Un JWT está
-     * firmado pero NO cifrado: cualquiera que lo tenga lee lo que trae con un
-     * base64. Antes llevaba el código tal cual, y como el token vuelve al mismo
-     * navegador que puso la contraseña, quien supiera solo la contraseña podía
-     * sacar el código de su propia cookie y saltarse el segundo paso.
-     */
+    // En el token va la HUELLA del código, nunca el código. Un JWT está firmado pero NO cifrado:
+    // cualquiera que lo tenga lee lo que trae con un base64.
     const twofaToken = jsonwebtoken.sign(
       { id: cuenta._id, huella: huellaDelCodigo(code), rol, purpose: "personal-2fa" },
       config.JWT.secret,
@@ -180,11 +152,9 @@ loginAdminController.login = async (req, res) => {
       needs2FA: true,
       message: "Le enviamos un código a su correo",
       email: enmascarado,
-      /*
-       * La app del teléfono no guarda cookies como el navegador: se le da el
-       * token para que lo devuelva en el paso 2. Ya no trae el código (solo su
-       * huella), así que tenerlo no sirve de nada sin el correo.
-       */
+      // La app del teléfono no guarda cookies como el navegador: se le da el token para que lo devuelva
+      // en el paso 2. Ya no trae el código (solo su huella), así que tenerlo no sirve de nada sin el
+      // correo.
       ...(req.body.app ? { twofaToken } : {}),
     });
   } catch (error) {
@@ -238,13 +208,9 @@ loginAdminController.verify2FA = async (req, res) => {
   }
 };
 
-/*
- * ── EL PANEL DENTRO DE LA APP ── (ver utils/pasesPanel.js)
- *
- * La sesión que abre el pase dura medio día y no un mes: la app pide un pase
- * nuevo cada vez que abre el panel, así que no hace falta que la de la web
- * dure más que una jornada de trabajo.
- */
+// ── EL PANEL DENTRO DE LA APP ── (ver utils/pasesPanel.js) La sesión que abre el pase dura medio
+// día y no un mes: la app pide un pase nuevo cada vez que abre el panel, así que no hace falta que
+// la de la web dure más que una jornada de trabajo.
 const DOCE_HORAS_MS = 12 * 60 * 60 * 1000;
 
 // La app pide el pase con su sesión (soloAdmin ya la revisó).

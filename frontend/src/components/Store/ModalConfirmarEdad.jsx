@@ -5,14 +5,8 @@ import { formatearDui, LARGO_DUI } from '../../utils/mascaras';
 import { EDAD_MINIMA } from '../../utils/edad';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * ModalConfirmarEdad — el candado de los productos +18.
- *
- * Pide el DUI, no la fecha de nacimiento: en El Salvador el DUI se emite a los
- * 18, así que un DUI bien formado ya afirma la mayoría de edad. Sigue siendo
- * una barrera blanda (no se puede comprobar que el documento sea suyo), por eso
- * la verificación de verdad es el DUI FÍSICO en la entrega, y así se dice.
- */
+// ModalConfirmarEdad — el candado de los productos +18. Pide el DUI, no la fecha de nacimiento: en
+// El Salvador el DUI se emite a los 18, así que un DUI bien formado ya afirma la mayoría de edad.
 const ModalConfirmarEdad = ({ abierto, onCerrar, onConfirmar }) => {
   const [dui, setDui] = useState('');
   const [error, setError] = useState('');

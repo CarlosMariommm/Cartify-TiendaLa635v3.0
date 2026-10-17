@@ -1,14 +1,8 @@
 import api from './api';
 
-/*
- * ============================================================
- * SERVICIO DE EMPLEADOS — employeeService.js
- * ============================================================
- * Centraliza las peticiones HTTP del módulo de empleados.
- * Al igual que productos, usa FormData para crear/actualizar
- * porque los empleados pueden tener foto de perfil.
- * ============================================================
- */
+// SERVICIO DE EMPLEADOS — employeeService.js
+// Centraliza las peticiones HTTP del módulo de empleados. Al igual que productos, usa FormData
+// para crear/actualizar porque los empleados pueden tener foto de perfil.
 export const employeeService = {
   // 1- Obtener todos los empleados registrados (SELECT)
   getEmployees: async () => {

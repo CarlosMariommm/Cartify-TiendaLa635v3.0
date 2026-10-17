@@ -1,44 +1,10 @@
-/*
- * ============================================================
- * TEMAS DE TEMPORADA — temporadas.js
- * ============================================================
- * La tienda se pinta de Navidad en diciembre y de Halloween a finales de
- * octubre, sola, sin que nadie se acuerde de entrar a cambiarlo.
- *
- * CÓMO FUNCIONA: cada tema es un puñado de valores para las MISMAS variables
- * de marca que ya usa toda la tienda (--marca-600, --marca-50, --acento...).
- * No hay pantallas duplicadas ni un "modo navideño" con su propio CSS: se
- * repintan cinco variables y el encabezado, las pastillas, los botones y las
- * filas cambian de color juntos, porque todos leen de ahí. Ver index.css.
- *
- * ADEMÁS DEL COLOR, cada tema trae DECORACIÓN: una cinta con su saludo debajo
- * del encabezado y unas figuras cayendo despacio de fondo (copos, corazones,
- * confeti...). Una paleta sola se siente como si la tienda hubiera cambiado de
- * marca, no como si fuera diciembre.
- *
- * DÓNDE ESTÁ EL LÍMITE: la decoración va SIEMPRE detrás del contenido y nunca
- * responde al clic. Las fotos y los precios tienen que leerse igual de bien el
- * 24 de diciembre que el 3 de marzo; si un copo de nieve tapa un precio, la
- * decoración dejó de ser decoración y pasó a estorbar. Por eso son pocas
- * figuras, muy tenues, y se apagan solas para quien pidió menos movimiento en
- * su sistema. Tampoco se tocan las tipografías ni las fotos de producto.
- *
- * Y se puede apagar desde el panel dejando solo los colores.
- *
- * LAS FECHAS SON DE EL SALVADOR. La Independencia es el 15 de septiembre, no
- * el 4 de julio: la tienda está en San Salvador y sus clientes son de ahí.
- * ============================================================
- */
+// TEMAS DE TEMPORADA — temporadas.js
+// La tienda se pinta de Navidad en diciembre y de Halloween a finales de octubre, sola, sin que
+// nadie se acuerde de entrar a cambiarlo.
 
-/*
- * Los rangos van [desde, hasta] como {mes, dia}, con el mes en base 1 (enero
- * es 1, no 0) porque así es como lo lee una persona. La conversión al mes de
- * JavaScript se hace en un solo lugar, abajo.
- *
- * `colores` son las variables que se repintan. Se listan TODAS en cada tema
- * —aunque alguna repita el valor de siempre— para que se pueda leer un tema
- * completo de un vistazo, sin ir a buscar qué hereda de dónde.
- */
+// Los rangos van [desde, hasta] como {mes, dia}, con el mes en base 1 (enero es 1, no 0) porque
+// así es como lo lee una persona. La conversión al mes de JavaScript se hace en un solo lugar,
+// abajo. `colores` son las variables que se repintan.
 export const TEMAS_DE_TEMPORADA = [
   {
     clave: 'navidad',
@@ -146,19 +112,9 @@ export const TEMAS_DE_TEMPORADA = [
   },
 ];
 
-/*
- * ============================================================
- * TEMPORADAS PROPIAS — las que crea el dueño desde el panel
- * ============================================================
- * "Regreso a clases", "Día de la madre", el aniversario de la tienda... Las de
- * fábrica no pueden adivinar todas las fechas que le importan a un negocio.
- *
- * Del panel llegan solo dos colores (el principal y el de acento). Los tonos
- * claros y oscuros que usa la tienda se DERIVAN aquí, mezclando el principal
- * con blanco o con negro: pedirle al dueño seis colores que combinen es
- * pedirle un trabajo de diseñador.
- * ============================================================
- */
+// TEMPORADAS PROPIAS — las que crea el dueño desde el panel
+// "Regreso a clases", "Día de la madre", el aniversario de la tienda... Las de fábrica no pueden
+// adivinar todas las fechas que le importan a un negocio.
 
 // Las figuras que puede elegir una temporada propia. La misma lista valida el
 // backend (models/storeSettings.js).
@@ -193,11 +149,9 @@ const mezclar = (hex, con, cuanto) => {
   return rgbAHex(a.map((c, i) => c + (b[i] - c) * cuanto));
 };
 
-/*
- * Qué tanto se lee el texto blanco encima de un color (contraste WCAG). Los
- * botones de la tienda son blancos sobre --marca-600: por debajo de 4.5 el
- * panel avisa que ese color no sirve para botones.
- */
+// Qué tanto se lee el texto blanco encima de un color (contraste WCAG). Los botones de la tienda
+// son blancos sobre --marca-600: por debajo de 4.5 el panel avisa que ese color no sirve para
+// botones.
 export const contrasteConBlanco = (hex) => {
   const lineal = hexARgb(hex).map((c) => {
     const s = c / 255;
@@ -243,11 +197,8 @@ const hslAHex = ([h, s, l]) => {
   return rgbAHex([canal(h + 1 / 3) * 255, canal(h) * 255, canal(h - 1 / 3) * 255]);
 };
 
-/*
- * El mismo tono, con la luz justa para `objetivo` (luminancia WCAG). Se mueve
- * la luminosidad en HSL y no se mezcla con blanco: mezclar lava el color y el
- * azul de la casa quedaba gris.
- */
+// El mismo tono, con la luz justa para `objetivo` (luminancia WCAG). Se mueve la luminosidad en
+// HSL y no se mezcla con blanco: mezclar lava el color y el azul de la casa quedaba gris.
 const conLuminancia = (hex, objetivo) => {
   const [h, s0] = rgbAHsl(hexARgb(hex));
   const s = Math.min(s0, 0.85);
@@ -264,26 +215,8 @@ const conLuminancia = (hex, objetivo) => {
 // El fondo del modo oscuro. El mismo que declara index.css en --papel.
 export const FONDO_OSCURO = '#121417';
 
-/*
- * LA MARCA EN MODO OSCURO.
- *
- * El azul de la casa (#003049) es casi negro: sobre el fondo oscuro los
- * botones desaparecían. En oscuro el principal sube hasta donde el texto
- * blanco del botón se sigue leyendo, el tono de "presionado" pasa a ser MÁS
- * claro —en oscuro lo que se ilumina es lo que responde— y los fondos suaves
- * (--marca-50/100) dejan de ser pastel y pasan a ser el fondo teñido del color.
- *
- * Un mismo color no puede llegar a 4,5:1 con la letra blanca Y con el fondo
- * oscuro a la vez: el punto medio (luminancia 0,19, como estaba) se quedaba
- * en 4,4 y 4,3, y fallaba las dos. Por eso se reparte: el principal queda en
- * 0,155 (5,1:1 con la letra blanca; como figura sobre el fondo da 3,6:1, y a
- * un botón le basta 3:1), el presionado en 0,18 (4,6:1 con el blanco) y la
- * marca como LETRA sale de --marca-400 por el token --marca-texto de
- * index.css (8:1 con el fondo).
- *
- * Recibe la paleta clara ya armada, así sirve igual para la marca, las
- * temporadas de fábrica y las que crea el dueño.
- */
+// LA MARCA EN MODO OSCURO.
+// El azul de la casa (#003049) es casi negro: sobre el fondo oscuro los botones desaparecían.
 export const paletaOscura = (colores) => {
   const principal = conLuminancia(colores['--marca-600'], 0.155);
   const acento = luminanciaDe(colores['--acento']) < 0.24 ? conLuminancia(colores['--acento'], 0.3) : rgbAHex(hexARgb(colores['--acento']));
@@ -310,11 +243,8 @@ export const paletaDesdeColores = (principal, acento) => ({
 export const describirRango = (desde, hasta) =>
   `Del ${desde.dia} de ${NOMBRES_DE_MES[desde.mes - 1]} al ${hasta.dia} de ${NOMBRES_DE_MES[hasta.mes - 1]}`;
 
-/*
- * Una temporada propia, con la misma forma que las de fábrica: así el resto
- * de la app (la pintura, la cinta, las figuras) no tiene que saber de dónde
- * salió.
- */
+// Una temporada propia, con la misma forma que las de fábrica: así el resto de la app (la pintura,
+// la cinta, las figuras) no tiene que saber de dónde salió.
 export const temaDesdePropio = (propio) => {
   const colores = paletaDesdeColores(propio.colorPrincipal, propio.colorAcento);
   return {
@@ -335,11 +265,9 @@ export const temaDesdePropio = (propio) => {
   };
 };
 
-/*
- * Todas las temporadas que puede usar la tienda: las propias primero. Si una
- * propia cae en las mismas fechas que una de fábrica, gana la propia — la
- * creó el dueño a propósito, así que es la que quiere ver.
- */
+// Todas las temporadas que puede usar la tienda: las propias primero. Si una propia cae en las
+// mismas fechas que una de fábrica, gana la propia — la creó el dueño a propósito, así que es la
+// que quiere ver.
 export const todosLosTemas = (temporada) => [
   ...(Array.isArray(temporada?.personalizados) ? temporada.personalizados : []).map(temaDesdePropio),
   ...TEMAS_DE_TEMPORADA,
@@ -348,17 +276,9 @@ export const todosLosTemas = (temporada) => [
 export const temaPorClave = (clave, lista = TEMAS_DE_TEMPORADA) =>
   lista.find((t) => t.clave === clave) || null;
 
-/*
- * ¿Cae esta fecha dentro del rango del tema?
- *
- * Se compara por mes y día, sin año, porque los rangos se repiten todos los
- * años. El `mes - 1` de aquí es la única traducción al mes de JavaScript en
- * todo el archivo.
- *
- * Un rango que cruza el año (del 20 de diciembre al 6 de enero) tiene el
- * inicio DESPUÉS del fin; ahí la fecha cae dentro si está pasado el inicio o
- * antes del fin. Las de fábrica no cruzan el año, pero una propia sí puede.
- */
+// ¿Cae esta fecha dentro del rango del tema? Se compara por mes y día, sin año, porque los rangos
+// se repiten todos los años. El `mes - 1` de aquí es la única traducción al mes de JavaScript en
+// todo el archivo.
 const caeEnRango = (fecha, tema) => {
   const mes = fecha.getMonth() + 1;
   const dia = fecha.getDate();
@@ -372,19 +292,8 @@ const caeEnRango = (fecha, tema) => {
 export const temaDeLaFecha = (fecha = new Date(), lista = TEMAS_DE_TEMPORADA) =>
   lista.find((tema) => caeEnRango(fecha, tema)) || null;
 
-/*
- * Qué tema toca AHORA, según lo que diga la configuración.
- *
- *   'automatico' → lo decide el calendario.
- *   'manual'     → manda el que eligieron, pase lo que pase en el calendario.
- *                  Sirve para adelantarse (poner Navidad el 20 de noviembre
- *                  porque ya llegó el producto navideño) y para probarlo en
- *                  el panel sin esperar a diciembre.
- *   'ninguno'    → los colores de siempre, todo el año.
- *
- * Devuelve el tema completo o null. Null es un resultado normal y esperado —
- * la mayor parte del año no hay temporada— y significa "no toques nada".
- */
+// Qué tema toca AHORA, según lo que diga la configuración. 'automatico' → lo decide el calendario.
+// 'manual' → manda el que eligieron, pase lo que pase en el calendario.
 export const temaActivo = (temporada, fecha = new Date()) => {
   const modo = temporada?.modo || 'automatico';
   if (modo === 'ninguno') return null;
@@ -393,16 +302,9 @@ export const temaActivo = (temporada, fecha = new Date()) => {
   return temaDeLaFecha(fecha, lista);
 };
 
-/*
- * Pintar (o despintar) el tema sobre el documento.
- *
- * Se escriben las variables en el <html> con setProperty, que pisa lo que
- * declara index.css sin tener que duplicar una hoja de estilos por temporada.
- * Al quitar el tema se BORRAN las propiedades en vez de reescribir los valores
- * originales: así el archivo de tokens sigue siendo la única fuente de verdad
- * de cómo se ve la tienda en un día normal, y cambiar el café de la marca allá
- * no obliga a acordarse de venir a cambiarlo aquí también.
- */
+// Pintar (o despintar) el tema sobre el documento. Se escriben las variables en el <html> con
+// setProperty, que pisa lo que declara index.css sin tener que duplicar una hoja de estilos por
+// temporada.
 const VARIABLES = ['--marca-700', '--marca-600', '--marca-400', '--marca-100', '--marca-50', '--acento'];
 
 export const aplicarTema = (tema, { oscuro = false } = {}) => {

@@ -1,14 +1,8 @@
 import { guardarDescarga, tomarDescarga } from "../utils/descargasPanel.js";
 
-/*
- * ============================================================
- * LAS DESCARGAS DEL PANEL EN LA APP — descargasPanelController.js
- * ============================================================
- * Ver utils/descargasPanel.js: el panel abierto dentro de la app sube aquí el
- * reporte que armó y lo baja por una dirección de un solo rato, para que
- * Android lo guarde en Descargas.
- * ============================================================
- */
+// LAS DESCARGAS DEL PANEL EN LA APP — descargasPanelController.js
+// Ver utils/descargasPanel.js: el panel abierto dentro de la app sube aquí el reporte que armó y
+// lo baja por una dirección de un solo rato, para que Android lo guarde en Descargas.
 
 const descargasPanelController = {};
 

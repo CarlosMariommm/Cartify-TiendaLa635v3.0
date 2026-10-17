@@ -1,18 +1,5 @@
-/*
- * ============================================================
- * SELECTOR DE IDIOMA — "Español · English"
- * ============================================================
- * El de `frontend/src/components/Store/SelectorIdioma.jsx`. Va donde se llega
- * SIN cuenta —la bienvenida y el inicio de sesión—: quien no lee español no
- * va a encontrar "Preferencias" dentro de Mi Cuenta, y ni tiene cuenta todavía.
- *
- * Cada opción va escrita en su propio idioma ("English", no "Inglés"). Sin
- * recuadros: texto suelto, la elegida en negrita y subrayada.
- *
- * `color`: la bienvenida tiene colores fijos (no cambia con el modo oscuro);
- * en el resto sale del modo.
- * ============================================================
- */
+// SELECTOR DE IDIOMA — "Español · English"
+// El de `frontend/src/components/Store/SelectorIdioma.jsx`.
 
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Globe } from 'lucide-react-native';

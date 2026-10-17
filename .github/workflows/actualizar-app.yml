@@ -1,18 +1,6 @@
-# La app se actualiza sola.
-#
-# Cada vez que llega a main un cambio de la app (movil/), se publica como
-# actualización por internet (EAS Update) en el canal "preview", el que
-# escuchan las APK que se compilan con ese perfil. Quien tiene la app la baja
-# al abrirla y la ve la próxima vez que la abre.
-#
-# Solo viaja el código de la app (pantallas, textos, Tiqui, lógica). Si el
-# cambio toca lo nativo (una librería nueva con parte nativa, permisos, ícono,
-# plugins de app.json, la versión de Expo), cambia la huella de la app
-# (runtimeVersion "fingerprint"): la actualización se publica igual, pero las
-# APK ya instaladas no la toman — para eso hace falta compilar una APK nueva.
-#
-# Necesita el secreto EXPO_TOKEN en GitHub (Settings → Secrets and variables
-# → Actions), creado en expo.dev desde la cuenta dueña del proyecto.
+# La app se actualiza sola. Cada vez que llega a main un cambio de la app (movil/), se publica
+# como actualización por internet (EAS Update) en el canal "preview", el que escuchan las APK que
+# se compilan con ese perfil.
 name: Actualizar la app
 
 on:

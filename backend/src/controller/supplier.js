@@ -66,12 +66,9 @@ supplierController.updateSupplier = async (req, res) => {
             return res.status(400).json({ message: 'Faltan campos obligatorios' });
         }
 
-        /*
-         * El plazo de crédito ya NO se edita desde este formulario sino desde el
-         * estado de cuenta, junto al límite (que es donde tiene sentido verlos).
-         * Por eso solo se toca si viene en la petición: si se incluyera siempre,
-         * cada edición de datos de contacto borraría el plazo configurado.
-         */
+        // El plazo de crédito ya NO se edita desde este formulario sino desde el estado de cuenta, junto
+        // al límite (que es donde tiene sentido verlos). Por eso solo se toca si viene en la petición: si
+        // se incluyera siempre, cada edición de datos de contacto borraría el plazo configurado.
         const cambios = { name, phoneNumber, email, brandIds, isActive };
         if (creditDays !== undefined) cambios.creditDays = creditDays;
         // Igual que el plazo: solo si vino (otras pantallas guardan sin él).

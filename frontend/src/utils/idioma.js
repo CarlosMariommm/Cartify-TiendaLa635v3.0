@@ -1,27 +1,9 @@
 import EN from '../i18n/en';
 import { areaDeRuta } from './sesion';
 
-/*
- * ============================================================
- * EL IDIOMA DE LA TIENDA — idioma.js
- * ============================================================
- * Español (el de siempre) o inglés, para la tienda y Mi Cuenta. El panel
- * del personal se queda en español: lo usa el equipo de la tienda.
- *
- * ── Cómo se traduce: el texto en español es la clave ──
- *   t('Iniciar sesión')          → "Iniciar sesión" o "Sign in"
- *   t('Llevas {n} productos', { n: 3 })
- * La traducción al inglés vive en i18n/en.js, un diccionario "así en
- * español → así en inglés". Lo que todavía no está en el diccionario sale en
- * español en vez de romperse (y en desarrollo avisa en la consola), así que
- * se puede traducir por partes sin dejar huecos en blanco.
- *
- * Lo que escribe la tienda —nombres de productos, descripciones, títulos de
- * promociones— queda como la tienda lo escribió: eso no se traduce solo.
- *
- * Se guarda en este navegador, como el modo claro u oscuro (ver utils/modo.js).
- * ============================================================
- */
+// EL IDIOMA DE LA TIENDA — idioma.js
+// Español (el de siempre) o inglés, para la tienda y Mi Cuenta. El panel del personal se queda en
+// español: lo usa el equipo de la tienda.
 
 export const LLAVE_IDIOMA = 'la635_idioma';
 
@@ -66,14 +48,9 @@ export const traducir = (idioma, texto, vars) => {
   return vars ? String(s).replace(/\{(\w+)\}/g, (m, k) => (vars[k] ?? m)) : s;
 };
 
-/*
- * Para los avisos que salen desde fuera de un componente (un toast dentro de
- * un hook o de utils): traduce al idioma elegido EN ESE MOMENTO. Dentro de un
- * componente va `t` de useIdioma, que además repinta si se cambia el idioma.
- *
- * En las pantallas del panel se queda en español: el idioma es de la tienda,
- * y un error del servidor (api.js) sale igual en las dos.
- */
+// Para los avisos que salen desde fuera de un componente (un toast dentro de un hook o de utils):
+// traduce al idioma elegido EN ESE MOMENTO. Dentro de un componente va `t` de useIdioma, que
+// además repinta si se cambia el idioma.
 export const tAhora = (texto, vars) => {
   const enPanel = typeof window !== 'undefined' && areaDeRuta(window.location.pathname) === 'personal';
   return traducir(enPanel ? 'es' : leerIdiomaGuardado(), texto, vars);

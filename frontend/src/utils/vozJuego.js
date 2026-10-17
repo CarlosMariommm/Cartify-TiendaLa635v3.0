@@ -1,20 +1,9 @@
 import { decirConTiqui, callarTiqui, paraDecir } from './vozTiqui';
 import { archivoDeVoz } from './juegoTiqui';
 
-/*
- * ============================================================
- * LA VOZ DE TIQUI EN EL RETO DEL STAND — vozJuego.js
- * ============================================================
- * En el juego Tiqui NO pide su voz al servidor: todo lo que dice está
- * grabado de antemano en public/juego/voz/ (ver scripts/voz-juego.mjs). Así
- * no gasta créditos de ElevenLabs por cada persona que juega y sigue
- * hablando aunque se caiga el internet de la Expo.
- *
- * Al abrir la pantalla se bajan todos los audios a la memoria. Lo que no esté
- * grabado (o si el audio falla) lo dice la voz del navegador: el juego nunca
- * se queda callado.
- * ============================================================
- */
+// LA VOZ DE TIQUI EN EL RETO DEL STAND — vozJuego.js
+// En el juego Tiqui NO pide su voz al servidor: todo lo que dice está grabado de antemano en
+// public/juego/voz/ (ver scripts/voz-juego.mjs).
 
 const grabadas = new Map(); // id de la frase → URL del audio en memoria
 
@@ -33,10 +22,8 @@ export const cargarVozGrabada = async (clips) => {
   return clips.filter((c) => grabadas.has(c.id)).length;
 };
 
-/*
- * La voz del navegador, por si falta un audio: una en español, de mujer si
- * hay (Tiqui es ella), un poco más aguda.
- */
+// La voz del navegador, por si falta un audio: una en español, de mujer si hay (Tiqui es ella), un
+// poco más aguda.
 const vozDelNavegador = () => {
   const voces = window.speechSynthesis?.getVoices?.() || [];
   const enEspanol = voces.filter((v) => /^es/i.test(v.lang));
@@ -57,10 +44,8 @@ export const callar = () => {
   try { window.speechSynthesis?.cancel(); } catch { /* nada que callar */ }
 };
 
-/*
- * Dice la frase. `alEmpezar(real)`: ya se oye (real = con su voz grabada,
- * que mueve la boca con el volumen). `alTerminar`: terminó o no se pudo.
- */
+// Dice la frase. `alEmpezar(real)`: ya se oye (real = con su voz grabada, que mueve la boca con el
+// volumen). `alTerminar`: terminó o no se pudo.
 export const decir = (clip, { alEmpezar, alTerminar } = {}) => {
   callar();
   const mio = turno;

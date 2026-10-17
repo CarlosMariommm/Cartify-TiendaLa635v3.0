@@ -1,18 +1,6 @@
-/*
- * ============================================================
- * CINTA DE TEMPORADA
- * ============================================================
- * La franja con el saludo de la fecha, debajo del encabezado.
- *
- * Es la mitad seria de la decoración: las figuras que caen ponen el ambiente,
- * pero esto DICE algo. "Pida con tiempo, que diciembre se llena" le sirve a
- * quien compra; un copo de nieve, no.
- *
- * Sin festón en las orillas, y eso no es un recorte: la versión web ya lo
- * apaga por debajo de 700 px de ancho, porque en un teléfono el texto ocupa
- * toda la línea y los triangulitos solo lo apretarían.
- * ============================================================
- */
+// CINTA DE TEMPORADA
+// La franja con el saludo de la fecha, debajo del encabezado. Es la mitad seria de la decoración:
+// las figuras que caen ponen el ambiente, pero esto DICE algo.
 
 import { StyleSheet, Text, View } from 'react-native';
 import { useTema } from '../../context/TemaContext';
@@ -22,12 +10,9 @@ const CintaTemporada = () => {
   const { t } = useIdioma();
   const { decoracion, colores, activo, saludoNormal } = useTema();
 
-  /*
-   * Con temporada: su saludo (si la decoración está encendida). Sin
-   * temporada: el saludo de días normales, si el dueño escribió uno. Si no
-   * hay nada que decir no se pinta NADA — ni una vista vacía: un contenedor
-   * invisible con relleno sigue empujando la tienda hacia abajo todo el año.
-   */
+  // Con temporada: su saludo (si la decoración está encendida). Sin temporada: el saludo de días
+  // normales, si el dueño escribió uno. Si no hay nada que decir no se pinta NADA — ni una vista
+  // vacía: un contenedor invisible con relleno sigue empujando la tienda hacia abajo todo el año.
   const texto = activo ? decoracion?.saludo : saludoNormal;
   if (!texto) return null;
 

@@ -27,17 +27,8 @@ employeeController.insertEmployee = async (req, res) => {
     //1- Pedimos los datos para insertar
     const { fullName, dui, phoneNumber, email, userName, password } = req.body;
 
-    //2- Lleno una instancia de mi Schema
-    /*
-     * La foto es opcional: antes esto hacía req.file.path a secas y, si el
-     * empleado se registraba sin foto, reventaba con un 500 sin explicar nada.
-     * Sin foto, la ficha muestra las iniciales.
-     *
-     * La contraseña se guarda HASHEADA. Antes se guardaba tal cual llegaba del
-     * formulario — un curl a la base la dejaba leíble, y de paso el login del
-     * empleado (que compara con bcrypt) nunca iba a coincidir contra texto
-     * plano.
-     */
+    // 2- Lleno una instancia de mi Schema. La foto es opcional (sin foto se muestran las iniciales) y
+    // la contraseña se guarda hasheada.
     const passwordHasheada = await bcryptjs.hash(password, 10);
 
     const newEmployee = new employeeModel({

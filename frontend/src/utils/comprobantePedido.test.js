@@ -1,10 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { construirComprobante, horaLocal, nombreDelComprobante, numeroDePedido } from './comprobantePedido';
 
-/*
- * El comprobante de un pedido (panel › Pedidos): que diga lo que se cobró,
- * como se cobró, y que las fechas sean las de El Salvador.
- */
+// El comprobante de un pedido (panel › Pedidos): que diga lo que se cobró, como se cobró, y que
+// las fechas sean las de El Salvador.
 
 const TIENDA = { nombre: 'Tienda la 635', direccion: 'Calle Sevilla 635', telefono: '2222-3333', nit: '0614-010190-101-3' };
 

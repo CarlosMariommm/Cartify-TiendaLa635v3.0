@@ -1,29 +1,6 @@
-/*
- * ============================================================
- * TUTORIAL DE TIQUI — el molde de los tutoriales de la app
- * ============================================================
- * Diapositivas deslizables con la línea gráfica de Tiqui (la de su video):
- * fondo claro, una ilustración de Tiqui en el centro, el titular en navy con
- * el azul de marca en la palabra que lo remata, la explicación en gris, el
- * botón navy con su flecha y los puntos del paginado.
- *
- * Lo usan los dos tutoriales, para que se vean iguales:
- *   - ConoceATiqui: Tiqui se presenta (la primera vez que se abre Asistente).
- *   - Onboarding: Tiqui enseña la tienda (la primera vez que se abre la app).
- *     Antes era otra cosa (degradados, cuadrícula, vidrio): parecía de otra
- *     app al lado del de Tiqui.
- *
- * Cada diapositiva: { clave, tituloPrefijo, tituloAcento, texto, Escena }. La
- * Escena es una ilustración de components/Tiqui/EscenasTiqui.js.
- *
- * ── Cómo se sale ──
- *   `cerrar`: 'x' (una X arriba, siempre) o 'saltar' ("Saltar", hasta la
- *   penúltima: en la última ya está el botón de terminar).
- *   `atrasCierra`: en la primera diapositiva, el atrás de Android cierra el
- *   tutorial (true) o hace lo normal (false: en la bienvenida, salir de la
- *   app, que es lo que se espera de la pantalla de arranque).
- * ============================================================
- */
+// TUTORIAL DE TIQUI — el molde de los tutoriales de la app
+// Diapositivas deslizables con Tiqui en el centro, un titular, la explicación, el botón y los
+// puntos del paginado.
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Dimensions, Easing, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -158,11 +135,8 @@ const TutorialTiqui = ({
           return (
             <View key={d.clave} style={{ width: ancho, height: alto }}>
               <View style={[estilos.cuerpo, { paddingTop: ALTURA_ESTADO + 64, paddingBottom: Math.max(insets.bottom, 16) }]}>
-                {/*
-                  El titular es lo primero que lee el lector de pantalla. En
-                  pantalla no va el "1 DE 4": lo cuentan los puntos de abajo, y
-                  para el lector se dice aquí.
-                */}
+                {/* El titular es lo primero que lee el lector de pantalla. En pantalla no va el "1 DE 4": lo
+                   cuentan los puntos de abajo, y para el lector se dice aquí. */}
                 <Animated.View
                   style={[estilos.bloqueTitulo, animTitulo]}
                   accessible

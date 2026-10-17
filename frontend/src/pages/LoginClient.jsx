@@ -17,21 +17,9 @@ import { useIdioma } from '../hooks/useIdioma';
 
 const BROWN = 'var(--marca-600)';
 
-/*
- * ============================================================
- * INICIAR SESIÓN — la puerta, ya no el portón
- * ============================================================
- * Esta pantalla dejó de ser lo primero que ve todo el mundo: ahora se entra
- * directo a la tienda y aquí se llega solo cuando hace falta una cuenta (al
- * pagar, en Mi Cuenta, para guardar favoritos).
- *
- * Por eso el diseño cambió de un formulario solo en medio de la nada a dos
- * mitades: a la izquierda quién es la tienda y por qué vale la pena tener
- * cuenta, a la derecha el formulario. Quien llega aquí ya venía haciendo
- * algo, y la pantalla tiene que verse como parte de la misma tienda y no
- * como un peaje.
- * ============================================================
- */
+// INICIAR SESIÓN — LoginClient.jsx
+// Se llega aquí solo cuando hace falta una cuenta (al pagar, en Mi Cuenta, para favoritos): a la
+// izquierda por qué vale la pena tener cuenta y a la derecha el formulario.
 
 const Container = styled.div`
   min-height: 100vh;
@@ -41,15 +29,9 @@ const Container = styled.div`
   position: relative;   /* de aquí cuelga la mascota (ver Percha) */
 `;
 
-/*
- * De dónde cuelga la mascota: la línea de abajo del encabezado (64px).
- *
- * Es parte del FONDO, como una ilustración ya pintada: va detrás del
- * contenido (Body tiene z-index 1), así que el cordón pasa por detrás del
- * titular y nada de la página se corre para hacerle lugar. No recibe toques.
- * Usa las mismas medidas que Body para caer en el hueco entre el texto y el
- * formulario; en el teléfono, centrada encima del formulario.
- */
+// De dónde cuelga la mascota: la línea de abajo del encabezado (64px). Es parte del FONDO, como
+// una ilustración ya pintada: va detrás del contenido (Body tiene z-index 1), así que el cordón
+// pasa por detrás del titular y nada de la página se corre para hacerle lugar. No recibe toques.
 const Percha = styled.div`
   position: absolute;
   top: 64px;
@@ -76,10 +58,8 @@ const Percha = styled.div`
   }
 `;
 
-/*
- * La barra de arriba vive en EncabezadoAcceso: la comparten todas las
- * pantallas de acceso (login, registro, verificación y contraseñas).
- */
+// La barra de arriba vive en EncabezadoAcceso: la comparten todas las pantallas de acceso (login,
+// registro, verificación y contraseñas).
 
 const Body = styled.div`
   flex: 1;
@@ -95,10 +75,8 @@ const Body = styled.div`
   position: relative;
   z-index: 1;
 
-  /*
-   * En pantalla chica el formulario manda y el saludo se va abajo. Arriba
-   * queda el aire donde cuelga la mascota: ahí el formulario la taparía.
-   */
+  /* En pantalla chica el formulario manda y el saludo se va abajo. Arriba queda el aire donde cuelga
+     la mascota: ahí el formulario la taparía. */
   @media (max-width: 940px) {
     grid-template-columns: 1fr;
     padding: 250px 20px 48px;
@@ -108,11 +86,9 @@ const Body = styled.div`
 
 // ── La mitad de la izquierda: quiénes somos ──
 const Saludo = styled.div`
-  /*
-   * El párrafo y la lista no llegan hasta donde cuelga la mascota. En
-   * pantalla ancha ya les sobra espacio (su máximo es 440px); esto solo
-   * actúa cuando la columna se angosta, para que no se le encimen.
-   */
+  /* El párrafo y la lista no llegan hasta donde cuelga la mascota. En pantalla ancha ya les sobra
+     espacio (su máximo es 440px); esto solo actúa cuando la columna se angosta, para que no se le
+     encimen. */
   @media (min-width: 941px) {
     > p, > ul { max-width: min(440px, calc(100% - 140px)); }
   }
@@ -392,26 +368,18 @@ const LoginClient = () => {
   const [verPass, setVerPass] = useState(false);
   const { t, idioma } = useIdioma();
 
-  /*
-   * A dónde iba antes de que le pidiéramos la cuenta. Lo pone
-   * ProtectedRoute y los botones que exigen sesión.
-   *
-   * Ya no se hace logout al entrar aquí: con la tienda abierta, cualquiera
-   * puede caer en esta pantalla de curioso, y cerrarle la sesión por pasar
-   * sería un castigo por explorar.
-   */
+  // A dónde iba antes de que le pidiéramos la cuenta. Lo pone ProtectedRoute y los botones que
+  // exigen sesión. Ya no se hace logout al entrar aquí: con la tienda abierta, cualquiera puede caer
+  // en esta pantalla de curioso, y cerrarle la sesión por pasar sería un castigo por explorar.
   const volver = params.get('volver');
 
   const { register, handleSubmit, control, formState: { errors } } = useForm({
     defaultValues: { email: '', password: '' }
   });
 
-  /*
-   * Lo que la mascota colgada necesita saber del formulario: en qué campo
-   * está la persona (para mirar el correo o taparse los ojos en la
-   * contraseña), cuánto lleva escrito del correo (para seguirlo con la
-   * vista) y si algo acaba de fallar (para negar con la cabeza).
-   */
+  // Lo que la mascota colgada necesita saber del formulario: en qué campo está la persona (para
+  // mirar el correo o taparse los ojos en la contraseña), cuánto lleva escrito del correo (para
+  // seguirlo con la vista) y si algo acaba de fallar (para negar con la cabeza).
   const [campo, setCampo] = useState(null);
   const correo = useWatch({ control, name: 'email' }) || '';
   // Cuenta los fallos; mientras no sea cero, la mascota niega. Se apaga sola.
@@ -428,23 +396,14 @@ const LoginClient = () => {
     : 'formulario';
   const estadoMascota = loading ? 'entrando' : noCuadro ? 'error' : 'reposo';
 
-  /*
-   * "¿Trabajas en la tienda?": la puerta del personal es la del panel, con su
-   * código de dos pasos. Si ya tiene la sesión del panel abierta, directo
-   * adentro: /admin cierra la sesión al entrar y le haría pedir otro código.
-   */
+  // "¿Trabajas en la tienda?": la puerta del personal es la del panel, con su código de dos pasos.
+  // Si ya tiene la sesión del panel abierta, directo adentro: /admin cierra la sesión al entrar y le
+  // haría pedir otro código.
   const puertaDelPersonal = haySesionDePersonal ? '/dashboard' : '/admin';
 
-  /*
-   * Alguien del personal escribió su cuenta AQUÍ, en el login de la tienda.
-   * El servidor ya no le abre sesión por esta puerta (se saltaba el código del
-   * panel), pero tampoco le dice "contraseña incorrecta", que sería mentira:
-   * contesta `esPersonal`. Se le lleva a su login con el correo ya escrito.
-   *
-   * Siempre a /admin, aunque haya una sesión del panel abierta: puede ser la
-   * de OTRA persona en la computadora del mostrador, y quien escribió su
-   * cuenta tiene que entrar con la suya.
-   */
+  // Alguien del personal escribió su cuenta AQUÍ, en el login de la tienda. El servidor ya no le
+  // abre sesión por esta puerta (se saltaba el código del panel), pero tampoco le dice "contraseña
+  // incorrecta", que sería mentira: contesta `esPersonal`.
   const irAlPanel = (correo) => {
     toast(t('Tu cuenta es del personal: entra por aquí, con tu código.'), {
       id: 'a-su-puerta',
@@ -454,16 +413,12 @@ const LoginClient = () => {
     navigate('/admin', { state: { correo } });
   };
 
-  /*
-   * Lo que pasa DESPUÉS de que el backend confirmó la sesión, sea por
-   * contraseña o por Google: se guarda en el contexto y se decide a dónde ir.
-   * Se comparte para que las dos puertas se comporten igual.
-   */
+  // Lo que pasa DESPUÉS de que el backend confirmó la sesión, sea por contraseña o por Google: se
+  // guarda en el contexto y se decide a dónde ir. Se comparte para que las dos puertas se comporten
+  // igual.
   const alEntrar = (res, correo) => {
-      /*
-       * Un servidor sin actualizar todavía abre sesión del personal por aquí.
-       * No se guarda: la tienda es de clientes y el personal tiene su puerta.
-       */
+      // Un servidor sin actualizar todavía abre sesión del personal por aquí. No se guarda: la tienda es
+      // de clientes y el personal tiene su puerta.
       if (res.userType && res.userType !== 'client') {
         irAlPanel(correo);
         return;
@@ -472,37 +427,19 @@ const LoginClient = () => {
       // 3- Guardamos el token y datos del cliente en el contexto
       login(res.token, 'client', res.client);
 
-      /*
-       * El saludo con el mapa es SOLO para quien acaba de crear su cuenta.
-       *
-       * Antes lo veía todo el mundo, en cada inicio de sesión: quien lleva
-       * meses comprando y ya tiene su casa y su trabajo guardados entraba a
-       * marcar un punto en un mapa que no necesitaba. La marca la deja el
-       * registro al verificar el código; ver utils/primerIngreso.js.
-       *
-       * Se consume acá aunque después mande a otro lado, para que no quede
-       * dando vueltas y aparezca días más tarde sin venir a cuento.
-       */
+      // El saludo con el mapa es SOLO para quien acaba de crear su cuenta. La marca la deja el registro
+      // al verificar el código; ver utils/primerIngreso.js. Se consume acá aunque después mande a otro
+      // lado, para que no quede dando vueltas y aparezca días más tarde sin venir a cuento.
       const recienRegistrado = consumirRecienRegistrado();
 
-      /*
-       * Primero manda a dónde iba; si llegó aquí por su cuenta, al recién
-       * llegado lo espera el mapa donde deja su dirección, y a todos los demás
-       * la tienda.
-       *
-       * El `volver` se revisa antes de seguirlo: tiene que ser una ruta de la
-       * casa. Sin esa comprobación, un enlace con ?volver=https://otro-sitio
-       * usaría nuestro login como trampolín — LoginAdmin ya lo validaba y esta
-       * pantalla no.
-       */
+      // Primero manda a dónde iba; si llegó aquí por su cuenta, al recién llegado lo espera el mapa
+      // donde deja su dirección, y a todos los demás la tienda. El `volver` se revisa antes de seguirlo:
+      // tiene que ser una ruta de la casa.
       const destino = volver?.startsWith('/') ? volver : null;
 
-      /*
-       * `replace` a propósito: el login se reemplaza en el historial en vez de
-       * apilarse. Sin esto, tras entrar el historial quedaba [tienda, login,
-       * destino] y el "atrás" del navegador caía de vuelta en el login —una
-       * pantalla que ya cumplió y a la que nadie quiere volver.
-       */
+      // `replace` a propósito: el login se reemplaza en el historial en vez de apilarse. Sin esto, tras
+      // entrar el historial quedaba [tienda, login, destino] y el "atrás" del navegador caía de vuelta
+      // en el login —una pantalla que ya cumplió y a la que nadie quiere volver.
       if (destino) navigate(destino, { replace: true });
       else navigate(recienRegistrado ? '/bienvenida' : '/', { replace: true });
   };
@@ -538,26 +475,13 @@ const LoginClient = () => {
       const res = await googleLoginDB(credential);
       alEntrar(res);
     } catch (err) {
-      /*
-       * Esta pantalla es para ENTRAR, no para registrarse. Si Google trae un
-       * correo que no tiene cuenta, el servidor se niega a crearla aquí: no
-       * hay dónde aceptar los términos ni dónde dejar un teléfono, y una
-       * cuenta creada a la callada es justo lo que rompía el consentimiento.
-       *
-       * Así que se lleva a Registro, que sí tiene las casillas, en vez de
-       * dejar un aviso rojo que no dice qué hacer.
-       */
+      // Esta pantalla es para ENTRAR, no para registrarse. Si Google trae un correo que no tiene cuenta,
+      // el servidor se niega a crearla aquí: no hay dónde aceptar los términos ni dónde dejar un
+      // teléfono, y una cuenta creada a la callada es justo lo que rompía el consentimiento.
       if (err.requiereConsentimiento) {
-        /*
-         * Y se va CON lo que Google ya dio. Antes esto mandaba a /register en
-         * blanco: la persona acababa de autorizar a la tienda a leer su nombre
-         * y su correo, y lo primero que veía era un formulario vacío
-         * pidiéndoselos otra vez.
-         *
-         * El token viaja en el estado de la navegación y no en la URL: un
-         * token de Google en la barra de direcciones queda en el historial, en
-         * los registros del servidor y en cualquier captura de pantalla.
-         */
+        // Y se va CON lo que Google ya dio. El token viaja en el estado de la navegación y no en la URL:
+        // un token de Google en la barra de direcciones queda en el historial, en los registros del
+        // servidor y en cualquier captura de pantalla.
         navigate('/completar-registro', {
           state: { credential, sugerido: err.sugerido || {}, volverA: volver || '/' },
         });
@@ -585,10 +509,8 @@ const LoginClient = () => {
       </Percha>
 
       <Body>
-        {/*
-          La mitad de la izquierda no está de adorno: quien llegó hasta aquí
-          merece saber qué gana con la cuenta antes de escribir su correo.
-        */}
+        {/* La mitad de la izquierda no está de adorno: quien llegó hasta aquí merece saber qué gana con la
+           cuenta antes de escribir su correo. */}
         <Saludo>
           <Titular>
             {t('El súper de la esquina,')} <strong>{t('a un toque')}</strong>
@@ -701,10 +623,8 @@ const LoginClient = () => {
             <FooterLink to="/register">{t('Regístrate')}</FooterLink>
           </FooterText>
 
-          {/*
-            La puerta del personal, igual que en la app. Aquí no abre Tiqui ni
-            el Reparto (esos viven en la app): lleva al login del panel.
-          */}
+          {/* La puerta del personal, igual que en la app. Aquí no abre Tiqui ni el Reparto (esos viven en la
+             app): lleva al login del panel. */}
           <PiePersonal>
             {t('¿Trabajas en la tienda?')}{' '}
             <FooterLink to={puertaDelPersonal}>{t('Entra aquí')}</FooterLink>

@@ -6,20 +6,8 @@ import {
 import { useSubidaArchivo } from '../../hooks/useSubidaArchivo';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * SubidorArchivo — la misma zona de subida para toda la app.
- *
- * Antes había seis <input type="file"> con seis destinos distintos: tres con
- * su propia preview (parecidas pero cada una a su manera) y dos sin ninguna.
- * Esta pieza sustituye a todas: muestra de verdad lo que se eligió — la foto,
- * el PDF completo, o al menos el icono, el nombre y el peso.
- *
- * Está hecha con styled-components a propósito: tiene que verse bien tanto en
- * las pantallas de Tailwind (los modales del admin) como en las que ya usan
- * styled-components (Registro, Impresiones). Los estilos viajan con el
- * componente y no dependen de qué sistema use la pantalla que lo monta; lo que
- * cambia de un lugar a otro va por props, no clavado adentro.
- */
+// SubidorArchivo — la misma zona de subida para toda la app. Esta pieza sustituye a todas: muestra
+// de verdad lo que se eligió — la foto, el PDF completo, o al menos el icono, el nombre y el peso.
 
 /* Nada aparece de la nada: arranca casi a tamaño y crece lo justo. */
 const entrada = keyframes`
@@ -32,27 +20,9 @@ const fundido = keyframes`
   to   { opacity: 1; }
 `;
 
-/*
- * Tres paletas:
- *   - claro:  el resto de la app (Registro, Impresiones, de cara al cliente).
- *             Va con los tokens de la tienda (--papel, --tinta, --marca-*),
- *             así que también se oscurece con el modo oscuro de Preferencias.
- *   - oscuro: el panel izquierdo café oscuro de EmployeeFormModal, fijo a
- *             propósito — es un diseño propio del modal, no debe cambiar con
- *             la paleta de accesibilidad que el admin tenga elegida.
- *   - panel:  pantallas DENTRO del panel de administración (Personalización,
- *             el formulario de producto, el de promociones). Sigue las
- *             variables --theme-* de ThemeContext.jsx, así que se ve igual
- *             de oscura/clara/alto-contraste que el resto de esa pantalla.
- *
- * En panel, el "vivo" (borde y fondo al pasar el mouse, arrastrar o
- * enfocar) usa var(--theme-primary) con el café de fábrica como respaldo —
- * no un hex clavado. --theme-primary lo pinta ThemeContext.jsx según la
- * paleta que el admin tenga elegida en SU navegador (incluida "Mi marca").
- * En claro usa --marca-600 de la tienda, que sigue a la temporada y al modo
- * oscuro: el --theme-primary del panel se quedaba casi negro sobre el fondo
- * oscuro de la tienda.
- */
+// Tres paletas: - claro: el resto de la app (Registro, Impresiones, de cara al cliente). Va con
+// los tokens de la tienda (--papel, --tinta, --marca-*), así que también se oscurece con el modo
+// oscuro de Preferencias.
 const PALETAS = {
   claro: {
     borde: 'var(--linea-fuerte)',
@@ -86,16 +56,8 @@ const PALETAS = {
   },
 };
 
-/*
- * Con `crecer`, el subidor deja de medir un alto fijo y se estira para ocupar
- * lo que le sobre a su contenedor. Lo pide el formulario de producto: su panel
- * izquierdo se estira para igualar el alto del formulario de la derecha, y con
- * la imagen a 192px clavados quedaba media columna de fondo vacío debajo del
- * precio. La foto es lo único de ese panel que gana algo con más espacio.
- *
- * Va por prop y apagado por defecto: las otras cinco pantallas que usan esta
- * pieza siguen con su alto fijo, sin enterarse.
- */
+// Con `crecer`, el subidor deja de medir un alto fijo y se estira para ocupar lo que le sobre a su
+// contenedor.
 const Envoltorio = styled.div`
   width: 100%;
   min-width: 0;
@@ -145,10 +107,9 @@ const Zona = styled.div`
 
   &:focus-visible {
     border-color: ${(p) => p.$c.bordeVivo};
-    /* Mismo truco que el aro de foco del buscador (HeaderTienda.jsx): el
-       color base ya es una variable, así que "pegarle" una opacidad fija en
-       hex no sirve — con color-mix el aro sigue siendo del mismo color que
-       el borde, aunque ese color cambie con la paleta. */
+    /* Mismo truco que el aro de foco del buscador (HeaderTienda.jsx): el color base ya es una
+       variable, así que "pegarle" una opacidad fija en hex no sirve — con color-mix el aro sigue
+       siendo del mismo color que el borde, aunque ese color cambie con la paleta. */
     box-shadow: 0 0 0 3px color-mix(in srgb, ${(p) => p.$c.bordeVivo} 30%, transparent);
   }
 
@@ -157,12 +118,9 @@ const Zona = styled.div`
   }
 `;
 
-/*
- * La preview entra encima de la zona. El !important del modo "menos
- * movimiento" es a propósito: la regla global de index.css deja TODAS las
- * animaciones en 0.01ms, y aquí queremos conservar el fundido — es lo que
- * avisa que el archivo cambió sin mover nada de lugar.
- */
+// La preview entra encima de la zona. El !important del modo "menos movimiento" es a propósito: la
+// regla global de index.css deja TODAS las animaciones en 0.01ms, y aquí queremos conservar el
+// fundido — es lo que avisa que el archivo cambió sin mover nada de lugar.
 const Capa = styled.div`
   position: absolute;
   inset: 0;
@@ -184,12 +142,7 @@ const Miniatura = styled.img`
   ${(p) => p.$ajuste === 'contain' && css`padding: 8px;`}
 `;
 
-/*
- * El PDF de verdad, renderizado por el propio navegador: no hace falta ninguna
- * librería para esto. Sin pointer-events el visor se traga la rueda del mouse
- * y la página deja de bajar; apagados, además, un clic encima abre el selector
- * para cambiar el archivo, que es lo que uno espera al tocar la preview.
- */
+// El PDF de verdad, renderizado por el propio navegador: no hace falta ninguna librería para esto.
 const VistaPdf = styled('embed')`
   width: 100%;
   height: 100%;
@@ -345,11 +298,8 @@ const SubidorArchivo = ({
       >
         {hayAlgo ? (
           <>
-            {/*
-              La key hace que la animación de entrada se vuelva a disparar al
-              cambiar de archivo; sin ella React reusa el nodo y el cambio pasa
-              sin que nadie lo note.
-            */}
+            {/* La key hace que la animación de entrada se vuelva a disparar al cambiar de archivo; sin ella
+               React reusa el nodo y el cambio pasa sin que nadie lo note. */}
             <Capa key={url}>
               {tipo === 'imagen' && (
                 <Miniatura src={url} alt={t('Vista previa de {nombre}', { nombre })} $ajuste={ajuste} />
@@ -395,11 +345,9 @@ const SubidorArchivo = ({
           </>
         )}
 
-        {/*
-          El input de verdad, escondido pero vivo: es quien abre el selector del
-          sistema. Fuera del tabulador porque la zona de arriba ya es el botón
-          accesible y no queremos dos paradas para lo mismo.
-        */}
+        {/* El input de verdad, escondido pero vivo: es quien abre el selector del sistema. Fuera del
+           tabulador porque la zona de arriba ya es el botón accesible y no queremos dos paradas para lo
+           mismo. */}
         <input
           ref={inputRef}
           type="file"
@@ -413,12 +361,9 @@ const SubidorArchivo = ({
 
       {hayAlgo && (
         <Pie $c={c}>
-          {/*
-            El $c va SIEMPRE, aunque el padre ya lo tenga: styled-components no
-            hereda props. Sin él, la regla de color leía una paleta inexistente
-            y reventaba el render entero en cuanto alguien elegía un archivo —
-            que es exactamente cuando esta línea aparece por primera vez.
-          */}
+          {/* El $c va SIEMPRE, aunque el padre ya lo tenga: styled-components no hereda props. Sin él, la
+             regla de color leía una paleta inexistente y reventaba el render entero en cuanto alguien elegía
+             un archivo — que es exactamente cuando esta línea aparece por primera vez. */}
           <NombreArchivo $c={c} title={nombre}>{nombre}</NombreArchivo>
           {peso && <Peso>{peso}</Peso>}
         </Pie>

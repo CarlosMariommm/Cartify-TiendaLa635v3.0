@@ -1,30 +1,6 @@
-/*
- * ============================================================
- * DETALLE DE PRODUCTO
- * ============================================================
- * Hoy solo la abre Tiqui (Asistente.js, "muéstrame las manzanas"): ahí la
- * persona está hablando con ella y cambiar de pantalla le cortaría la charla.
- * En el resto de la tienda un producto es su propia página, como en la web
- * (pages/Producto.js).
- *
- * La foto en grande, el precio y de ahí al carrito. Es la versión corta de
- * `ProductDetailModal.jsx`: se dejaron fuera las reseñas y "Del mismo
- * pasillo", que no entran en una hoja. Sí está "Quien compra esto también
- * lleva", en una fila que se desliza de lado (ver utils/tambienLlevan.js).
- *
- * ── Una diferencia con la web, a propósito ──
- *
- * La web agrega de uno en uno: su botón llama a `onAgregarAlCarrito(producto, 1)`
- * y punto. Aquí hay un selector de cantidad, y se mueve al PASO de la unidad
- * del producto: de uno en uno las piezas, de media en media las libras.
- *
- * No es un capricho. En la web, quien quiere media libra de queso abre el
- * carrito y la corrige ahí; en un teléfono ese viaje son dos pantallas de ida
- * y dos de vuelta. Y agregar "1" a un producto que se vende por peso, cuando
- * el propio sistema sabe que su paso es 0.5, es hacer que el cliente pida más
- * de lo que quería. Ver utils/unidades.js.
- * ============================================================
- */
+// DETALLE DE PRODUCTO
+// Hoy solo la abre Tiqui (Asistente.js, "muéstrame las manzanas"): ahí la persona está hablando
+// con ella y cambiar de pantalla le cortaría la charla.
 
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, PanResponder, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
@@ -48,26 +24,16 @@ import { useTienda } from '../../context/TiendaContext';
 import { cargarTambienLlevan } from '../../api/tiendaApi';
 import { elegirTambienLlevan } from '../../utils/tambienLlevan';
 
-/*
- * `conBarraFlotante`: true solo cuando quien abre este detalle vive DENTRO
- * de un apartado del Tab (Inicio, Asistente, Favoritos) — ahí la píldora de
- * abajo flota por encima y tapa el botón "Agregar" si no se le deja hueco.
- * Desde Carrito o Sección no hace falta: son pantallas de Stack que
- * reemplazan el Tab entero, sin píldora detrás, y sumar el hueco ahí solo
- * dejaría un espacio muerto bajo el botón.
- */
+// `conBarraFlotante`: true solo cuando quien abre este detalle vive DENTRO de un apartado del Tab
+// (Inicio, Asistente, Favoritos) — ahí la píldora de abajo flota por encima y tapa el botón
+// "Agregar" si no se le deja hueco.
 const ModalProducto = ({ producto: productoAbierto, alCerrar, alAgregar, conBarraFlotante = false }) => {
   const { t } = useIdioma();
   const [fallóImagen, setFallóImagen] = useState(false);
   const [cantidad, setCantidad] = useState(() => pasoDe(productoAbierto));
-  /*
-   * El producto que se ve. Es el que se abrió, hasta que se toca uno de
-   * "Quien compra esto también lleva": ese se muestra aquí mismo, sin cerrar
-   * la hoja (cerrarla y abrir otra desde cada pantalla que usa esta ficha
-   * serían cinco cambios para lo mismo). Se guarda su id y no el objeto, para
-   * que con el catálogo al día la existencia también lo esté. Si quien la
-   * abrió manda otro producto, vuelve a ser ese.
-   */
+  // El producto que se ve. Es el que se abrió, hasta que se toca uno de "Quien compra esto también
+  // lleva": ese se muestra aquí mismo, sin cerrar la hoja (cerrarla y abrir otra desde cada pantalla
+  // que usa esta ficha serían cinco cambios para lo mismo).
   const { productos: catalogo } = useTienda();
   const [otroId, setOtroId] = useState(null);
   const [abiertoId, setAbiertoId] = useState(productoAbierto?.id);
@@ -102,13 +68,8 @@ const ModalProducto = ({ producto: productoAbierto, alCerrar, alAgregar, conBarr
     setFallóImagen(false);
     scrollRef.current?.scrollTo({ y: 0, animated: true });
   };
-  /*
-   * Defensa extra, no la puerta principal: la puerta es TarjetaProducto (ahí
-   * se tapa la foto y no se llega hasta aquí). Pero esta ficha también se
-   * abre desde el asistente de voz (Asistente.js → mostrarProducto), que no
-   * pasa por esa tarjeta — así que "Agregar" vuelve a preguntar por su
-   * cuenta, igual que useDetalleProducto.js en la web.
-   */
+  // Defensa extra, no la puerta principal: la puerta es TarjetaProducto (ahí se tapa la foto y no se
+  // llega hasta aquí).
   const { mayorConfirmado, pedirConfirmacion } = useEdad();
 
   // La hoja entra deslizándose desde abajo mientras el fondo se oscurece,
@@ -133,13 +94,9 @@ const ModalProducto = ({ producto: productoAbierto, alCerrar, alAgregar, conBarr
     ]).start();
   }, [fondoOpacidad, panelY]);
 
-  /*
-   * Todo lo que cierra —tocar fuera, la "X", el botón atrás de Android, o
-   * agregar y salir— pasa por aquí: primero la hoja baja y el fondo se
-   * aclara, y solo CUANDO terminan de verdad se avisa al que llama
-   * (alCerrar), que es quien de verdad la quita de pantalla.
-   * `cerrandoRef` evita relanzar la animación si tocan dos veces seguidas.
-   */
+  // Todo lo que cierra —tocar fuera, la "X", el botón atrás de Android, o agregar y salir— pasa por
+  // aquí: primero la hoja baja y el fondo se aclara, y solo CUANDO terminan de verdad se avisa al
+  // que llama (alCerrar), que es quien de verdad la quita de pantalla.
   const cerrarConAnimacion = () => {
     if (cerrandoRef.current) return;
     cerrandoRef.current = true;
@@ -161,11 +118,9 @@ const ModalProducto = ({ producto: productoAbierto, alCerrar, alAgregar, conBarr
   // El botón de atrás de Android cierra la hoja, no la app. Ver el hook.
   useBotonAtras(cerrarConAnimacion);
 
-  /*
-   * Arrastrar el asa. Se guarda el alto real del panel (varía con el
-   * contenido: un producto con descripción larga mide distinto que uno
-   * sin ella) para poder comparar contra SU mitad, no un número fijo.
-   */
+  // Arrastrar el asa. Se guarda el alto real del panel (varía con el contenido: un producto con
+  // descripción larga mide distinto que uno sin ella) para poder comparar contra SU mitad, no un
+  // número fijo.
   const panelAlturaRef = useRef(0);
 
   const panResponder = useRef(
@@ -173,14 +128,8 @@ const ModalProducto = ({ producto: productoAbierto, alCerrar, alAgregar, conBarr
       // Recién a partir de un arrastre de verdad: un toque corto en el asa
       // (que ya no hace nada) no debe robarle el gesto a nadie.
       onMoveShouldSetPanResponder: (_evento, gesto) => Math.abs(gesto.dy) > 4,
-      /*
-       * Sin esto, un arrastre largo terminaba en el ScrollView de abajo
-       * pidiendo (y llevándose) el control a medio camino — el gesto se
-       * "soltaba" ahí (onPanResponderTerminate) y el toque de "pasó la
-       * mitad" nunca llegaba a evaluarse: la hoja SIEMPRE volvía a subir,
-       * sin importar cuánto se hubiera bajado. Rechazar la cesión mantiene
-       * el gesto entero, de principio a fin, en manos de este asa.
-       */
+      // No le cede el gesto al ScrollView de abajo: así un arrastre largo hacia abajo sí cierra la hoja
+      // en vez de devolverla arriba.
       onPanResponderTerminationRequest: () => false,
       onPanResponderMove: (_evento, gesto) => {
         // Solo baja. Arrastrar hacia arriba no "abre más" — no hay más.
@@ -226,18 +175,14 @@ const ModalProducto = ({ producto: productoAbierto, alCerrar, alAgregar, conBarr
   };
 
   return (
-    /*
-     * Una vista sobre la pantalla, no un <Modal>. El Modal de React Native se
-     * dibuja en una capa nativa por encima de TODO, y ahí el aviso de
-     * "agregado al carrito" quedaba tapado. Ver hooks/useBotonAtras.js.
-     */
+    // Una vista sobre la pantalla, no un <Modal>. El Modal de React Native se dibuja en una capa
+    // nativa por encima de TODO, y ahí el aviso de "agregado al carrito" quedaba tapado. Ver
+    // hooks/useBotonAtras.js.
     <View style={estilos.capa}>
       <Animated.View style={[estilos.fondo, { opacity: fondoOpacidad }]}>
-        {/*
-          Tocar fuera cierra. Es un Pressable del tamaño del fondo DEBAJO del
-          panel, no un envoltorio: envolviéndolo, cada toque dentro del panel
-          burbujearía hasta aquí y cerraría el detalle al intentar tocar "+".
-        */}
+        {/* Tocar fuera cierra. Es un Pressable del tamaño del fondo DEBAJO del panel, no un envoltorio:
+           envolviéndolo, cada toque dentro del panel burbujearía hasta aquí y cerraría el detalle al
+           intentar tocar "+". */}
         <Pressable accessibilityRole="button" style={estilos.zonaCierre} onPress={cerrarConAnimacion} accessibilityLabel={t('Cerrar')} />
 
         <Animated.View
@@ -245,20 +190,14 @@ const ModalProducto = ({ producto: productoAbierto, alCerrar, alAgregar, conBarr
           onLayout={(e) => { panelAlturaRef.current = e.nativeEvent.layout.height; }}
         >
           <View style={estilos.encabezado}>
-            {/*
-              El asa ahora sí se arrastra: baja con el dedo, y al soltar
-              decide sola — pasó la mitad del panel, cierra; si no, vuelve
-              a subir. La zona de agarre es más grande que el dibujo (38x4)
-              para no repetir el problema de un blanco angosto.
-            */}
+            {/* El asa ahora sí se arrastra: baja con el dedo, y al soltar decide sola — pasó la mitad del
+               panel, cierra; si no, vuelve a subir. La zona de agarre es más grande que el dibujo (38x4) para
+               no repetir el problema de un blanco angosto. */}
             <View style={estilos.zonaAsa} {...panResponder.panHandlers}>
               <View style={estilos.asa} />
             </View>
-            {/*
-              Compartir manda el enlace de la WEB (/producto/:id): lo abre
-              cualquiera, tenga o no la app, y en WhatsApp llega con la foto,
-              el nombre y el precio (frontend/middleware.js).
-            */}
+            {/* Compartir manda el enlace de la WEB (/producto/:id): lo abre cualquiera, tenga o no la app, y en
+               WhatsApp llega con la foto, el nombre y el precio (frontend/middleware.js). */}
             <Pressable
               onPress={() => {
                 const precio = `$${Number(producto.precio).toFixed(2)}${esPorLibra(producto) ? '/lb' : ''}`;
@@ -396,11 +335,8 @@ ${url}`,
               </>
             )}
 
-            {/*
-              Lo que más se lleva con este en un mismo pedido. Sin tarjetas:
-              la foto sobre su fondo suave, el nombre y el precio. Tocar uno lo
-              muestra aquí mismo. Ver utils/tambienLlevan.js.
-            */}
+            {/* Lo que más se lleva con este en un mismo pedido. Sin tarjetas: la foto sobre su fondo suave, el
+               nombre y el precio. Tocar uno lo muestra aquí mismo. Ver utils/tambienLlevan.js. */}
             {tambienLlevan.length > 0 && (
               <>
                 <Text style={estilos.tituloSeccion}>{t('Quien compra esto también lleva')}</Text>
@@ -436,11 +372,8 @@ ${url}`,
             )}
           </ScrollView>
 
-          {/*
-            El botón vive FUERA del scroll: es a lo que se vino, y en un
-            producto con descripción larga quedaba al final de todo, a dos
-            deslizadas de distancia.
-          */}
+          {/* El botón vive FUERA del scroll: es a lo que se vino, y en un producto con descripción larga
+             quedaba al final de todo, a dos deslizadas de distancia. */}
           <View
             style={[
               estilos.pie,
@@ -501,13 +434,8 @@ const crearEstilos = (COLORES) => StyleSheet.create({
     // Tope de alto: el detalle es una hoja que sube, no una pantalla entera.
     maxHeight: '88%',
   },
-  /*
-   * minHeight a propósito: "cerrar" es absoluta y mide más (top:8 + 32 de
-   * alto = 40) que lo que este encabezado ocupaba antes solo con el asa
-   * (~14px). Sin este mínimo, el ScrollView de abajo —que se dibuja
-   * DESPUÉS, ya que es el hermano siguiente— quedaba encima de la mitad de
-   * abajo de la "X" y se robaba el toque: se veía perfecto pero no cerraba.
-   */
+  // minHeight a propósito: "cerrar" es absoluta y mide más (top:8 + 32 de alto = 40) que lo que este
+  // encabezado ocupaba antes solo con el asa (~14px).
   encabezado: {
     paddingTop: 10,
     paddingHorizontal: 16,

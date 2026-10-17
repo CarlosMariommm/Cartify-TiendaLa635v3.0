@@ -2,23 +2,9 @@ import styled, { css } from 'styled-components';
 import { Link } from 'react-router-dom';
 import { MessageCircle, ShieldCheck, Info, ArrowRight } from 'lucide-react';
 
-/*
- * ============================================================
- * EL TEXTO DE LOS TÉRMINOS — TextoTerminos.jsx
- * ============================================================
- * El documento, pintado. Nada más: ni encabezado, ni índice, ni botón de
- * volver. Eso lo pone quien lo muestre.
- *
- * Existe separado porque el mismo documento se lee en DOS lugares: la página
- * `/terminos` y el modal que se abre desde el registro. Si cada uno tuviera su
- * propia copia del texto —o de cómo se pinta una lista, o de dónde va el botón
- * de borrado— a la segunda edición dirían cosas distintas, y el que dice cosas
- * distintas en dos sitios es precisamente un documento legal que no sirve.
- *
- * El contenido no vive aquí sino en utils/terminos.js. Aquí solo se decide cómo
- * se ve cada tipo de bloque.
- * ============================================================
- */
+// EL TEXTO DE LOS TÉRMINOS — TextoTerminos.jsx
+// El documento, pintado. Nada más: ni encabezado, ni índice, ni botón de volver. Eso lo pone quien
+// lo muestre.
 
 const TituloSeccion = styled.h2`
   font-size: 21px;
@@ -106,15 +92,9 @@ const EnvolturaTabla = styled.div`
   background: var(--papel);
 `;
 
-/*
- * La tabla de datos, que en el teléfono deja de ser tabla.
- *
- * Cuatro columnas de texto en 375px son ilegibles de las dos formas posibles:
- * apretadas quedan en una palabra por renglón, y con scroll horizontal nadie
- * descubre que hay dos columnas más a la derecha. Bajo 760px cada fila se
- * convierte en una tarjeta y el nombre de la columna se pinta con ::before
- * desde `data-columna`, así el dato nunca queda huérfano de su etiqueta.
- */
+// La tabla de datos, que en el teléfono deja de ser tabla. Cuatro columnas de texto en 375px son
+// ilegibles de las dos formas posibles: apretadas quedan en una palabra por renglón, y con scroll
+// horizontal nadie descubre que hay dos columnas más a la derecha.
 const Tabla = styled.table`
   width: 100%;
   border-collapse: collapse;
@@ -140,11 +120,8 @@ const Tabla = styled.table`
     border-bottom: 1px solid var(--linea);
   }
 
-  /*
-   * La primera columna es el nombre del dato: el ancla de la fila. Va como
-   * encabezado de fila (th scope="row") para que el lector de pantalla diga
-   * "Teléfono" antes de cada dato de esa fila.
-   */
+  /* La primera columna es el nombre del dato: el ancla de la fila. Va como encabezado de fila (th
+     scope="row") para que el lector de pantalla diga "Teléfono" antes de cada dato de esa fila. */
   tbody th {
     text-align: left;
     padding: 14px 16px;
@@ -247,17 +224,12 @@ const BotonDocumento = styled.button.attrs({ type: 'button' })`
   cursor: pointer;
 `;
 
-/*
- * `alAbrirDocumento`: lo pasa el modal de términos. Con él, "Ver la política
- * de privacidad" cambia el documento DENTRO del modal en vez de navegar: el
- * modal se abre desde el registro, y un enlace de verdad sacaba a la persona
- * del formulario a medio llenar. En la página legal no se pasa y son enlaces.
- */
+// `alAbrirDocumento`: lo pasa el modal de términos. Con él, "Ver la política de privacidad" cambia
+// el documento DENTRO del modal en vez de navegar: el modal se abre desde el registro, y un enlace
+// de verdad sacaba a la persona del formulario a medio llenar.
 const TextoTerminos = ({ secciones, whatsappBorrado, direccion, nombre, negocio = {}, alAbrirDocumento }) => {
-  /*
-   * Los datos del negocio que haya: lo que el dueño dejó vacío no se pinta.
-   * Nada inventado en un texto legal.
-   */
+  // Los datos del negocio que haya: lo que el dueño dejó vacío no se pinta. Nada inventado en un
+  // texto legal.
   const filasNegocio = [
     ['Negocio', nombre],
     ['Titular', negocio.titular],
@@ -345,10 +317,8 @@ const TextoTerminos = ({ secciones, whatsappBorrado, direccion, nombre, negocio 
           </EnlaceDocumento>
         );
 
-      /*
-       * El botón de borrado. Sin WhatsApp configurado no se pinta un botón
-       * muerto: se dice por dónde sí, que es la misma tienda.
-       */
+      // El botón de borrado. Sin WhatsApp configurado no se pinta un botón muerto: se dice por dónde sí,
+      // que es la misma tienda.
       case 'borrado':
         return whatsappBorrado ? (
           <BotonBorrado key={i} href={whatsappBorrado} target="_blank" rel="noopener noreferrer">

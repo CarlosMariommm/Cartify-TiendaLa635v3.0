@@ -2,10 +2,8 @@ import { describe, it, expect, vi } from 'vitest';
 import { cantidad, construirReportePredictivo, faltanCuatroSemanas, pronosticoParaMostrar, rango, resumenDelPronostico } from './reportePredictivo';
 import { dinero, fechaLarga, pasoRedondo, rangoDeFechas } from './reportesPdf';
 
-/*
- * El reporte predictivo con un pronóstico de ejemplo, con la forma que
- * devuelve el servicio de analítica (analitica/app/pronostico.py).
- */
+// El reporte predictivo con un pronóstico de ejemplo, con la forma que devuelve el servicio de
+// analítica (analitica/app/pronostico.py).
 
 const producto = (extra) => ({
   id: 'p', nombre: 'Producto', unidad: 'unidad', proveedor: 's1', stock: 10, vendido: 20, dias_con_venta: 8,

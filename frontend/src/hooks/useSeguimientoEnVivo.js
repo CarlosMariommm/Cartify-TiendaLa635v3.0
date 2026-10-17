@@ -6,52 +6,26 @@ import { distanciaMetros, minutosDeViaje, textoDeEspera, formatoDistancia } from
 import { useIdioma } from './useIdioma';
 import { tAhora } from '../utils/idioma';
 
-/*
- * ============================================================
- * SEGUIMIENTO EN VIVO — useSeguimientoEnVivo.js
- * ============================================================
- * El lado del cliente: preguntar cada pocos segundos dónde va el repartidor
- * y traducirlo a algo que se entienda ("llega en 10 min aprox.").
- *
- * Por qué preguntar y no un socket: el backend es Express pelado, sin
- * socket.io. Una consulta cada 10 segundos a una ruta que devuelve cuatro
- * números es más barata que sumar una dependencia y un servidor de sockets
- * para una tienda de barrio con dos repartos a la vez.
- *
- * Lo importante de aquí es `senalFria`: si la última posición tiene más de
- * minuto y medio, se deja de mostrar el puntito como si fuera de ahorita. Un
- * punto viejo haciéndose el vivo es peor que no tener punto, porque el
- * cliente sale a la puerta a esperar a alguien que va tres calles atrás.
- * ============================================================
- */
+// SEGUIMIENTO EN VIVO — useSeguimientoEnVivo.js
+// El lado del cliente: preguntar cada pocos segundos dónde va el repartidor y traducirlo a algo
+// que se entienda ("llega en 10 min aprox.").
 
 const CADA_CUANTO_MS = 10000;      // se pregunta cada 10 segundos
 const SENAL_FRIA_MS = 90000;       // sin noticias en minuto y medio: se avisa
 
-/*
- * A esta distancia se avisa que ya casi tocan la puerta.
- *
- * 250 metros son como dos cuadras: el punto justo donde vale la pena
- * levantarse. Antes es falsa alarma y uno se queda parado en la puerta; y si
- * se espera a que esté enfrente, el repartidor termina tocando dos veces
- * mientras la persona busca las llaves.
- */
+// A esta distancia se avisa que ya casi tocan la puerta. 250 metros son como dos cuadras: el punto
+// justo donde vale la pena levantarse.
 const YA_CASI_M = 250;
 
 export const useSeguimientoEnVivo = (pedidoId, activo = true) => {
-  /*
-   * Todo en un solo estado y con el id adentro. Así, cuando se cambia de
-   * pedido, lo que quedó del anterior se descarta al comparar en vez de
-   * tener que limpiarlo a mano y provocar un render de más.
-   */
+  // Todo en un solo estado y con el id adentro. Así, cuando se cambia de pedido, lo que quedó del
+  // anterior se descarta al comparar en vez de tener que limpiarlo a mano y provocar un render de
+  // más.
   const [datos, setDatos] = useState(null);
   const [ahora, setAhora] = useState(() => Date.now());
 
-  /*
-   * El punto anterior, para medir a qué velocidad viene de verdad. Solo se
-   * toca dentro de la consulta (nunca al pintar), que es justo para lo que
-   * sirve un ref.
-   */
+  // El punto anterior, para medir a qué velocidad viene de verdad. Solo se toca dentro de la
+  // consulta (nunca al pintar), que es justo para lo que sirve un ref.
   const anteriorRef = useRef(null);
 
   // Para no repetir el aviso de "ya casi llega" en cada vuelta del reloj.
@@ -71,23 +45,17 @@ export const useSeguimientoEnVivo = (pedidoId, activo = true) => {
         const data = await orderService.getCourierPosition(pedidoId);
         if (!vivo) return;
 
-        /*
-         * Pedido cerrado, se deja de preguntar. Sin esto, la pestaña de
-         * alguien que dejó la tienda abierta seguiría consultando cada diez
-         * segundos toda la tarde por un pedido que ya recibió.
-         */
+        // Pedido cerrado, se deja de preguntar. Sin esto, la pestaña de alguien que dejó la tienda abierta
+        // seguiría consultando cada diez segundos toda la tarde por un pedido que ya recibió.
         if (["entregado", "cancelado"].includes(data?.status)) {
           clearInterval(reloj);
         }
 
         const courier = data?.courier?.lat != null ? data.courier : null;
 
-        /*
-         * Velocidad medida: metros entre el punto anterior y este, divididos
-         * por los segundos que pasaron. Solo cuenta si el punto es nuevo de
-         * verdad — repetir la misma posición daría velocidad cero y una
-         * espera infinita que no le sirve a nadie.
-         */
+        // Velocidad medida: metros entre el punto anterior y este, divididos por los segundos que pasaron.
+        // Solo cuenta si el punto es nuevo de verdad — repetir la misma posición daría velocidad cero y
+        // una espera infinita que no le sirve a nadie.
         let velocidad = anteriorRef.current?.velocidad || null;
         const previo = anteriorRef.current;
         if (courier && previo?.updatedAt && previo.updatedAt !== courier.updatedAt) {
@@ -97,16 +65,9 @@ export const useSeguimientoEnVivo = (pedidoId, activo = true) => {
         }
         if (courier) anteriorRef.current = { ...courier, velocidad };
 
-        /*
-         * ── "Ya casi toca tu puerta" ──
-         * El aviso que de verdad importa. Mirar un puntito acercarse es
-         * entretenido, pero lo que la gente quiere es que le digan CUÁNDO
-         * levantarse: nadie se queda con el teléfono en la mano midiendo
-         * cuadras.
-         *
-         * Una sola vez por pedido (el ref), y solo si el repartidor viene
-         * llegando de verdad — sin destino guardado no hay contra qué medir.
-         */
+        // ── "Ya casi toca tu puerta" ── El aviso que de verdad importa. Mirar un puntito acercarse es
+        // entretenido, pero lo que la gente quiere es que le digan CUÁNDO levantarse: nadie se queda con
+        // el teléfono en la mano midiendo cuadras.
         if (courier && data?.destino && !avisadoRef.current) {
           const faltan = distanciaMetros(courier, data.destino);
           if (faltan != null && faltan <= YA_CASI_M) {
@@ -130,25 +91,19 @@ export const useSeguimientoEnVivo = (pedidoId, activo = true) => {
           destino: data?.destino || null,
           courier,
           velocidad,
-          /*
-           * La ruta por las calles que le falta al repartidor (el servidor la
-           * calcula y la va recortando; ver backend/src/utils/rutaReparto.js).
-           * Null sin servicio de rutas: el mapa queda con sus dos puntos.
-           */
+          // La ruta por las calles que le falta al repartidor (el servidor la calcula y la va recortando;
+          // ver backend/src/utils/rutaReparto.js). Null sin servicio de rutas: el mapa queda con sus dos
+          // puntos.
           ruta: data?.ruta?.puntos?.length > 1 ? data.ruta : null,
-          /*
-           * Sin punto fresco del repartidor, el servidor manda la ruta desde la
-           * tienda y cuánto falta desde que salió (estimadoDesdeLaTienda, en el
-           * mismo archivo). Null si la tienda no guardó su ubicación.
-           */
+          // Sin punto fresco del repartidor, el servidor manda la ruta desde la tienda y cuánto falta desde
+          // que salió (estimadoDesdeLaTienda, en el mismo archivo). Null si la tienda no guardó su
+          // ubicación.
           estimado: data?.estimado?.desde ? data.estimado : null,
         });
       } catch {
-        /*
-         * Un fallo de red no borra lo que ya se sabía: se deja el último
-         * punto y el reloj de abajo se encarga de enfriar la señal si esto se
-         * repite. Parpadear el mapa en cada bache de señal se ve peor.
-         */
+        // Un fallo de red no borra lo que ya se sabía: se deja el último punto y el reloj de abajo se
+        // encarga de enfriar la señal si esto se repite. Parpadear el mapa en cada bache de señal se ve
+        // peor.
       }
     };
 
@@ -184,12 +139,9 @@ export const useSeguimientoEnVivo = (pedidoId, activo = true) => {
   // Sin eso, lo aproximado desde la tienda (si el servidor lo mandó).
   const estimado = enVivo ? null : actual?.estimado || null;
 
-  /*
-   * Con la ruta por las calles, lo que falta es lo que mide ESA línea y la
-   * espera sale de su tiempo; sin ella, la línea recta de siempre con la
-   * velocidad medida. Una ruta con la señal fría no se muestra: sería dibujar
-   * el camino desde un punto donde el repartidor ya no está.
-   */
+  // Con la ruta por las calles, lo que falta es lo que mide ESA línea y la espera sale de su tiempo;
+  // sin ella, la línea recta de siempre con la velocidad medida. Una ruta con la señal fría no se
+  // muestra: sería dibujar el camino desde un punto donde el repartidor ya no está.
   const ruta = enVivo ? actual?.ruta : null;
   const puntosDeLinea = ruta?.puntos || estimado?.puntos || null;
   // La misma línea llega como objeto nuevo en cada consulta: se compara por
@@ -210,10 +162,8 @@ export const useSeguimientoEnVivo = (pedidoId, activo = true) => {
 
   return {
     enVivo,
-    /*
-     * Sin GPS del repartidor: la ruta y el tiempo son aproximados, desde la
-     * tienda (`origen`). Las pantallas lo dicen así y no pintan su punto.
-     */
+    // Sin GPS del repartidor: la ruta y el tiempo son aproximados, desde la tienda (`origen`). Las
+    // pantallas lo dicen así y no pintan su punto.
     estimado: !!estimado,
     origen: estimado?.desde || null,
     estado: actual?.status || null,

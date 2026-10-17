@@ -1,22 +1,9 @@
 import styled from 'styled-components';
 import { useTemaCalculado } from '../../hooks/useTemporada';
 
-/*
- * ============================================================
- * CINTA DE TEMPORADA — CintaTemporada.jsx
- * ============================================================
- * La franja con el saludo de la fecha, justo debajo del encabezado.
- *
- * Es la mitad seria de la decoración: las figuras que caen ponen el ambiente,
- * pero esto DICE algo. "Pida con tiempo, que diciembre se llena" le sirve a
- * quien compra; un copo de nieve, no.
- *
- * Va debajo de la barra y no dentro: el encabezado es pegajoso (sticky) y si
- * la cinta viviera adentro se llevaría 34px de alto en todas las pantallas,
- * todo el año, para nada. Así aparece arriba del todo, se lee, y se va con el
- * scroll como cualquier otro contenido.
- * ============================================================
- */
+// CINTA DE TEMPORADA — CintaTemporada.jsx
+// La franja con el saludo de la fecha, justo debajo del encabezado. Es la mitad seria de la
+// decoración: las figuras que caen ponen el ambiente, pero esto DICE algo.
 
 const Banda = styled.div`
   background: var(--marca-600);
@@ -29,11 +16,9 @@ const Banda = styled.div`
   position: relative;
   overflow: hidden;
 
-  /*
-   * El festón de las orillas: triangulitos como los de una guirnalda de papel.
-   * Dibujado con un degradado repetido en vez de una imagen — pesa cero y se
-   * pinta del color del tema porque sale de la misma variable.
-   */
+  /* El festón de las orillas: triangulitos como los de una guirnalda de papel. Dibujado con un
+     degradado repetido en vez de una imagen — pesa cero y se pinta del color del tema porque sale de
+     la misma variable. */
   &::before,
   &::after {
     content: '';
@@ -67,11 +52,9 @@ const CintaTemporada = () => {
     return <Banda role="status">{tema.decoracion.saludo}</Banda>;
   }
 
-  /*
-   * Día normal: el saludo que el dueño haya escrito para el resto del año, del
-   * color de la casa. En blanco no se pinta nada — ni un div vacío: un
-   * contenedor invisible sigue empujando el contenido de abajo.
-   */
+  // Día normal: el saludo que el dueño haya escrito para el resto del año, del color de la casa. En
+  // blanco no se pinta nada — ni un div vacío: un contenedor invisible sigue empujando el contenido
+  // de abajo.
   if (!enPanel && saludoNormal) return <Banda role="status">{saludoNormal}</Banda>;
   return null;
 };

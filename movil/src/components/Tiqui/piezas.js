@@ -1,16 +1,6 @@
-/*
- * ============================================================
- * PIEZAS DE TIQUI — lo que comparten todas sus versiones en la app
- * ============================================================
- * La forma (copiada punto por punto de frontend/src/components/UI/
- * mascotaFormas.js, lienzo de 400 × 470), los disfraces de temporada (de
- * DisfrazTiqui.jsx), sus colores en claro y en oscuro, y los ganchos que la
- * hacen sentirse viva: el parpadeo y el respeto por "menos movimiento".
- *
- * La usan Mascota (las poses de la tienda), TiquiColgada (la del asistente y
- * la de jalar para recargar) y Tiqui (el tutorial).
- * ============================================================
- */
+// PIEZAS DE TIQUI — lo que comparten todas sus versiones en la app
+// La forma de Tiqui, sus disfraces de temporada, sus colores en claro y oscuro, el parpadeo y el
+// respeto por "menos movimiento".
 
 import { useEffect, useMemo, useState } from 'react';
 import { Circle, Ellipse, G, Path, Rect } from 'react-native-svg';
@@ -33,14 +23,9 @@ export const HOJA = '#4CC27A';
 // Los trazos redondeados de siempre.
 export const TRAZO = { fill: 'none', strokeLinecap: 'round', strokeLinejoin: 'round' };
 
-/*
- * Sus colores. En claro, la etiqueta navy con la cara blanca; en oscuro se
- * voltea (blanca con la cara navy), como el logo. No usa el color de la
- * temporada: la temporada le cambia la ropa, no la piel.
- *
- * `sobre`: 'color' (dentro de un botón de la marca) u 'oscuro' (sobre un velo)
- * la ponen blanca para que se vea.
- */
+// Sus colores. En claro, la etiqueta navy con la cara blanca; en oscuro se voltea (blanca con la
+// cara navy), como el logo. No usa el color de la temporada: la temporada le cambia la ropa, no la
+// piel.
 export const useColoresTiqui = (sobre) => {
   const COLORES = useColores();
   const { colores } = useTema();
@@ -92,16 +77,9 @@ export const useParpadeo = (activo = true) => {
   return cerrado;
 };
 
-/*
- * Los disfraces. Las piezas son datos (utils/piezasDisfraz.js, el mismo
- * archivo que usa la web); aquí solo se dibujan con react-native-svg, igual
- * que DisfrazTiqui.jsx en la web. Cada pieza lleva un borde del color de los
- * rasgos, así se despega del cuerpo en claro y en oscuro.
- *
- * En dos pasadas: primero la silueta de la pieza entera con el borde y
- * encima las formas con sus colores. Así el borde rodea la pieza y no cruza
- * por dentro donde una forma se encima a otra.
- */
+// Los disfraces. Las piezas son datos (utils/piezasDisfraz.js, el mismo archivo que usa la web);
+// aquí solo se dibujan con react-native-svg, igual que DisfrazTiqui.jsx en la web. Cada pieza
+// lleva un borde del color de los rasgos, así se despega del cuerpo en claro y en oscuro.
 const ELEMENTOS = { path: Path, rect: Rect, circle: Circle, ellipse: Ellipse };
 const MEDIDAS = ['d', 'x', 'y', 'width', 'height', 'rx', 'ry', 'cx', 'cy', 'r'];
 // Primero el cuello, después la cara y arriba de todo el sombrero.

@@ -1,53 +1,14 @@
-/*
- * ============================================================
- * LA VOZ DE TIQUI — vozTiqui.js
- * ============================================================
- * El asistente de voz habla con la voz de Tiqui, la mascota: la misma del
- * video de presentación. Sale de ElevenLabs, que la va entregando mientras
- * la genera (streaming): la primera parte del audio llega en menos de medio
- * segundo, y el navegador empieza a sonar sin esperar el archivo completo.
- *
- * Por qué ElevenLabs y no HeyGen (donde se grabó el video): HeyGen tardaba
- * ~5 s por frase y entrega el archivo entero al final. Para una conversación
- * eso es una eternidad.
- *
- * La llave vive SOLO aquí, en el servidor (ELEVENLABS_API_KEY). El navegador
- * y la app piden el audio a /api/ai/voz y nunca la ven. Sin llave, la ruta
- * contesta 503 y los clientes hablan con la voz del sistema, como antes.
- *
- * Variables:
- *   ELEVENLABS_API_KEY   la llave (solo con permiso de Text to Speech)
- *   ELEVENLABS_VOICE_ID  la voz; por defecto la de Tiqui (ver abajo)
- *   ELEVENLABS_MODEL     por defecto eleven_flash_v2_5, el más rápido y barato.
- *                        Con eleven_v4_turbo (o eleven_v3_conversational)
- *                        Tiqui habla con emoción: ver conEmocion, abajo.
- *
- * La voz de Tiqui es una voz de la cuenta de ElevenLabs de la tienda (la
- * actual, desde el 2026-10-04; antes era p5EUznrYaWnafKvUkNiR). Es la misma
- * para la tienda y el panel, en la web y en la app. NO es la del primer
- * video: esa era de HeyGen, generada con el plan gratis, que no permite uso
- * comercial ni clonarla.
- * ============================================================
- */
+// LA VOZ DE TIQUI — vozTiqui.js
+// El asistente de voz habla con la voz de Tiqui, la mascota: la misma del video de presentación.
 
 const VOZ_POR_DEFECTO = "HZX0g2vsDbKCRzHJAQ20";
 const MODELO_POR_DEFECTO = "eleven_flash_v2_5";
 
 export const modeloDeVoz = () => process.env.ELEVENLABS_MODEL || MODELO_POR_DEFECTO;
 
-/*
- * ── El ánimo de cada frase ──
- * Tiqui no dice todo igual: se alegra al agregar algo, se emociona al cerrar
- * la compra, se asombra con una oferta, se apena si no hay lo que pidieron,
- * duda si no entendió y, muy de vez en cuando, se ríe. El ánimo lo elige la
- * IA (o, en las frases fijas de la web y la app, utils/animoTiqui.js) y aquí
- * se vuelve una etiqueta de ElevenLabs al principio de la frase.
- *
- * Solo con los modelos que las entienden. Flash (el de siempre) leería
- * "[laughs]" en voz alta, así que con él la frase va tal cual: cambiar de
- * modelo en Render (ELEVENLABS_MODEL) prende o apaga las emociones sin tocar
- * el código.
- */
+// ── El ánimo de cada frase ── Tiqui no dice todo igual: se alegra al agregar algo, se emociona al
+// cerrar la compra, se asombra con una oferta, se apena si no hay lo que pidieron, duda si no
+// entendió y, muy de vez en cuando, se ríe.
 const ETIQUETAS = {
   alegre: "[cheerfully]",
   emocionada: "[excited]",
@@ -68,18 +29,9 @@ export const animoValido = (animo) => (ANIMOS.includes(animo) ? animo : "normal"
 export const conEmocion = (texto, animo, modelo = modeloDeVoz()) =>
   ETIQUETAS[animo] && MODELOS_CON_EMOCION.includes(modelo) ? `${ETIQUETAS[animo]} ${texto}` : texto;
 
-/*
- * ── ¿De verdad hay voz? ──
- * Tener la llave no basta. Con la cuenta en el plan gratis ElevenLabs contesta
- * 402 a cada frase, pero /ai/listo decía "hay voz" igual: la web y la app
- * pedían el audio en cada respuesta, esperaban el error y recién ahí hablaban
- * con la voz del dispositivo. Esa espera era el "tarda en sonar".
- *
- * Ahora se recuerda: si ElevenLabs rechaza la llave o la cuenta (401, 402,
- * 403), no se le vuelve a preguntar en 30 minutos; si es el tope por minuto
- * (429), en uno. Y al abrir un asistente se comprueba con una sola palabra
- * (comprobarVoz), así el aviso "no hay voz" llega ANTES de la primera frase.
- */
+// ── ¿De verdad hay voz? ── Tener la llave no basta. Con la cuenta en el plan gratis ElevenLabs
+// contesta 402 a cada frase, pero /ai/listo decía "hay voz" igual: la web y la app pedían el audio
+// en cada respuesta, esperaban el error y recién ahí hablaban con la voz del dispositivo.
 const MEDIA_HORA = 30 * 60 * 1000;
 let rotaHasta = 0;
 let comprobadaEn = 0;
@@ -91,19 +43,8 @@ const recordarRechazo = (estado) => {
 
 export const vozDisponible = () => Boolean(process.env.ELEVENLABS_API_KEY) && Date.now() >= rotaHasta;
 
-/*
- * Lo que se escribe no siempre es lo que se dice.
- *
- *   - La tienda se llama "la seis tres cinco", NUNCA "seiscientos treinta y
- *     cinco" (lo pidió la tienda para el video y vale igual aquí).
- *   - Los precios se escriben "$2.50" y se dicen "2 dólares con 50 centavos",
- *     con la palabra "centavos" completa: la tienda cobra en dólares, y leído
- *     tal cual el signo sale como "pesos" o en inglés.
- *   - Las promos "2x1" se dicen "2 por 1", no "dos equis uno".
- *
- * La web y la app tienen la misma regla para la voz del teléfono o del
- * navegador (el respaldo): si cambia aquí, cambia allá.
- */
+// Lo que se escribe no siempre es lo que se dice. - La tienda se llama "la seis tres cinco", NUNCA
+// "seiscientos treinta y cinco" (lo pidió la tienda para el video y vale igual aquí).
 const dineroParaDecir = (_, enteros, decimales = "") => {
   const d = Number(enteros);
   const c = decimales ? Number(decimales.padEnd(2, "0")) : 0;
@@ -122,11 +63,9 @@ export const paraDecir = (texto) =>
     .replace(/\s+/g, " ")
     .trim();
 
-/*
- * Las frases que se repiten ("¿Algo más?", "Vacié tu carrito…") se guardan
- * ya generadas: suenan al instante y no se pagan dos veces. Solo en memoria
- * — si el servidor se reinicia, se vuelven a pedir y listo.
- */
+// Las frases que se repiten ("¿Algo más?", "Vacié tu carrito…") se guardan ya generadas: suenan al
+// instante y no se pagan dos veces. Solo en memoria — si el servidor se reinicia, se vuelven a
+// pedir y listo.
 const MAX_FRASES = 300;
 const MAX_BYTES_FRASE = 400 * 1024;
 const frases = new Map();
@@ -146,11 +85,9 @@ export const guardarFrase = (texto, audio) => {
   while (frases.size > MAX_FRASES) frases.delete(frases.keys().next().value);
 };
 
-/*
- * Pide el audio a ElevenLabs y devuelve la respuesta tal cual, para que la
- * ruta la vaya pasando al cliente mientras llega. `signal` corta el pedido
- * si el cliente se va (lo interrumpieron, cerró el asistente).
- */
+// Pide el audio a ElevenLabs y devuelve la respuesta tal cual, para que la ruta la vaya pasando al
+// cliente mientras llega. `signal` corta el pedido si el cliente se va (lo interrumpieron, cerró
+// el asistente).
 export const pedirVoz = async (texto, { signal } = {}) => {
   const voz = process.env.ELEVENLABS_VOICE_ID || VOZ_POR_DEFECTO;
   const url =
@@ -181,12 +118,9 @@ export const pedirVoz = async (texto, { signal } = {}) => {
   return respuesta;
 };
 
-/*
- * Lo que contestan /ai/listo y /tiqui-panel/listo. Si la voz funcionó hace
- * poco, sí; si se sabe rota, no; y si no se sabe, se prueba con una palabra
- * (cuesta cinco caracteres cada media hora). Máximo 4 segundos: si
- * ElevenLabs no contesta a tiempo, mejor la voz del dispositivo.
- */
+// Lo que contestan /ai/listo y /tiqui-panel/listo. Si la voz funcionó hace poco, sí; si se sabe
+// rota, no; y si no se sabe, se prueba con una palabra (cuesta cinco caracteres cada media hora).
+// Máximo 4 segundos: si ElevenLabs no contesta a tiempo, mejor la voz del dispositivo.
 export const comprobarVoz = async () => {
   if (!vozDisponible()) return false;
   if (Date.now() - comprobadaEn < MEDIA_HORA) return true;

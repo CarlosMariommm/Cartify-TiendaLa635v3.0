@@ -1,22 +1,8 @@
 import mongoose, { Schema, model } from "mongoose";
 
-/*
- * ============================================================
- * VALORACIONES — review.js
- * ============================================================
- * Lo que opinan los clientes de un producto.
- *
- * Antes la tienda mostraba reseñas inventadas: un 4.3 fijo, "5,961 reseñas" y
- * dos comentarios firmados por gente que no existe, iguales en TODOS los
- * productos. Eso no es una maqueta inofensiva: son opiniones falsas puestas
- * frente a alguien que está decidiendo si compra.
- *
- * Reglas que sostienen que esto valga algo:
- *   - Solo valora quien compró el producto (se verifica contra sus pedidos).
- *   - Una valoración por persona y producto (índice único); si vuelve a
- *     opinar, se actualiza la suya en lugar de sumar otra.
- * ============================================================
- */
+// VALORACIONES — review.js
+// Lo que opinan los clientes de un producto. Eso no es una maqueta inofensiva: son opiniones
+// falsas puestas frente a alguien que está decidiendo si compra.
 const reviewSchema = new Schema(
   {
     productId: { type: mongoose.Schema.Types.ObjectId, ref: "productModel", required: true },

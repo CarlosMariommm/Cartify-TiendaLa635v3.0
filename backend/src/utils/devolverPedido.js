@@ -3,25 +3,9 @@ import productModel from "../models/product.js";
 import loyaltyLedgerModel from "../models/loyaltyLedger.js";
 import { getLoyaltyConfig } from "./loyaltyPoints.js";
 
-/*
- * ============================================================
- * DESHACER UN PEDIDO CANCELADO — devolverPedido.js
- * ============================================================
- * Al crear un pedido pasan cuatro cosas (orderController.createOrder): baja
- * el stock, se cobra el saldo si pagó con él, se consumen los puntos que
- * canjeó y se le dan los puntos nuevos de esa compra. Cancelar solo cambiaba
- * el estado, así que las cuatro se quedaban hechas: el inventario decía que
- * faltaban productos que seguían en el estante, y el cliente perdía el saldo
- * y los puntos de una compra que nunca recibió.
- *
- * Aquí se deshacen, una por una y cada una por su cuenta: si falla el stock
- * de un producto, el saldo del cliente igual vuelve. Lo llama
- * utils/estadoPedido.js UNA sola vez por pedido, en el salto a cancelado.
- *
- * Devuelve lo que se le devolvió AL CLIENTE ({ saldo, puntos }), que queda
- * anotado en el pedido y se le cuenta en el aviso.
- * ============================================================
- */
+// DESHACER UN PEDIDO CANCELADO — devolverPedido.js
+// Al cancelar devuelve lo que el pedido movió: el stock, el saldo cobrado y los puntos canjeados,
+// y quita los puntos que había ganado.
 
 const idDe = (valor) => valor?._id || valor;
 
@@ -43,11 +27,9 @@ const devolverStock = async (items) => {
   }
 };
 
-/*
- * Los puntos que ESTE pedido le dio se retiran, pero solo los que no ha
- * gastado. Si ya usó algunos en otra compra, esa compra ya pasó y no se le
- * puede cobrar de vuelta: se retira lo que queda del lote y ya.
- */
+// Los puntos que ESTE pedido le dio se retiran, pero solo los que no ha gastado. Si ya usó algunos
+// en otra compra, esa compra ya pasó y no se le puede cobrar de vuelta: se retira lo que queda del
+// lote y ya.
 const retirarPuntosGanados = async (pedido, clientId) => {
   if (!(pedido.pointsEarned > 0)) return;
   const lote = await loyaltyLedgerModel.findOne({ clientId, orderId: pedido._id });
@@ -61,15 +43,9 @@ const retirarPuntosGanados = async (pedido, clientId) => {
   await clientModel.findByIdAndUpdate(clientId, { $inc: { loyaltyPoints: -sinUsar } });
 };
 
-/*
- * Los puntos que CANJEÓ en este pedido vuelven como un lote nuevo, con su
- * vencimiento contado desde hoy. No se puede saber de qué lotes salieron
- * (consumirPuntos los reparte entre varios), y devolverlos con la fecha
- * vieja podría dárselos ya vencidos.
- *
- * Sin orderId a propósito: el lote que lleva el id de este pedido es el de
- * los puntos que GANÓ, y retirarPuntosGanados lo busca por ahí.
- */
+// Los puntos que CANJEÓ en este pedido vuelven como un lote nuevo, con su vencimiento contado
+// desde hoy. No se puede saber de qué lotes salieron (consumirPuntos los reparte entre varios), y
+// devolverlos con la fecha vieja podría dárselos ya vencidos.
 const devolverPuntosCanjeados = async (pedido, clientId) => {
   const puntos = Number(pedido.pointsRedeemed) || 0;
   if (puntos <= 0) return 0;

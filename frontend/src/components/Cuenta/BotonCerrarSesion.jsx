@@ -7,18 +7,9 @@ import { useTheme } from '../../hooks/useClientTheme';
 import { useAuth } from '../../hooks/useAuth';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * BotonCerrarSesion — "Cerrar sesión" de Mi Cuenta, con su confirmación.
- *
- * Vive en Mis datos, al lado de "Guardar cambios". Antes era la última
- * pestaña del menú de arriba, y con nueve secciones más la ayuda era justo
- * la que se quedaba fuera de la pantalla: para salir había que adivinar que
- * el menú se deslizaba.
- *
- * Pide confirmación porque es lo único de la cuenta que te saca de ella. Al
- * salir se queda EN la tienda, no en un formulario de login: salirse de la
- * cuenta no es salirse del negocio, y la mayoría sigue viendo precios un rato.
- */
+// BotonCerrarSesion — "Cerrar sesión" de Mi Cuenta, con su confirmación. Vive en Mis datos, al
+// lado de "Guardar cambios". Pide confirmación porque es lo único de la cuenta que te saca de
+// ella.
 const BotonCerrarSesion = () => {
   const { palette } = useTheme();
   const c = palette.colors;

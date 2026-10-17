@@ -6,25 +6,9 @@ import { LANDING_URL } from '../../utils/tienda';
 import { useIdioma } from '../../hooks/useIdioma';
 import SelectorIdioma from './SelectorIdioma';
 
-/*
- * ============================================================
- * PIE DE LA TIENDA — PieTienda.jsx
- * ============================================================
- * El final de la página, que hasta ahora no existía: se acababan los productos
- * y quedaba el blanco.
- *
- * Un pie sirve para dos cosas concretas, y este hace esas dos:
- *   1. Cerrar. Sin él, la página no termina, se corta. La banda café tenue
- *      es la señal de "hasta aquí llegó la tienda".
- *   2. Recoger a quien no encontró lo que buscaba arriba. Por eso están los
- *      pasillos y el WhatsApp, no un menú de veinte enlaces.
- *
- * Lo que NO tiene, a propósito: horarios, correo y redes sociales inventadas.
- * Ver el porqué en utils/tienda.js.
- *
- * Todo lo que decide qué se muestra vive en usePieTienda. Aquí solo se pinta.
- * ============================================================
- */
+// PIE DE LA TIENDA — PieTienda.jsx
+// El final de la página, que hasta ahora no existía: se acababan los productos y quedaba el
+// blanco. Un pie sirve para dos cosas concretas, y este hace esas dos: 1. Cerrar.
 
 const Banda = styled.footer`
   background: var(--marca-50);
@@ -33,12 +17,9 @@ const Banda = styled.footer`
   padding: 48px 0 0;
 `;
 
-/*
- * Mismo ancho y mismo margen lateral que el <Content> de la tienda (1400 + 28).
- * El relleno va AQUÍ y no en la banda, porque la banda tiene que llegar de
- * orilla a orilla: si el color se corta a 28px del borde, deja de leerse como
- * el piso de la página y parece una tarjeta más.
- */
+// Mismo ancho y mismo margen lateral que el <Content> de la tienda (1400 + 28). El relleno va AQUÍ
+// y no en la banda, porque la banda tiene que llegar de orilla a orilla: si el color se corta a
+// 28px del borde, deja de leerse como el piso de la página y parece una tarjeta más.
 const Interior = styled.div`
   max-width: 1400px;
   margin: 0 auto;
@@ -47,11 +28,9 @@ const Interior = styled.div`
   @media (max-width: 560px) { padding: 0 16px; }
 `;
 
-/*
- * auto-fit en vez de un número fijo de columnas: en el teléfono cae a una sola,
- * en tablet a dos, y en pantalla grande a cuatro, sin escribir tres media
- * queries que después haya que mantener en paralelo.
- */
+// auto-fit en vez de un número fijo de columnas: en el teléfono cae a una sola, en tablet a dos, y
+// en pantalla grande a cuatro, sin escribir tres media queries que después haya que mantener en
+// paralelo.
 const Columnas = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -95,11 +74,9 @@ const Frase = styled.p`
   max-width: 34ch;
 `;
 
-/*
- * El enlace a la página de presentación. Va pegado a la frase de la marca
- * porque es eso: "así es la tienda", contado largo. En el color de acción y
- * con la flechita hacia afuera, que avisa que se abre en otra pestaña.
- */
+// El enlace a la página de presentación. Va pegado a la frase de la marca porque es eso: "así es
+// la tienda", contado largo. En el color de acción y con la flechita hacia afuera, que avisa que
+// se abre en otra pestaña.
 const EnlaceLanding = styled.a`
   display: inline-flex;
   align-items: center;
@@ -170,13 +147,9 @@ const Lista = styled.ul`
   gap: 10px;
 `;
 
-/*
- * Enlaces que solo cambian de COLOR al pasar el cursor, sin moverse.
- *
- * Un pie es una lista que se recorre con la vista de arriba abajo; si cada
- * renglón se corre al pasarle por encima, la columna entera parece temblar
- * mientras uno la lee.
- */
+// Enlaces que solo cambian de COLOR al pasar el cursor, sin moverse. Un pie es una lista que se
+// recorre con la vista de arriba abajo; si cada renglón se corre al pasarle por encima, la columna
+// entera parece temblar mientras uno la lee.
 const Enlace = styled.button`
   background: none;
   border: none;
@@ -205,11 +178,9 @@ const Cierre = styled.div`
   color: var(--tinta-tenue);
 `;
 
-/*
- * El enlace de lo legal. Va del tamaño del copyright que tiene al lado, porque
- * eso es lo que es: la letra pequeña del final. Pero subrayable y con color al
- * pasarle encima, para que se note que es un enlace y no un adorno.
- */
+// El enlace de lo legal. Va del tamaño del copyright que tiene al lado, porque eso es lo que es:
+// la letra pequeña del final. Pero subrayable y con color al pasarle encima, para que se note que
+// es un enlace y no un adorno.
 const EnlaceCierre = styled.button`
   background: none;
   border: none;

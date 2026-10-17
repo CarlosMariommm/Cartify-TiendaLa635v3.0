@@ -1,37 +1,5 @@
-/*
- * ============================================================
- * EL MODO PERSONAL — la app de quien trabaja en la tienda (ModoPersonal.js)
- * ============================================================
- * Lo que ve quien entró por "¿Trabajas en la tienda?". Depende de su cuenta:
- *
- *   - El ADMINISTRADOR tiene dos secciones: el Reparto (lo que antes era
- *     "Estoy trabajando" en la web) y el Panel, el mismo de la web dentro de
- *     la app (PanelWeb.js). Cambia entre ellas arriba.
- *   - El EMPLEADO ve solo el Reparto.
- *
- * Tiqui del panel ya no tiene sección propia: vive en el Panel, igual que en
- * la computadora (su burbuja en la esquina). Tener las dos era la misma
- * asistente repetida.
- *
- * Las secciones se quedan montadas aunque no se vean: cambiar al Panel no
- * corta la ubicación que se está compartiendo con un cliente (el reparto vive
- * aquí arriba, en useRepartoPersonal, y no dentro de su pantalla). El Panel
- * se monta la primera vez que se abre y desde ahí también se queda.
- *
- * LOS PEDIDOS NUEVOS. Mientras la sesión esté abierta, cada pedido que entra
- * suena en este teléfono (hooks/useAvisosPersonal.js). Al tocar el aviso: a
- * domicilio, al Reparto; para recoger o impresión, a Pedidos del panel (el
- * empleado, que no tiene panel, al Reparto). Al cerrar sesión se deja de
- * recibirlos, y eso se dice en la pregunta de salir.
- *
- * EL AVISO DEL PANEL. En el teléfono el panel funciona, pero tiene tablas y
- * formularios pensados para pantallas amplias: la primera vez que se abre en
- * la sesión se le avisa y se le recomienda una tablet o una computadora. En
- * la tablet no hace falta avisar.
- *
- * La tienda no está: para comprar se sale del modo personal.
- * ============================================================
- */
+// EL MODO PERSONAL — la app de quien trabaja en la tienda (ModoPersonal.js)
+// Lo que ve quien entró por "¿Trabajas en la tienda?".
 
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -121,11 +89,9 @@ const ModoPersonal = () => {
     }
   };
 
-  /*
-   * Los pedidos nuevos. Al llegar, el Reparto se pone al día sin esperar su
-   * vuelta; al tocarlo, se va a donde está ese pedido. Los oyentes se ponen
-   * una vez y leen lo de este momento por la referencia.
-   */
+  // Los pedidos nuevos. Al llegar, el Reparto se pone al día sin esperar su vuelta; al tocarlo, se
+  // va a donde está ese pedido. Los oyentes se ponen una vez y leen lo de este momento por la
+  // referencia.
   const avisos = useAvisosPersonal();
   const alTocarAviso = useRef(null);
   alTocarAviso.current = (datos) => {
@@ -147,14 +113,8 @@ const ModoPersonal = () => {
     };
   }, []);
 
-  /*
-   * La píldora del selector: UNA sola vista que viaja de una opción a la otra,
-   * como la de la barra de abajo de la tienda. Lleva dentro una copia de las
-   * opciones en blanco que se corre al revés de lo que ella avanza, así que
-   * esa copia queda quieta en su lugar y la píldora solo la va destapando: el
-   * texto se pone blanco justo donde ella pasa, no de golpe antes de que
-   * llegue. Hasta que `onLayout` no mide el selector no hay dónde pararla.
-   */
+  // La píldora del selector: UNA sola vista que viaja de una opción a la otra, como la de la barra
+  // de abajo de la tienda.
   const movimientoReducido = useMovimientoReducido();
   const [anchoSelector, setAnchoSelector] = useState(0);
   const pildoraX = useRef(new Animated.Value(0)).current;
@@ -195,12 +155,9 @@ const ModoPersonal = () => {
     salir();
   };
 
-  /*
-   * La versión nueva de la app, en cuanto está lista (ver
-   * hooks/useActualizacionApp.js). Se aplica con un toque y no sola: si
-   * alguien va repartiendo, reiniciar le cortaría el viaje un momento, y eso
-   * se pregunta antes.
-   */
+  // La versión nueva de la app, en cuanto está lista (ver hooks/useActualizacionApp.js). Se aplica
+  // con un toque y no sola: si alguien va repartiendo, reiniciar le cortaría el viaje un momento, y
+  // eso se pregunta antes.
   const actualizacion = useActualizacionApp();
   const [confirmarActualizar, setConfirmarActualizar] = useState(false);
   const actualizar = () => {
@@ -265,10 +222,8 @@ const ModoPersonal = () => {
               </Pressable>
             ))}
 
-            {/*
-              Va encima de las opciones pero no les roba el toque, y el lector
-              de pantalla no la lee: las opciones de verdad son las de abajo.
-            */}
+            {/* Va encima de las opciones pero no les roba el toque, y el lector de pantalla no la lee: las
+               opciones de verdad son las de abajo. */}
             {anchoSelector > 0 && (
               <Animated.View
                 pointerEvents="none"

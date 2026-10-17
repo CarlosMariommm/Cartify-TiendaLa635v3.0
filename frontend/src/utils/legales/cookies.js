@@ -1,18 +1,5 @@
-/*
- * ============================================================
- * POLÍTICA DE COOKIES — legales/cookies.js
- * ============================================================
- * Qué guarda el navegador cuando se usa la tienda, para qué y cuánto dura.
- *
- * Las tablas salen del código real: las cookies son las que pone el servidor
- * (grep "res.cookie" en backend/src) y el almacenamiento local, las llaves que
- * usa la web. Si se agrega una cookie o una llave nueva, va aquí.
- *
- * La única categoría opcional hoy son las analíticas (Vercel Web Analytics),
- * que ni siquiera usan cookies: aun así solo se cargan si la persona las
- * acepta en el aviso (components/UI/AvisoCookies.jsx).
- * ============================================================
- */
+// POLÍTICA DE COOKIES — legales/cookies.js
+// Qué guarda el navegador cuando se usa la tienda, para qué y cuánto dura.
 
 export const LLAVE_CONSENTIMIENTO_COOKIES = 'la635_consentimiento_cookies';
 

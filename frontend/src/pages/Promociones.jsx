@@ -21,14 +21,8 @@ const TIPOS = [
 // En qué está cada una, como lo dice su tarjeta.
 const estadoDe = (promo) => (promoVencida(promo) ? 'Vencidas' : promo.isActive ? 'Activas' : 'Inactivas');
 
-/*
- * Promociones (Admin) — banners/anuncios de la tienda. El gerente sube una
- * imagen, le pone descuento y elige los productos; en la tienda aparece como
- * banner y al hacer click lleva a esos productos.
- */
-// Etiqueta corta del tipo de promo para la tarjeta.
-// El ahorro real ("-25%", "$1.25", "2x1") sale del helper compartido, así el
-// admin y la tienda muestran siempre lo mismo.
+// Promociones (Admin) — los banners de la tienda: imagen, descuento y productos; en la tienda
+// llevan a esos productos. El ahorro ("-25%", "$1.25", "2x1") sale del helper compartido.
 
 const Promociones = () => {
   const [promos, setPromos] = useState([]);
@@ -151,12 +145,7 @@ const Promociones = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {visibles.map((promo, i) => (
             <div key={promo._id} style={{ '--i': i }} className="card-in bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              {/*
-                La MISMA tarjeta que ve el cliente. Antes esto pintaba la
-                imagen a secas y las promos dibujadas con CSS —que ya son la
-                mayoría— salían como "Sin banner", aunque en la tienda se
-                vieran perfectas.
-              */}
+              {/* La MISMA tarjeta que ve el cliente. */}
               <div className="p-3 pb-0">
                 <PromoCard
                   promo={promo}

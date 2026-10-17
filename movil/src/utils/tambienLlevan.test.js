@@ -1,10 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { elegirTambienLlevan } from './tambienLlevan';
 
-/*
- * Qué sale en "Quien compra esto también lleva" de la ficha: lo del servidor,
- * cruzado con el catálogo que ya tiene la app.
- */
+// Qué sale en "Quien compra esto también lleva" de la ficha: lo del servidor, cruzado con el
+// catálogo que ya tiene la app.
 
 const CATALOGO = [
   { id: 'pan', nombre: 'Pan', stock: 10 },

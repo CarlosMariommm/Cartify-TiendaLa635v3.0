@@ -7,26 +7,9 @@ import { apagarTutoriales, diapositivasDe, marcarVisto, tocaTutorial } from '../
 import { useTurno } from '../../utils/turnoPanel';
 import { modalTransition } from '../../utils/motion';
 
-/*
- * ============================================================
- * EL TUTORIAL DE CADA APARTADO — TutorialApartado.jsx
- * ============================================================
- * La primera vez que el administrador entra a un apartado del panel
- * (Pedidos, Inventario, Promociones…), le sale un recorrido corto: para qué
- * sirve, los pasos uno por uno y un consejo. Igual que la invitación a
- * enlazar los proveedores: una ventanita encima, que se cierra cuando quiera.
- *
- *   "Siguiente" / "Anterior"   recorren los pasos (también con las flechas).
- *   "Entendido" o "Saltar"      lo cierran; ese apartado ya no lo vuelve a mostrar.
- *   "Ver la ayuda completa"     lleva al tema de la Ayuda, con todo el detalle.
- *   "No mostrar más tutoriales" ninguno vuelve a salir solo.
- *
- * El contenido sale de la ayuda del panel (ver utils/tutorialesPanel.js). Se
- * espera un momento al entrar: quien solo pasa por un apartado camino a
- * otro no recibe un tutorial que no pidió. Y sale de a uno con la
- * invitación de proveedores (ver utils/turnoPanel.js).
- * ============================================================
- */
+// EL TUTORIAL DE CADA APARTADO — TutorialApartado.jsx
+// La primera vez que el administrador entra a un apartado del panel (Pedidos, Inventario,
+// Promociones…), le sale un recorrido corto: para qué sirve, los pasos uno por uno y un consejo.
 
 const ESPERA_MS = 700;
 

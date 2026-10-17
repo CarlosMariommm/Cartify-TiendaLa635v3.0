@@ -1,18 +1,6 @@
-/*
- * ============================================================
- * PREFERENCIAS — cómo se ve la app para esta persona
- * ============================================================
- * La de `frontend/src/pages/cliente/Preferencias.jsx`. Por ahora: claro,
- * oscuro o igual que el teléfono. Se guarda en este teléfono y no en la
- * cuenta —ver utils/modo.js— así que cambiarlo aquí se ve al instante en toda
- * la app, sin botón de guardar.
- *
- * Cada opción lleva un dibujito de la tienda en ese modo: "oscuro" dicho en
- * palabras no dice cuánto cambia; viéndolo se elige en un segundo. Van una
- * debajo de otra con el dibujito chico a la izquierda, como la web en el
- * teléfono.
- * ============================================================
- */
+// PREFERENCIAS — cómo se ve la app para esta persona
+// La de `frontend/src/pages/cliente/Preferencias.jsx`. Por ahora: claro, oscuro o igual que el
+// teléfono.
 
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { ClipPath, Defs, G, Polygon, Rect } from 'react-native-svg';
@@ -25,10 +13,8 @@ import { useIdioma } from '../../context/IdiomaContext';
 import { IDIOMAS } from '../../utils/idioma';
 import { contenidoCentrado } from '../../theme/pantalla';
 
-/*
- * Los colores de los dibujitos van FIJOS a propósito: la miniatura de "Claro"
- * tiene que verse clara aunque la app ya esté en oscuro, y al revés.
- */
+// Los colores de los dibujitos van FIJOS a propósito: la miniatura de "Claro" tiene que verse
+// clara aunque la app ya esté en oscuro, y al revés.
 const CLARO = { fondo: '#FFFFFF', barra: '#F5F5F5', tarjeta: '#EFEFEF', texto: '#1C1614', marca: '#003049' };
 const OSCURO = { fondo: '#121417', barra: '#1F2328', tarjeta: '#23272C', texto: '#ECEEF0', marca: '#0F80BA' };
 
@@ -132,11 +118,8 @@ const Preferencias = ({ alVolver }) => {
           })}
         </View>
 
-        {/*
-          El idioma, como la web. Cada opción va escrita en su propio idioma
-          ("English", no "Inglés"): quien no lee español tiene que poder
-          encontrarla.
-        */}
+        {/* El idioma, como la web. Cada opción va escrita en su propio idioma ("English", no "Inglés"):
+           quien no lee español tiene que poder encontrarla. */}
         <Text style={[estilos.seccion, estilos.seccionSiguiente]}>{t('Idioma')}</Text>
         <Text style={estilos.explicacion}>
           {t('En qué idioma se ve la tienda. Los nombres de los productos quedan como la tienda los escribió.')}

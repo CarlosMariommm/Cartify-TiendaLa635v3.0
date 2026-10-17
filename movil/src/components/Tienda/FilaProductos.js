@@ -1,18 +1,6 @@
-/*
- * ============================================================
- * FILA DE PRODUCTOS
- * ============================================================
- * Una sección de la portada: su título, su bajada, y los productos
- * deslizándose de lado. El equivalente de `FilaProductos.jsx` en la web.
- *
- * El título y "Ver todos" llevan al MISMO sitio a propósito: son dos puertas a
- * lo mismo, y la gente toca el título tanto como el enlace.
- *
- * El total va en el enlace y no suelto ("Ver todos (24)"): saber que hay 24 es
- * lo que hace que valga la pena entrar. "Ver todos" a secas puede ser una
- * pantalla con los mismos cinco que ya se están viendo.
- * ============================================================
- */
+// FILA DE PRODUCTOS
+// Una sección de la portada: su título, su bajada, y los productos deslizándose de lado. El
+// equivalente de `FilaProductos.jsx` en la web.
 
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useEstilos } from '../../context/ModoContext';

@@ -3,11 +3,9 @@ import {
   construirInventario, construirResumenTienda, etiquetaDeSerie, resumenDeLaTienda, resumenDelInventario,
 } from './reportesTienda';
 
-/*
- * Los reportes del tablero con el formato del reporte predictivo: el
- * resumen en palabras y que el PDF salga completo, con el encabezado de la
- * tienda. Los datos tienen la forma de GET /dashboard/summary e inventario.
- */
+// Los reportes del tablero con el formato del reporte predictivo: el resumen en palabras y que el
+// PDF salga completo, con el encabezado de la tienda. Los datos tienen la forma de GET
+// /dashboard/summary e inventario.
 
 const RESUMEN = {
   pedidosHoy: { valor: 5, variacion: 25 },

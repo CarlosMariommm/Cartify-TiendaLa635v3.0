@@ -1,26 +1,6 @@
-/*
- * ============================================================
- * FAVORITOS — el corazón de las tarjetas
- * ============================================================
- * Copia del contrato de `useFavoritos` en la web: `esFavorito(id)` y
- * `alternar(id, nombre)`.
- *
- * ── Vive en la cuenta, no en el teléfono ──
- *
- * Y eso es a propósito, aunque ahora que hay expo-secure-store guardarlos aquí
- * sería fácil. Guardados en el teléfono se pierden al cambiar de aparato, y
- * obligan a resolver el choque el día que la persona entra y ya tenía otros en
- * su cuenta. Marcar favoritos es de quien tiene cuenta. (El carrito sí se
- * guarda local, y por la razón contraria: se llena ANTES de tener cuenta.)
- *
- * ── El corazón se pinta antes de que conteste el servidor ──
- *
- * Un corazón que tarda medio segundo en encenderse se siente roto, y en un
- * teléfono con datos móviles ese medio segundo son dos. Se pinta al instante y
- * se revierte si la petición falla: mejor un corazón que vuelve atrás con su
- * aviso que una mentira guardada en pantalla.
- * ============================================================
- */
+// FAVORITOS — el corazón de las tarjetas
+// Copia del contrato de `useFavoritos` en la web: `esFavorito(id)` y `alternar(id, nombre)`. ──
+// Vive en la cuenta, no en el teléfono ──
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { getFavoritos, alternarFavorito } from '../api/favoritosApi';
@@ -49,11 +29,8 @@ export const FavoritosProvider = ({ children, alPedirSesion }) => {
       const lista = await getFavoritos(user.id);
       setIds((Array.isArray(lista) ? lista : []).map((p) => String(p._id)));
     } catch {
-      /*
-       * Que falle la lista de favoritos no puede tumbar la tienda. Los
-       * corazones salen apagados, que es un estado honesto: no sabemos cuáles
-       * marcó, así que no encendemos ninguno.
-       */
+      // Que falle la lista de favoritos no puede tumbar la tienda. Los corazones salen apagados, que es
+      // un estado honesto: no sabemos cuáles marcó, así que no encendemos ninguno.
     }
   }, [esCliente, user?.id]);
 

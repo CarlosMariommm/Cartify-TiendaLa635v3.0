@@ -3,13 +3,9 @@ import { useNotifications } from '../../hooks/useNotifications';
 import { CargandoMascota } from '../../components/UI/Mascota';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * Notificaciones — el cliente elige qué le avisamos y por dónde (área "Mi
- * Cuenta"). Cada aviso tiene su interruptor en la app (el teléfono) y, si lo
- * hay, por correo: apagar uno no toca al otro. Es la misma lista que la de
- * la app (movil/src/pages/cuenta/Notificaciones.js): escriben en el mismo
- * documento. La lógica vive en useNotifications.
- */
+// Notificaciones — el cliente elige qué le avisamos y por dónde (área "Mi Cuenta"). Cada aviso
+// tiene su interruptor en la app (el teléfono) y, si lo hay, por correo: apagar uno no toca al
+// otro.
 
 // Interruptor tipo "switch" reutilizable, temeable.
 const Toggle = ({ on, onClick, colors, label }) => (
@@ -32,11 +28,9 @@ const Toggle = ({ on, onClick, colors, label }) => (
   </button>
 );
 
-/*
- * `app`: la clave en avisosApp. `correo`: la de notificationPrefs, solo si ese
- * aviso también sale por correo. "Sale o está listo" usa `pedidoCerca`, el
- * correo de siempre de "tu pedido va en camino".
- */
+// `app`: la clave en avisosApp. `correo`: la de notificationPrefs, solo si ese aviso también sale
+// por correo. "Sale o está listo" usa `pedidoCerca`, el correo de siempre de "tu pedido va en
+// camino".
 const GRUPOS = [
   {
     titulo: 'Ofertas y novedades',

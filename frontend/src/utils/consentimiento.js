@@ -1,24 +1,9 @@
 import { LLAVE_CONSENTIMIENTO_COOKIES } from './legales/cookies';
 import { VERSION_LEGAL } from './legales';
 
-/*
- * ============================================================
- * EL CONSENTIMIENTO DE COOKIES — consentimiento.js
- * ============================================================
- * Qué eligió la persona en el aviso de cookies. Hoy hay una sola categoría
- * opcional: las analíticas (Vercel Web Analytics). Lo necesario —la sesión,
- * el carrito— no se pregunta: sin eso la tienda no funciona, y la política de
- * cookies lo explica.
- *
- * Vive en localStorage y NO en un estado de React porque lo leen tres
- * lugares que no se conocen: el aviso, el pie ("Configurar cookies") y las
- * analíticas, que lo vuelven a mirar ANTES DE CADA ENVÍO para que retirar el
- * permiso surta efecto en el acto, sin recargar.
- *
- * Dura 12 meses: después se vuelve a preguntar, que es lo razonable para un
- * permiso que la persona dio una vez y pudo olvidar.
- * ============================================================
- */
+// EL CONSENTIMIENTO DE COOKIES — consentimiento.js
+// Qué eligió la persona en el aviso de cookies. Hoy hay una sola categoría opcional: las
+// analíticas (Vercel Web Analytics).
 
 const VIGENCIA_MS = 365 * 24 * 60 * 60 * 1000;
 const EVENTO_CAMBIO = 'la635:consentimiento';

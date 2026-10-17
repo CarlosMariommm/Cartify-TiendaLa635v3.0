@@ -6,16 +6,9 @@ import { soloPersonal } from "../middlewares/validarSesion.js";
 
 const router = express.Router();
 
-/*
- * Estas rutas gastan cuota de Gemini (y la voz, créditos de ElevenLabs):
- * abiertas, cualquiera podía quemarle la cuota del día a la tienda con un
- * bucle.
- *
- * Las del asistente se quedan públicas porque las usa el kiosco, que a
- * propósito NO tiene sesión. Por eso llevan un tope por persona: alcanza de
- * sobra para una charla (una frase cada par de segundos) y corta un bucle.
- * Las otras dos las llama solo el panel.
- */
+// Estas rutas gastan cuota de Gemini (y la voz, créditos de ElevenLabs): abiertas, cualquiera
+// podía quemarle la cuota del día a la tienda con un bucle. Las del asistente se quedan públicas
+// porque las usa el kiosco, que a propósito NO tiene sesión.
 const topeCharla = rateLimit({
     windowMs: 60 * 1000,
     max: 40,

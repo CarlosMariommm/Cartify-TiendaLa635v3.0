@@ -1,25 +1,6 @@
-/*
- * ============================================================
- * SONIDOS DEL RETO DE TIQUI — sonidosJuego.js
- * ============================================================
- * Todo lo que suena en el juego del stand, menos la voz de Tiqui:
- *
- *   · la MÚSICA de fondo: una alegre para llamar gente (inicio y ruleta) y
- *     una de suspenso, más quieta, mientras se piensa la respuesta. Baja sola
- *     cuando Tiqui habla, para que se le entienda;
- *   · los EFECTOS: toques, la pregunta que aparece, la moneda del acierto, el
- *     error, el reloj y la chicharra del tiempo, el redoble y el platillo de
- *     la ruleta, aplausos, fanfarrias y el trombón triste de cuando se pierde.
- *
- * Se generan aquí mismo con osciladores y ruido (Web Audio): no hay archivos
- * que bajar, funcionan sin internet y no gastan nada. La música y los efectos
- * se apagan por separado desde el panel del operador.
- *
- * El navegador no deja sonar nada hasta que alguien toca la pantalla o una
- * tecla: el primer toque despierta el audio (ver despertarAudio) y desde ahí
- * la música del inicio suena sola.
- * ============================================================
- */
+// SONIDOS DEL RETO DE TIQUI — sonidosJuego.js
+// La música de fondo y los efectos del juego del stand, hechos con Web Audio en el navegador (sin
+// archivos). La voz de Tiqui va aparte.
 
 let contexto = null;
 let efectosEncendidos = true;
@@ -54,11 +35,9 @@ const bufferDeRuido = (c) => {
 
 const hz = (midi) => 440 * 2 ** ((midi - 69) / 12);
 
-/*
- * Una nota que sube rápido y se apaga sola (sin el "clic" de cortar en seco).
- *   cuando: segundos desde ahora (o un instante exacto con `en`).
- *   hasta: frecuencia final, para deslizar.   ataque: cuánto tarda en sonar.
- */
+// Una nota que sube rápido y se apaga sola (sin el "clic" de cortar en seco). cuando: segundos
+// desde ahora (o un instante exacto con `en`). hasta: frecuencia final, para deslizar. ataque:
+// cuánto tarda en sonar.
 const nota = (c, frecuencia, cuando, duracion, { tipo = 'sine', volumen = 0.16, hasta, ataque = 0.012, en, destino, vibrato } = {}) => {
   const t0 = en ?? c.currentTime + cuando;
   const osc = c.createOscillator();
@@ -221,10 +200,8 @@ export const sonarSecreto = () => tocar((c) => {
   aplauso(c, 0.4, 3, 1.4);
 });
 
-/*
- * El redoble mientras gira la ruleta: ruido de caja con un temblor rápido que
- * va creciendo. Se detiene con pararRedoble (o solo, a los `segundos`).
- */
+// El redoble mientras gira la ruleta: ruido de caja con un temblor rápido que va creciendo. Se
+// detiene con pararRedoble (o solo, a los `segundos`).
 let redoble = null;
 
 export const pararRedoble = () => {
@@ -271,10 +248,8 @@ export const empezarRedoble = (segundos = 8) => tocar((c) => {
 
 // ── La música ──
 
-/*
- * Cada pista es un bucle de semicorcheas: `tocar` recibe el paso del bucle y
- * el instante exacto en que suena, y programa lo que toca en ese paso.
- */
+// Cada pista es un bucle de semicorcheas: `tocar` recibe el paso del bucle y el instante exacto en
+// que suena, y programa lo que toca en ese paso.
 const bombo = (c, d, t, v = 0.2) => nota(c, 140, 0, 0.16, { en: t, volumen: v, hasta: 45, destino: d });
 const caja = (c, d, t, v = 0.05) => soplo(c, 0, 0.12, { en: t, frecuencia: 1800, volumen: v, destino: d });
 const platillito = (c, d, t, v = 0.02) => soplo(c, 0, 0.04, { en: t, frecuencia: 8000, volumen: v, destino: d });
@@ -393,10 +368,8 @@ const callarMusica = (luego) => {
   }, 350);
 };
 
-/*
- * Pone la pista ('alegre', 'tension') o la calla (null). Si ya suena esa,
- * no la reinicia: pasar de una pregunta a otra no corta la música.
- */
+// Pone la pista ('alegre', 'tension') o la calla (null). Si ya suena esa, no la reinicia: pasar de
+// una pregunta a otra no corta la música.
 export const tocarMusica = (pista) => {
   const quiere = musicaEncendida ? pista : null;
   if (quiere === musica.deseada) return;

@@ -1,17 +1,5 @@
-/*
- * ============================================================
- * TARJETAS — tarjetas.js
- * ============================================================
- * Copia de `frontend/src/utils/tarjetas.js`. Es JavaScript puro —cuentas y
- * texto, nada de navegador— así que se porta tal cual: reconocer la marca por
- * los primeros dígitos, separar el número en grupos mientras se escribe, saber
- * si el número es válido (algoritmo de Luhn, el mismo dígito verificador que
- * traen todas las tarjetas) y revisar que no esté vencida.
- *
- * NADA DE ESTO SALE DEL TELÉFONO. Con el número completo solo se calcula; al
- * servidor viajan la marca, los últimos 4, el titular y el vencimiento.
- * ============================================================
- */
+// TARJETAS — tarjetas.js
+// Copia de `frontend/src/utils/tarjetas.js`.
 
 export const soloDigitos = (texto) => String(texto || '').replace(/\D/g, '');
 
@@ -103,10 +91,8 @@ export const vencimientoEnTexto = (mes, anio) =>
 export const LARGO_NUMERO = 19;
 export const LARGO_VENCIMIENTO = 5; // MM/AA
 
-/*
- * "Visa crédito", "Mastercard débito"… o "Tarjeta" para las guardadas antes de
- * que la app supiera de marcas. Igual que en la web (MetodoPago.jsx).
- */
+// "Visa crédito", "Mastercard débito"… o "Tarjeta" para las guardadas antes de que la app supiera
+// de marcas. Igual que en la web (MetodoPago.jsx).
 const sinTraducir = (texto, vars) => (vars ? texto.replace(/\{(\w+)\}/g, (m, k) => vars[k] ?? m) : texto);
 
 // `t` (de useIdioma) para mostrarlo en el idioma de la tienda; sin él sale en español.

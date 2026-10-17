@@ -5,33 +5,9 @@ import { pasosDe, indiceDePaso } from '../../utils/pasosPedido';
 import MapaSeguimiento from './MapaSeguimiento';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * ============================================================
- * SEGUIMIENTO COMPACTO — SeguimientoCompacto.jsx
- * ============================================================
- * Por dónde va el pedido, en el alto de una tarjeta.
- *
- * POR QUÉ EXISTE
- * "Mis pedidos" era la única pantalla donde se ven pedidos EN CURSO y no
- * decía nada de por dónde iban: una etiqueta de estado ("Pagado") y un enlace
- * a otra pantalla. Para saber si su pedido ya salió, el cliente tenía que
- * entrar a cada uno. La burbuja y la confirmación del pago sí lo mostraban;
- * la lista, no.
- *
- * QUÉ MUESTRA
- * La línea de tiempo siempre y, cuando el repartidor ya salió y está
- * compartiendo su punto, cuánto falta MÁS el mapa en vivo — que es lo que de
- * verdad se viene a mirar mientras uno espera.
- *
- * El mapa se pinta SOLO en el pedido que va en camino, nunca en todas las
- * tarjetas. La diferencia importa: cinco mapas de Leaflet montados a la vez en
- * una lista arrastran un teléfono, y en la práctica solo hay un pedido en la
- * calle a la vez. Así se ve el seguimiento sin pagar el precio de la lista.
- *
- * Se calla solo en los pedidos entregados o cancelados: ahí ya no hay nada que
- * seguir y la tarjeta se queda con su historial, que es lo que toca.
- * ============================================================
- */
+// SEGUIMIENTO COMPACTO — SeguimientoCompacto.jsx
+// Por dónde va el pedido, en el alto de una tarjeta. Para saber si su pedido ya salió, el cliente
+// tenía que entrar a cada uno.
 const SeguimientoCompacto = ({ pedido }) => {
   const { palette } = useTheme();
   const c = palette.colors;
@@ -39,12 +15,9 @@ const SeguimientoCompacto = ({ pedido }) => {
 
   const enCurso = ['pagado', 'preparando', 'en_camino', 'listo'].includes(pedido?.status);
 
-  /*
-   * El hook va SIEMPRE, aunque el pedido esté entregado: llamarlo dentro de un
-   * `if` rompe la regla de los hooks de React. El segundo argumento es el que
-   * decide si de verdad sale a preguntar, así que un pedido terminado no gasta
-   * ni una petición.
-   */
+  // El hook va SIEMPRE, aunque el pedido esté entregado: llamarlo dentro de un `if` rompe la regla
+  // de los hooks de React. El segundo argumento es el que decide si de verdad sale a preguntar, así
+  // que un pedido terminado no gasta ni una petición.
   const seguimiento = useSeguimientoEnVivo(pedido?._id, !!enCurso);
 
   if (!pedido || !enCurso) return null;
@@ -93,12 +66,9 @@ const SeguimientoCompacto = ({ pedido }) => {
         })}
       </div>
 
-      {/*
-        Cuánto falta, solo cuando de verdad hay alguien moviéndose y mandando
-        su punto. Sin esa comprobación se mostraría una cuenta regresiva
-        calculada sobre una posición vieja, que es peor que no mostrar nada:
-        el cliente sale a la puerta y no hay nadie.
-      */}
+      {/* Cuánto falta, solo cuando de verdad hay alguien moviéndose y mandando su punto. Sin esa
+         comprobación se mostraría una cuenta regresiva calculada sobre una posición vieja, que es peor
+         que no mostrar nada: el cliente sale a la puerta y no hay nadie. */}
       {enCamino && (
         <div
           className="flex items-center gap-2 mt-2.5 px-3 py-2 rounded-xl text-xs"
@@ -122,11 +92,8 @@ const SeguimientoCompacto = ({ pedido }) => {
         </div>
       )}
 
-      {/*
-        El mapa, aquí mismo. Va debajo del "cuánto falta" porque primero se
-        quiere el dato y después el dibujo: quien mira esto en la puerta ya
-        sabe que viene, lo que quiere saber es por dónde.
-      */}
+      {/* El mapa, aquí mismo. Va debajo del "cuánto falta" porque primero se quiere el dato y después el
+         dibujo: quien mira esto en la puerta ya sabe que viene, lo que quiere saber es por dónde. */}
       {enCamino && (
         <div className="mt-2.5">
           <MapaSeguimiento

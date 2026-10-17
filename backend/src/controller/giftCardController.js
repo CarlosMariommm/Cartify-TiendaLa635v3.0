@@ -4,11 +4,9 @@ import clientModel from "../models/client.js";
 
 const giftCardController = {};
 
-/*
- * Alfabeto sin caracteres que se confunden al dictar o al leer una tarjeta
- * impresa: se van 0/O, 1/I/L y el 5/S. Quien recibe la tarjeta la teclea a
- * mano, y "¿es cero o ele?" es una llamada al negocio.
- */
+// Alfabeto sin caracteres que se confunden al dictar o al leer una tarjeta impresa: se van 0/O,
+// 1/I/L y el 5/S. Quien recibe la tarjeta la teclea a mano, y "¿es cero o ele?" es una llamada al
+// negocio.
 const ALFABETO = "ABCDEFGHJKMNPQRTUVWXY2346789";
 
 // Código tipo "635-A7K2-M9QX". Aleatorio de verdad (crypto), no correlativo:
@@ -118,15 +116,8 @@ giftCardController.redeemGiftCard = async (req, res) => {
 
     const codigo = String(code).trim().toUpperCase();
 
-    /*
-     * EL CANJE, EN UNA SOLA OPERACIÓN ATÓMICA.
-     *
-     * findOneAndUpdate busca y marca en el mismo paso, del lado de MongoDB.
-     * Si dos peticiones llegan a la vez con el mismo código, solo una va a
-     * encontrar isRedeemed:false y la otra se va con las manos vacías. Si esto
-     * se hiciera en dos pasos (buscar, después marcar), entre uno y otro cabe
-     * la segunda petición y la tarjeta se canjearía dos veces.
-     */
+    // EL CANJE, EN UNA SOLA OPERACIÓN ATÓMICA.
+    // findOneAndUpdate busca y marca en el mismo paso, del lado de MongoDB.
     const ahora = new Date();
     const tarjeta = await giftCardModel.findOneAndUpdate(
       {

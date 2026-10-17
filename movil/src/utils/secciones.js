@@ -1,28 +1,6 @@
-/*
- * ============================================================
- * SECCIONES DE LA PORTADA — secciones.js
- * ============================================================
- * Las filas se arman solas con el inventario: el empleado sube productos en el
- * panel y las secciones aparecen. Nadie configura nada.
- *
- * Copia de `useSeccionesTienda` en la web, con DOS de sus cuatro filas:
- *
- *   ✓ "Se están acabando"  : urgencia REAL, calculada contra el stock máximo
- *                            de cada producto. Nada de urgencia inventada.
- *   ✓ "Nuevos en la tienda": lo recién agregado.
- *
- *   ✗ "Volver a comprar"   : necesita los pedidos del cliente (/api/order), que
- *                            es un apartado que la app todavía no tiene.
- *   ✗ familias ("Quesos", "Bebidas energizantes"): salen del clasificador —
- *                            `utils/similitud.js` más el hook de IA— y son
- *                            otras 200 líneas y una llamada a Gemini.
- *
- * Las dos que sí están no piden nada que no esté ya cargado: salen del mismo
- * catálogo que pinta la cuadrícula.
- *
- * El orden importa y es el de la web: primero lo urgente, después lo temático.
- * ============================================================
- */
+// SECCIONES DE LA PORTADA — secciones.js
+// Las filas se arman solas con el inventario: el empleado sube productos en el panel y las
+// secciones aparecen. Nadie configura nada.
 
 const RATIO_POR_ACABARSE = 0.3; // 30% o menos de su tope
 const MINIMO_PARA_FILA = 4;     // menos de esto no llena la fila y se ve pobre
@@ -35,12 +13,9 @@ export const armarSecciones = (productos) => {
   const secciones = [];
 
   /* ── Se están acabando ── */
-  /*
-   * Contra el tope de CADA producto, no contra un número fijo. Cinco unidades
-   * son muchas para un producto del que normalmente hay seis, y son nada para
-   * uno del que hay doscientas: un umbral fijo llamaría urgente a lo que no lo
-   * es y se callaría lo que sí.
-   */
+  // Contra el tope de CADA producto, no contra un número fijo. Cinco unidades son muchas para un
+  // producto del que normalmente hay seis, y son nada para uno del que hay doscientas: un umbral
+  // fijo llamaría urgente a lo que no lo es y se callaría lo que sí.
   const porAcabarse = disponibles
     .filter((p) => p.stockMaximo > 0 && p.stock <= p.stockMaximo * RATIO_POR_ACABARSE)
     .sort((a, b) => a.stock / a.stockMaximo - b.stock / b.stockMaximo);
@@ -66,12 +41,9 @@ export const armarSecciones = (productos) => {
       titulo: 'Nuevos en la tienda',
       subtitulo: 'Lo último que llegó',
       productos: nuevos.slice(0, CUANTOS_EN_LA_FILA),
-      /*
-       * La fila muestra 12; la lista completa va aparte para "Ver todos". Se
-       * guardan las dos y no una sola con el corte hecho después, porque el
-       * corte de 12 es una decisión de la FILA (lo que vale la pena deslizar
-       * de lado), no de la sección.
-       */
+      // La fila muestra 12; la lista completa va aparte para "Ver todos". Se guardan las dos y no una
+      // sola con el corte hecho después, porque el corte de 12 es una decisión de la FILA (lo que vale
+      // la pena deslizar de lado), no de la sección.
       todos: nuevos,
     });
   }

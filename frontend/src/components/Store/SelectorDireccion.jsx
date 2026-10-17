@@ -6,45 +6,24 @@ import { useDireccionCtx } from '../../context/DireccionContext';
 import { useAuth } from '../../hooks/useAuth';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * ============================================================
- * SELECTOR DE DIRECCIÓN — el "entregar en" del encabezado
- * ============================================================
- * A la par del nombre de la tienda, dice a dónde va el pedido y deja
- * cambiarlo sin salir de comprar.
- *
- * Antes esto vivía escondido hasta el último paso del carrito, y arrancaba
- * siempre en la primera dirección guardada. Quien tiene dos (la casa y el
- * trabajo) tenía que acordarse de cambiarla justo cuando ya solo quería
- * pagar. Arriba se ve todo el tiempo, que es la única manera de que se note
- * cuando está equivocada.
- *
- * La lógica no vive aquí: el contexto manda. Este componente solo pinta.
- * ============================================================
- */
+// SELECTOR DE DIRECCIÓN — el "entregar en" del encabezado
+// A la par del nombre de la tienda, dice a dónde va el pedido y deja cambiarlo sin salir de
+// comprar.
 
 const BROWN = 'var(--marca-600)';
 
 const Zona = styled.div`
   position: relative;
   flex-shrink: 0;
-  /*
-   * Separado del nombre de la tienda con una línea: pegado se leía como si
-   * la dirección fuera parte del nombre del negocio.
-   */
+  /* Separado del nombre de la tienda con una línea: pegado se leía como si la dirección fuera parte
+     del nombre del negocio. */
   padding-left: 18px;
   margin-left: 4px;
   border-left: 1px solid var(--linea, #ebebeb);
 
-  /*
-   * En pantalla chica no cabe "Entregar en · Casa", pero tampoco se borra:
-   * queda el pin solo. Saber a dónde va el pedido —y poder cambiarlo— es de
-   * las pocas cosas que arruinan una entrega si se descubren tarde.
-   *
-   * El position static de abajo no es un descuido: suelta el panel de este
-   * botón para que se cuelgue del ENCABEZADO, y así puede abrirse de orilla a
-   * orilla en vez de salirse por la derecha de la pantalla.
-   */
+  /* En pantalla chica no cabe "Entregar en · Casa", pero tampoco se borra: queda el pin solo. Saber
+     a dónde va el pedido —y poder cambiarlo— es de las pocas cosas que arruinan una entrega si se
+     descubren tarde. */
   @media (max-width: 820px) {
     position: static;
     padding-left: 0;
@@ -135,15 +114,8 @@ const Panel = styled.div`
   z-index: 300;
   animation: cardIn 180ms var(--ease-out, ease);
 
-  /*
-   * De orilla a orilla y colgado del encabezado (ver la Zona de arriba).
-   * Anclado al botón se salía casi 50px por la derecha y arrastraba la página
-   * entera de lado.
-   *
-   * El alto también se limita: con cinco o seis direcciones guardadas el panel
-   * medía más que la pantalla y las últimas quedaban abajo, sin manera de
-   * alcanzarlas. Ahora se desplaza el panel, no la página.
-   */
+  /* De orilla a orilla y colgado del encabezado (ver la Zona de arriba). Anclado al botón se salía
+     casi 50px por la derecha y arrastraba la página entera de lado. */
   @media (max-width: 820px) {
     left: 16px;
     right: 16px;
@@ -190,14 +162,9 @@ const Agregar = styled(Opcion)`
   margin-top: 4px;
 `;
 
-/*
- * El aviso de dirección incompleta.
- *
- * Las direcciones viejas se guardaron como texto suelto, sin punto en el
- * mapa. Se entregan igual —el repartidor lee la calle— pero no se puede
- * seguir el pedido ni calcular cuánto falta. Vale más decirlo que dejar a la
- * persona esperando un mapa que nunca va a aparecer.
- */
+// El aviso de dirección incompleta. Las direcciones viejas se guardaron como texto suelto, sin
+// punto en el mapa. Se entregan igual —el repartidor lee la calle— pero no se puede seguir el
+// pedido ni calcular cuánto falta.
 const Aviso = styled.div`
   display: flex;
   align-items: flex-start;
@@ -240,21 +207,16 @@ const SelectorDireccion = () => {
   // seguimiento en vivo ni tiempo estimado, solo un texto para el repartidor.
   const sinPunto = (dir) => dir?.lat == null || dir?.lng == null;
 
-  /*
-   * El mapa es la única forma de dar de alta una dirección (así queda con
-   * coordenadas y el repartidor la encuentra). Al guardar vuelve a la tienda,
-   * no a Mi Cuenta: quien estaba comprando quiere seguir comprando.
-   */
+  // El mapa es la única forma de dar de alta una dirección (así queda con coordenadas y el
+  // repartidor la encuentra). Al guardar vuelve a la tienda, no a Mi Cuenta: quien estaba comprando
+  // quiere seguir comprando.
   const abrirMapa = () => {
     close();
     navigate('/bienvenida?volver=/store');
   };
 
-  /*
-   * Sin cuenta no hay direcciones que mostrar. Quien entra de curioso no
-   * tiene por qué ver un "Entregar en" vacío ni que le pidan una dirección
-   * antes de haber visto un solo precio.
-   */
+  // Sin cuenta no hay direcciones que mostrar. Quien entra de curioso no tiene por qué ver un
+  // "Entregar en" vacío ni que le pidan una dirección antes de haber visto un solo precio.
   if (user?.type !== 'client') return null;
 
   // Mientras carga no se pinta nada: un "Sin dirección" que parpadea y
@@ -263,12 +225,9 @@ const SelectorDireccion = () => {
 
   return (
     <Zona ref={ref}>
-      {/*
-        Dos líneas, como el logo de al lado: la etiqueta chiquita arriba y el
-        nombre de la dirección abajo. Sin icono — el pin solo repetía lo que
-        ya dice "Entregar en", y en un encabezado cada elemento de más le
-        quita aire al buscador.
-      */}
+      {/* Dos líneas, como el logo de al lado: la etiqueta chiquita arriba y el nombre de la dirección
+         abajo. Sin icono — el pin solo repetía lo que ya dice "Entregar en", y en un encabezado cada
+         elemento de más le quita aire al buscador. */}
       <Boton
         onClick={toggle}
         aria-expanded={isOpen}

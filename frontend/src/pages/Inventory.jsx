@@ -56,11 +56,9 @@ const Inventory = () => {
   // Además del stock (las tarjetas del resumen): activos, inactivos, sin foto…
   const [filtro, setFiltro] = useState('Todos');
 
-  /*
-   * "Stock bajo" es relativo al máximo de CADA producto, no un número fijo:
-   * que queden 10 refrescos de un máximo de 1000 es crítico, pero 10 televisores
-   * de un máximo de 12 es normal. Si el producto no tiene máximo, usamos 10.
-   */
+  // "Stock bajo" es relativo al máximo de CADA producto, no un número fijo: que queden 10 refrescos
+  // de un máximo de 1000 es crítico, pero 10 televisores de un máximo de 12 es normal. Si el
+  // producto no tiene máximo, usamos 10.
   const RATIO_BAJO = 0.25;
   const STOCK_BAJO_ABS = 10;
   const esBajo = (p) => {
@@ -151,11 +149,9 @@ const Inventory = () => {
       <div className="flex justify-between items-center flex-wrap gap-4">
         <h1 className="text-3xl sm:text-4xl font-extrabold text-[#066494]">Inventario</h1>
 
-        {/*
-          Buscador, orden y "Añadir producto" sumaban más de 600px en una fila
-          que no envolvía: en teléfono se salían de la pantalla. Ahora la barra
-          baja completa debajo del título y el buscador toma el ancho que haya.
-        */}
+        {/* Buscador, orden y "Añadir producto" sumaban más de 600px en una fila que no envolvía: en
+           teléfono se salían de la pantalla. Ahora la barra baja completa debajo del título y el buscador
+           toma el ancho que haya. */}
         <div className="flex flex-wrap gap-3 sm:gap-4 w-full sm:w-auto">
           <div className="relative flex-1 min-w-[12rem] sm:flex-none">
             <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -167,11 +163,8 @@ const Inventory = () => {
               className="pl-9 pr-4 py-2 bg-white border border-gray-300 rounded-full text-sm outline-none focus:border-[#003049] transition-colors w-full sm:w-64 shadow-sm"
             />
           </div>
-          {/*
-            El botón de ordenar heredó la píldora del filtro de stock (que ya
-            no está: filtrar ahora se hace clickeando las tarjetas del resumen,
-            que además dicen cuántos son antes de que uno filtre).
-          */}
+          {/* El botón de ordenar la lista; filtrar se hace tocando las tarjetas del resumen, que dicen
+             cuántos productos hay de cada tipo. */}
           <FilterSelect
             value={filtro}
             onChange={setFiltro}
@@ -210,12 +203,9 @@ const Inventory = () => {
 
       <ConsejoImportar onImportar={() => setImportando(true)} />
 
-      {/*
-        Resumen del inventario: contexto antes de la lista, y de paso el filtro.
-        Que "Agotados: 7" no se pueda tocar es una crueldad pequeña: el número
-        que le preocupa al encargado ya está ahí, lo natural es clickearlo para
-        ver cuáles son. Volver a clickear la tarjeta activa quita el filtro.
-      */}
+      {/* Resumen del inventario: contexto antes de la lista, y de paso el filtro. Que "Agotados: 7" no se
+         pueda tocar es una crueldad pequeña: el número que le preocupa al encargado ya está ahí, lo
+         natural es clickearlo para ver cuáles son. Volver a clickear la tarjeta activa quita el filtro. */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Productos', valor: products.length, tono: 'text-gray-900', filtro: 'Todos' },
@@ -278,11 +268,8 @@ const Inventory = () => {
             />
           ))}
           {filteredProducts.length === 0 && (
-            /*
-              col-span-full y no col-span-2: en teléfono la grilla tiene UNA
-              columna, y pedir dos le inventaba una segunda que ensanchaba la
-              página aunque estuviera vacía.
-            */
+            // col-span-full y no col-span-2: en teléfono la grilla tiene UNA columna, y pedir dos le inventaba
+            // una segunda que ensanchaba la página aunque estuviera vacía.
             <div className="col-span-full text-center py-14">
               <p className="text-gray-800 font-semibold mb-1">No hay productos que coincidan</p>
               <p className="text-gray-500 text-sm">Prueba con otra búsqueda, categoría o filtro.</p>

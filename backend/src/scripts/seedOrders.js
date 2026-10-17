@@ -1,17 +1,6 @@
-/*
- * Seed de PEDIDOS de prueba (Opción B).
- *
- * Crea unos pedidos de cliente para poder ver funcionando "Mis Pedidos",
- * la pantalla del empleado y los puntos de fidelidad — mientras el checkout
- * real de la tienda llega en la fase del Asistente de Voz.
- *
- * Cómo correrlo:
- *   cd backend
- *   node src/scripts/seedOrders.js
- *
- * Toma un cliente y unos productos que YA existan en tu base. Si no hay,
- * te avisa qué falta.
- */
+// Seed de PEDIDOS de prueba (Opción B). Crea unos pedidos de cliente para poder ver funcionando
+// "Mis Pedidos", la pantalla del empleado y los puntos de fidelidad — mientras el checkout real de
+// la tienda llega en la fase del Asistente de Voz.
 import dotenv from "dotenv";
 dotenv.config();
 import mongoose from "mongoose";

@@ -5,22 +5,9 @@ import { useAuth } from '../hooks/useAuth';
 import { kioscoService } from '../api/kioscoService';
 import { useIdioma } from '../hooks/useIdioma';
 
-/*
- * ============================================================
- * VINCULAR KIOSCO — lo que abre el teléfono al escanear el QR
- * ============================================================
- * Es la mitad del cliente: el kiosco muestra el código, y esta pantalla
- * —abierta en SU teléfono, donde ya inició sesión— lo reclama.
- *
- * Todo el diseño responde a que se lee de pie, en dos segundos, con una
- * mano y con alguien esperando atrás en la fila: una sola pregunta y un
- * botón grande.
- *
- * Nunca vincula sola. Aunque bastaría con abrir el enlace, la confirmación
- * existe porque un QR es algo que uno escanea sin leer: si la compra se
- * pegara a la cuenta con solo apuntar la cámara, cualquier código puesto en
- * la pared le cargaría a alguien una compra ajena.
- */
+// VINCULAR KIOSCO — lo que abre el teléfono al escanear el QR
+// Es la mitad del cliente: el kiosco muestra el código, y esta pantalla —abierta en SU teléfono,
+// donde ya inició sesión— lo reclama.
 const VincularKiosco = () => {
   const { codigo } = useParams();
   const navigate = useNavigate();

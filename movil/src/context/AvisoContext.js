@@ -1,40 +1,6 @@
-/*
- * ============================================================
- * AVISOS — el reemplazo de react-hot-toast
- * ============================================================
- * La tienda web avisa con toasts en media docena de momentos: al agregar algo
- * al carrito, al sacarlo, cuando ya no hay stock, cuando el carrito guardado
- * se corrigió solo. No son adornos — el de agregar, en particular, DICE CUÁNTAS
- * unidades lleva, porque al segundo toque el texto era idéntico y no había
- * forma de saber si el toque había contado.
- *
- * `react-hot-toast` es del navegador y no corre aquí. En vez de traer una
- * librería de toasts para React Native, esto es un texto que aparece abajo,
- * se queda un momento y se va.
- *
- * ── La misma píldora que la web ──
- *
- * Píldora oscura con un círculo de color a la izquierda, que entra con un
- * rebote desde abajo y se va hundiéndose: la de la web
- * (frontend/src/components/UI/PildoraAviso.jsx) y la de la landing. El
- * círculo dice qué pasó antes de leer, y sale del segundo argumento:
- *
- *   avisar('Dirección guardada', 'exito')        ✓ verde
- *   avisar('No se pudo guardar', 'error')        ✕ rojo
- *   avisar('Fresas salió del carrito', 'quitar') basurero
- *   avisar('Inicie sesión para…')                i  (sin tipo: informativo)
- *
- * y también 'favorito', 'sinFavorito', 'reparto' y 'atencion' (ver ICONOS).
- * Los iconos son los de lucide, el MISMO trazo que la web.
- *
- * En modo oscuro la píldora se voltea sola —clara con letra oscura—, porque
- * `tituloFuerte` y `sobreTinta` ya van al revés en la paleta oscura.
- *
- * Por qué NO se usa el `Alert` de React Native: Alert es modal. Interrumpe,
- * tapa la tienda y hay que darle "OK" para seguir comprando. Avisar que un
- * producto entró al carrito no merece detener a nadie.
- * ============================================================
- */
+// AVISOS — el reemplazo de react-hot-toast
+// La tienda web avisa con toasts en media docena de momentos: al agregar algo al carrito, al
+// sacarlo, cuando ya no hay stock, cuando el carrito guardado se corrigió solo.
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, StyleSheet, Text, View } from 'react-native';
@@ -44,20 +10,14 @@ import { useMovimientoReducido } from '../hooks/useMovimientoReducido';
 
 const AvisoContext = createContext(null);
 
-/*
- * Cuánto se queda en pantalla. Lo suficiente para leerlo sin que estorbe; un
- * error un poco más (hay que leerlo y decidir qué hacer) y un mensaje largo,
- * más todavía: "De su carrito guardado, dos productos ya no están…" no se lee
- * en dos segundos y medio.
- */
+// Cuánto se queda en pantalla. Lo suficiente para leerlo sin que estorbe; un error un poco más
+// (hay que leerlo y decidir qué hacer) y un mensaje largo, más todavía: "De su carrito guardado,
+// dos productos ya no están…" no se lee en dos segundos y medio.
 const duracionDe = (texto, tipo) =>
   Math.min(6000, (tipo === 'error' ? 4000 : 2600) + Math.max(0, texto.length - 50) * 35);
 
-/*
- * Colores de estado, no de marca: los mismos de la web, no cambian con la
- * paleta ni con el modo, y los tres pasan 3:1 contra la píldora oscura y
- * contra la clara.
- */
+// Colores de estado, no de marca: los mismos de la web, no cambian con la paleta ni con el modo, y
+// los tres pasan 3:1 contra la píldora oscura y contra la clara.
 const VERDE = '#16A34A';
 const ROJO = '#DC2626';
 const NARANJA = '#C2410C';
@@ -93,11 +53,8 @@ export const AvisoProvider = ({ children }) => {
 
   const mostrar = useCallback((texto, tipo = 'info') => {
     if (!texto) return;
-    /*
-     * Un aviso nuevo pisa al anterior en vez de hacer cola. Quien toca "+"
-     * tres veces seguidas quiere ver el último número, no los tres avisos uno
-     * tras otro durante ocho segundos.
-     */
+    // Un aviso nuevo pisa al anterior en vez de hacer cola. Quien toca "+" tres veces seguidas quiere
+    // ver el último número, no los tres avisos uno tras otro durante ocho segundos.
     if (temporizador.current) clearTimeout(temporizador.current);
     setAviso({ texto, tipo: ICONOS[tipo] ? tipo : 'info' });
     // La píldora no recibe toques ni foco: el lector de pantalla la oye así.
@@ -109,11 +66,8 @@ export const AvisoProvider = ({ children }) => {
   useEffect(() => {
     if (!aviso) return;
 
-    /*
-     * Si ya hay una píldora a la vista, solo cambia el texto: que rebote de
-     * nuevo con cada "+" sería un brinco por toque. Si no la hay (o se estaba
-     * yendo), entra desde abajo.
-     */
+    // Si ya hay una píldora a la vista, solo cambia el texto: que rebote de nuevo con cada "+" sería
+    // un brinco por toque. Si no la hay (o se estaba yendo), entra desde abajo.
     if (!enPantalla.current) {
       enPantalla.current = true;
       salida.stopAnimation();
@@ -192,11 +146,8 @@ export const useAviso = () => {
 };
 
 const crearEstilos = (COLORES) => StyleSheet.create({
-  /*
-   * `pointerEvents="none"` en la capa es lo que evita el peor error de este
-   * patrón: un aviso invisible que se queda encima de la tienda comiéndose los
-   * toques. Aquí nunca recibe ninguno.
-   */
+  // `pointerEvents="none"` en la capa es lo que evita el peor error de este patrón: un aviso
+  // invisible que se queda encima de la tienda comiéndose los toques. Aquí nunca recibe ninguno.
   capa: {
     position: 'absolute',
     left: 0,

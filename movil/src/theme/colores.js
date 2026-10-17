@@ -1,31 +1,5 @@
-/*
- * ============================================================
- * COLORES — la misma paleta que la tienda web, en claro y en oscuro
- * ============================================================
- * En la web estos valores viven repetidos arriba de cada pantalla
- * (`const BROWN = '#B46C30'`). Aquí se juntan en un solo lugar porque la app
- * móvil arranca de cero y no tiene sentido heredar esa repetición.
- *
- * Si un día la tienda cambia de color, este archivo es el que se toca.
- *
- * ── Dos paletas con los MISMOS nombres ──
- *
- * El modo oscuro (Mi cuenta → Preferencias, ver ModoContext) no pregunta en
- * cada pantalla "¿y aquí qué color va?": cambia la paleta entera y las
- * pantallas se repintan solas. Es lo mismo que hace la web con
- * `:root[data-modo="oscuro"]` en frontend/src/index.css — mismos nombres,
- * otros valores.
- *
- * Por eso ninguna pantalla importa estas paletas directo: piden la del modo
- * que rige con `useColores()` (para un color suelto, como el de un icono) o
- * arman sus estilos con `useEstilos(crearEstilos)` (ver ModoContext). Un
- * `#FFFFFF` fijo en una pantalla es un pedazo que se queda blanco en oscuro.
- *
- * Los valores oscuros son los de la web. Los claros de siempre no se movieron:
- * encender el modo oscuro no tenía que cambiarle nada a quien se queda en
- * claro.
- * ============================================================
- */
+// COLORES — la misma paleta que la tienda web, en claro y en oscuro
+// En la web estos valores viven repetidos arriba de cada pantalla (`const BROWN = '#B46C30'`).
 
 export const COLORES_CLARO = {
   oscuro: false,
@@ -39,19 +13,13 @@ export const COLORES_CLARO = {
   marcaApagado: '#A9C2CE',
   // Fondo tenue para los cuadritos de iconos de las ventajas (--marca-100).
   marcaSuave: '#DDECF3',
-  /*
-   * La marca cuando es LETRA (enlaces, precios, títulos en color) y no fondo
-   * (--marca-texto de la web). En claro es la misma; en oscuro es el tono
-   * claro, porque la marca oscura está afinada para llevar letra blanca
-   * encima y como letra sobre el fondo oscuro no se leía.
-   */
+  // La marca cuando es LETRA (enlaces, precios, títulos en color) y no fondo (--marca-texto de la
+  // web). En claro es la misma; en oscuro es el tono claro, porque la marca oscura está afinada para
+  // llevar letra blanca encima y como letra sobre el fondo oscuro no se leía.
   marcaTexto: '#003049',
-  /*
-   * La letra encima de un botón de la marca. Blanca aquí y en oscuro; solo
-   * cambia con las paletas del panel en el modo del personal (Modo oscuro y
-   * Calma noche tienen un principal claro y llevan letra oscura encima; ver
-   * utils/paletaPanel.js).
-   */
+  // La letra encima de un botón de la marca. Blanca aquí y en oscuro; solo cambia con las paletas
+  // del panel en el modo del personal (Modo oscuro y Calma noche tienen un principal claro y llevan
+  // letra oscura encima; ver utils/paletaPanel.js).
   sobreMarca: '#FFFFFF',
 
   fondo: '#FFFFFF',
@@ -71,13 +39,8 @@ export const COLORES_CLARO = {
 
   error: '#C62828',
 
-  /*
-   * ── Los tokens de la web ──
-   * Los que ya existían arriba cubren el texto y las líneas; estos son los que
-   * hicieron falta al pasar las pantallas a oscuro, con el nombre y el valor
-   * claro de frontend/src/index.css.
-   */
-  // Texto principal y los botones negros ("Agregar", "Pagar").
+  // ── Los tokens de la web ── Los colores que hicieron falta para el modo oscuro, con el nombre y
+  // el valor de frontend/src/index.css. `tinta`: el texto principal y los botones negros.
   tinta: '#1C1614',
   tintaSuave: '#6B6560',
   tintaTenue: '#736D66',
@@ -104,11 +67,9 @@ export const COLORES_CLARO = {
   alertaTexto: '#8A2B12',
   exito: '#297E45',
 
-  /*
-   * Colores de ESTADO: verde de listo, azul de en camino, ámbar de cuidado,
-   * rojo de error. No son marca, así que no cambian con la temporada; sí
-   * cambian con el modo oscuro, porque un fondo pastel sobre negro deslumbra.
-   */
+  // Colores de ESTADO: verde de listo, azul de en camino, ámbar de cuidado, rojo de error. No son
+  // marca, así que no cambian con la temporada; sí cambian con el modo oscuro, porque un fondo
+  // pastel sobre negro deslumbra.
   exitoFondo: '#EFFAF1',
   exitoBorde: '#D3EEDA',
   exitoTexto: '#14663A',
@@ -128,14 +89,7 @@ export const COLORES_CLARO = {
   peligro: '#D72323',
 };
 
-/*
- * El oscuro de la web (`:root[data-modo="oscuro"]` en index.css). La marca
- * oscura sale de `paletaOscura()` en utils/temporadas.js a partir del azul de
- * la casa: el #003049 es casi negro y sobre el fondo oscuro los botones
- * desaparecían, así que sube hasta donde el texto blanco del botón se sigue
- * leyendo. El "presionado" (marcaOscuro) pasa a ser MÁS claro: en oscuro lo
- * que se ilumina es lo que responde.
- */
+// El oscuro de la web (`:root[data-modo="oscuro"]` en index.css).
 export const COLORES_OSCURO = {
   oscuro: true,
 
@@ -200,11 +154,8 @@ export const COLORES_OSCURO = {
   peligro: '#F87171',
 };
 
-/*
- * La paleta clara con su nombre de siempre, para lo que se pinta fuera de una
- * pantalla (el HTML de un mapa, un valor por defecto) y no puede usar hooks.
- * Dentro de un componente, `useColores()`.
- */
+// La paleta clara con su nombre de siempre, para lo que se pinta fuera de una pantalla (el HTML de
+// un mapa, un valor por defecto) y no puede usar hooks. Dentro de un componente, `useColores()`.
 export const COLORES = COLORES_CLARO;
 
 export default COLORES;

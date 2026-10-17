@@ -1,31 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { tAhora } from '../utils/idioma';
 
-/*
- * ============================================================
- * useSubidaArchivo — elegir un archivo y VERLO antes de subirlo
- * ============================================================
- * Hasta ahora cada pantalla resolvía esto por su cuenta: tres previews
- * parecidas pero distintas, y dos pantallas donde no había ninguna. La peor
- * era Impresiones — el cliente paga por imprimir algo que nunca llega a ver.
- *
- * Acá vive todo lo que NO es pintar: el archivo elegido, su URL de vista
- * previa, las validaciones, el arrastrar y soltar. El componente solo dibuja.
- *
- * Lo importante y lo fácil de olvidar: URL.createObjectURL deja el archivo
- * vivo en memoria hasta que alguien revoque esa URL. Si la persona prueba
- * ocho fotos hasta encontrar la buena, quedan ocho colgadas. Por eso soltamos
- * la anterior en cada cambio y también al desmontar.
- */
+// useSubidaArchivo — elegir un archivo y VERLO antes de subirlo La peor era Impresiones — el
+// cliente paga por imprimir algo que nunca llega a ver. Acá vive todo lo que NO es pintar: el
+// archivo elegido, su URL de vista previa, las validaciones, el arrastrar y soltar.
 
 // Extensiones que el navegador va a saber dibujar en un <img>.
 const IMAGENES = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'bmp', 'svg', 'heic'];
 
-/*
- * Extensión en minúsculas, sin el punto.
- * Corta antes del "?" porque las URL de Cloudinary vienen con "?v=1712..."
- * pegado atrás y si no, la extensión sale "jpg?v=1712" y no coincide con nada.
- */
+// Extensión en minúsculas, sin el punto. Corta antes del "?" porque las URL de Cloudinary vienen
+// con "?v=1712..." pegado atrás y si no, la extensión sale "jpg?v=1712" y no coincide con nada.
 export const extensionDe = (nombre = '') => {
   const limpio = String(nombre).split(/[?#]/)[0];
   const punto = limpio.lastIndexOf('.');
@@ -41,11 +25,9 @@ export const pesoLegible = (bytes) => {
   return `${(kb / 1024).toFixed(1)} MB`;
 };
 
-/*
- * 'imagen' | 'pdf' | 'otro'. Miramos primero el mime que reporta el navegador
- * y caemos a la extensión, porque algunos sistemas mandan el archivo con el
- * mime vacío (pasa con archivos venidos de WhatsApp o de una tarjeta SD).
- */
+// 'imagen' | 'pdf' | 'otro'. Miramos primero el mime que reporta el navegador y caemos a la
+// extensión, porque algunos sistemas mandan el archivo con el mime vacío (pasa con archivos
+// venidos de WhatsApp o de una tarjeta SD).
 const tipoDeArchivo = (nombre, mime = '') => {
   if (mime.startsWith('image/')) return 'imagen';
   if (mime === 'application/pdf') return 'pdf';
@@ -73,12 +55,9 @@ const cumpleAccept = (file, reglas) => {
   });
 };
 
-/*
- * Traduce el accept a algo que se pueda leer en voz alta:
- *   "image/*"                  -> "imágenes"
- *   ".pdf,.jpg,.jpeg,.png"     -> "PDF, JPG o PNG"
- * JPG y JPEG son lo mismo para quien mira, así que no se nombran dos veces.
- */
+// Traduce el accept a algo que se pueda leer en voz alta: "image/*" -> "imágenes"
+// ".pdf,.jpg,.jpeg,.png" -> "PDF, JPG o PNG" JPG y JPEG son lo mismo para quien mira, así que no
+// se nombran dos veces.
 const describirAceptados = (reglas) => {
   const nombres = [];
   reglas.forEach((regla) => {
@@ -95,29 +74,17 @@ const describirAceptados = (reglas) => {
   return `${nombres.slice(0, -1).join(', ')} ${tAhora('o')} ${nombres[nombres.length - 1]}`;
 };
 
-/*
- * Para que el error hable del archivo que la persona acaba de soltar. Frases
- * enteras y no "{como} pesa…": en inglés el orden de las palabras cambia.
- */
+// Para que el error hable del archivo que la persona acaba de soltar. Frases enteras y no "{como}
+// pesa…": en inglés el orden de las palabras cambia.
 const errorDePeso = (tipo, vars) => {
   if (tipo === 'imagen') return tAhora('Esa imagen pesa {peso} y el máximo son {max} MB.', vars);
   if (tipo === 'pdf') return tAhora('Ese PDF pesa {peso} y el máximo son {max} MB.', vars);
   return tAhora('Ese archivo pesa {peso} y el máximo son {max} MB.', vars);
 };
 
-/*
- * Parámetros:
- *   valorInicial : URL ya guardada (Cloudinary) para que al EDITAR se vea la
- *                  imagen actual y no un recuadro vacío.
- *   accept       : el mismo string que llevaría el <input type="file">.
- *   maxMB        : tope de peso. 0 lo desactiva.
- *   alElegir     : (file, url) => void. También se llama con (null, null) al
- *                  quitar, para que el padre se entere.
- *   reinicio     : cualquier valor; cuando cambia, se vuelve al estado de
- *                  recién abierto. Sirve donde la pantalla no se desmonta
- *                  (Impresiones limpia el formulario después de enviar).
- *   tipoInicial  : qué es el valorInicial cuando la URL no trae extensión.
- */
+// Parámetros: valorInicial : URL ya guardada (Cloudinary) para que al EDITAR se vea la imagen
+// actual y no un recuadro vacío. accept : el mismo string que llevaría el <input type="file">.
+// maxMB : tope de peso. 0 lo desactiva. alElegir : (file, url) => void.
 export const useSubidaArchivo = ({
   valorInicial = null,
   accept = '',
@@ -135,10 +102,8 @@ export const useSubidaArchivo = ({
 
   const inputRef = useRef(null);
   const urlRef = useRef(null);
-  /*
-   * El callback llega nuevo en cada render del padre. Guardado en una ref, los
-   * handlers no se rearman por eso y no arrastran una versión vieja del padre.
-   */
+  // El callback llega nuevo en cada render del padre. Guardado en una ref, los handlers no se
+  // rearman por eso y no arrastran una versión vieja del padre.
   const alElegirRef = useRef(alElegir);
   useEffect(() => { alElegirRef.current = alElegir; });
 
@@ -154,10 +119,8 @@ export const useSubidaArchivo = ({
 
   const reglas = useMemo(() => reglasDeAccept(accept), [accept]);
 
-  /*
-   * Guarda el archivo si pasa las dos aduanas (tipo y peso). Devuelve si entró,
-   * por si quien llama quiere reaccionar.
-   */
+  // Guarda el archivo si pasa las dos aduanas (tipo y peso). Devuelve si entró, por si quien llama
+  // quiere reaccionar.
   const elegir = useCallback((file) => {
     if (!file) return false;
 
@@ -192,23 +155,15 @@ export const useSubidaArchivo = ({
     setUrlBlob(null);
     setInicialVisible(false); // quitar también tapa la que ya estaba guardada
     setError('');
-    /*
-     * Limpiar el input a mano: si no, volver a elegir EL MISMO archivo no
-     * dispara onChange (el navegador ve el mismo valor) y parece que se trabó.
-     */
+    // Limpiar el input a mano: si no, volver a elegir EL MISMO archivo no dispara onChange (el
+    // navegador ve el mismo valor) y parece que se trabó.
     if (inputRef.current) inputRef.current.value = '';
     alElegirRef.current?.(null, null);
   }, [soltarUrl]);
 
-  /*
-   * Volver al estado de recién abierto cuando el padre cambia `reinicio`.
-   *
-   * Va durante el render y no en un useEffect a propósito: es el patrón que
-   * recomienda React para "ajustar estado cuando cambia una prop". Con efecto,
-   * la pantalla alcanzaba a pintar un cuadro con el archivo viejo todavía
-   * puesto. Y no le avisamos al padre: si él movió `reinicio` es porque ya
-   * limpió lo suyo.
-   */
+  // Volver al estado de recién abierto cuando el padre cambia `reinicio`. Va durante el render y no
+  // en un useEffect a propósito: es el patrón que recomienda React para "ajustar estado cuando
+  // cambia una prop".
   const [reinicioAnterior, setReinicioAnterior] = useState(reinicio);
   if (reinicio !== reinicioAnterior) {
     setReinicioAnterior(reinicio);
@@ -218,11 +173,9 @@ export const useSubidaArchivo = ({
     setError('');
   }
 
-  /*
-   * Revocar el blob y vaciar el input son cosas que tocan el navegador, así
-   * que no pueden ir en el render: van aquí, en cuanto la preview queda vacía.
-   * Cuando se limpió con quitar() esto ya no encuentra nada que hacer.
-   */
+  // Revocar el blob y vaciar el input son cosas que tocan el navegador, así que no pueden ir en el
+  // render: van aquí, en cuanto la preview queda vacía. Cuando se limpió con quitar() esto ya no
+  // encuentra nada que hacer.
   useEffect(() => {
     if (urlBlob) return;
     soltarUrl();

@@ -3,49 +3,17 @@ import { useLocation } from 'react-router-dom';
 import api from '../api/api';
 import { CAJON, areaDeRuta, LLAVE_MODO_TRABAJO } from '../utils/sesion';
 
-/*
- * ============================================================
- * CONTEXTO DE AUTENTICACIÓN — AuthContext.jsx
- * ============================================================
- * DOS CAJONES DE SESIÓN, UNO POR ÁREA.
- *
- * El problema que resuelve: antes las dos áreas —el panel y la tienda—
- * guardaban su sesión en las MISMAS tres llaves de localStorage ('token',
- * 'userType', 'userData'). Entrar como cliente pisaba la sesión de
- * administrador y al volver al panel la cuenta salía como cliente; entrar
- * como administrador borraba la del cliente. Con el mismo correo en las dos
- * tablas —el caso normal aquí, el dueño es cliente de su propia tienda— eso
- * se veía como si las cuentas "se fusionaran".
- *
- * Ahora hay un cajón para cada una y no se tocan:
- *
- *   sesion:personal → administradores y empleados (el panel)
- *   sesion:cliente  → clientes (la tienda y Mi Cuenta)
- *
- * En qué cajón se GUARDA lo decide el tipo de cuenta que devolvió el backend.
- * Cuál se USA lo decide dónde está parada la persona: en el panel manda el
- * cajón del personal, y en la tienda el del cliente. Así se puede estar
- * conectado como las dos cosas a la vez en el mismo navegador, que es
- * justamente lo que hace el dueño todos los días.
- *
- * Expone lo mismo de siempre (`user`, `token`, `login`, `logout`,
- * `isAuthenticated`) para que ningún componente tenga que enterarse de esto,
- * más dos banderas que solo necesita el guardia de rutas.
- * ============================================================
- */
+// CONTEXTO DE AUTENTICACIÓN — AuthContext.jsx
+// Dos cajones de sesión, uno por área: el panel y la tienda guardan cada uno la suya, así entrar
+// en una no pisa la otra.
 export const AuthContext = createContext();
 
-/*
- * Dónde vive cada cajón y qué área manda en cada ruta: bajó a utils/sesion.js
- * porque el interceptor de axios también lo necesita para saber a quién echar
- * cuando el servidor contesta 401, y no puede importar este archivo sin armar
- * un círculo.
- */
+// Dónde vive cada cajón y qué área manda en cada ruta: bajó a utils/sesion.js porque el
+// interceptor de axios también lo necesita para saber a quién echar cuando el servidor contesta
+// 401, y no puede importar este archivo sin armar un círculo.
 
-/*
- * En qué cajón va una sesión según a quién pertenece. El backend responde
- * 'client', 'admin' o 'employee'; solo el primero es del área de cliente.
- */
+// En qué cajón va una sesión según a quién pertenece. El backend responde 'client', 'admin' o
+// 'employee'; solo el primero es del área de cliente.
 const cajonDeTipo = (tipo) => (tipo === 'client' ? 'cliente' : 'personal');
 
 const leerCajon = (area) => {
@@ -61,25 +29,15 @@ const leerCajon = (area) => {
   }
 };
 
-/*
- * Mudanza de las llaves viejas.
- *
- * Sin esto, la primera vez que alguien abre la app después de este cambio se
- * encuentra la sesión cerrada sin haber tocado nada. Se lee lo que había,
- * se acomoda en el cajón que le toca por su tipo y se borran las llaves
- * viejas para que la mudanza pase una sola vez.
- */
+// Mudanza de las llaves viejas. Sin esto, la primera vez que alguien abre la app después de este
+// cambio se encuentra la sesión cerrada sin haber tocado nada.
 const mudarSesionVieja = () => {
   const token = localStorage.getItem('token');
   if (!token) return;
 
-  /*
-   * Sin tipo declarado se asume CLIENTE, no personal.
-   *
-   * Una sesión vieja de la que no sabemos nada no puede heredar los permisos
-   * del panel por descuido: si acierta, no se gana nada; si se equivoca, se
-   * regala una sesión de personal. Ante la duda, la de menos alcance.
-   */
+  // Sin tipo declarado se asume CLIENTE, no personal. Una sesión vieja de la que no sabemos nada no
+  // puede heredar los permisos del panel por descuido: si acierta, no se gana nada; si se equivoca,
+  // se regala una sesión de personal. Ante la duda, la de menos alcance.
   const tipo = localStorage.getItem('userType') || 'client';
   let datos;
   try {
@@ -98,25 +56,17 @@ const mudarSesionVieja = () => {
   localStorage.removeItem('userData');
 };
 
-/*
- * Los dos cajones, leídos al crear el estado: así la sesión ya está en el
- * PRIMER pintado. Antes se leían en un efecto y la app pintaba primero un
- * cuadro vacío para no mostrar "no ha entrado" de pasada.
- *
- * La mudanza y la limpieza escriben en localStorage, así que van una sola vez
- * por carga de la página (React puede llamar dos veces a esta función en
- * desarrollo para comprobar que sea pura).
- */
+// Los dos cajones, leídos al crear el estado: así la sesión ya está en el PRIMER pintado. La
+// mudanza y la limpieza escriben en localStorage, así que van una sola vez por carga de la página
+// (React puede llamar dos veces a esta función en desarrollo para comprobar que sea pura).
 let yaSeAcomodo = false;
 const levantarSesiones = () => {
   if (!yaSeAcomodo) {
     yaSeAcomodo = true;
     mudarSesionVieja();
-    /*
-     * El "Estoy trabajando" de antes ya no existe (ver ClienteLayout). Quien lo
-     * dejó encendido tenía la bandera guardada: se borra, para que nadie quede
-     * atrapado en un modo que ya no tiene botón para apagarse.
-     */
+    // El "Estoy trabajando" de antes ya no existe (ver ClienteLayout). Quien lo dejó encendido tenía
+    // la bandera guardada: se borra, para que nadie quede atrapado en un modo que ya no tiene botón
+    // para apagarse.
     try { localStorage.removeItem(LLAVE_MODO_TRABAJO); } catch { /* sin localStorage no hay nada que borrar */ }
   }
   return { personal: leerCajon('personal'), cliente: leerCajon('cliente') };
@@ -129,50 +79,19 @@ export const AuthProvider = ({ children }) => {
   //    mudar lo que hubiera guardado el sistema anterior.
   const [sesiones, setSesiones] = useState(levantarSesiones);
 
-  /*
-   * 2- La sesión que manda AQUÍ, en la pantalla donde está parada la persona.
-   *
-   * En el panel es la del personal y nada más: si ahí valiera la del cliente,
-   * una pantalla de administración terminaría pidiendo datos con el id
-   * equivocado. Y en la tienda, la del cliente y nada más.
-   *
-   * Antes, en la tienda, sin sesión de cliente se usaba la del personal: el
-   * repartidor trabajaba desde /mi-cuenta/reparto con su cuenta de empleado.
-   * El Reparto se fue a la app, y una sesión del panel en la tienda solo
-   * dejaba a medias pantallas que piden datos de CLIENTE (Mi Cuenta, el
-   * carrito). El dueño que mira su tienda la ve como un visitante; para
-   * comprar, entra con su cuenta de cliente.
-   */
+  // 2- La sesión que manda AQUÍ, en la pantalla donde está parada la persona. En el panel es la del
+  // personal y nada más: si ahí valiera la del cliente, una pantalla de administración terminaría
+  // pidiendo datos con el id equivocado. Y en la tienda, la del cliente y nada más.
   const area = areaDeRuta(pathname);
   const activa = area === 'personal' ? sesiones.personal : sesiones.cliente;
 
-  /*
-   * El área, también en una referencia.
-   *
-   * `logout` la necesita para saber qué cajón cerrar, pero NO puede depender
-   * de `pathname`: si cambiara de identidad en cada navegación, un efecto tan
-   * inocente como el `useEffect(() => logout(), [logout])` de LoginAdmin
-   * dejaría de significar "al entrar a esta pantalla" y pasaría a significar
-   * "cada vez que cambie la ruta" — que fue exactamente lo que pasó: entrar
-   * como administrador guardaba la sesión y el salto a /dashboard la borraba
-   * de vuelta, así que el panel nunca llegaba a abrirse.
-   */
+  // El área, también en una referencia.
   const areaRef = useRef(area);
   useEffect(() => { areaRef.current = area; }, [area]);
 
-  /*
-   * Las otras pestañas también cuentan.
-   *
-   * Los cajones se leían una sola vez al montar, así que cerrar sesión en una
-   * pestaña dejaba a las demás creyendo que seguía abierta —mostrando el
-   * nombre, el carrito y el panel— hasta que alguien recargara. En un mostrador
-   * donde se dejan tres pestañas abiertas, eso es una sesión que se cerró solo
-   * de mentira.
-   *
-   * `storage` solo lo oyen las OTRAS pestañas, nunca la que escribió: por eso
-   * no hace falta protegerse de un bucle. Mismo patrón que useStore y
-   * useDireccionActiva, que ya sincronizan el carrito y la dirección.
-   */
+  // Las otras pestañas también cuentan. Los cajones se leían una sola vez al montar, así que cerrar
+  // sesión en una pestaña dejaba a las demás creyendo que seguía abierta —mostrando el nombre, el
+  // carrito y el panel— hasta que alguien recargara.
   useEffect(() => {
     const alCambiarOtraPestana = (e) => {
       // e.key es null cuando alguien hizo localStorage.clear().
@@ -194,14 +113,7 @@ export const AuthProvider = ({ children }) => {
     setSesiones((previas) => ({ ...previas, [cajon]: sesion }));
   }, []);
 
-  /*
-   * 3.5- Actualizar datos de la sesión que está abierta, sin volver a entrar.
-   *
-   * Lo pide la foto de perfil: al subirla, el nombre y el token siguen igual
-   * pero el `image` cambió, y hay que reflejarlo de una en el avatar (el TopBar
-   * y la pantalla de Cuenta) y dejarlo guardado para el próximo arranque. El
-   * cajón es el de la sesión activa, que lo dice su propio `type`.
-   */
+  // 3.5- Actualizar datos de la sesión que está abierta, sin volver a entrar.
   const actualizarUsuario = useCallback((cambios = {}) => {
     if (!activa) return;
     const cajon = cajonDeTipo(activa.type);
@@ -214,46 +126,22 @@ export const AuthProvider = ({ children }) => {
     });
   }, [activa]);
 
-  /*
-   * 4- Cerrar sesión cierra la de ESTA área, no las dos.
-   *
-   * Salir del panel no tiene por qué sacar a la persona de la tienda: son dos
-   * cuentas distintas aunque compartan el correo, y cerrar una no dice nada
-   * sobre la otra.
-   */
+  // 4- Cerrar sesión cierra la de ESTA área, no las dos. Salir del panel no tiene por qué sacar a la
+  // persona de la tienda: son dos cuentas distintas aunque compartan el correo, y cerrar una no dice
+  // nada sobre la otra.
   const logout = useCallback((areaAcerrar) => {
     const cajon = areaAcerrar || areaRef.current;
 
-    /*
-     * Avisarle al servidor para que borre SU cookie.
-     *
-     * El logout solo limpiaba el navegador, así que la cookie httpOnly seguía
-     * puesta 30 días: cerrar sesión dejaba media sesión abierta. Va sin await
-     * y tragándose el error a propósito — si el servidor no contesta, la
-     * sesión se cierra igual de este lado; lo que no puede pasar es que
-     * alguien se quede dentro porque falló una petición de limpieza.
-     */
+    // Avisarle al servidor para que borre SU cookie. El logout solo limpiaba el navegador, así que la
+    // cookie httpOnly seguía puesta 30 días: cerrar sesión dejaba media sesión abierta.
     api.post(cajon === 'personal' ? '/logoutAdmin' : '/logoutClient').catch(() => {});
 
     localStorage.removeItem(CAJON[cajon]);
     setSesiones((previas) => ({ ...previas, [cajon]: null }));
   }, []);
 
-  /*
-   * 4.5- Cerrar TODO, a pedido — el botón "Cerrar sesión" del PANEL.
-   *
-   * `logout()` de arriba cierra un solo cajón a propósito: son dos cuentas
-   * distintas aunque compartan el correo.
-   *
-   * Pero desde el botón del panel eso confundía: alguien tocaba "Cerrar
-   * sesión" en /dashboard, aterrizaba en /admin, y si volvía a la tienda se
-   * encontraba TODAVÍA conectado — como cliente, con otra cuenta, pero
-   * conectado igual. Para quien vino a salir del todo, eso no se sintió como
-   * un cierre de sesión.
-   *
-   * Decisión explícita: el botón del panel cierra los DOS cajones. El
-   * "Salir" de Mi Cuenta sigue cerrando solo lo suyo, ver `logout` arriba.
-   */
+  // 4.5- Cerrar TODO, a pedido — el botón "Cerrar sesión" del PANEL. `logout()` de arriba cierra un
+  // solo cajón a propósito: son dos cuentas distintas aunque compartan el correo.
   const logoutTodo = useCallback(() => {
     api.post('/logoutAdmin').catch(() => {});
     api.post('/logoutClient').catch(() => {});
@@ -274,11 +162,8 @@ export const AuthProvider = ({ children }) => {
       // Ya no hay espera: la sesión se lee antes del primer pintado.
       loading: false,
       isAuthenticated: !!activa?.token,
-      /*
-       * Para el guardia de rutas: le deja distinguir "no ha entrado" de
-       * "entró, pero por la otra puerta", que son dos situaciones que se
-       * resuelven de forma muy distinta. Ver ProtectedRoute.
-       */
+      // Para el guardia de rutas: le deja distinguir "no ha entrado" de "entró, pero por la otra
+      // puerta", que son dos situaciones que se resuelven de forma muy distinta. Ver ProtectedRoute.
       haySesionDePersonal: !!sesiones.personal,
       haySesionDeCliente: !!sesiones.cliente,
     }),

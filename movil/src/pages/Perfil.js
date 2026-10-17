@@ -1,52 +1,6 @@
-/*
- * ============================================================
- * PERFIL — la portada de "Mi cuenta"
- * ============================================================
- * Lo que en la web es el menú del `ClienteLayout`: quién está dentro y la lista
- * de las cosas que puede hacer con su cuenta.
- *
- * Reemplaza a la vieja pantalla de Bienvenida, que era una comprobación de que
- * el login funcionaba —el nombre, tres renglones de datos y un botón de salir—
- * y no una cuenta.
- *
- * ── La navegación de adentro vive AQUÍ, no en App.js ──
- *
- * Las pantallas de la cuenta se abren y se cierran contra este archivo, en su
- * propio `useState`. No suben a `Raiz` como el resto porque son de este
- * apartado y de ninguno más: metidas allá arriba, la lista de pantallas de la
- * app se duplicaría y ninguna de las nuevas se podría alcanzar desde otro
- * lado.
- *
- * El efecto que se busca es el de cualquier app con barra abajo: entrar a "Mis
- * datos" NO saca de la cuenta —la barra sigue ahí, con su icono encendido— y la
- * flecha de arriba vuelve a esta lista, no a la tienda.
- *
- * ── De la web no está todo ──
- *
- * Queda afuera un ítem del menú de allá, y no por descuido:
- *
- *   Pedidos    no falta: es uno de los cuatro apartados de la barra de abajo,
- *              que es un lugar MEJOR que un renglón aquí adentro.
- *
- * Pagos y Recibos sí se sumaron después (ver Pagos.js y Recibos.js): el
- * primero reusa el saldo/canje que ya vivía en Checkout.js, y el segundo
- * son los mismos pedidos de Pedidos.js, solo filtrados a los entregados —
- * ningún endpoint nuevo, salvo el de guardar métodos de pago.
- *
- * Preferencias (claro, oscuro o automático) llegó con el modo oscuro de la
- * web — ver Preferencias.js y context/ModoContext.js.
- *
- * Ayuda también se sumó después (ver Ayuda.js): al principio se dejó afuera
- * porque su único canal real, el WhatsApp, salía de una variable de Vite que
- * en Expo no existe — ver el comentario grande de utils/tienda.js para la
- * versión de Expo de lo mismo.
- *
- * ── Cerrar sesión vive arriba a la derecha, no abajo del menú ──
- * Es la única acción de esta pantalla que no abre una sección de la cuenta:
- * un icono aparte en la barra, lejos de la lista, para que no se confunda
- * con un ítem más ni se toque por error al bajar deslizando la lista.
- * ============================================================
- */
+// PERFIL — la portada de "Mi cuenta"
+// Lo que en la web es el menú del `ClienteLayout`: quién está dentro y la lista de las cosas que
+// puede hacer con su cuenta.
 
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -79,13 +33,8 @@ import { registrarTokenPush } from '../api/clienteApi';
 import { tokenActual } from '../utils/notificaciones';
 import { useIdioma } from '../context/IdiomaContext';
 
-/*
- * Los iconos son los mismos con los que la web pinta este menú (ver
- * ClienteLayout): User, Heart, MapPin, CreditCard, Bell, Star, Receipt,
- * SlidersHorizontal y HelpCircle. El orden también es el de allá, menos
- * Pedidos (ver el comentario de arriba) — Ayuda al final, igual que en la
- * barra de la web.
- */
+// Los iconos son los mismos con los que la web pinta este menú (ver ClienteLayout): User, Heart,
+// MapPin, CreditCard, Bell, Star, Receipt, SlidersHorizontal y HelpCircle.
 const SECCIONES = [
   { clave: 'datos', titulo: 'Mis datos', sub: 'Nombre, correo y teléfono', icono: User },
   { clave: 'favoritos', titulo: 'Mis favoritos', sub: 'Lo que marcó con el corazón', icono: Heart },
@@ -138,22 +87,17 @@ const Perfil = () => {
   // así que este gana mientras haya una sección abierta.
   useBotonAtras(volverALaLista, seccion !== null);
 
-  /*
-   * Los datos se releen cada vez que se vuelve a esta lista, no solo al entrar.
-   * Es lo que hace que al guardar el nombre en "Mis datos" el saludo de aquí
-   * arriba salga con el nombre nuevo: el `user` de la sesión se llenó al entrar
-   * y no se entera de una edición posterior.
-   */
+  // Los datos se releen cada vez que se vuelve a esta lista, no solo al entrar. Es lo que hace que
+  // al guardar el nombre en "Mis datos" el saludo de aquí arriba salga con el nombre nuevo: el
+  // `user` de la sesión se llenó al entrar y no se entera de una edición posterior.
   const cargar = useCallback(async () => {
     if (!esCliente) return;
     try {
       setCliente(await getCliente(user.id));
     } catch {
-      /*
-       * Sin esto se cae al `user` de la sesión, que trae el nombre y el correo
-       * de cuando entró. Es información de hace un rato, no información falsa —
-       * y dejar la cuenta en blanco porque falló una petición sería peor.
-       */
+      // Sin esto se cae al `user` de la sesión, que trae el nombre y el correo de cuando entró. Es
+      // información de hace un rato, no información falsa — y dejar la cuenta en blanco porque falló una
+      // petición sería peor.
     }
   }, [esCliente, user?.id]);
 
@@ -244,11 +188,8 @@ const Perfil = () => {
             ))}
           </View>
         ) : (
-          /*
-           * Personal de la tienda. No se le esconde la app —puede seguir viendo
-           * la tienda— pero tampoco se le enseñan cinco renglones que al tocarlos
-           * darían error.
-           */
+          // Personal de la tienda. No se le esconde la app —puede seguir viendo la tienda— pero tampoco se
+          // le enseñan cinco renglones que al tocarlos darían error.
           <View style={estilos.aviso}>
             <Text style={estilos.avisoTexto}>
               {t('Entró con una cuenta del personal. Esta aplicación es la de los clientes: el área de reparto y el panel de la tienda están en la versión de computadora.')}
@@ -256,11 +197,8 @@ const Perfil = () => {
           </View>
         )}
 
-        {/*
-          Lo que se puede leer en cualquier momento, no solo al registrarse:
-          la presentación de Tiqui y los documentos legales. Van sueltos, como
-          enlaces, sin recuadro: no son secciones de la cuenta.
-        */}
+        {/* Lo que se puede leer en cualquier momento, no solo al registrarse: la presentación de Tiqui y
+           los documentos legales. Van sueltos, como enlaces, sin recuadro: no son secciones de la cuenta. */}
         <View style={estilos.extras}>
           <Pressable
             onPress={() => navegarA('ConoceATiqui')}
@@ -270,11 +208,9 @@ const Perfil = () => {
             <Text style={[estilos.extraTexto, { color: colores.marcaTexto }]}>{t('Conoce a Tiqui, tu asistente')}</Text>
             <ChevronRight size={16} color={colores.marca} strokeWidth={2.2} />
           </Pressable>
-          {/*
-            La puerta del personal también desde aquí: quien trabaja en la
-            tienda y además compra con su cuenta no tiene que cerrar sesión
-            para llegar al enlace del login. Ver pages/personal/LoginPersonal.js.
-          */}
+          {/* La puerta del personal también desde aquí: quien trabaja en la tienda y además compra con su
+             cuenta no tiene que cerrar sesión para llegar al enlace del login. Ver
+             pages/personal/LoginPersonal.js. */}
           <Pressable
             onPress={() => navegarA('LoginPersonal')}
             accessibilityRole="button"
@@ -313,17 +249,8 @@ const Perfil = () => {
           trabajando={saliendo}
           alConfirmar={async () => {
             setSaliendo(true);
-            /*
-             * Antes de soltar la sesión: que este teléfono deje de recibir los
-             * avisos de esta cuenta. No es un detalle de limpieza — sin esto,
-             * el próximo "su pedido va en camino" suena en un aparato donde ya
-             * entró otra persona.
-             *
-             * Va con un tope de tiempo y su catch porque cerrar sesión no
-             * puede quedarse colgado esperando a la red: si no se pudo dar de
-             * baja, el token se cae solo la primera vez que Expo conteste que
-             * ya no existe (ver pushExpo.js).
-             */
+            // Antes de cerrar sesión, este teléfono deja de recibir los avisos de la cuenta, con un tope de
+            // tiempo para no quedarse colgado esperando la red.
             try {
               const token = await Promise.race([
                 tokenActual(),

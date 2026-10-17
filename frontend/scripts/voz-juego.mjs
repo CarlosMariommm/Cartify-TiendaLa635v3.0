@@ -1,29 +1,6 @@
-/*
- * ============================================================
- * LA VOZ GRABADA DEL RETO DE TIQUI — scripts/voz-juego.mjs
- * ============================================================
- * El juego del stand (pages/JuegoTiqui.jsx) no le pide la voz al servidor
- * cada vez que alguien juega: la reproduce grabada desde public/juego/voz/.
- * Este script la graba UNA vez, con la misma voz y los mismos ánimos que el
- * asistente (GET /api/ai/voz del servidor en producción).
- *
- *   npm run voz-juego              cuenta qué falta y cuántos caracteres
- *                                  costaría. NO graba ni gasta nada.
- *   npm run voz-juego:grabar       graba lo que falta (gasta créditos de
- *                                  ElevenLabs: la llave tiene que estar
- *                                  encendida en Render).
- *   npm run voz-juego:limpiar      borra audios viejos que ya no usa ninguna
- *                                  frase.
- *
- * Son comandos aparte y no "npm run voz-juego -- --grabar" a propósito: en
- * PowerShell el "--" se pierde y el script nunca recibía --grabar.
- *
- * Solo pide lo que falta: correrlo dos veces no gasta dos veces. Si se
- * cambia el texto de una frase, su archivo cambia de nombre (lleva una huella
- * del texto) y queda pendiente de grabar; mientras tanto el juego la dice con
- * la voz del navegador.
- * ============================================================
- */
+// LA VOZ GRABADA DEL RETO DE TIQUI — scripts/voz-juego.mjs
+// El juego del stand (pages/JuegoTiqui.jsx) no le pide la voz al servidor cada vez que alguien
+// juega: la reproduce grabada desde public/juego/voz/.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

@@ -3,14 +3,9 @@ import rateLimit from "express-rate-limit";
 import tiquiPanelController from "../controller/tiquiPanelController.js";
 import { soloPersonal } from "../middlewares/validarSesion.js";
 
-/*
- * Tiqui del panel: la asistente del equipo. Es OTRA asistente que la de la
- * tienda (/api/ai/asistente) y vive en su propia ruta, cerrada al personal:
- * sabe cuánto vende la tienda y a quién le debe. Ver tiquiPanelController.
- *
- * La voz sí es la misma (GET /api/ai/voz): convertir un texto en audio no
- * sabe nada de ninguna de las dos.
- */
+// Tiqui del panel: la asistente del equipo. Es OTRA asistente que la de la tienda
+// (/api/ai/asistente) y vive en su propia ruta, cerrada al personal: sabe cuánto vende la tienda y
+// a quién le debe. Ver tiquiPanelController.
 
 const router = express.Router();
 

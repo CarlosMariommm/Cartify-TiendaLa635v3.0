@@ -22,37 +22,14 @@ import { config } from "../../config.js";
 
 const orderController = {};
 
-/*
- * EL CÓDIGO DE ENTREGA NO SE LO ENSEÑAMOS AL PERSONAL.
- *
- * Parece de más —es la tienda, no un extraño— pero es justamente lo que hace
- * que el código sirva. Si el repartidor lo ve en su pantalla, puede marcar
- * "entregado" desde la moto sin haberle preguntado nada a nadie, y entonces no
- * prueba que el pedido llegó a su dueño: prueba que el repartidor sabe leer.
- *
- * El código lo tiene UNA sola persona —la que lo pidió, en su pantalla— y el
- * personal lo recibe dictado en la puerta. Así es como funciona en cualquier
- * app de reparto, y por la misma razón.
- *
- * El campo va con `select: false` en el modelo, así que de la base no sale
- * solo; esto es para cuando se pide a mano con +deliveryCode y quien pregunta
- * resulta no ser el dueño.
- */
+// EL CÓDIGO DE ENTREGA NO SE LO ENSEÑAMOS AL PERSONAL.
+// Parece de más —es la tienda, no un extraño— pero es justamente lo que hace que el código sirva.
 const sinCodigoDeEntrega = (pedido) => {
   const plano = typeof pedido?.toObject === "function" ? pedido.toObject() : { ...pedido };
 
-  /*
-   * SÍ se le dice al personal si el pedido LLEVA código, aunque no cuál.
-   *
-   * Sin este dato, la pantalla de entrega no puede distinguir un pedido normal
-   * de uno anterior a esta función —los que ya estaban en la calle el día que
-   * se estrenó el código y nunca tuvieron uno—. Les pedía cuatro dígitos que
-   * ese cliente no tiene ni va a tener nunca, y el repartidor se quedaba
-   * trabado en la puerta inventando un número.
-   *
-   * Un booleano no compromete nada: no dice cuál es el código, solo si hay que
-   * preguntarlo. Ver ModalCodigoEntrega.
-   */
+  // SÍ se le dice al personal si el pedido LLEVA código, aunque no cuál. Sin este dato, la pantalla
+  // de entrega no puede distinguir un pedido normal de uno anterior a esta función —los que ya
+  // estaban en la calle el día que se estrenó el código y nunca tuvieron uno—.
   plano.tieneCodigoEntrega = !!plano.deliveryCode;
 
   delete plano.deliveryCode;
@@ -67,14 +44,9 @@ orderController.createOrder = async (req, res) => {
       deliveryType, deliveryAddress, deliveryReference, deliveryLat, deliveryLng,
     } = req.body;
 
-    /*
-     * A nombre de quién va el pedido lo decide el SERVIDOR, no el navegador.
-     *
-     * Antes se leía `clientId` del cuerpo de la petición, así que cualquiera
-     * podía cargarle una compra —con su stock y sus puntos— a la cuenta de
-     * otra persona. Ahora sale de la cookie del cliente, del código del kiosco
-     * o de la sesión del empleado que cobra. Ver middlewares/identificarComprador.js.
-     */
+    // A nombre de quién va el pedido lo decide el SERVIDOR, no el navegador. Ahora sale de la cookie
+    // del cliente, del código del kiosco o de la sesión del empleado que cobra. Ver
+    // middlewares/identificarComprador.js.
     const clientId = req.compradorId;
 
     // Validación básica: sin cliente o sin productos no hay pedido. Que sea
@@ -86,20 +58,8 @@ orderController.createOrder = async (req, res) => {
       });
     }
 
-    /*
-     * ── Y que ese cliente EXISTA ──
-     *
-     * Con solo comprobar que el campo venga, cualquier id con forma válida
-     * pasaba: el del propio administrador mirando su tienda, por ejemplo. El
-     * pedido se guardaba, se descontaba el stock y se le escribía un lote de
-     * puntos a un cliente que no está en la tabla — un pedido que después nadie
-     * puede consultar ni entregar, y existencias que bajaron por él.
-     *
-     * Mismo criterio que el del stock: el carrito ya lo revisa, pero la
-     * comprobación que vale es esta.
-     */
-    // isValidObjectId primero: findById con una cadena cualquiera lanza
-    // CastError y saldría como un 500, culpando al servidor de un dato malo.
+    // ── Y que ese cliente EXISTA ── Se valida el id (isValidObjectId) y que la cuenta exista de
+    // verdad, antes de crear el pedido a su nombre.
     const cliente = isValidObjectId(clientId)
       ? await clientModel.findById(clientId).select("_id")
       : null;
@@ -109,19 +69,9 @@ orderController.createOrder = async (req, res) => {
       });
     }
 
-    /*
-     * ── CADA RENGLÓN ES UN PRODUCTO DEL CATÁLOGO ──
-     *
-     * Antes los renglones sin productId se saltaban todas las revisiones —eran
-     * de cuando las impresiones pasaban por aquí; hoy tienen su propia ruta,
-     * createPrintOrder— y entraban a la cuenta con el precio que trajeran. Un
-     * renglón inventado, "Descuento" a −9.99, dejaba cualquier compra en un
-     * centavo. La tienda, el kiosco y la app mandan siempre el productId, así
-     * que lo que llegue sin él no salió de ninguno de los tres.
-     *
-     * isValidObjectId por lo mismo que con el cliente: un id con mala forma
-     * hacía reventar el find de abajo y salía como un 500.
-     */
+    // ── CADA RENGLÓN ES UN PRODUCTO DEL CATÁLOGO ──
+    // Cada renglón tiene que ser un producto del catálogo con su precio real: no entra un renglón
+    // inventado con el precio que traiga.
     for (const it of items) {
       if (!it?.productId || !isValidObjectId(it.productId)) {
         return res.status(400).json({
@@ -134,38 +84,18 @@ orderController.createOrder = async (req, res) => {
     const productos = await productModel.find({ _id: { $in: idsProductos } });
     const porId = new Map(productos.map((p) => [String(p._id), p]));
 
-    /*
-     * Las promociones que tocan a estos productos, para cobrar lo mismo que
-     * el cliente vio en pantalla. Se traen también las vencidas que sigan
-     * encendidas en la base: construirMapaPromo las descarta por fecha, que
-     * es la regla que usa la tienda. Ver utils/precioPedido.js.
-     */
+    // Las promociones que tocan a estos productos, para cobrar lo mismo que el cliente vio en
+    // pantalla. Se traen también las vencidas que sigan encendidas en la base: construirMapaPromo las
+    // descarta por fecha, que es la regla que usa la tienda. Ver utils/precioPedido.js.
     const promociones = await promotionModel
       .find({ isActive: { $ne: false }, "items.productId": { $in: idsProductos } })
       .select("type items buyQty payQty isActive endsAt createdAt")
       .lean();
     const mapaPromo = construirMapaPromo(promociones);
 
-    /*
-     * ── PRECIO Y STOCK, renglón por renglón ──
-     *
-     * Del renglón que manda el navegador se usan DOS datos: qué producto y
-     * cuántos. Todo lo demás sale de la base.
-     *
-     * El precio, sobre todo. Antes se sumaba el `price` del cuerpo de la
-     * petición: el comentario decía que nunca confiábamos en el total del
-     * front, y era cierto, pero se confiaba en el precio por unidad, que da
-     * lo mismo. Bastaba mandar `price: 0.01`. El stock ya se revisaba contra
-     * la base; el precio, que es lo que se cobra, no.
-     *
-     * El nombre también sale del producto: es lo que lee quien arma el
-     * pedido, y un renglón de chicles no puede llegarle a la bodega diciendo
-     * "Whisky".
-     *
-     * Y el stock, ANTES de cobrar: sin esto se podían pedir 100 unidades de
-     * algo que tiene 5. El carrito ya lo revisa, pero el navegador no es de
-     * fiar — la comprobación que vale es esta.
-     */
+    // ── PRECIO Y STOCK, renglón por renglón ──
+    // Del renglón que manda el navegador se usan DOS datos: qué producto y cuántos. Todo lo demás sale
+    // de la base. El precio, sobre todo. Bastaba mandar `price: 0.01`.
     const renglones = [];
     for (const it of items) {
       const producto = porId.get(String(it.productId));
@@ -173,15 +103,8 @@ orderController.createOrder = async (req, res) => {
         return res.status(400).json({ message: `El producto "${it.name}" ya no existe` });
       }
 
-      /*
-       * La cantidad tiene que ser un número mayor que cero. Una negativa
-       * restaba del subtotal —y de paso SUBÍA el stock al descontarla— y un
-       * cero dejaba un renglón fantasma en el pedido.
-       *
-       * Por libra se aceptan decimales (media libra de queso es lo normal);
-       * por unidad, no: media Coca-Cola no se vende, y aceptarla sería
-       * cobrar la mitad por la botella entera. Ver frontend/src/utils/unidades.js.
-       */
+      // La cantidad tiene que ser un número mayor que cero. Una negativa restaba del subtotal —y de paso
+      // SUBÍA el stock al descontarla— y un cero dejaba un renglón fantasma en el pedido.
       const cantidad = Number(it.amount);
       const porLibra = producto.unidadVenta === "libra";
       if (!Number.isFinite(cantidad) || cantidad <= 0 || (!porLibra && !Number.isInteger(cantidad))) {
@@ -216,15 +139,9 @@ orderController.createOrder = async (req, res) => {
 
     const config = await getLoyaltyConfig();
 
-    // ── CANJE DE PUNTOS ──
-    // Nos protegemos de tres cosas: que no canjee más de lo que tiene, que no
-    // canjee más de lo que cuesta la compra, y que respete el mínimo.
-    /*
-     * Aquí solo se CALCULA cuántos se canjean. Se consumen al final, cuando ya
-     * no queda nada que pueda rechazar el pedido: antes se consumían aquí, y si
-     * después faltaba la dirección o no alcanzaba el saldo, el pedido no se
-     * hacía y los puntos se perdían igual.
-     */
+    // ── CANJE DE PUNTOS ── Que no canjee más de lo que tiene ni de lo que cuesta la compra, y que
+    // respete el mínimo. Aquí solo se calcula: los puntos se consumen al final, cuando el pedido ya
+    // no puede fallar.
     let aCanjear = 0;
     let discount = 0;
     const pedidos = Number(pointsToRedeem) || 0;
@@ -248,13 +165,9 @@ orderController.createOrder = async (req, res) => {
       return res.status(400).json({ message: "Indica la dirección de entrega" });
     }
 
-    /*
-     * ── ENVÍO ──
-     * El costo lo fija el panel, NO el navegador: el front solo lo muestra. Se
-     * cobra únicamente a domicilio; en retiro es 0. El cálculo (zona → por km →
-     * plano) vive en utils/envio.js para que la cuenta sea la misma aquí y en el
-     * carrito. Las coordenadas del cliente vienen con el pedido (deliveryLat/Lng).
-     */
+    // ── ENVÍO ── El costo lo fija el panel, NO el navegador: el front solo lo muestra. Se cobra
+    // únicamente a domicilio; en retiro es 0. El cálculo (zona → por km → plano) vive en
+    // utils/envio.js para que la cuenta sea la misma aquí y en el carrito.
     const ajustesTienda = await storeSettingsModel
       .findOne({ clave: CLAVE_UNICA })
       .select("ubicacionTienda envioBase envioPorKm zonasEnvio radioMaximoKm servicioActivo servicioTipo servicioValor");
@@ -269,10 +182,8 @@ orderController.createOrder = async (req, res) => {
     }
     const shippingCost = envio ? envio.costo : 0;
 
-    /*
-     * Tarifa de servicio: solo si la tienda la tiene activa. Fija (dólares) o un
-     * porcentaje del subtotal. Se cobra igual a domicilio y a retiro.
-     */
+    // Tarifa de servicio: solo si la tienda la tiene activa. Fija (dólares) o un porcentaje del
+    // subtotal. Se cobra igual a domicilio y a retiro.
     const serviceFee = ajustesTienda?.servicioActivo
       ? (ajustesTienda.servicioTipo === "porcentaje"
           ? Number(((subtotal * (Number(ajustesTienda.servicioValor) || 0)) / 100).toFixed(2))
@@ -288,13 +199,9 @@ orderController.createOrder = async (req, res) => {
       ? Math.floor(baseParaPuntos * config.pointsPerDollar)
       : 0;
 
-    /*
-     * ── PAGO CON SALDO ──
-     * Va antes de guardar: si no le alcanza, no queremos ni el pedido creado
-     * ni los puntos consumidos. El descuento del saldo es condicional
-     * ({ balance: { $gte: total } }) para que dos compras simultáneas no
-     * puedan gastar el mismo dinero dos veces.
-     */
+    // ── PAGO CON SALDO ── Va antes de guardar: si no le alcanza, no queremos ni el pedido creado ni
+    // los puntos consumidos. El descuento del saldo es condicional ({ balance: { $gte: total } }) para
+    // que dos compras simultáneas no puedan gastar el mismo dinero dos veces.
     if (metodo === "saldo") {
       const cobrado = await clientModel.findOneAndUpdate(
         { _id: clientId, balance: { $gte: total } },
@@ -309,12 +216,9 @@ orderController.createOrder = async (req, res) => {
       }
     }
 
-    /*
-     * Ahora sí se consumen los puntos: ya pasó todo lo que podía rechazar el
-     * pedido. Si justo en este instante otra compra gastó parte de ellos, se
-     * canjean los que quedan; el descuento ya está en el total, y es un caso
-     * tan raro que no vale la pena rehacer el cobro por él.
-     */
+    // Ahora sí se consumen los puntos: ya pasó todo lo que podía rechazar el pedido. Si justo en este
+    // instante otra compra gastó parte de ellos, se canjean los que quedan; el descuento ya está en el
+    // total, y es un caso tan raro que no vale la pena rehacer el cobro por él.
     const pointsRedeemed = aCanjear > 0 ? await consumirPuntos(clientId, aCanjear) : 0;
 
     const newOrder = new orderModel({
@@ -337,26 +241,16 @@ orderController.createOrder = async (req, res) => {
       deliveryLng: entrega === "delivery" ? deliveryLng : undefined,
       channel: channel || "web",
       pointsEarned,
-      /*
-       * El código con el que se recibirá este pedido. Lo pone el servidor —el
-       * navegador nunca lo propone— y se emite para retiro igual que para
-       * domicilio. Ver utils/codigoEntrega.js.
-       */
+      // El código con el que se recibirá este pedido. Lo pone el servidor —el navegador nunca lo
+      // propone— y se emite para retiro igual que para domicilio. Ver utils/codigoEntrega.js.
       deliveryCode: generarCodigoEntrega(),
     });
 
     await newOrder.save();
 
-    /*
-     * ── STOCK: descontar ──
-     * Va DESPUÉS de guardar el pedido: si algo falla acá, al menos la venta
-     * quedó registrada. Al revés (descontar y que falle el pedido) perderíamos
-     * inventario sin tener a qué achacárselo.
-     *
-     * Se usa $set con el número ya calculado y no $inc porque varios productos
-     * tienen el stock guardado como texto y $inc revienta con esos. De paso,
-     * cada venta va dejando el campo convertido a número.
-     */
+    // ── STOCK: descontar ── Va DESPUÉS de guardar el pedido: si algo falla acá, al menos la venta
+    // quedó registrada. Al revés (descontar y que falle el pedido) perderíamos inventario sin tener a
+    // qué achacárselo.
     for (const r of renglones) {
       const producto = porId.get(String(r.productId));
       if (!producto) continue;
@@ -417,14 +311,9 @@ orderController.createOrder = async (req, res) => {
 // SELECT — Pedidos de UN cliente (su historial). Alimenta MisPedidos/Recibidos.
 orderController.getOrdersByClient = async (req, res) => {
   try {
-    /*
-     * Tener sesión no basta: hay que ser ESE cliente.
-     *
-     * Sin esta comprobación, cualquiera con una cuenta leía el historial de
-     * cualquier otro cambiando el id de la URL — qué compró, a qué dirección
-     * se lo llevaron y las coordenadas de su casa. El personal sí puede ver
-     * los de todos: es la tienda atendiendo a su gente.
-     */
+    // Tener sesión no basta: hay que ser ESE cliente. Sin esta comprobación, cualquiera con una cuenta
+    // leía el historial de cualquier otro cambiando el id de la URL — qué compró, a qué dirección se
+    // lo llevaron y las coordenadas de su casa.
     if (req.usuario?.tipo === "Client" && req.usuario.id !== req.params.clientId) {
       return res.status(403).json({ message: "No tiene permiso para esta acción" });
     }
@@ -435,11 +324,9 @@ orderController.getOrdersByClient = async (req, res) => {
       .select("+deliveryCode")
       .populate("items.productId");
 
-    /*
-     * El código va SOLO si quien pregunta es el cliente dueño. El personal
-     * llega hasta aquí legítimamente (atender es su trabajo) pero se lleva el
-     * pedido sin el código. Ver sinCodigoDeEntrega, arriba.
-     */
+    // El código va SOLO si quien pregunta es el cliente dueño. El personal llega hasta aquí
+    // legítimamente (atender es su trabajo) pero se lleva el pedido sin el código. Ver
+    // sinCodigoDeEntrega, arriba.
     const esElDueno = req.usuario?.tipo === "Client";
     return res.status(200).json(esElDueno ? orders : orders.map(sinCodigoDeEntrega));
 
@@ -449,14 +336,9 @@ orderController.getOrdersByClient = async (req, res) => {
   }
 };
 
-/*
- * SELECT — UN pedido completo, para la pantalla de estado del pedido.
- *
- * Distinto de getCourierPosition (que devuelve solo el puntito y se consulta
- * cada pocos segundos): esto trae el pedido entero —productos, dirección,
- * método de pago, envío, total— para pintar la pantalla una vez. Mismo candado:
- * tener sesión no basta, hay que ser el dueño; el personal ve el de cualquiera.
- */
+// SELECT — UN pedido completo, para la pantalla de estado del pedido.
+// Trae el pedido entero (productos, dirección, pago, envío y total). Solo lo ve su dueño o el
+// personal.
 orderController.getOrderById = async (req, res) => {
   try {
     // Igual que en getCourierPosition: un id con mala forma es un 404 limpio,
@@ -490,10 +372,8 @@ orderController.getOrderById = async (req, res) => {
   }
 };
 
-/*
- * El cliente valora el SERVICIO de entrega de un pedido suyo YA entregado.
- * No es una reseña del producto: es qué tal estuvo el reparto.
- */
+// El cliente valora el SERVICIO de entrega de un pedido suyo YA entregado. No es una reseña del
+// producto: es qué tal estuvo el reparto.
 orderController.rateService = async (req, res) => {
   try {
     const n = Number(req.body.rating);
@@ -549,12 +429,9 @@ orderController.getOrders = async (req, res) => {
       .find(filter)
       .sort({ createdAt: -1 })
       .populate("clientId", "fullName email phoneNumber")
-      /*
-       * La marca va anidada: sin este segundo populate, items.productId.brandId
-       * llegaba como un ObjectId pelado y el panel no tenía forma de mostrar
-       * "Oreja" de cuál marca — con productos que se llaman igual entre sí
-       * (varias "Oreja", "Semita") era imposible saber cuál pidió el cliente.
-       */
+      // La marca va anidada: sin este segundo populate, items.productId.brandId llegaba como un ObjectId
+      // pelado y el panel no tenía forma de mostrar "Oreja" de cuál marca — con productos que se llaman
+      // igual entre sí (varias "Oreja", "Semita") era imposible saber cuál pidió el cliente.
       .populate({ path: "items.productId", populate: { path: "brandId" } })
       // +deliveryCode solo para poder decir si LO HAY: sinCodigoDeEntrega lo
       // convierte en el booleano `tieneCodigoEntrega` y borra el código.
@@ -568,17 +445,8 @@ orderController.getOrders = async (req, res) => {
   }
 };
 
-// UPDATE — Cambiar el estado del pedido (preparando, entregado, cancelado).
-/*
- * Lo que pasa al mover un pedido (sellos de hora, código de entrega, aviso al
- * cliente) vive en utils/estadoPedido.js: lo comparte con Tiqui del panel,
- * que también mueve pedidos cuando se lo piden. Aquí solo se traduce a HTTP.
- */
-/*
- * El nombre de quien mueve el pedido, sacado de su sesión. La pantalla de
- * Pedidos no lo manda, así que los sellos (preparedBy, deliveredBy…) quedaban
- * vacíos: el pedido decía a qué hora se entregó pero no quién lo entregó.
- */
+// UPDATE — Cambiar el estado del pedido; lo que pasa al moverlo vive en utils/estadoPedido.js.
+// nombreDelPersonal: el nombre de quien lo mueve, sacado de su sesión, para los sellos.
 const nombreDelPersonal = async (usuario) => {
   if (!usuario?.id || usuario.tipo === "Client") return "";
   try {
@@ -612,17 +480,9 @@ orderController.updateOrderStatus = async (req, res) => {
   }
 };
 
-/*
- * UPDATE — El CLIENTE cancela su pedido.
- *
- * Solo mientras está "por preparar": en cuanto la tienda empieza a juntar los
- * productos, ya hay alguien trabajando en él y cancelarlo desde la app dejaría
- * la bolsa armada a medias. Ahí se le pide que escriba por WhatsApp.
- *
- * Todo lo demás es la cancelación de siempre (utils/estadoPedido.js): vuelve
- * el stock, se le devuelve el saldo y los puntos canjeados. El motivo lo elige
- * el cliente y lo lee el personal en Pedidos.
- */
+// UPDATE — El CLIENTE cancela su pedido.
+// Solo mientras está "por preparar": en cuanto la tienda empieza a juntar los productos, ya hay
+// alguien trabajando en él y cancelarlo desde la app dejaría la bolsa armada a medias.
 const YA_EN_PREPARACION =
   "Ya empezamos a preparar tu pedido y no se puede cancelar desde aquí. Escríbenos por WhatsApp y lo vemos.";
 
@@ -692,12 +552,7 @@ orderController.createPrintOrder = async (req, res) => {
     }
 
     const esColor = color === "true" || color === true;
-    /*
-     * Copias y páginas, enteras y con tope. Antes pasaba cualquier número: el
-     * campo de copias de la web acepta "1e258" (un <input type="number"> deja
-     * escribir exponentes) y llegaron pedidos de 10^258 copias, con un total y
-     * unos puntos de 5×10^256 que dejaron el dashboard ilegible.
-     */
+    // Copias y páginas, enteras y con tope.
     const nCopias = copies === undefined || copies === "" ? 1 : Number(copies);
     const nPaginas = pages === undefined || pages === "" ? 1 : Number(pages);
     if (!Number.isInteger(nCopias) || nCopias < 1 || nCopias > MAX_COPIAS) {
@@ -708,11 +563,8 @@ orderController.createPrintOrder = async (req, res) => {
     }
     const doble = doubleSided === "true" || doubleSided === true;
 
-    /*
-     * Antes el precio ignoraba `doble`: se calculaba, se guardaba en el pedido
-     * y no tocaba el total, así que elegir doble cara no cambiaba nada. Ahora
-     * el cálculo vive en un solo lugar y cobra por hoja, no por página.
-     */
+    // El precio de una impresión se calcula en un solo lugar y cobra por hoja, no por página (con
+    // la doble cara incluida).
     const { total, hojas, precioPorHoja } = calcularPrecioImpresion({
       servicio: service,
       paginas: nPaginas,
@@ -793,14 +645,9 @@ orderController.createPrintOrder = async (req, res) => {
   }
 };
 
-/*
- * UPDATE — El repartidor manda dónde va.
- *
- * Lo llama el teléfono de quien reparte cada pocos segundos mientras dura el
- * viaje. Es la mitad barata del seguimiento en vivo: escribe cuatro números y
- * ya. Con `activo: false` se apaga el compartir sin tener que entregar
- * (se cansó, se le acabó la batería, o se bajó del pedido).
- */
+// UPDATE — El repartidor manda dónde va.
+// Lo llama el teléfono de quien reparte cada pocos segundos mientras dura el viaje. Es la mitad
+// barata del seguimiento en vivo: escribe cuatro números y ya.
 orderController.updateCourierPosition = async (req, res) => {
   try {
     const { lat, lng, quien, activo } = req.body;
@@ -853,24 +700,15 @@ orderController.updateCourierPosition = async (req, res) => {
   }
 };
 
-/*
- * SELECT — Dónde va el repartidor, para el cliente que espera.
- *
- * Devuelve solo el punto y el destino, no el pedido entero: esta ruta se
- * consulta cada pocos segundos y sería un desperdicio arrastrar los productos
- * y los datos del cliente en cada vuelta.
- */
-// Un punto con más de esto ya no es "ahorita" (la misma cuenta que
-// frontend/src/hooks/useSeguimientoEnVivo.js).
+// SELECT — Dónde va el repartidor, para el cliente que espera: solo el punto y el destino, porque
+// se consulta cada pocos segundos. Un punto de más de 90 s ya no es "ahorita".
 const SENAL_FRIA_MS = 90 * 1000;
 
 orderController.getCourierPosition = async (req, res) => {
   try {
-    /*
-     * Un id con mala forma revienta en el casteo de Mongoose y sale como 500.
-     * En una ruta que se consulta cada diez segundos eso son cientos de
-     * errores en el log tapando los que sí importan: mejor un 404 y ya.
-     */
+    // Un id con mala forma revienta en el casteo de Mongoose y sale como 500. En una ruta que se
+    // consulta cada diez segundos eso son cientos de errores en el log tapando los que sí importan:
+    // mejor un 404 y ya.
     if (!isValidObjectId(req.params.id)) {
       return res.status(404).json({ message: "Pedido no encontrado" });
     }
@@ -883,13 +721,9 @@ orderController.getCourierPosition = async (req, res) => {
       return res.status(404).json({ message: "Pedido no encontrado" });
     }
 
-    /*
-     * Solo el dueño del pedido —o el personal— puede ver por dónde viene.
-     *
-     * Esta ruta devuelve el punto del repartidor Y las coordenadas del
-     * destino, o sea la casa de alguien. `clientId` entra en el select de
-     * arriba solo para poder comprobarlo; no se devuelve al navegador.
-     */
+    // Solo el dueño del pedido —o el personal— puede ver por dónde viene. Esta ruta devuelve el punto
+    // del repartidor Y las coordenadas del destino, o sea la casa de alguien. `clientId` entra en el
+    // select de arriba solo para poder comprobarlo; no se devuelve al navegador.
     if (req.usuario?.tipo === "Client" && String(pedido.clientId) !== req.usuario.id) {
       return res.status(403).json({ message: "No tiene permiso para esta acción" });
     }
@@ -899,18 +733,13 @@ orderController.getCourierPosition = async (req, res) => {
       : null;
     const courier = pedido.courier?.active ? pedido.courier : null;
 
-    /*
-     * La línea por las calles que le falta al repartidor, mientras va en
-     * camino: { puntos: [[lng, lat]…], metros, segundos }. Null sin llave del
-     * servicio de rutas, sin destino o si no encontró camino. Al terminar el
-     * viaje se olvida. Ver utils/rutaReparto.js.
-     */
+    // La línea por las calles que le falta al repartidor, mientras va en camino: { puntos: [[lng,
+    // lat]…], metros, segundos }. Null sin llave del servicio de rutas, sin destino o si no encontró
+    // camino. Al terminar el viaje se olvida. Ver utils/rutaReparto.js.
     let ruta = null;
-    /*
-     * Sin punto fresco del repartidor (nunca llegó, o lleva más de minuto y
-     * medio callado), lo que sí se sabe: la ruta desde la tienda y cuánto
-     * falta desde que salió. Ver estimadoDesdeLaTienda en utils/rutaReparto.js.
-     */
+    // Sin punto fresco del repartidor (nunca llegó, o lleva más de minuto y medio callado), lo que sí
+    // se sabe: la ruta desde la tienda y cuánto falta desde que salió. Ver estimadoDesdeLaTienda en
+    // utils/rutaReparto.js.
     let estimado = null;
     const puntoFresco = courier?.lat != null && courier.updatedAt
       && Date.now() - new Date(courier.updatedAt).getTime() <= SENAL_FRIA_MS;
@@ -950,27 +779,8 @@ orderController.getCourierPosition = async (req, res) => {
   }
 };
 
-/*
- * ============================================================
- * SELECT — Cuánto tardamos DE VERDAD en llegar a esta zona.
- * ============================================================
- * Todas las tiendas prometen "30 a 45 minutos" y ese número no sale de
- * ningún lado. Aquí ya tenemos con qué responder de verdad: cada pedido
- * entregado guarda a qué punto fue y a qué hora llegó.
- *
- * Cómo se calcula:
- *   1. Se buscan las entregas pasadas CERCA del punto que preguntan (no por
- *      colonia: los nombres de colonia son un desastre y la gente los
- *      escribe de diez maneras distintas).
- *   2. Se toma la MEDIANA, no el promedio. Un pedido que se quedó olvidado
- *      tres horas un domingo no tiene por qué empeorarle el estimado a todo
- *      el barrio; la mediana lo ignora sin tener que andar borrando datos.
- *   3. Si hay menos de 3 entregas cerca, NO se inventa un número. Se dice
- *      que todavía no hay con qué, que es la verdad.
- *
- * Se miran solo los últimos 90 días: cómo se repartía hace un año no dice
- * nada de cómo se reparte hoy.
- */
+// SELECT — Cuánto tardamos DE VERDAD en llegar a esta zona.
+// Todas las tiendas prometen "30 a 45 minutos" y ese número no sale de ningún lado.
 const RADIO_ZONA_M = 1500;      // qué tan cerca cuenta como "su zona"
 const MINIMO_ENTREGAS = 3;      // menos que esto no es un dato, es una anécdota
 const DIAS_DE_HISTORIA = 90;
@@ -1027,11 +837,9 @@ orderController.getTiempoPorZona = async (req, res) => {
       // solo el rato que el repartidor anduvo en la calle.
       const tardanza = (new Date(o.deliveredAt) - new Date(o.createdAt)) / 60000;
 
-      /*
-       * Se descartan los imposibles: entregas "negativas" (alguien movió el
-       * estado a mano) y las de más de 4 horas, que casi siempre son un
-       * pedido que se marcó entregado al día siguiente, no un reparto lento.
-       */
+      // Se descartan los imposibles: entregas "negativas" (alguien movió el estado a mano) y las de más
+      // de 4 horas, que casi siempre son un pedido que se marcó entregado al día siguiente, no un
+      // reparto lento.
       if (tardanza > 0 && tardanza < 240) minutos.push(tardanza);
     }
 

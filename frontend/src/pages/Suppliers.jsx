@@ -118,10 +118,8 @@ const Suppliers = () => {
     <div className="flex flex-col gap-6 w-full pb-8">
       <h1 className="text-4xl font-extrabold text-[#066494] mb-6">Proveedores</h1>
 
-      {/*
-        Lo vencido, arriba de todo. Es plata que ya se debía pagar y suele venir
-        con recargo: si hay que ver una sola cosa al entrar, es esta.
-      */}
+      {/* Lo vencido, arriba de todo. Es plata que ya se debía pagar y suele venir con recargo: si hay que
+         ver una sola cosa al entrar, es esta. */}
       {totales.vencido > 0 && (
         <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl p-4 mb-5">
           <AlertTriangle className="w-5 h-5 text-red-500 flex-none mt-0.5" />
@@ -211,13 +209,9 @@ const Suppliers = () => {
                 </td>
                 <td className="py-4 px-4 text-sm">
                   <div className="flex items-center gap-3">
-                    {/*
-                      Mismo padding/redondeo/sombreado de fondo que Editar y
-                      Eliminar (ver TableActions.jsx) — antes solo cambiaba de
-                      color al pasar el mouse, y ese cambio de color ni se
-                      notaba (ver el fix del hover en index.css), así que el
-                      botón parecía no reaccionar a nada.
-                    */}
+                    {/* Mismo padding/redondeo/sombreado de fondo que Editar y Eliminar (ver TableActions.jsx) — antes
+                       solo cambiaba de color al pasar el mouse, y ese cambio de color ni se notaba (ver el fix del
+                       hover en index.css), así que el botón parecía no reaccionar a nada. */}
                     <button
                       onClick={() => setCuentaAbierta(item)}
                       className="press p-1.5 rounded-md text-[#003049] hover:text-[#00283D] hover:bg-gray-100 transition-colors"
@@ -243,11 +237,9 @@ const Suppliers = () => {
         supplier={currentSupplier}
         onSave={handleSaveForm}
         brands={brands}
-        /*
-          La marca recién creada desde el formulario se suma a la lista de aquí
-          para que aparezca entre las casillas al instante. No se recarga todo:
-          el formulario está abierto y con datos a medio escribir.
-        */
+        // La marca recién creada desde el formulario se suma a la lista de aquí para que aparezca entre
+        // las casillas al instante. No se recarga todo: el formulario está abierto y con datos a medio
+        // escribir.
         onMarcaCreada={(nueva) => setBrands((prev) => [...prev, nueva])}
       />
 

@@ -1,13 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { dashboardService } from '../api/dashboardService';
 
-/*
- * useDashboard — datos del resumen del admin.
- *
- * Importante: el resumen completo se pide UNA vez al entrar. Cambiar el
- * periodo (Semana/Mes/Año) solo vuelve a pedir la GRÁFICA, porque es lo único
- * que cambia — así el dashboard no se repinta entero por tocar un botón.
- */
+// useDashboard — datos del resumen del admin. Importante: el resumen completo se pide UNA vez al
+// entrar. Cambiar el periodo (Semana/Mes/Año) solo vuelve a pedir la GRÁFICA, porque es lo único
+// que cambia — así el dashboard no se repinta entero por tocar un botón.
 export const useDashboard = () => {
   const [data, setData] = useState(null);
   const [grafica, setGrafica] = useState([]);
@@ -18,11 +14,9 @@ export const useDashboard = () => {
   // Nos sirve para no pedir la gráfica dos veces en el primer render.
   const yaCargoResumen = useRef(false);
 
-  /*
-   * El periodo elegido, para "recargar". El resumen se arma una sola vez, así
-   * que su función no depende del periodo; antes lo leía de cuando se abrió
-   * la pantalla y recargar con "Semana" puesta traía la gráfica del mes.
-   */
+  // El periodo elegido, para "recargar". El resumen se arma una sola vez, así que su función no
+  // depende del periodo; antes lo leía de cuando se abrió la pantalla y recargar con "Semana" puesta
+  // traía la gráfica del mes.
   const periodoRef = useRef(periodo);
   useEffect(() => { periodoRef.current = periodo; }, [periodo]);
 

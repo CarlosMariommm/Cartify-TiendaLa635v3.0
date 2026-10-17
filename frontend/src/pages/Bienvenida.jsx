@@ -10,19 +10,9 @@ import { useAjustesCtx } from '../context/AjustesContext';
 import Mapa from '../components/Mapa/Mapa';
 import { useIdioma } from '../hooks/useIdioma';
 
-/*
- * ============================================================
- * BIENVENIDA — la primera pantalla después de entrar
- * ============================================================
- * Un saludo sobre el mapa, para que el cliente deje su dirección de entrega
- * antes de empezar a comprar. Se puede omitir: pedir la dirección a alguien
- * que solo quiere ver precios es la forma más rápida de perderlo.
- *
- * El mapa es mapcn (MapLibre con los mapas de CARTO), no Google Maps: la
- * llave de Google del proyecto vence y Maps exige facturación con tarjeta.
- * Esto es gratis y sin llave.
- * ============================================================
- */
+// BIENVENIDA — la primera pantalla después de entrar
+// Un saludo sobre el mapa, para que el cliente deje su dirección de entrega antes de empezar a
+// comprar.
 
 const BROWN = 'var(--marca-600)';
 const BROWN_DARK = 'var(--marca-700)';
@@ -42,10 +32,8 @@ const FondoMapa = styled.div`
   z-index: 0;
 `;
 
-/*
- * Velo sobre el mapa: sin él, el texto blanco de la tarjeta compite con las
- * calles y no se lee. Es más oscuro arriba, donde va el saludo.
- */
+// Velo sobre el mapa: sin él, el texto blanco de la tarjeta compite con las calles y no se lee. Es
+// más oscuro arriba, donde va el saludo.
 const Velo = styled.div`
   position: absolute;
   inset: 0;
@@ -218,11 +206,9 @@ const Bienvenida = () => {
 
   const primerNombre = (user?.fullName || '').split(' ')[0];
 
-  /*
-   * La misma pantalla sirve para dos cosas: el saludo de entrada y agregar
-   * otra dirección desde Mi Cuenta. Cuando viene con ?volver=, es lo segundo:
-   * cambia el texto y regresa a donde estaba en lugar de ir a servicios.
-   */
+  // La misma pantalla sirve para dos cosas: el saludo de entrada y agregar otra dirección desde Mi
+  // Cuenta. Cuando viene con ?volver=, es lo segundo: cambia el texto y regresa a donde estaba en
+  // lugar de ir a servicios.
   const volverA = searchParams.get('volver');
   const esAgregar = !!volverA;
   const destinoAlSalir = volverA || '/tienda-dashboard';
@@ -238,11 +224,8 @@ const Bienvenida = () => {
 
     setGuardando(true);
     try {
-      /*
-       * Se agrega a las que ya tenga en vez de reemplazarlas: alguien puede
-       * entrar por segunda vez desde otro lugar, y perder la dirección de la
-       * casa por eso sería un desastre.
-       */
+      // Se agrega a las que ya tenga en vez de reemplazarlas: alguien puede entrar por segunda vez desde
+      // otro lugar, y perder la dirección de la casa por eso sería un desastre.
       const cliente = await clientService.getClientById(user.id);
       const previas = Array.isArray(cliente?.clientAddress) ? cliente.clientAddress : [];
       const nueva = {
@@ -267,10 +250,8 @@ const Bienvenida = () => {
 
   return (
     <Pantalla>
-      {/*
-        Tocar el mapa mueve el pin, el pin se arrastra, y cuando aparece una
-        posición nueva (el GPS, por ejemplo) el mapa vuela hasta ella.
-      */}
+      {/* Tocar el mapa mueve el pin, el pin se arrastra, y cuando aparece una posición nueva (el GPS, por
+         ejemplo) el mapa vuela hasta ella. */}
       <FondoMapa>
         <Mapa
           centro={centro}
@@ -287,21 +268,12 @@ const Bienvenida = () => {
       <Velo />
 
       <Contenido>
-        {/*
-          "Bienvenido" tiene género y la mitad de la clientela es mujer. "Hola"
-          y "te damos la bienvenida" saludan igual de bien sin dejar a nadie
-          fuera, y de paso funcionan si el nombre no está cargado.
-        */}
+        {/* "Bienvenido" tiene género y la mitad de la clientela es mujer. "Hola" y "te damos la bienvenida"
+           saludan igual de bien sin dejar a nadie fuera, y de paso funcionan si el nombre no está cargado. */}
         <Saludo>
-          {/*
-            El nombre sale de los ajustes, no del codigo. Estaba escrito a
-            mano, asi que si el dueno le cambiaba el nombre a su tienda en
-            Personalizacion esta pantalla seguia diciendo el viejo.
-
-            Aqui NO se usa MarcaTienda: esto no es una barra superior sino un
-            rotulo pequeno en versalitas sobre el saludo, y meterle la marca
-            grande le comeria el protagonismo al "!Hola, Fulano!".
-          */}
+          {/* El nombre sale de los ajustes, no del codigo. Aqui NO se usa MarcaTienda: esto no es una barra
+             superior sino un rotulo pequeno en versalitas sobre el saludo, y meterle la marca grande le
+             comeria el protagonismo al "!Hola, Fulano!". */}
           <Marca>{[ajustes.nombreLinea1, ajustes.nombreLinea2].filter(Boolean).join(" ")}</Marca>
           <Titulo>
             {esAgregar
@@ -333,12 +305,9 @@ const Bienvenida = () => {
             {localizando ? t('Ubicándote…') : t('Usar mi ubicación')}
           </Ubicarme>
 
-          {/*
-            Nombre y referencia. El nombre es para el cliente —para elegir
-            rápido entre "Casa" y "Trabajo" al pagar—; la referencia es para
-            el repartidor, que en el barrio se guía por el portón verde y no
-            por el número de casa.
-          */}
+          {/* Nombre y referencia. El nombre es para el cliente —para elegir rápido entre "Casa" y "Trabajo"
+             al pagar—; la referencia es para el repartidor, que en el barrio se guía por el portón verde y
+             no por el número de casa. */}
           <Dos>
             <div>
               <Etiqueta htmlFor="nombre">{t('Nombre de la dirección')}</Etiqueta>

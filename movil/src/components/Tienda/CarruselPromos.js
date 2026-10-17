@@ -1,31 +1,6 @@
-/*
- * ============================================================
- * CARRUSEL DE PROMOCIONES
- * ============================================================
- * El mismo anillo que la web (PromoBanners.jsx en teléfono): la del centro de
- * frente y las de los lados giradas hacia adentro, asomando por detrás, como
- * los discos de una rocola. Avanza solo cada cinco segundos y se desliza con
- * el dedo. Tocar la del centro abre sus productos; tocar una de los lados la
- * trae al frente, porque abrir algo que no se alcanza a leer se siente a trampa.
- *
- * ── Cómo se mueve ──
- *
- * Todo cuelga de UN número, `posicion`: cuántos pasos dio el anillo (con
- * decimales a medio deslizar, y sin tope: después de la última sigue la
- * primera sin saltos). La distancia de cada tarjeta al centro sale de ahí con
- * un módulo, y de la distancia, su giro, su tamaño y su opacidad. Así el dedo,
- * la flecha y el avance solo mueven lo mismo y la animación corre en el hilo
- * nativo (useNativeDriver).
- *
- * Las cuentas viven en utils/anillo.js, con su prueba.
- *
- * ── Cuándo se queda quieto ──
- *
- * Mientras el dedo está encima, cuando la tienda no está a la vista (se abrió
- * un producto encima) y si la persona pidió "menos movimiento" en su
- * teléfono. En ese último caso tampoco gira: solo se corre de lado.
- * ============================================================
- */
+// CARRUSEL DE PROMOCIONES
+// El mismo anillo que la web (PromoBanners.jsx en teléfono): la del centro de frente y las de los
+// lados giradas hacia adentro, asomando por detrás, como los discos de una rocola.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Dimensions, Easing, PanResponder, Pressable, StyleSheet, View } from 'react-native';
@@ -39,11 +14,9 @@ import TarjetaPromo, { PROPORCION } from './TarjetaPromo';
 import { useIdioma } from '../../context/IdiomaContext';
 import { useMovimientoReducido } from '../../hooks/useMovimientoReducido';
 
-/*
- * El ancho de la tarjeta, con la cuenta de la web: clamp(260px, 58vw, 600px).
- * Más angosta que la pantalla a propósito: lo que sobra es por donde asoman
- * las de los lados, que es lo que dice "hay más de una".
- */
+// El ancho de la tarjeta, con la cuenta de la web: clamp(260px, 58vw, 600px). Más angosta que la
+// pantalla a propósito: lo que sobra es por donde asoman las de los lados, que es lo que dice "hay
+// más de una".
 const anchoDeTarjeta = (pantalla) => Math.round(Math.max(260, Math.min(pantalla * 0.58, 600)));
 
 // La curva de la web (EASE_OUT): arranca rápido y se posa suave.
@@ -66,21 +39,17 @@ const CarruselPromos = ({ promos, alElegirPromo }) => {
   const ancho = anchoDeTarjeta(anchoPantalla);
   const alto = ancho / PROPORCION;
 
-  /*
-   * `paso` es a dónde va el anillo (un entero sin tope) y `posicion` es dónde
-   * está ahora, animado. `frente` es el entero más cercano a la posición: la
-   * tarjeta que va arriba de todas, que cambia en cuanto el dedo cruza la mitad.
-   */
+  // `paso` es a dónde va el anillo (un entero sin tope) y `posicion` es dónde está ahora, animado.
+  // `frente` es el entero más cercano a la posición: la tarjeta que va arriba de todas, que cambia
+  // en cuanto el dedo cruza la mitad.
   const posicion = useRef(new Animated.Value(0)).current;
   const pasoRef = useRef(0);
   const [frente, setFrente] = useState(0);
   const [tocando, setTocando] = useState(false);
   const activa = indiceEnAnillo(frente, total);
 
-  /*
-   * Al cambiar las promociones (otro pasillo) se vuelve al principio, para no
-   * quedar apuntando a una tarjeta que en el pasillo nuevo ya no está.
-   */
+  // Al cambiar las promociones (otro pasillo) se vuelve al principio, para no quedar apuntando a una
+  // tarjeta que en el pasillo nuevo ya no está.
   const firma = promos.map((p) => p._id).join('|');
   useEffect(() => {
     posicion.stopAnimation();
@@ -112,22 +81,17 @@ const CarruselPromos = ({ promos, alElegirPromo }) => {
     [irAPaso, total]
   );
 
-  /*
-   * El avance solo. Se vuelve a contar desde cero cada vez que el anillo se
-   * mueve, así que después de deslizar a mano hay cinco segundos enteros para
-   * leer la promo antes de que se vaya.
-   */
+  // El avance solo. Se vuelve a contar desde cero cada vez que el anillo se mueve, así que después
+  // de deslizar a mano hay cinco segundos enteros para leer la promo antes de que se vaya.
   useEffect(() => {
     if (reducido || !enFoco || tocando || total < 2) return undefined;
     const reloj = setTimeout(siguiente, INTERVALO_ANILLO);
     return () => clearTimeout(reloj);
   }, [frente, reducido, enFoco, tocando, total, siguiente]);
 
-  /*
-   * El dedo. Solo se queda con el gesto si va de lado: uno que va hacia
-   * abajo es para recorrer la tienda, y quitárselo dejaría la portada trabada.
-   * Un toque sin arrastrar llega a la tarjeta (Pressable) como siempre.
-   */
+  // El dedo. Solo se queda con el gesto si va de lado: uno que va hacia abajo es para recorrer la
+  // tienda, y quitárselo dejaría la portada trabada. Un toque sin arrastrar llega a la tarjeta
+  // (Pressable) como siempre.
   const pxPorPaso = ancho * 0.5;
   const arrastre = useRef({ desde: 0, ultimo: 0 });
   const respuesta = useMemo(
@@ -171,11 +135,8 @@ const CarruselPromos = ({ promos, alElegirPromo }) => {
     [total, pxPorPaso, posicion, irAPaso]
   );
 
-  /*
-   * Cómo se ve cada tarjeta según su distancia al centro: los mismos cinco
-   * puntos para todas (oculta, de lado, centro, de lado, oculta) y la
-   * animación interpola entre ellos.
-   */
+  // Cómo se ve cada tarjeta según su distancia al centro: los mismos cinco puntos para todas
+  // (oculta, de lado, centro, de lado, oculta) y la animación interpola entre ellos.
   const poses = useMemo(() => PUNTOS_ANILLO.map((d) => poseEnAnillo(d, { sinGiro: reducido })), [reducido]);
   const distancias = useMemo(
     () =>
@@ -197,11 +158,8 @@ const CarruselPromos = ({ promos, alElegirPromo }) => {
     promos.forEach((_, i) => anchosPuntos.push(new Animated.Value(i === activa ? ANCHO_PILDORA : ANCHO_PUNTO)));
   }
   useEffect(() => {
-    /*
-     * Con Animated y `useNativeDriver: false` a propósito: animar el ancho es
-     * lo único que dibuja bien las puntas redondeadas de la píldora (con
-     * scaleX el borderRadius se estira y quedan ovaladas).
-     */
+    // Con Animated y `useNativeDriver: false` a propósito: animar el ancho es lo único que dibuja bien
+    // las puntas redondeadas de la píldora (con scaleX el borderRadius se estira y quedan ovaladas).
     Animated.parallel(
       anchosPuntos.map((valor, i) =>
         Animated.timing(valor, {
@@ -289,11 +247,9 @@ const CarruselPromos = ({ promos, alElegirPromo }) => {
         })}
       </View>
 
-      {/*
-        Los controles, como en la web: flecha, puntos y flecha. Solo con más de
-        una promo; con una sola, un punto suelto parece un adorno sin
-        explicación. Los puntos se ven de 8 px pero se tocan de bastante más.
-      */}
+      {/* Los controles, como en la web: flecha, puntos y flecha. Solo con más de una promo; con una sola,
+         un punto suelto parece un adorno sin explicación. Los puntos se ven de 8 px pero se tocan de
+         bastante más. */}
       {!unaSola && (
         <View style={estilos.controles}>
           <Pressable

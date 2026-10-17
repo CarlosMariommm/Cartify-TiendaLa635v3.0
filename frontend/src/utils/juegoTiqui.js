@@ -1,40 +1,13 @@
-/*
- * ============================================================
- * EL RETO DE TIQUI — juegoTiqui.js
- * ============================================================
- * La dinámica del stand de la Expo (pantalla /juego, en la laptop):
- *
- *   1. Tiqui hace preguntas sobre el proyecto, de tres opciones: la tienda,
- *      ella misma, tu cuenta y el negocio. Nada de cómo está programado
- *      (se pidió así): todo es lo que alguien ve al usarla.
- *   2. Con 3 aciertos antes de 2 errores, se gira la ruleta. Perdona un
- *      error: con uno solo, una pregunta difícil sacaba a casi todos.
- *   3. La ruleta da dulce o premio mayor. Lo decide el ángulo donde cae, y
- *      cada porción mide lo mismo que su probabilidad (15 % secreto = 54°):
- *      lo que se ve es exactamente lo que pasa.
- *
- * Aquí vive solo lo que no depende de la pantalla: las preguntas, las frases
- * de Tiqui, el marcador, el mazo y la ruleta. Lo usan la pantalla
- * (pages/JuegoTiqui.jsx) y el script que graba su voz (scripts/voz-juego.mjs),
- * por eso no importa nada del navegador.
- * ============================================================
- */
+// EL RETO DE TIQUI — juegoTiqui.js
+// La dinámica del stand de la Expo (pantalla /juego, en la laptop): 1. Tiqui hace preguntas sobre
+// el proyecto, de tres opciones: la tienda, ella misma, tu cuenta y el negocio.
 
 export const ACIERTOS_PARA_GANAR = 3;
 export const ERRORES_PARA_PERDER = 2;
 
-/*
- * Las preguntas. La PRIMERA opción es la correcta: el orden en pantalla se
- * mezcla en cada partida (ver armarPregunta). `voz` es lo que dice Tiqui
- * cuando lo escrito no se lee bien en voz alta (comillas, un NO en
- * mayúsculas); si no está, dice la pregunta tal cual. `dato` sale después de
- * responder: cuenta cómo funciona esa parte del proyecto, así que cada
- * pregunta también lo presenta. Los datos son del código real: si algo
- * cambia en la tienda, cambiar también su pregunta.
- *
- * El "635" y los precios ("$2.50") no hace falta escribirlos para la voz: el
- * servidor ya los dice bien (backend/src/utils/vozTiqui.js).
- */
+// Las preguntas. La PRIMERA opción es la correcta: el orden en pantalla se mezcla en cada partida
+// (ver armarPregunta). `voz` es lo que dice Tiqui cuando lo escrito no se lee bien en voz alta
+// (comillas, un NO en mayúsculas); si no está, dice la pregunta tal cual.
 export const PREGUNTAS = [
   // ── La tienda ──
   {
@@ -241,15 +214,9 @@ export const PREGUNTAS = [
   },
 ];
 
-/*
- * Lo que dice Tiqui fuera de las preguntas. Cada frase lleva su `id` (es el
- * nombre de su audio grabado) y su ánimo, que le da el tono a la voz y la
- * cara a la mascota. Todo en tú y sin género: no sabemos quién se acerca.
- *
- * Hay frases distintas para el primer y el segundo acierto, y para el primer
- * error y el que cierra la partida: así Tiqui cuenta cómo va el juego sin que
- * nadie tenga que mirar el marcador.
- */
+// Lo que dice Tiqui fuera de las preguntas. Cada frase lleva su `id` (es el nombre de su audio
+// grabado) y su ánimo, que le da el tono a la voz y la cara a la mascota. Todo en tú y sin género:
+// no sabemos quién se acerca.
 export const FRASES = {
   bienvenida: [
     { id: 'bienvenida', animo: 'alegre', texto: '¡Hola! Soy Tiqui. Te voy a preguntar sobre mi tienda. Acierta tres antes de fallar dos, y te dejo girar mi ruleta. ¡Empecemos!' },
@@ -303,12 +270,9 @@ export const clipsDeVoz = () => [
   ...PREGUNTAS.map(clipDePregunta),
 ];
 
-/*
- * Huella corta del texto (FNV-1a de 32 bits). Va en el nombre del audio: si
- * alguien cambia una frase, su audio viejo deja de coincidir y el juego no
- * dice algo distinto de lo que muestra (cae en la voz del navegador hasta que
- * se vuelva a grabar).
- */
+// Huella corta del texto (FNV-1a de 32 bits). Va en el nombre del audio: si alguien cambia una
+// frase, su audio viejo deja de coincidir y el juego no dice algo distinto de lo que muestra (cae
+// en la voz del navegador hasta que se vuelva a grabar).
 export const huella = (texto) => {
   let h = 0x811c9dc5;
   for (const letra of String(texto)) {
@@ -337,10 +301,8 @@ export const estadoDelJuego = ({ aciertos, errores }) => {
   return 'jugando';
 };
 
-/*
- * Qué dice Tiqui después de una respuesta, según cómo quedó el marcador.
- * `porTiempo`: no contestó a tiempo (cuenta como error).
- */
+// Qué dice Tiqui después de una respuesta, según cómo quedó el marcador. `porTiempo`: no contestó
+// a tiempo (cuenta como error).
 export const grupoDeReaccion = (marcador, acerto, porTiempo = false) => {
   const estado = estadoDelJuego(marcador);
   if (acerto) {
@@ -371,14 +333,9 @@ export const mezclar = (lista, azar = azarSeguro) => {
 
 export const alguna = (lista, azar = azarSeguro) => lista[Math.floor(azar() * lista.length)];
 
-/*
- * El mazo: el orden en que salen las preguntas, guardado entre jugadores. Así
- * el que estaba en la fila escuchando no se sabe las respuestas del
- * siguiente: hasta que se acaba el mazo no se repite ninguna. Al acabarse se
- * baraja de nuevo (y si alguien agrega o quita preguntas, el mazo se corrige
- * solo). `yaSalieron` son las de la partida en curso: si el mazo se acaba a
- * media partida, esas van al fondo del nuevo para no repetirlas.
- */
+// El mazo: el orden en que salen las preguntas, guardado entre jugadores. Así el que estaba en la
+// fila escuchando no se sabe las respuestas del siguiente: hasta que se acaba el mazo no se repite
+// ninguna.
 export const sacarDelMazo = (mazo, { ids = PREGUNTAS.map((p) => p.id), yaSalieron = [], azar = azarSeguro } = {}) => {
   let quedan = (Array.isArray(mazo) ? mazo : []).filter((id) => ids.includes(id));
   if (!quedan.length) {
@@ -401,28 +358,8 @@ export const armarPregunta = (id, azar = azarSeguro) => {
 
 export const PORCIONES_DE_DULCE = 6;
 
-/*
- * Las porciones, en grados y en el sentido del reloj desde arriba (0° es
- * donde está la flecha). El premio mayor mide lo mismo que su probabilidad
- * y va entre los dulces, no pegado a la flecha al arrancar.
- *
- * Sin premios mayores en bodega, su porción se queda (gris, "Agotado") pero
- * la ruleta ya no cae ahí: eso es más honesto que esconderla.
- */
-/*
- * La probabilidad del premio mayor, en %.
- *
- * Automática: la de sacar un premio mayor de la bolsa de premios que
- * quedan. Con 10 secretos y 60 dulces, 10 de 70 = 14 %. Cada premio que se
- * entrega la mueve: si salen muchos dulces seguidos sube, si sale un secreto
- * baja, y así los dos se acaban más o menos parejo a lo largo del día.
- *
- * Fija: la que eligió el operador, sin importar cuántos queden.
- *
- * Va de 1 % a 50 %: con menos no se vería la porción y con más dejaría de
- * ser secreto. Sin secretos devuelve la fija, solo para dibujar la porción
- * gris de "Agotado" (la ruleta ya no cae ahí).
- */
+// Las porciones de la ruleta, en grados desde arriba (0° es la flecha); el premio mayor mide su
+// probabilidad, que sale de los premios que quedan (10 mayores y 60 dulces = 14 %).
 export const PROBABILIDAD_MINIMA = 1;
 export const PROBABILIDAD_MAXIMA = 50;
 
@@ -453,12 +390,9 @@ export const armarRuleta = ({ porcentajeSecreto = 15, quedanSecretos = 1 } = {})
   return porciones;
 };
 
-/*
- * Dónde cae. Se elige un ángulo al azar en toda la rueda (o solo entre los
- * dulces, si el secreto está agotado): la probabilidad de cada porción es su
- * ancho. Se deja un margen en los bordes para que nunca quede la flecha
- * justo encima de una raya y se dude de qué salió.
- */
+// Dónde cae. Se elige un ángulo al azar en toda la rueda (o solo entre los dulces, si el secreto
+// está agotado): la probabilidad de cada porción es su ancho. Se deja un margen en los bordes para
+// que nunca quede la flecha justo encima de una raya y se dude de qué salió.
 const MARGEN = 2;
 
 export const elegirPremio = (porciones, azar = azarSeguro) => {
@@ -477,11 +411,9 @@ export const elegirPremio = (porciones, azar = azarSeguro) => {
   return null;
 };
 
-/*
- * Cuánto girar para que `angulo` quede bajo la flecha (arriba), dando al
- * menos `vueltas` completas desde donde está ahora. La ruleta gira en el
- * sentido del reloj: un punto en `a` queda arriba cuando a + giro ≡ 0.
- */
+// Cuánto girar para que `angulo` quede bajo la flecha (arriba), dando al menos `vueltas` completas
+// desde donde está ahora. La ruleta gira en el sentido del reloj: un punto en `a` queda arriba
+// cuando a + giro ≡ 0.
 export const giroHasta = (actual, angulo, vueltas = 6) => {
   const base = actual + vueltas * 360;
   const falta = (((360 - ((base + angulo) % 360)) % 360) + 360) % 360;
@@ -513,10 +445,8 @@ export const CONTADORES_VACIOS = { jugaron: 0, ruleta: 0, dulces: 0, secretos: 0
 export const hoy = (d = new Date()) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-/*
- * Lo guardado, sano: valores fuera de rango vuelven a los de fábrica, y los
- * contadores se reinician solos al cambiar de día (la Expo dura varios).
- */
+// Lo guardado, sano: valores fuera de rango vuelven a los de fábrica, y los contadores se
+// reinician solos al cambiar de día (la Expo dura varios).
 export const leerGuardado = (crudo, dia = hoy()) => {
   const g = crudo && typeof crudo === 'object' ? crudo : {};
   const numero = (v, min, max, def) => (Number.isFinite(v) && v >= min && v <= max ? Math.round(v) : def);

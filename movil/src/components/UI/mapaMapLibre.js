@@ -1,30 +1,13 @@
-/*
- * ============================================================
- * MAPLIBRE PARA LOS WEBVIEW — lo que comparten los mapas de la app
- * ============================================================
- * La web usa mapcn (MapLibre con los mapas vectoriales de CARTO). Los mapas
- * de la app corren dentro de un WebView, así que aquí va lo mismo escrito
- * para una página HTML suelta: la librería, el estilo de mapa y los pines.
- *
- * Versión 5 y no la 6 de la web: la 5 viene en UN solo archivo que ya trae
- * su "worker" adentro. La 6 carga el worker como archivo aparte desde el CDN,
- * y un WebView sin dominio propio (source={{ html }}) no siempre lo deja.
- * El mapa se ve igual: el estilo es el mismo.
- *
- * Gratis y sin llave, igual que antes con Leaflet.
- * ============================================================
- */
+// MAPLIBRE PARA LOS WEBVIEW — lo que comparten los mapas de la app
+// La web usa mapcn (MapLibre con los mapas vectoriales de CARTO).
 
 const VERSION = '5.24.0';
 
 export const MAPLIBRE_JS = `https://cdn.jsdelivr.net/npm/maplibre-gl@${VERSION}/dist/maplibre-gl.js`;
 export const MAPLIBRE_CSS = `https://cdn.jsdelivr.net/npm/maplibre-gl@${VERSION}/dist/maplibre-gl.css`;
 
-/*
- * Los mismos dos estilos que usa mapcn en la web: las calles claras de
- * siempre y, en modo oscuro, las oscuras de CARTO — no un mapa blanco en
- * medio de la pantalla.
- */
+// Los mismos dos estilos que usa mapcn en la web: las calles claras de siempre y, en modo oscuro,
+// las oscuras de CARTO — no un mapa blanco en medio de la pantalla.
 export const ESTILO_MAPA = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 export const ESTILO_MAPA_OSCURO = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
@@ -45,12 +28,9 @@ const cssControlesOscuros = `
   .maplibregl-ctrl-attrib-button { filter: invert(1) brightness(.85); }
 `;
 
-/*
- * Los pines y el crédito, igual que en la web (MapaTienda.jsx):
- * - la gota: cuadrado con tres esquinas redondas girado 45°;
- * - el repartidor: punto azul con halo que late;
- * - el crédito "© CARTO, © OpenStreetMap" plegado en su botón "i".
- */
+// Los pines y el crédito, igual que en la web (MapaTienda.jsx): - la gota: cuadrado con tres
+// esquinas redondas girado 45°; - el repartidor: punto azul con halo que late; - el crédito "©
+// CARTO, © OpenStreetMap" plegado en su botón "i".
 export const cssComun = (colorMarca, oscuro = false) => `
   html, body, #mapa { height: 100%; margin: 0; padding: 0; background: ${oscuro ? FONDO_MAPA_OSCURO : FONDO_MAPA}; }
   ${oscuro ? cssControlesOscuros : ''}

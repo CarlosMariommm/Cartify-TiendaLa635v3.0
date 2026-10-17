@@ -9,24 +9,9 @@ import { caraDeAnimo } from '../utils/animoTiqui';
 import { ACIERTOS_PARA_GANAR, ERRORES_PARA_PERDER } from '../utils/juegoTiqui';
 import { despertarAudio, sonarPasar } from '../utils/sonidosJuego';
 
-/*
- * ============================================================
- * EL RETO DE TIQUI — JuegoTiqui.jsx (ruta /juego)
- * ============================================================
- * La dinámica del stand de la Expo, en la laptop y a pantalla completa:
- * Tiqui hace preguntas sobre el proyecto; con 3 aciertos antes de 2 errores
- * se gira la ruleta, que da dulce o premio mayor.
- *
- * Solo pinta: lo que pasa vive en useJuegoTiqui y las reglas en
- * utils/juegoTiqui.js. Se juega con el mouse, tocando la pantalla o con el
- * teclado (1, 2, 3 o A, B, C para responder; Enter para seguir).
- *
- * Va siempre en oscuro, con el fondo de la landing, y por encima de todo lo
- * flotante de la tienda (WhatsApp, cookies, el pedido en curso): en el stand
- * no hay nada más que el juego. El panel del operador se abre tocando 5
- * veces el nombre de arriba a la izquierda.
- * ============================================================
- */
+// EL RETO DE TIQUI — JuegoTiqui.jsx (ruta /juego)
+// La dinámica del stand de la Expo, en la laptop y a pantalla completa: Tiqui hace preguntas sobre
+// el proyecto; con 3 aciertos antes de 2 errores se gira la ruleta, que da dulce o premio mayor.
 
 const TIENDA = 'https://cartify-tienda-la635.vercel.app';
 
@@ -46,10 +31,8 @@ const COLOR_TEMA = {
 
 const SUAVE = 'rgba(255,255,255,0.68)';
 
-/*
- * El confeti del premio. Las posiciones salen de un azar con semilla, fijo:
- * se calculan una vez al cargar, no en cada pintado.
- */
+// El confeti del premio. Las posiciones salen de un azar con semilla, fijo: se calculan una vez al
+// cargar, no en cada pintado.
 const PAPELITOS = (() => {
   let s = 20261008;
   const azar = () => (s = (s * 16807) % 2147483647) / 2147483647;
@@ -122,10 +105,8 @@ const Marcador = ({ marcador }) => (
   </div>
 );
 
-/*
- * El botón de seguir. Cuando el juego va a avanzar solo, se va llenando:
- * así se ve cuánto falta, y quien quiera se adelanta.
- */
+// El botón de seguir. Cuando el juego va a avanzar solo, se va llenando: así se ve cuánto falta, y
+// quien quiera se adelanta.
 const BotonSeguir = ({ texto, onClick, espera, clave, className = '' }) => (
   <button
     type="button"
@@ -453,11 +434,8 @@ const JuegoTiqui = () => {
     }).then(setQr).catch(() => {});
   }, []);
 
-  /*
-   * El navegador no deja sonar nada hasta que alguien toca: el primer toque
-   * o tecla despierta el audio, y desde ahí la música del inicio suena sola
-   * entre jugador y jugador.
-   */
+  // El navegador no deja sonar nada hasta que alguien toca: el primer toque o tecla despierta el
+  // audio, y desde ahí la música del inicio suena sola entre jugador y jugador.
   useEffect(() => {
     window.addEventListener('pointerdown', despertarAudio);
     window.addEventListener('keydown', despertarAudio);
@@ -502,11 +480,9 @@ const JuegoTiqui = () => {
       if (k !== 'enter' && k !== ' ') return;
       // Que el botón enfocado no se active también: una sola acción por tecla.
       e.preventDefault();
-      /*
-       * Un Enter de más justo después de cambiar de pantalla no cuenta: en el
-       * stand la gente lo pulsa dos veces seguidas, y el segundo se saltaba
-       * una pantalla (del premio pasaba directo a otra partida).
-       */
+      // Un Enter de más justo después de cambiar de pantalla no cuenta: en el stand la gente lo pulsa
+      // dos veces seguidas, y el segundo se saltaba una pantalla (del premio pasaba directo a otra
+      // partida).
       if (performance.now() - cambioDePantalla.current < 700) return;
       if (fase === 'inicio') empezar();
       else if (fase === 'reglas' || fase === 'respuesta') avanzar();

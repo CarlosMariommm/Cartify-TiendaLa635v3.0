@@ -3,23 +3,9 @@ import { useAuth } from '../hooks/useAuth';
 import { clientService } from '../api/clientService';
 import ModalConfirmarEdad from '../components/Store/ModalConfirmarEdad';
 
-/*
- * ============================================================
- * EDAD — EdadContext.jsx
- * ============================================================
- * El candado de los productos +18, compartido por toda la tienda: la tarjeta,
- * el detalle y el carrito preguntan lo mismo desde un solo lado.
- *
- * `mayorConfirmado` es verdadero cuando:
- *   - hay sesión de cliente y ya tiene un DUI guardado (el DUI se emite a los
- *     18, así que tenerlo afirma la mayoría de edad), o
- *   - ingresó un DUI a mano en esta pestaña (se recuerda mientras dure).
- *
- * `pedirConfirmacion(cb)` abre el modal si hace falta y ejecuta `cb` cuando la
- * persona confirma (o de una si ya estaba confirmado). Así el que llama no
- * tiene que saber nada del candado: pide y sigue.
- * ============================================================
- */
+// EDAD — EdadContext.jsx
+// El candado de los productos +18, compartido por toda la tienda: la tarjeta, el detalle y el
+// carrito preguntan lo mismo desde un solo lado.
 const EdadContext = createContext({ mayorConfirmado: true, pedirConfirmacion: (cb) => cb?.() });
 
 export const useEdad = () => useContext(EdadContext);

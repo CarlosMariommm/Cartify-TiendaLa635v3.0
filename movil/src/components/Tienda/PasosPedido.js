@@ -3,18 +3,9 @@ import { useTema } from '../../context/TemaContext';
 import { useColores, useEstilos } from '../../context/ModoContext';
 import { pasosDe, indiceDePaso } from '../../utils/pasosPedido';
 
-/*
- * ============================================================
- * LA LÍNEA DE PASOS — PasosPedido.js
- * ============================================================
- * El "Recibido → Preparando → En camino → Entregado", con el paso actual
- * resaltado y los ya pasados marcados. Vivía dibujado a mano dentro de
- * BurbujaPedido.js; se separa porque ModalPedido.js (el detalle al tocar un
- * pedido en el historial) necesita exactamente el mismo dibujo, y copiarlo
- * era exponerse al mismo bug que pasosPedido.js ya documenta: dos copias que
- * un día dejan de decir lo mismo.
- * ============================================================
- */
+// LA LÍNEA DE PASOS — PasosPedido.js
+// El "Recibido → Preparando → En camino → Entregado", con el paso actual resaltado y los ya
+// pasados marcados.
 const PasosPedido = ({ deliveryType, estado }) => {
   const { colores } = useTema();
   const COLORES = useColores();

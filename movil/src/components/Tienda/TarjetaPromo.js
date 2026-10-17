@@ -1,32 +1,6 @@
-/*
- * ============================================================
- * TARJETA DE PROMOCIÓN
- * ============================================================
- * La cara de una promoción, copiada de `PromoCard.jsx`: el sello del ahorro,
- * cuánto le queda, el título y la descripción, sobre el degradado de su tema y
- * con su icono de marca de agua al fondo.
- *
- * ── Las tres capas, y por qué ese orden ──
- *
- *   1. El degradado (LinearGradient), que es el fondo.
- *   2. La marca de agua: el icono en grande, muy tenue. Es una CAPA, no un
- *      vecino que pelea por el espacio — el texto se dibuja encima, así que un
- *      título largo lo cruza sin problema y el icono nunca le quita lugar.
- *   3. El texto.
- *
- * Si la tienda sube una foto, esta ACOMPAÑA: se acomoda a la derecha y el
- * texto se queda legible a la izquierda. Para quien sí diseñó su banner
- * completo está `imagenCompleta`, que devuelve el comportamiento de imagen a
- * sangre. Es una decisión, no un accidente.
- *
- * ── El difuminado de la foto que acompaña ──
- *
- * Igual que la web, la foto se funde hacia la izquierda con el fondo. La web lo
- * hace con `maskImage`; aquí, con un degradado del color del fondo pintado
- * ENCIMA de la foto (opaco a la izquierda, transparente al 46%). Antes era una
- * máscara (MaskedView), que en algunos casos dejaba un bloque negro.
- * ============================================================
- */
+// TARJETA DE PROMOCIÓN
+// La cara de una promoción, copiada de `PromoCard.jsx`: el sello del ahorro, cuánto le queda, el
+// título y la descripción, sobre el degradado de su tema y con su icono de marca de agua al fondo.
 
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -47,19 +21,14 @@ export const PROPORCION = 2.2;
 // Lo que en CSS es clamp(min, valor, max).
 const entre = (min, valor, max) => Math.max(min, Math.min(valor, max));
 
-/*
- * El color del fondo justo donde empieza la foto (54% del ancho, a media
- * altura). El degradado de la tarjeta va en diagonal, así que ahí ya no es
- * ni el primer color ni el último: con el último a secas quedaba un corte
- * visible a la izquierda de la foto. Ver difuminadoDelFondo.
- */
+// El color del fondo justo donde empieza la foto (54% del ancho, a media altura). El degradado de
+// la tarjeta va en diagonal, así que ahí ya no es ni el primer color ni el último: con el último a
+// secas quedaba un corte visible a la izquierda de la foto. Ver difuminadoDelFondo.
 const T_BORDE_FOTO = puntoEnDiagonal(0.54, 0.5, PROPORCION);
 
-/*
- * Hasta este ancho la tarjeta es "angosta": la web lo decide con una consulta
- * @container de 380 px (index.css, .promo-titulo). Ahí la descripción se va,
- * los sellos no se parten en dos filas y el título le deja lugar a la flecha.
- */
+// Hasta este ancho la tarjeta es "angosta": la web lo decide con una consulta @container de 380 px
+// (index.css, .promo-titulo). Ahí la descripción se va, los sellos no se parten en dos filas y el
+// título le deja lugar a la flecha.
 const ANGOSTA = 380;
 
 const TarjetaPromo = ({ promo, etiqueta, vencimiento, ancho, mostrarFlecha = true }) => {
@@ -71,25 +40,19 @@ const TarjetaPromo = ({ promo, etiqueta, vencimiento, ancho, mostrarFlecha = tru
   const aSangre = hayImagen && promo.imagenCompleta;
   const acompaña = hayImagen && !promo.imagenCompleta;
 
-  /*
-   * Sobre fondos oscuros el texto es blanco; el acento entonces necesita letra
-   * oscura para que se lea. Es la misma cuenta que hace la web.
-   */
+  // Sobre fondos oscuros el texto es blanco; el acento entonces necesita letra oscura para que se
+  // lea. Es la misma cuenta que hace la web.
   const textoSobreAcento = colores.texto === '#FFFFFF' ? '#3D2B1A' : colores.texto;
 
   const glifo = glifoDePromo(promo?.icono);
-  /*
-   * La marca de agua se dibuja siempre que haya icono y NO haya foto. Con foto
-   * serían dos cosas peleando por la mitad derecha de la tarjeta.
-   */
+  // La marca de agua se dibuja siempre que haya icono y NO haya foto. Con foto serían dos cosas
+  // peleando por la mitad derecha de la tarjeta.
   const marcaDeAgua = !!glifo && !hayImagen;
   const alto = ancho / PROPORCION;
 
-  /*
-   * La letra se mide contra el ancho de ESTA tarjeta, con las mismas cuentas
-   * que la web (cqw = 1% del ancho). En el carrusel la tarjeta es angosta y
-   * con las letras fijas de antes el texto se salía por abajo.
-   */
+  // La letra se mide contra el ancho de ESTA tarjeta, con las mismas cuentas que la web (cqw = 1%
+  // del ancho). En el carrusel la tarjeta es angosta y con las letras fijas de antes el texto se
+  // salía por abajo.
   const angosta = ancho <= ANGOSTA;
   const medidas = {
     relleno: entre(16, ancho * 0.045, 40),
@@ -104,25 +67,14 @@ const TarjetaPromo = ({ promo, etiqueta, vencimiento, ancho, mostrarFlecha = tru
   const degradado = aSangre ? ['#EDE7E0', '#EDE7E0'] : colores.colores;
 
   return (
-    /*
-     * El primer color del degradado va TAMBIÉN como fondo del contenedor, y no
-     * es redundante: es lo que sostiene la tarjeta si el degradado no llega a
-     * pintarse.
-     *
-     * Sin esto el modo de fallo es el peor posible. El texto de casi todos los
-     * temas es blanco —está pensado para ir sobre un fondo oscuro— así que una
-     * tarjeta sin fondo no se ve "sin degradado": se ve VACÍA, con el título y
-     * la descripción en blanco sobre blanco. Solo sobreviven el sello y la
-     * flecha, que llevan color propio. Cuesta un `backgroundColor` y convierte
-     * un fallo mudo en uno que apenas se nota.
-     */
+    // El primer color del degradado va TAMBIÉN como fondo del contenedor, y no es redundante: es lo
+    // que sostiene la tarjeta si el degradado no llega a pintarse. Sin esto el modo de fallo es el
+    // peor posible.
     <View
       style={[estilos.tarjeta, { width: ancho, height: alto, backgroundColor: degradado[0] }]}
     >
-      {/*
-        El degradado va de la esquina de arriba a la izquierda a la de abajo a
-        la derecha: es lo que en CSS es `135deg`, que es lo que usa la web.
-      */}
+      {/* El degradado va de la esquina de arriba a la izquierda a la de abajo a la derecha: es lo que en
+         CSS es `135deg`, que es lo que usa la web. */}
       <LinearGradient
         colors={degradado}
         start={{ x: 0, y: 0 }}
@@ -134,28 +86,18 @@ const TarjetaPromo = ({ promo, etiqueta, vencimiento, ancho, mostrarFlecha = tru
         <View style={estilos.marcaDeAgua} pointerEvents="none">
           <MaterialCommunityIcons
             name={glifo}
-            /*
-             * El 31% del ANCHO, como en la web (31cqw). Atado al ancho de la
-             * tarjeta y no a un número fijo: la misma pieza se pinta a 600 px
-             * en una tableta y a 300 en un teléfono, y un icono de 90 px se ve
-             * discreto en la primera y enorme en la segunda.
-             */
+            // El 31% del ANCHO, como en la web (31cqw). Atado al ancho de la tarjeta y no a un número fijo: la
+            // misma pieza se pinta a 600 px en una tableta y a 300 en un teléfono, y un icono de 90 px se ve
+            // discreto en la primera y enorme en la segunda.
             size={ancho * 0.31}
             color={colores.acento}
           />
         </View>
       )}
 
-      {/*
-        La foto va a la derecha y ENCIMA, un degradado del color del fondo que
-        va de opaco (a la izquierda de la foto) a transparente (al 46%): así se
-        funde con la tarjeta en vez de cortarse con un borde duro, como el
-        `maskImage` de la web.
-
-        Antes era una máscara (MaskedView), y donde la máscara no se pinta —el
-        modo web, algunos teléfonos— la foto salía con un bloque negro encima.
-        El degradado encima se pinta siempre.
-      */}
+      {/* La foto va a la derecha y ENCIMA, un degradado del color del fondo que va de opaco (a la
+         izquierda de la foto) a transparente (al 46%): así se funde con la tarjeta en vez de cortarse
+         con un borde duro, como el `maskImage` de la web. El degradado encima se pinta siempre. */}
       {acompaña && (
         <View style={estilos.imagenAcompana} pointerEvents="none">
           <Image
@@ -186,10 +128,8 @@ const TarjetaPromo = ({ promo, etiqueta, vencimiento, ancho, mostrarFlecha = tru
       ) : (
         <View style={[estilos.contenido, { padding: medidas.relleno }]}>
           {(!!etiqueta || !!vencimiento) && (
-            /*
-             * Angosta, los sellos van en UNA fila: si se partían en dos le
-             * quitaban un renglón al título. La fecha es la que se recorta.
-             */
+            // Angosta, los sellos van en UNA fila: si se partían en dos le quitaban un renglón al título. La
+            // fecha es la que se recorta.
             <View style={[estilos.filaSellos, angosta && estilos.filaSellosAngosta]}>
               {!!etiqueta && (
                 <View style={[estilos.sello, { backgroundColor: colores.acento }]}>
@@ -277,23 +217,18 @@ const estilos = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     justifyContent: 'center',
-    /*
-     * Sombra bajita y en dos intenciones: `elevation` es la de Android y
-     * shadow* la de iOS. Una sola mancha fuerte se veía como una alfombra
-     * sucia debajo de la tarjeta, sobre todo con varias seguidas.
-     */
+    // Sombra bajita y en dos intenciones: `elevation` es la de Android y shadow* la de iOS. Una sola
+    // mancha fuerte se veía como una alfombra sucia debajo de la tarjeta, sobre todo con varias
+    // seguidas.
     elevation: 3,
     shadowColor: '#5A3719',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.18,
     shadowRadius: 10,
   },
-  /*
-   * Pegada a la derecha y centrada en vertical, como en la web. Va con la
-   * opacidad puesta en el contenedor y no en el color del icono: así el mismo
-   * 17% vale para cualquier acento, sin tener que armar un rgba a mano por
-   * cada tema.
-   */
+  // Pegada a la derecha y centrada en vertical, como en la web. Va con la opacidad puesta en el
+  // contenedor y no en el color del icono: así el mismo 17% vale para cualquier acento, sin tener
+  // que armar un rgba a mano por cada tema.
   marcaDeAgua: {
     position: 'absolute',
     right: '5%',

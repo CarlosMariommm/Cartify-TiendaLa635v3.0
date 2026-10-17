@@ -4,62 +4,18 @@ import { avisarALaApp } from '../utils/puenteApp';
 // Las paletas de fondo oscuro: la app pinta su barra de estado con letras claras.
 const PALETAS_OSCURAS = ['dark', 'calma-noche'];
 
-/**
- * LAS PALETAS DEL PANEL — todas pensadas para la vista de quien lo usa.
- * "Mi marca" (ver armarPaletaDeMarca más abajo) es la que arranca por defecto.
- *
- * 1. Lectura         — sepia: fondo color papel y letras café oscuro, sin la luz
- *                      azul ni el reflejo del blanco. El modo de lectura de los
- *                      libros electrónicos, para leer mucho rato.
- * 2. Contraste reforzado — para baja visión o cataratas: letras negras sobre
- *                      blanco, bordes marcados y acciones en azul fuerte (10 a 1).
- * 3. Modo oscuro     — poca luz, para migrañas y fotosensibilidad.
- * 4. Calma           — colores apagados y fondo marfil, sin blanco puro ni tonos
- *                      intensos: para quien se cansa o se abruma con la pantalla
- *                      (la pidió la tienda para un administrador en recuperación
- *                      neurológica). Ver abajo.
- * 5. Calma noche     — su contraparte oscura, carbón tibio y letras blanco hueso.
- *
- * Antes estaban Alto contraste (negro y amarillo), Deuteranopía y Tritanopía:
- * la tienda pidió cambiarlas (2026-09-28) por paletas que cuiden la vista. Quien
- * tenía una guardada pasa a la más parecida (ver PALETAS_QUE_SE_FUERON).
- *
- * Con las paletas van las opciones de lectura (texto más grande, más espacio
- * entre líneas, menos animaciones, resaltar enlaces y foco): ver LECTURA.
- *
- * ── Lo que se lee tiene que leerse (medido, 2026-09-27) ──
- * Se recorrió el panel con cada paleta midiendo el contraste de cada texto
- * contra su fondo real, y fallaban cosas en todas:
- *   - El ACENTO se usaba para texto (títulos, fechas, "2x1"), pero es un color
- *     de adorno: el celeste de Mi marca daba 2.9. Ahora cada paleta trae
- *     `accentText`, su acento oscurecido (o aclarado en las oscuras) hasta 4.5
- *     o más.
- *   - El gris APAGADO (encabezados de columna, "hace 5 h", el rol) daba 2.3 a
- *     2.8 en las claras: se oscureció a 4.5 o más.
- *   - En Modo oscuro los botones eran texto blanco sobre lila claro (2.7):
- *     ahora el texto del botón es oscuro (6.6).
- * La regla: todo texto de 4.5 para arriba sobre su fondo. Una paleta nueva se
- * mide igual.
- */
+// LAS PALETAS DEL PANEL — todas pensadas para la vista de quien lo usa. "Mi marca" (ver
+// armarPaletaDeMarca más abajo) es la que arranca por defecto. 1. Lectura — sepia: fondo color
+// papel y letras café oscuro, sin la luz azul ni el reflejo del blanco.
 
-/*
- * Los colores de ESTADO (peligro, aviso, éxito) de cada paleta: los recuadros
- * de error, de "ojo con esto" y de "listo" del panel. Eran rojos, ámbar y
- * verdes fijos de Tailwind, pensados para fondo blanco: en Modo oscuro y Alto
- * contraste un texto rojo oscuro sobre la tarjeta negra no se leía, y un
- * recuadro rosado pálido con el texto de la paleta (blanco) tampoco. Con su
- * propio tono por paleta, index.css (.admin-theme) los pinta legibles en las
- * cinco: oscuros sobre fondo claro, claros sobre fondo oscuro.
- */
+// Los colores de ESTADO (peligro, aviso, éxito) de cada paleta: los recuadros de error, de "ojo
+// con esto" y de "listo" del panel.
 const ESTADOS_CLAROS = { peligro: '#B91C1C', aviso: '#92400E', exito: '#15803D' };
 const ESTADOS_OSCUROS = { peligro: '#FCA5A5', aviso: '#FCD34D', exito: '#86EFAC' };
 
 export const palettes = [
-  /*
-   * LECTURA — sepia. El fondo color papel y las letras café oscuro cansan menos
-   * en sesiones largas: no hay blanco que encandile ni tanta luz azul. Texto a
-   * 11 a 1; todo lo demás, de 5 para arriba.
-   */
+  // LECTURA — sepia. El fondo color papel y las letras café oscuro cansan menos en sesiones largas:
+  // no hay blanco que encandile ni tanta luz azul. Texto a 11 a 1; todo lo demás, de 5 para arriba.
   {
     id: 'lectura',
     name: 'Lectura',
@@ -87,13 +43,9 @@ export const palettes = [
     },
     swatches: ['#7A4E2D', '#B07A3C', '#F4ECD8', '#FBF6EA', '#3B2F22'],
   },
-  /*
-   * CONTRASTE REFORZADO — para baja visión o cataratas. Letras negras sobre
-   * blanco (21 a 1), acciones en azul fuerte (10 a 1) y bordes que SE VEN
-   * (5 a 1: en las demás paletas un borde casi blanco no se distingue con poca
-   * vista). Sin el amarillo chillón del Alto contraste de antes. Va mejor con
-   * el texto grande (ver LECTURA).
-   */
+  // CONTRASTE REFORZADO — para baja visión o cataratas. Letras negras sobre blanco (21 a 1),
+  // acciones en azul fuerte (10 a 1) y bordes que SE VEN (5 a 1: en las demás paletas un borde casi
+  // blanco no se distingue con poca vista). Sin el amarillo chillón del Alto contraste de antes.
   {
     id: 'contraste',
     name: 'Contraste reforzado',
@@ -147,22 +99,8 @@ export const palettes = [
     },
     swatches: ['#A78BFA', '#111827', '#0F172A', '#1E293B', '#F1F5F9'],
   },
-  /*
-   * CALMA — para quien se cansa o se abruma con la pantalla.
-   *
-   * La pidió la tienda para un administrador que se recupera de un derrame.
-   * Sigue lo que recomiendan las guías de accesibilidad para la fatiga visual
-   * y la sensibilidad a la luz:
-   *   - Nada de blanco puro: el fondo es marfil tibio y las tarjetas un marfil
-   *     más claro, con menos brillo y menos reflejo.
-   *   - Colores apagados: un azul verdoso grisáceo de principal, salvia de
-   *     acento. Sin rojos ni amarillos intensos; hasta el error es un ladrillo
-   *     suave, que avisa sin sobresaltar.
-   *   - El texto en gris carbón y no negro, pero con contraste de sobra (9 a 1
-   *     el principal, 4.5 o más todo lo demás). Suave no es tenue: después de
-   *     un derrame también puede costar ver, y un texto que no se distingue
-   *     cansa más que uno oscuro.
-   */
+  // CALMA — para quien se cansa o se abruma con la pantalla.
+  // La pidió la tienda para un administrador que se recupera de un derrame.
   {
     id: 'calma',
     name: 'Calma',
@@ -190,17 +128,9 @@ export const palettes = [
     },
     swatches: ['#4E7282', '#7FA08F', '#F4F1EA', '#FBF9F4', '#3E444D'],
   },
-  /*
-   * CALMA NOCHE — la contraparte oscura de Calma, como Modo oscuro lo es de
-   * las claras: para quien necesita la misma tranquilidad con poca luz o a
-   * quien el fondo claro le molesta.
-   *   - Nada de negro puro: un carbón tibio. El blanco sobre negro puro hace
-   *     un halo alrededor de las letras que cansa la vista.
-   *   - Letras blanco hueso, no blanco brillante: 10 a 12 a 1 de contraste,
-   *     de sobra para leer sin el 21 a 1 que encandila.
-   *   - Los mismos azul verdoso y salvia de Calma, aclarados y apagados, con
-   *     el texto de los botones oscuro (7 a 1).
-   */
+  // CALMA NOCHE — la contraparte oscura de Calma, como Modo oscuro lo es de las claras: para quien
+  // necesita la misma tranquilidad con poca luz o a quien el fondo claro le molesta. - Nada de negro
+  // puro: un carbón tibio.
   {
     id: 'calma-noche',
     name: 'Calma noche',
@@ -234,18 +164,8 @@ const ThemeContext = createContext();
 
 export const useTheme = () => useContext(ThemeContext);
 
-/*
- * "Mi marca" — la paleta por defecto del panel. Va con el azul de la casa, el
- * mismo que viste la cara de la tienda. Ya no sale de ningún ajuste: la marca
- * es fija (ver index.css). Las 4 paletas de
- * accesibilidad de arriba siguen intactas, con sus colores pensados a
- * propósito para cada condición, para quien las necesite.
- */
-/*
- * Los mismos seis tonos que declara index.css. Se repiten aquí porque este
- * archivo arma un objeto de JavaScript, no CSS, y no puede leer variables del
- * documento. Si la marca cambia, cambian los dos sitios.
- */
+// "Mi marca" — la paleta por defecto del panel, con el azul de la casa. Repite los seis tonos de
+// index.css porque aquí es un objeto de JavaScript: si la marca cambia, cambian los dos.
 const ESCALA_DE_MARCA = {
   '--marca-600': '#003049',
   '--marca-700': '#00283D',
@@ -283,27 +203,12 @@ const armarPaletaDeMarca = () => {
   };
 };
 
-/*
- * Quien tenía guardada una de las paletas que se quitaron pasa a la más
- * parecida, en vez de caer sin aviso a Mi marca: el que usaba Alto contraste
- * porque ve poco sigue necesitando contraste.
- */
+// Quien tenía guardada una de las paletas que se quitaron pasa a la más parecida, en vez de caer
+// sin aviso a Mi marca: el que usaba Alto contraste porque ve poco sigue necesitando contraste.
 const PALETAS_QUE_SE_FUERON = { 'high-contrast': 'contraste', deuteranopia: 'marca', tritanopia: 'marca' };
 
-/*
- * ── LECTURA: las opciones para leer mejor el panel ──
- * Aparte de los colores, porque se combinan con cualquier paleta:
- *   texto      Normal, Grande (115%) o Muy grande (130%). Agranda todo el
- *              panel en proporción —letras, botones y espacios—, como el zoom
- *              del navegador pero solo aquí y sin romper el acomodo.
- *   espaciado  Más aire entre líneas y letras: ayuda a no perder el renglón.
- *   movimiento Menos animaciones (lo mismo que "reducir movimiento" del
- *              sistema, pero para quien no sabe dónde se activa eso).
- *   foco       Subraya los enlaces y marca con un borde grueso lo que tiene
- *              el foco del teclado.
- * Se guardan en este navegador, como la paleta, y se pintan como atributos
- * del <html> (data-panel-*) que index.css aplica solo dentro del panel.
- */
+// ── LECTURA: las opciones para leer mejor el panel ── Aparte de los colores, porque se combinan
+// con cualquier paleta: texto Normal, Grande (115%) o Muy grande (130%).
 // Los tamaños (normal, grande, muy-grande) están en utils/lecturaPanel.js.
 const LECTURA_INICIAL = { texto: 'normal', espaciado: false, movimiento: false, foco: false };
 const LLAVE_LECTURA = 'panel-lectura';
@@ -351,11 +256,9 @@ export const ThemeProvider = ({ children }) => {
       root.style.setProperty(cssVar, value);
     });
 
-    /*
-     * Dentro de la app del teléfono, la app se viste igual que el panel: todo
-     * su modo del personal (Tiqui, el Reparto, los avisos) toma esta paleta.
-     * Fuera de la app no pasa nada. Ver utils/puenteApp.js.
-     */
+    // Dentro de la app del teléfono, la app se viste igual que el panel: todo su modo del personal
+    // (Tiqui, el Reparto, los avisos) toma esta paleta. Fuera de la app no pasa nada. Ver
+    // utils/puenteApp.js.
     avisarALaApp({
       tipo: 'paleta-panel',
       id: palette.id,

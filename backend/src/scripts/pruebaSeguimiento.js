@@ -1,24 +1,6 @@
-/*
- * Prueba del seguimiento en vivo, sin tener que salir a la calle.
- *
- * Crea un pedido a domicilio CON punto en el mapa (los que hay en la base
- * traen solo la dirección escrita, y sin coordenadas no hay nada que seguir)
- * y después simula al repartidor saliendo de la tienda hacia esa casa.
- *
- * El pedido se inserta directo con mongoose y no por el controller a
- * propósito: así no descuenta stock real ni reparte puntos de fidelidad.
- *
- * Cómo correrlo, desde backend/:
- *   node src/scripts/pruebaSeguimiento.js crear [correo]  -> crea el pedido
- *   node src/scripts/pruebaSeguimiento.js simular         -> mueve el puntito 3 min
- *   node src/scripts/pruebaSeguimiento.js simular cerca   -> ya viene llegando (30 s)
- *   node src/scripts/pruebaSeguimiento.js historial       -> entregas pasadas, para el tiempo por zona
- *   node src/scripts/pruebaSeguimiento.js borrar          -> limpia lo que creó
- *
- * El correo es opcional: sirve para que el pedido quede a nombre de la cuenta
- * con la que va a entrar a la tienda, y así le salga a usted la burbuja de
- * seguimiento. Sin correo, agarra el primer cliente que encuentre.
- */
+// Prueba del seguimiento en vivo, sin tener que salir a la calle. Crea un pedido a domicilio CON
+// punto en el mapa (los que hay en la base traen solo la dirección escrita, y sin coordenadas no
+// hay nada que seguir) y después simula al repartidor saliendo de la tienda hacia esa casa.
 import dotenv from "dotenv";
 dotenv.config();
 import mongoose from "mongoose";
@@ -58,11 +40,9 @@ const crear = async (correo) => {
   // entregas (marcado igual) se respeta: solo se borra lo que está en curso.
   await orderModel.deleteMany({ deliveryReference: MARCA, status: { $ne: "entregado" } });
 
-  /*
-   * Se entrega a la dirección REAL del cliente cuando la tiene. Así el
-   * pedido cae en la misma zona que su historial y el tiempo estimado sale;
-   * con la casa inventada quedaba a un kilómetro y medio y no coincidía.
-   */
+  // Se entrega a la dirección REAL del cliente cuando la tiene. Así el pedido cae en la misma zona
+  // que su historial y el tiempo estimado sale; con la casa inventada quedaba a un kilómetro y medio
+  // y no coincidía.
   const suya = (cliente.clientAddress || [])
     .map((d) => (typeof d === "string" ? null : d))
     .find((d) => d?.lat != null && d?.lng != null);
@@ -92,11 +72,9 @@ const crear = async (correo) => {
   console.log("  destino: ", destino.lat, destino.lng, suya ? `(${suya.nombre || suya.direccion})` : "(casa de prueba)");
 };
 
-/*
- * El repartidor saliendo de la tienda. Va en línea recta porque lo que se
- * está probando es el seguimiento, no la ruta: al cliente le llega la misma
- * información que le llegaría de un teléfono real.
- */
+// El repartidor saliendo de la tienda. Va en línea recta porque lo que se está probando es el
+// seguimiento, no la ruta: al cliente le llega la misma información que le llegaría de un teléfono
+// real.
 const simular = async (cerca) => {
   // El que está en curso, no una de las entregas del historial.
   const pedido = await orderModel.findOne({
@@ -111,10 +89,8 @@ const simular = async (cerca) => {
   // Se va hacia donde de verdad va el pedido, no hacia la casa de ejemplo.
   const meta = { lat: pedido.deliveryLat, lng: pedido.deliveryLng };
 
-  /*
-   * Modo "cerca": arranca ya a la vuelta de la esquina y va rápido, para
-   * probar el aviso de las últimas cuadras sin esperar el viaje completo.
-   */
+  // Modo "cerca": arranca ya a la vuelta de la esquina y va rápido, para probar el aviso de las
+  // últimas cuadras sin esperar el viaje completo.
   const desde = cerca
     ? {
         lat: meta.lat + (TIENDA.lat - meta.lat) * 0.28,
@@ -124,15 +100,9 @@ const simular = async (cerca) => {
   const pasos = cerca ? 8 : PASOS;
   const espera = cerca ? 3000 : ESPERA_MS;
 
-  /*
-   * SALIR A REPARTIR SON DOS COSAS, no una.
-   *
-   * En la app las hace el mismo botón de la pantalla de Reparto: mueve el
-   * pedido a 'en_camino' Y empieza a compartir la ubicación. El script solo
-   * hacía la segunda, así que el pedido se quedaba en 'preparando' y el
-   * cliente no veía ningún seguimiento por más posiciones que llegaran —
-   * la tienda solo dibuja el mapa cuando el pedido va en camino.
-   */
+  // SALIR A REPARTIR SON DOS COSAS, no una.
+  // En la app las hace el mismo botón de la pantalla de Reparto: mueve el pedido a 'en_camino' Y
+  // empieza a compartir la ubicación.
   await orderModel.findByIdAndUpdate(pedido._id, {
     $set: { status: "en_camino", enCaminoAt: new Date(), enCaminoBy: QUIEN },
   });
@@ -144,22 +114,9 @@ const simular = async (cerca) => {
     const lat = desde.lat + (meta.lat - desde.lat) * avance;
     const lng = desde.lng + (meta.lng - desde.lng) * avance;
 
-    /*
-     * La posición se escribe DIRECTO en la base, no por la API.
-     *
-     * PUT /order/:id/courier es soloPersonal, y esto es un proceso de Node
-     * sin navegador: no tiene cookie de sesión que mandar, así que recibía un
-     * 401 en cada punto y el script "corría bien" sin mover nada. Se veía
-     * como que el seguimiento estaba roto cuando lo roto era la prueba.
-     *
-     * Escribir directo es además lo que ya hacía el comando `crear` de este
-     * mismo archivo, y lo correcto para un script de pruebas: se salta la
-     * puerta en vez de fabricarse una llave.
-     *
-     * Se escribe EXACTAMENTE lo que escribe el endpoint (ver
-     * updateCourierPosition en orderController), para que la prueba no sea
-     * más fácil que la realidad.
-     */
+    // La posición se escribe DIRECTO en la base, no por la API. PUT /order/:id/courier es
+    // soloPersonal, y esto es un proceso de Node sin navegador: no tiene cookie de sesión que mandar,
+    // así que recibía un 401 en cada punto y el script "corría bien" sin mover nada.
     let estado;
     try {
       await orderModel.findByIdAndUpdate(pedido._id, {
@@ -182,29 +139,17 @@ const simular = async (cerca) => {
   console.log("El pedido quedó en 'en_camino': ábralo en Mis pedidos y verá el mapa.");
 };
 
-/*
- * Historial de entregas ya hechas, para que el "tiempo real por zona" tenga
- * de dónde salir.
- *
- * Sin esto la pantalla no muestra nada — y con razón: el cálculo se niega a
- * inventar un tiempo cuando no hay entregas por esa zona. Estos pedidos son
- * de PRUEBA y llevan la misma marca, así que se van con `borrar`.
- *
- * Los tiempos van entre 20 y 50 minutos con un par de días malos metidos a
- * propósito: si todas las entregas fueran igual de rápidas, la mediana no
- * estaría demostrando nada.
- */
+// Crea entregas de prueba ya hechas para que el "tiempo real por zona" tenga de dónde salir.
+// Llevan la misma marca y se borran con `borrar`.
 const historial = async (correo) => {
   const cliente = correo
     ? await clientModel.findOne({ email: correo })
     : await clientModel.findOne({ isActive: true });
   if (!cliente) { console.log("No se encontró el cliente."); return; }
 
-  /*
-   * El historial se siembra alrededor de la dirección REAL del cliente, no
-   * de la casa de prueba: si cae a cinco kilómetros, el cálculo dice —con
-   * razón— que no hay entregas por su zona, y no se vería nada.
-   */
+  // El historial se siembra alrededor de la dirección REAL del cliente, no de la casa de prueba: si
+  // cae a cinco kilómetros, el cálculo dice —con razón— que no hay entregas por su zona, y no se
+  // vería nada.
   const suya = (cliente.clientAddress || [])
     .map((d) => (typeof d === "string" ? null : d))
     .find((d) => d?.lat != null && d?.lng != null);

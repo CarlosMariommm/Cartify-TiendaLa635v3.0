@@ -1,25 +1,6 @@
-/*
- * ============================================================
- * EL PRONÓSTICO, DEL LADO DE LA TIENDA — pronostico.js
- * ============================================================
- * La estadística vive en otro servicio, en Python (analitica/): ahí están
- * Holt-Winters, la demanda intermitente y la simulación. Este archivo es el
- * puente:
- *
- *   1. junta de la base lo que hace falta, ya agrupado por día (en la hora
- *      de El Salvador): lo vendido por la tienda, las unidades de cada
- *      producto, la existencia de cada uno y cuándo se le compró a cada
- *      proveedor;
- *   2. se lo manda al servicio con la clave compartida;
- *   3. guarda la respuesta un rato, porque el pronóstico no cambia de un
- *      minuto a otro y el servicio puede estar dormido (Render gratis).
- *
- * El servicio no toca la base ni ve datos de clientes: solo números por día.
- *
- * Se pronostica con lo vendido HASTA AYER: el día de hoy va a medias y haría
- * parecer que hoy se vende poco.
- * ============================================================
- */
+// EL PRONÓSTICO, DEL LADO DE LA TIENDA — pronostico.js
+// La estadística vive en otro servicio, en Python (analitica/): ahí están Holt-Winters, la demanda
+// intermitente y la simulación.
 
 import orderModel from "../models/order.js";
 import productModel from "../models/product.js";
@@ -36,14 +17,8 @@ const DIAS_DE_HISTORIAL = 180;
 const HORIZONTE = 28;
 // Lo que se guarda la respuesta antes de volver a calcular.
 const VIGENCIA_MS = 15 * 60 * 1000;
-/*
- * Cuánto se le espera al servicio. Antes era minuto y medio, y en Render
- * gratis un cálculo con historia larga (Holt-Winters más la prueba de
- * precisión) tarda más que eso: se cortaba, el cálculo se perdía y el
- * siguiente intento empezaba de cero, así que nunca terminaba. Ahora se le
- * da tiempo de sobra y el panel no se queda esperando: pregunta cada pocos
- * segundos si ya está (ver dashboardController.getPronostico).
- */
+// Cuánto se le espera al servicio. Ahora se le da tiempo de sobra y el panel no se queda
+// esperando: pregunta cada pocos segundos si ya está (ver dashboardController.getPronostico).
 const ESPERA_MS = 5 * 60 * 1000;
 // Un cálculo que falló se le dice al que pregunte durante este rato, en vez de reintentar en bucle.
 const RECUERDO_DEL_ERROR_MS = 60 * 1000;
@@ -70,11 +45,9 @@ const aNumero = (campo) => ({ $convert: { input: campo, to: "double", onError: 0
 // De dónde salen los datos: los modelos de la tienda (lo normal).
 const DE_LA_TIENDA = { pedidos: orderModel, productos: productModel, proveedores: supplierModel, compras: shoppingModel };
 
-/*
- * Lo mismo, pero de otra base (la de demostración, para exportarla; ver
- * scripts/exportarDemoPronostico.js): las colecciones crudas con la misma
- * forma de uso que los modelos (aggregate, y find().select().lean()).
- */
+// Lo mismo, pero de otra base (la de demostración, para exportarla; ver
+// scripts/exportarDemoPronostico.js): las colecciones crudas con la misma forma de uso que los
+// modelos (aggregate, y find().select().lean()).
 export const fuenteDeBase = (db) => {
   const coleccion = (nombre) => ({
     aggregate: (pipeline) => db.collection(nombre).aggregate(pipeline).toArray(),
@@ -89,10 +62,8 @@ export const fuenteDeBase = (db) => {
   return { pedidos: coleccion("Orders"), productos: coleccion("Products"), proveedores: coleccion("Suppliers"), compras: coleccion("Shoppings") };
 };
 
-/*
- * Lo que se le manda al servicio. `ahora` se puede pasar para las pruebas.
- * Devuelve null si todavía no hay ventas de las que aprender.
- */
+// Lo que se le manda al servicio. `ahora` se puede pasar para las pruebas. Devuelve null si
+// todavía no hay ventas de las que aprender.
 export const armarSolicitud = async (ahora = new Date(), fuente = DE_LA_TIENDA) => {
   const hoy = diaLocal(ahora);
   const hasta = sumarDias(hoy, -1);
@@ -148,12 +119,8 @@ export const armarSolicitud = async (ahora = new Date(), fuente = DE_LA_TIENDA) 
   };
 };
 
-/*
- * ¿A la tienda real le faltan todavía 4 semanas de ventas? Se averigua en la
- * base, sin el servicio (que solo llena "las 4 semanas anteriores" desde 28
- * días de historia). Así, mientras el cálculo real tarda —Render despertando—,
- * el panel ya sabe que va a abrir con la demostración y no la hace esperar.
- */
+// ¿A la tienda real le faltan todavía 4 semanas de ventas? Se averigua en la base, sin el servicio
+// (que solo llena "las 4 semanas anteriores" desde 28 días de historia).
 export const faltanCuatroSemanasEnLaBase = async (ahora = new Date(), pedidos = orderModel) => {
   const [primero] = await pedidos
     .find({ status: { $ne: "cancelado" } })
@@ -169,16 +136,8 @@ export const faltanCuatroSemanasEnLaBase = async (ahora = new Date(), pedidos = 
 
 /* ══════════ La demostración ══════════ */
 
-/*
- * Para mostrar el pronóstico con una historia de varios meses (la Expo) sin
- * meter ventas inventadas en la tienda real: datos/pronosticoDemo.json trae
- * la base de demostración ya resumida por día —lo vendido por día y por
- * producto, existencias, proveedores y compras; nada de clientes—, exportada
- * con scripts/exportarDemoPronostico.js.
- *
- * Sus fechas se corren solas para que la historia termine AYER, la abran
- * cuando la abran: no hay que volver a exportarla el día que se presenta.
- */
+// Los datos de la demostración (datos/pronosticoDemo.json): ventas, existencias, proveedores y
+// compras ya resumidos por día, con las fechas corridas hasta hoy. Sin datos de clientes.
 const ARCHIVO_DEMO = new URL("../datos/pronosticoDemo.json", import.meta.url);
 let demoLeida;
 
@@ -216,20 +175,9 @@ export const solicitudDeDemostracion = (ahora = new Date(), demo = leerDemo()) =
   };
 };
 
-/*
- * ── El resultado de la demostración, ya calculado ──
- *
- * La demostración son siempre las mismas ventas inventadas, así que su
- * pronóstico no hace falta pedírselo al servicio cada vez: en Render gratis
- * ese cálculo (105 días, Holt-Winters y la prueba de precisión) tardaba más
- * de minuto y medio y el panel se quedaba sin nada. Se calcula UNA vez con
- * scripts/calcularDemoPronostico.js y aquí solo se corren sus fechas, igual
- * que las de la solicitud: sale al instante, el día que sea.
- *
- * Correr las fechas mueve también los días de la semana (lo que era sábado
- * cae otro día), así que el perfil de la semana se gira lo mismo. Es lo que
- * daría el servicio si calculara la historia corrida.
- */
+// ── El resultado de la demostración, ya calculado ──
+// El pronóstico de la demostración se calcula una vez (scripts/calcularDemoPronostico.js) y se
+// guarda, para mostrarlo al instante sin esperar al servicio de Python.
 const ARCHIVO_RESULTADO_DEMO = new URL("../datos/pronosticoDemoResultado.json", import.meta.url);
 let resultadoDemoLeido;
 
@@ -270,13 +218,9 @@ export const resultadoDeDemostracion = (ahora = new Date(), guardado = leerResul
   return correrResultado(guardado.resultado, diasHastaAyer(ahora, guardado.hasta));
 };
 
-/*
- * Por dónde se le pide a cada proveedor de la compra sugerida (WhatsApp, una
- * app como BEES o llamada; ver utils/pedidoProveedor.js), para el botón
- * "Pedir" de la pantalla Pronóstico. Va aparte de lo que se guarda: si el
- * administrador lo cambia, se ve al instante. La demostración lo trae en su
- * archivo.
- */
+// Por dónde se le pide a cada proveedor de la compra sugerida (WhatsApp, una app como BEES o
+// llamada; ver utils/pedidoProveedor.js), para el botón "Pedir" de la pantalla Pronóstico. Va
+// aparte de lo que se guarda: si el administrador lo cambia, se ve al instante.
 const canalDe = (doc) => (doc ? {
   canal: doc.pedidos?.canal || "",
   whatsapp: doc.pedidos?.whatsapp || "",
@@ -314,12 +258,9 @@ export const olvidarPronostico = () => {
   }
 };
 
-/*
- * El pronóstico, del servicio o del rato que se guarda. `forzar` lo vuelve a
- * calcular (el botón "Actualizar" del panel); `demo`, con la demostración.
- * Si piden otro mientras uno está en camino (el panel y Tiqui a la vez), se
- * espera ese mismo en vez de lanzar dos.
- */
+// El pronóstico, del servicio o del rato que se guarda. `forzar` lo vuelve a calcular (el botón
+// "Actualizar" del panel); `demo`, con la demostración. Si piden otro mientras uno está en camino
+// (el panel y Tiqui a la vez), se espera ese mismo en vez de lanzar dos.
 export const obtenerPronostico = async ({ forzar = false, ahora = new Date(), demo = false } = {}) => {
   const e = estado[demo ? "demo" : "real"];
   if (!forzar && e.guardado && ahora.getTime() - e.guardado.en < VIGENCIA_MS) return e.guardado.datos;
@@ -328,13 +269,9 @@ export const obtenerPronostico = async ({ forzar = false, ahora = new Date(), de
   return e.enCamino;
 };
 
-/*
- * Para el panel: espera el pronóstico hasta `ms`. Si para entonces no
- * terminó, NO se corta: sigue calculándose en segundo plano (y se guarda al
- * terminar) y esto devuelve null, para que el panel conteste "calculando" y
- * vuelva a preguntar en unos segundos. Si ese cálculo de fondo falla, el
- * error se le dice a la siguiente pregunta, una vez.
- */
+// Para el panel: espera el pronóstico hasta `ms`. Si para entonces no terminó, NO se corta: sigue
+// calculándose en segundo plano (y se guarda al terminar) y esto devuelve null, para que el panel
+// conteste "calculando" y vuelva a preguntar en unos segundos.
 const EN_CAMINO = Symbol("en camino");
 
 export const pronosticoSinEsperarDeMas = async (opciones = {}, ms = 20 * 1000) => {
@@ -353,10 +290,8 @@ export const pronosticoSinEsperarDeMas = async (opciones = {}, ms = 20 * 1000) =
   return null;
 };
 
-/*
- * Lo último que se calculó, sin pedir nada: para Tiqui, que no puede quedarse
- * esperando a un servicio dormido. Vale hasta 6 horas (dice de cuándo es).
- */
+// Lo último que se calculó, sin pedir nada: para Tiqui, que no puede quedarse esperando a un
+// servicio dormido. Vale hasta 6 horas (dice de cuándo es).
 const VIGENCIA_PARA_TIQUI_MS = 6 * 60 * 60 * 1000;
 export const pronosticoReciente = (ahora = new Date()) => {
   const { guardado } = estado.real;
@@ -394,13 +329,9 @@ const calcular = async (ahora, demo) => {
     return { vacio: true, generado: ahora.toISOString() };
   }
 
-  /*
-   * Render gratis duerme el servicio, y mientras despierta su portero puede
-   * contestar 502/503 al instante o cortar la conexión: pasó el 14-10-2026 y
-   * el panel decía "No se pudo calcular" aunque un minuto después ya andaba.
-   * Esas fallas se reintentan con calma (el panel no espera: ve "calculando").
-   * Un error del cálculo mismo (un 500, la clave equivocada) no se reintenta.
-   */
+  // Render gratis duerme el servicio, y mientras despierta su portero puede contestar 502/503 al
+  // instante o cortar la conexión: pasó el 14-10-2026 y el panel decía "No se pudo calcular" aunque
+  // un minuto después ya andaba.
   let respuesta;
   for (let intento = 0; ; intento += 1) {
     try {
@@ -444,12 +375,9 @@ const cuanto = (n, unidad) => (unidad === "libra" ? `${Number(n).toFixed(1)} lb`
 const lista = (nombres, maximo = 4) =>
   nombres.slice(0, maximo).join(", ") + (nombres.length > maximo ? ` y ${nombres.length - maximo} más` : "");
 
-/*
- * El pronóstico en renglones cortos, con las cuentas ya hechas: Tiqui solo
- * los cuenta (igual que los consejos de ventas, ver consejosVentas.js). Los
- * montos van siempre con su rango, y si todavía no se pudo medir qué tan bien
- * acierta, lo dice: "preliminar".
- */
+// El pronóstico en renglones cortos, con las cuentas ya hechas: Tiqui solo los cuenta (igual que
+// los consejos de ventas, ver consejosVentas.js). Los montos van siempre con su rango, y si
+// todavía no se pudo medir qué tan bien acierta, lo dice: "preliminar".
 export const textoDelPronostico = (datos, calculadoEn, ahora = Date.now()) => {
   if (!datos) return "";
   if (datos.vacio) return "Todavía no hay ventas de las que aprender: no hay pronóstico.";
@@ -516,13 +444,9 @@ const aPlano = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").t
 // Lo que Tiqui espera al servicio, solo si la pregunta es justo del pronóstico.
 const ESPERA_TIQUI_MS = 5000;
 
-/*
- * El bloque PRONÓSTICO para la pregunta de Tiqui (solo el administrador).
- * Si ya hay uno calculado, va siempre. Si no, se manda a calcular sin
- * esperarlo; y si la pregunta es justo de eso, se le dan unos segundos por si
- * el servicio estaba despierto. Si tampoco llega, Tiqui dice que lo está
- * calculando, en vez de inventar.
- */
+// El bloque PRONÓSTICO para la pregunta de Tiqui (solo el administrador). Si ya hay uno calculado,
+// va siempre. Si no, se manda a calcular sin esperarlo; y si la pregunta es justo de eso, se le
+// dan unos segundos por si el servicio estaba despierto.
 export const pronosticoParaTiqui = async (frase, ahora = new Date()) => {
   const reciente = pronosticoReciente(ahora);
   if (reciente) return textoDelPronostico(reciente.datos, reciente.en, ahora.getTime());

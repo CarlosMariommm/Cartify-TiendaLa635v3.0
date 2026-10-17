@@ -33,12 +33,9 @@ const BROWN = 'var(--marca-600)';
 const BROWN_DARK = 'var(--marca-700)';
 const BROWN_LIGHT = 'var(--marca-100)';
 
-/*
- * El carrito entra con TRANSICIONES, no con @keyframes.
- * Motivo: una transición se puede interrumpir y retomar desde donde va; los
- * keyframes reinician desde cero. Si el cliente abre y cierra rápido, esto se
- * siente natural en vez de dar un brinco.
- */
+// El carrito entra con TRANSICIONES, no con @keyframes. Motivo: una transición se puede
+// interrumpir y retomar desde donde va; los keyframes reinician desde cero. Si el cliente abre y
+// cierra rápido, esto se siente natural en vez de dar un brinco.
 const Overlay = styled.div`
   position: fixed;
   inset: 0;
@@ -47,15 +44,9 @@ const Overlay = styled.div`
      cada cuadro y la apertura se sentía pesada. 2px da la sensación de foco sin
      ese costo. */
   backdrop-filter: blur(2px);
-  /*
-   * POR ENCIMA de la ficha de producto (1000), no debajo.
-   *
-   * Desde que la ficha lleva el encabezado completo de la tienda, ahí adentro
-   * hay un botón de carrito — y con 999 el carrito se abría DETRÁS de la
-   * ficha: la pantalla se oscurecía, el pedido se movía y no se veía nada.
-   * Por debajo del candado de los +18 (1100), que tiene que poder preguntar
-   * la edad incluso con el carrito abierto.
-   */
+  /* POR ENCIMA de la ficha de producto (1000), no debajo. Desde que la ficha lleva el encabezado
+     completo de la tienda, ahí adentro hay un botón de carrito — y con 999 el carrito se abría
+     DETRÁS de la ficha: la pantalla se oscurecía, el pedido se movía y no se veía nada. */
   z-index: 1050;
   display: flex;
   justify-content: flex-end;
@@ -63,17 +54,9 @@ const Overlay = styled.div`
   transition: opacity var(--dur-popover) var(--ease-out);
 `;
 
-/*
- * 100dvh y no 100vh, en los dos paneles.
- *
- * En el teléfono 100vh mide la pantalla SIN la barra de direcciones del
- * navegador, así que el panel quedaba más alto que lo que de verdad se ve y su
- * último tramo caía por debajo. En el carrito ese último tramo es justo el
- * botón de pagar: la persona llenaba el carrito, abría el panel y el botón no
- * estaba en ninguna parte. La unidad dvh sí mide lo visible.
- *
- * Se deja el 100vh arriba como respaldo para el navegador que no la conozca.
- */
+// 100dvh y no 100vh, en los dos paneles. En el teléfono 100vh mide la pantalla SIN la barra de
+// direcciones del navegador, así que el panel quedaba más alto que lo que de verdad se ve y su
+// último tramo caía por debajo.
 const ALTO_PANTALLA = `
   height: 100vh;
   height: 100dvh;
@@ -151,10 +134,8 @@ const BackBtn = styled.button`
   &:active { transform: scale(0.94); }
 `;
 
-/*
- * "Ayuda" abre el WhatsApp de la tienda. Es un enlace y no un botón porque
- * lleva a otro lado; antes era un botón que no hacía nada al tocarlo.
- */
+// "Ayuda" abre el WhatsApp de la tienda. Es un enlace y no un botón porque lleva a otro lado;
+// antes era un botón que no hacía nada al tocarlo.
 const HelpBtn = styled.a`
   text-decoration: none;
   display: flex;
@@ -338,14 +319,9 @@ const QtyControls = styled.div`
   gap: 6px;
 `;
 
-/*
- * Los botones de cantidad crecen en el teléfono.
- *
- * A 26px son dos blancos de la mitad del pulgar, pegados uno al otro y con el
- * bote de basura al lado: equivocarse aquí no es un tropiezo, es borrar un
- * producto que se quería llevar. En pantalla táctil pasan a 34px de caja y
- * 44px de área de toque; con el ratón se quedan como estaban.
- */
+// Los botones de cantidad crecen en el teléfono. A 26px son dos blancos de la mitad del pulgar,
+// pegados uno al otro y con el bote de basura al lado: equivocarse aquí no es un tropiezo, es
+// borrar un producto que se quería llevar.
 const QtyBtn = styled.button`
   width: 26px;
   height: 26px;
@@ -407,10 +383,8 @@ const RemoveBtn = styled.button`
     &:hover { color: var(--peligro); }
   }
 
-  /*
-   * Separado del menos, no pegado: es el único botón de esta fila que no se
-   * puede deshacer, y estaba a 6px del que solo baja la cantidad.
-   */
+  /* Separado del menos, no pegado: es el único botón de esta fila que no se puede deshacer, y estaba
+     a 6px del que solo baja la cantidad. */
   @media (pointer: coarse), (max-width: 560px) {
     width: 34px;
     height: 34px;
@@ -420,11 +394,9 @@ const RemoveBtn = styled.button`
 `;
 
 const EmptyCart = styled.div`
-  /*
-   * Columna centrada, no solo text-align. Tailwind pone svg { display:block },
-   * así que el icono es un bloque y text-align no lo centra: quedaba pegado a
-   * la izquierda mientras el texto sí se centraba. Con flex se centran los tres.
-   */
+  /* Columna centrada, no solo text-align. Tailwind pone svg { display:block }, así que el icono es
+     un bloque y text-align no lo centra: quedaba pegado a la izquierda mientras el texto sí se
+     centraba. Con flex se centran los tres. */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -444,12 +416,9 @@ const CartFooter = styled.div`
   flex-shrink: 0;
   background: var(--papel);
 
-  /*
-   * El área segura del iPhone. Sin esto la barra de gestos de abajo se come el
-   * borde del botón de pagar, y aunque se alcance a tocar, un botón mordido
-   * por el borde de la pantalla no invita a apretarlo con la plata de por
-   * medio.
-   */
+  /* El área segura del iPhone. Sin esto la barra de gestos de abajo se come el borde del botón de
+     pagar, y aunque se alcance a tocar, un botón mordido por el borde de la pantalla no invita a
+     apretarlo con la plata de por medio. */
   padding-bottom: env(safe-area-inset-bottom);
 `;
 
@@ -475,11 +444,9 @@ const SummaryRow = styled.div`
   span:last-child { color: var(--tinta); font-weight: 500; }
 `;
 
-/*
- * "Se calcula al pagar": un dato pendiente, no un monto, así que va más tenue.
- * Con !important porque SummaryRow pinta en negrita a su último <span> con un
- * selector más fuerte que una clase sola.
- */
+// "Se calcula al pagar": un dato pendiente, no un monto, así que va más tenue. Con !important
+// porque SummaryRow pinta en negrita a su último <span> con un selector más fuerte que una clase
+// sola.
 const PorCalcular = styled.span`
   color: var(--tinta-tenue) !important;
   font-weight: 400 !important;
@@ -566,11 +533,9 @@ const CheckoutLayout = styled.div`
     grid-template-columns: 1fr;
   }
 
-  /*
-   * En el teléfono el margen baja a 14px y el de abajo sube, con el área
-   * segura incluida: el resumen con el botón de pagar es lo último de la
-   * página, y sin este colchón quedaba pegado al borde inferior.
-   */
+  /* En el teléfono el margen baja a 14px y el de abajo sube, con el área segura incluida: el resumen
+     con el botón de pagar es lo último de la página, y sin este colchón quedaba pegado al borde
+     inferior. */
   @media (max-width: 560px) {
     padding: 18px 14px calc(40px + env(safe-area-inset-bottom));
     gap: 16px;
@@ -611,11 +576,8 @@ const OrderThumbsRow = styled.div`
   gap: 8px;
   padding: 20px 24px;
 
-  /*
-   * Seis miniaturas de 48px no caben en 347px de tarjeta, y como la tarjeta
-   * recorta lo que se sale, las últimas desaparecían sin dejar rastro. Que
-   * bajen de renglón.
-   */
+  /* Seis miniaturas de 48px no caben en 347px de tarjeta, y como la tarjeta recorta lo que se sale,
+     las últimas desaparecían sin dejar rastro. Que bajen de renglón. */
   flex-wrap: wrap;
 
   @media (max-width: 560px) { padding: 14px 16px; }
@@ -656,11 +618,9 @@ const SummaryCard = styled.div`
   position: sticky;
   top: 20px;
 
-  /*
-   * En una sola columna el sticky no tiene contra qué pegarse (es el último
-   * bloque del flujo) y encima lo dejaba flotando raro al rebotar el scroll.
-   * Abajo del formulario, quieto, que es donde se lee el total y se paga.
-   */
+  /* En una sola columna el sticky no tiene contra qué pegarse (es el último bloque del flujo) y
+     encima lo dejaba flotando raro al rebotar el scroll. Abajo del formulario, quieto, que es donde
+     se lee el total y se paga. */
   @media (max-width: 768px) { position: static; }
   @media (max-width: 560px) { padding: 18px 16px; }
 `;
@@ -895,18 +855,12 @@ const PayMethod = styled.div`
 `;
 
 
-/*
- * Opción del checkout (retiro/delivery, efectivo/tarjeta/saldo).
- * Tarjeta seleccionable con borde café, no un radio button suelto: en pantalla
- * táctil el área de toque es toda la tarjeta y no un círculo de 12px.
- */
+// Opción del checkout (retiro/delivery, efectivo/tarjeta/saldo). Tarjeta seleccionable con borde
+// café, no un radio button suelto: en pantalla táctil el área de toque es toda la tarjeta y no un
+// círculo de 12px.
 const OpcionBtn = styled.button`
-  /*
-   * En el teléfono cada opción se lleva el renglón entero: dos de estas a la
-   * par miden 130px cada una, y "Envío a domicilio · +$4.78 de envío" en 130px
-   * se parte en cuatro líneas. Son cuatro decisiones en toda la compra
-   * (retiro/envío, efectivo/tarjeta/saldo): bien vale un renglón cada una.
-   */
+  /* En el teléfono cada opción se lleva el renglón entero: dos de estas a la par miden 130px cada
+     una, y "Envío a domicilio · +$4.78 de envío" en 130px se parte en cuatro líneas. */
   flex: 1 1 150px;
   min-width: 0;
   min-height: 52px;
@@ -955,20 +909,14 @@ const ShoppingCart = ({
   onEliminarItem,
   onLimpiarCarrito,
   onCheckout,
-  /*
-   * Abrir directo en el pago, sin pasar por la lista. Lo pide Tiqui cuando
-   * la persona le confirma la compra por voz: ya dijo que sí, hacerla tocar
-   * "Pagar" otra vez sería preguntarle dos veces lo mismo.
-   */
+  // Abrir directo en el pago, sin pasar por la lista. Lo pide Tiqui cuando la persona le confirma la
+  // compra por voz: ya dijo que sí, hacerla tocar "Pagar" otra vez sería preguntarle dos veces lo
+  // mismo.
   abrirEnPago = false,
 }) => {
   const navigate = useNavigate();
-  /*
-   * A dónde hay que volver si por algo se sale de aquí. Antes estaba escrito
-   * "/store" a mano, pero la tienda también vive en "/" y en "/seccion/…":
-   * quien entraba desde la portada terminaba en otra pantalla que no era la
-   * suya. La ruta de verdad la sabe el router, no nosotros.
-   */
+  // A dónde hay que volver si por algo se sale de aquí. La ruta de verdad la sabe el router, no
+  // nosotros.
   const location = useLocation();
   const rutaActual = `${location.pathname}${location.search}`;
 
@@ -976,10 +924,8 @@ const ShoppingCart = ({
   const { user, esCliente } = useAuth();
   const { t, locale } = useIdioma();
 
-  /*
-   * El pago exige sesión de cliente y algo que pagar (ver irAlCheckout). Si
-   * falta cualquiera de las dos, se abre la lista como siempre.
-   */
+  // El pago exige sesión de cliente y algo que pagar (ver irAlCheckout). Si falta cualquiera de las
+  // dos, se abre la lista como siempre.
   const [view, setView] = useState(() => (abrirEnPago && esCliente && items.length ? 'checkout' : 'cart')); // 'cart' | 'checkout' | 'confirmation'
   const [procesando, setProcesando] = useState(false);
   // El pedido que devolvió el backend al crearlo: de aquí salen el número real,
@@ -988,22 +934,9 @@ const ShoppingCart = ({
   const [imgErrors, setImgErrors] = useState({});
   const [orderPage, setOrderPage] = useState(1);
 
-  /*
-   * LA FOTO DE LO QUE SE PIDIÓ.
-   *
-   * La confirmación se pintaba leyendo el carrito EN VIVO, y por eso el
-   * carrito no se podía vaciar hasta que la persona cerrara el panel con el
-   * botón — si se vaciaba antes, la confirmación se quedaba sin productos.
-   *
-   * El problema es que nadie cierra las cosas con el botón: se va para atrás,
-   * cierra la pestaña, toca un enlace. Y entonces el carrito seguía lleno de
-   * lo YA PAGADO, así que en la siguiente visita se encontraba el mismo pedido
-   * esperando y se podía pagar dos veces.
-   *
-   * Con la foto tomada al confirmar, la confirmación deja de depender del
-   * carrito y el carrito se puede vaciar en el momento en que corresponde: en
-   * cuanto el servidor dice que el pedido existe.
-   */
+  // LA FOTO DE LO QUE SE PIDIÓ.
+  // La confirmación se pinta con una copia de lo pedido, así el carrito se vacía en cuanto el
+  // servidor confirma el pedido y no se puede pagar dos veces.
   const [itemsPedido, setItemsPedido] = useState([]);
   const itemsAMostrar = view === 'confirmation' ? itemsPedido : items;
 
@@ -1018,19 +951,11 @@ const ShoppingCart = ({
     return () => cancelAnimationFrame(id);
   }, []);
 
-  /*
-   * ── Entrega y pago ──
-   * El envío solo se cobra si se lo llevan a la casa. Antes se cobraba
-   * siempre, así que pasar a traerlo al local costaba lo mismo que el
-   * delivery — no tenía sentido elegirlo.
-   */
+  // ── Entrega y pago ── El envío solo se cobra si se lo llevan a la casa.
   const [entrega, setEntrega] = useState('retiro');   // 'retiro' | 'delivery'
-  /*
-   * La dirección se elige de las guardadas, y es la MISMA que muestra el
-   * encabezado de la tienda: viene del contexto. Cambiarla aquí la cambia
-   * arriba y al revés — dos lugares diciendo cosas distintas sobre a dónde
-   * va el pedido es la peor manera de perder una entrega.
-   */
+  // La dirección se elige de las guardadas, y es la MISMA que muestra el encabezado de la tienda:
+  // viene del contexto. Cambiarla aquí la cambia arriba y al revés — dos lugares diciendo cosas
+  // distintas sobre a dónde va el pedido es la peor manera de perder una entrega.
   const {
     direcciones,
     indice: indiceDireccion,
@@ -1040,32 +965,11 @@ const ShoppingCart = ({
     guardando: guardandoDireccion,
   } = useDireccionCtx();
 
-  /*
-   * ── Agregar una dirección SIN salir del carrito ──
-   *
-   * Antes este botón mandaba a la pantalla del mapa, en medio del pago. Salir
-   * de la tienda para volver a entrar es el peor momento para pedirle un
-   * viaje a alguien que ya tenía la plata en la mano — y el carrito, que no
-   * se guardaba en ningún lado, se quedaba en el camino.
-   *
-   * Ahora se escribe aquí mismo. El mapa sigue estando para quien quiera
-   * marcar el punto exacto, pero como una opción, no como el único camino.
-   */
+  // ── Agregar una dirección SIN salir del carrito ──
+  // Se escribe aquí mismo, sin dejar el pago; el mapa queda para quien quiera marcar el punto exacto.
   const [agregandoDireccion, setAgregandoDireccion] = useState(false);
 
-  /*
-   * La dirección se marca EN EL MAPA, aquí mismo.
-   *
-   * Antes había dos caminos: escribirla a ciegas en tres cajas de texto, o
-   * irse a otra pantalla a marcarla. El primero dejaba direcciones sin
-   * coordenadas —el repartidor sale con un texto y sin saber a qué portón
-   * tocar, el envío se cobra solo la base en vez de por distancia, y el
-   * cliente no puede seguir su pedido en el mapa— y el segundo sacaba a la
-   * persona del pago para mandarla de viaje.
-   *
-   * Ahora el mapa está incrustado: no se sale de aquí Y la dirección queda
-   * con su punto. Ver MapaDireccion.jsx.
-   */
+  // La dirección se marca EN EL MAPA, aquí mismo.
   const guardarNuevaDireccion = (dir) => {
     // Las direcciones se guardan en la cuenta: sin sesión no hay dónde ponerlas.
     if (!user?.id) {
@@ -1073,11 +977,9 @@ const ShoppingCart = ({
       navigate(`/iniciar-sesion?volver=${encodeURIComponent(rutaActual)}`);
       return;
     }
-    /*
-     * Se deja elegida la que acaba de marcar: agregarla y que el pedido
-     * siguiera saliendo a la anterior es exactamente el error que se quiso
-     * evitar. Va por el índice que ocupará al final de la lista.
-     */
+    // Se deja elegida la que acaba de marcar: agregarla y que el pedido siguiera saliendo a la
+    // anterior es exactamente el error que se quiso evitar. Va por el índice que ocupará al final de
+    // la lista.
     setIndiceDireccion(direcciones.length);
     agregarDireccion(dir);
     setAgregandoDireccion(false);
@@ -1096,10 +998,9 @@ const ShoppingCart = ({
   // PedidoActivoContext.
   const { refrescar: refrescarPedidoActivo } = usePedidoActivoCtx();
 
-  // El costo del envío se calcula por DISTANCIA (zona → por km → plano) con la
-  // ubicación de la dirección elegida. Es el MISMO cálculo que hace el backend,
-  // así que lo que se ve aquí es lo que se va a cobrar. Si aún no cargan los
-  // ajustes o la dirección no tiene coordenadas, se cobra solo la tarifa base.
+  // El costo del envío se calcula por DISTANCIA (zona → por km → plano) con la ubicación de la
+  // dirección elegida. Es el MISMO cálculo que hace el backend, así que lo que se ve aquí es lo que
+  // se va a cobrar.
   const envioCalc = calcularEnvio(ajustes, { lat: direccionElegida?.lat, lng: direccionElegida?.lng });
   const COSTO_ENVIO = envioCalc.costo;
   const ENVIO = items.length > 0 && entrega === 'delivery' ? COSTO_ENVIO : 0;
@@ -1111,11 +1012,9 @@ const ShoppingCart = ({
   const { saldo, canjeando, canjear, recargar: recargarSaldo } = useSaldo();
   const [codigoTarjeta, setCodigoTarjeta] = useState('');
 
-  /*
-   * Canjear la tarjeta sin salir del checkout: si el cliente tuviera que irse
-   * a "Métodos de pago" a canjearla, pierde el carrito de vista y muchos no
-   * vuelven. Al canjear, si el saldo alcanza, se selecciona solo como pago.
-   */
+  // Canjear la tarjeta sin salir del checkout: si el cliente tuviera que irse a "Métodos de pago" a
+  // canjearla, pierde el carrito de vista y muchos no vuelven. Al canjear, si el saldo alcanza, se
+  // selecciona solo como pago.
   const onCanjearEnCheckout = async (e) => {
     e.preventDefault();
     if (await canjear(codigoTarjeta)) {
@@ -1133,11 +1032,9 @@ const ShoppingCart = ({
   const descuento = Number((puntosAUsar / (redeemRate || 100)).toFixed(2));
   const totalAPagar = Math.max(0, Number((totalFinal - descuento).toFixed(2)));
 
-  /*
-   * Precio efectivo por unidad. Para las promos NxM (2x1) el cliente paga menos
-   * unidades de las que lleva, así que repartimos el total de la línea entre la
-   * cantidad — de esa forma el backend calcula el mismo total que ve en pantalla.
-   */
+  // Precio efectivo por unidad. Para las promos NxM (2x1) el cliente paga menos unidades de las que
+  // lleva, así que repartimos el total de la línea entre la cantidad — de esa forma el backend
+  // calcula el mismo total que ve en pantalla.
   const precioEfectivo = (item) => {
     if (item.promo?.type === 'nxm') {
       const b = item.promo.buyQty || 2;
@@ -1151,21 +1048,8 @@ const ShoppingCart = ({
 
   // Crea el pedido REAL. (El cobro con pasarela todavía no se conecta.)
   const handlePlaceOrder = async () => {
-    /*
-     * La tienda se recorre sin cuenta, pero para pagar sí hace falta: el
-     * pedido tiene que ir a nombre de alguien y a una dirección. En vez de
-     * dejar el aviso y que la persona busque dónde entrar, se la lleva al
-     * login y se la devuelve al carrito con todo lo que ya había puesto.
-     */
-    /*
-     * `esCliente`, no `user?.id`.
-     *
-     * Fuera del panel la sesión activa puede ser la del PERSONAL —un admin
-     * mirando su propia tienda, que es lo normal aquí—. Con `user?.id` a secas
-     * esa sesión pasaba el guarda y el pedido se guardaba con el _id del admin
-     * como clientId: un pedido a nombre de alguien que no existe en la tabla de
-     * clientes, con su stock descontado y su lote de puntos escrito.
-     */
+    // Para pagar hace falta cuenta: sin sesión de cliente se lleva al login y se vuelve al carrito con
+    // todo lo que ya había. Se usa `esCliente` porque la sesión abierta puede ser la del personal.
     if (!esCliente) {
       toast(t('Inicia sesión para terminar tu pedido'));
       // Vuelve a la pantalla en la que estaba, no a "/" a secas: la tienda
@@ -1222,14 +1106,9 @@ const ShoppingCart = ({
       // cierre el carrito, sin esperar a recargar la página.
       refrescarPedidoActivo();
 
-      /*
-       * La foto ANTES de vaciar, y el vaciado justo después.
-       *
-       * El orden importa: la confirmación se pinta de `itemsPedido`, así que
-       * primero se guarda lo que se pidió y recién entonces se suelta el
-       * carrito. A partir de aquí lo comprado ya no está pendiente de pagar,
-       * y el carrito no tiene por qué seguir cargándolo.
-       */
+      // La foto ANTES de vaciar, y el vaciado justo después. El orden importa: la confirmación se pinta
+      // de `itemsPedido`, así que primero se guarda lo que se pidió y recién entonces se suelta el
+      // carrito.
       setItemsPedido(items);
       setView('confirmation');
       // Sin aviso: el carrito se vacía porque la compra SALIÓ BIEN, y decirle
@@ -1247,11 +1126,9 @@ const ShoppingCart = ({
     onCerrar();
   };
 
-  /*
-   * Escape hace lo mismo que la flecha o la X de cada vista: en la lista
-   * cierra, en el pago vuelve a la lista y en la confirmación cierra. Mientras
-   * se procesa el pago no hace nada, para no salir a medio cobro.
-   */
+  // Escape hace lo mismo que la flecha o la X de cada vista: en la lista cierra, en el pago vuelve a
+  // la lista y en la confirmación cierra. Mientras se procesa el pago no hace nada, para no salir a
+  // medio cobro.
   useEffect(() => {
     const alTeclear = (e) => {
       if (e.key !== 'Escape' || procesando) return;
@@ -1271,14 +1148,9 @@ const ShoppingCart = ({
     </HelpBtn>
   );
 
-  /*
-   * Ir al checkout exige sesión de cliente.
-   *
-   * El servidor ya rechaza el pedido sin sesión, y "Realizar pedido" también lo
-   * revisa; pero dejar entrar al checkout, llenar la dirección y el pago para
-   * recién ahí rebotar al login es hacer trabajar en balde. Se corta antes: al
-   * tocar "Checkout" sin sesión, directo al login y de vuelta al carrito.
-   */
+  // Ir al checkout exige sesión de cliente. El servidor ya rechaza el pedido sin sesión, y "Realizar
+  // pedido" también lo revisa; pero dejar entrar al checkout, llenar la dirección y el pago para
+  // recién ahí rebotar al login es hacer trabajar en balde.
   const irAlCheckout = () => {
     if (!esCliente) {
       toast(t('Inicia sesión para continuar con tu pedido'));
@@ -1339,13 +1211,9 @@ const ShoppingCart = ({
                           {esPorLibra(item) && <UnidadChica>/lb</UnidadChica>}
                         </ItemPrice>
                       </ItemPriceLine>
-                      {/*
-                        El "+" y el "−" se mueven al paso de SU unidad: de uno
-                        en uno las piezas, de media en media las libras. Pedir
-                        media libra de queso es lo normal en el mostrador, y
-                        obligar a llevar una libra entera es cobrar de más.
-                        Ver utils/unidades.js.
-                      */}
+                      {/* El "+" y el "−" se mueven al paso de SU unidad: de uno en uno las piezas, de media en media las
+                         libras. Pedir media libra de queso es lo normal en el mostrador, y obligar a llevar una libra
+                         entera es cobrar de más. Ver utils/unidades.js. */}
                       <QtyControls>
                         <RemoveBtn onClick={() => onEliminarItem(item.id)} aria-label={t('Quitar {nombre} del carrito', { nombre: item.nombre })}><Trash2 size={14} /></RemoveBtn>
                         <QtyBtn
@@ -1377,12 +1245,8 @@ const ShoppingCart = ({
                 {SERVICIO > 0 && (
                   <SummaryRow><span>{t('Tarifa de servicio')}</span><span>${SERVICIO.toFixed(2)}</span></SummaryRow>
                 )}
-                {/*
-                  Aquí todavía no se eligió cómo se entrega (eso es al pagar),
-                  así que no hay envío que cobrar. Antes decía "$0.00", que se
-                  leía como envío gratis y luego aparecía el cobro. Si ya eligió
-                  domicilio, se muestra el monto y el total lo incluye.
-                */}
+                {/* Aquí todavía no se eligió cómo se entrega (eso es al pagar), así que no hay envío que cobrar. Si
+                   ya eligió domicilio, se muestra el monto y el total lo incluye. */}
                 <SummaryRow>
                   <span>{t('Costo de envío')}</span>
                   {entrega === 'delivery'
@@ -1397,12 +1261,9 @@ const ShoppingCart = ({
               </OrderSummaryBox>
               <BtnRow>
                 <ClearBtn onClick={onLimpiarCarrito}>{t('Vaciar')}</ClearBtn>
-                {/*
-                  "Pagar" y no "Checkout": la tienda entera está en español y
-                  esta era una de las dos últimas palabras en inglés que
-                  quedaban a la vista. Corta a propósito —el botón lleva el
-                  monto al lado y en un teléfono compiten por el mismo renglón.
-                */}
+                {/* "Pagar" y no "Checkout": la tienda entera está en español y esta era una de las dos últimas
+                   palabras en inglés que quedaban a la vista. Corta a propósito —el botón lleva el monto al lado y
+                   en un teléfono compiten por el mismo renglón. */}
                 <CheckoutBtn onClick={irAlCheckout}>
                   {t('Pagar')} · ${totalFinal.toFixed(2)}
                 </CheckoutBtn>
@@ -1434,12 +1295,9 @@ const ShoppingCart = ({
               <CheckoutCard>
                 {/* Header row */}
                 <div style={{ padding: '18px 20px 14px', borderBottom: '1px solid var(--linea)' }}>
-                  {/*
-                    Con flexWrap la franja de la fecha se baja de renglón en vez
-                    de empujar el título fuera de la tarjeta: la tarjeta recorta
-                    lo que se sale, así que antes en el teléfono no se cortaba
-                    la página pero sí se comía media leyenda.
-                  */}
+                  {/* Con flexWrap la franja de la fecha se baja de renglón en vez de empujar el título fuera de la
+                     tarjeta: la tarjeta recorta lo que se sale, así que antes en el teléfono no se cortaba la página
+                     pero sí se comía media leyenda. */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                     <CheckoutIconBox style={{ width: 42, height: 42, marginRight: 0 }}>
                       <ShoppingBag size={20} color={BROWN} />
@@ -1487,13 +1345,9 @@ const ShoppingCart = ({
                     </OpcionBtn>
                   </div>
 
-                  {/*
-                    El tiempo REAL a su zona, sacado de las entregas que ya
-                    hicimos por ahí. Va aquí, junto al botón de envío, porque
-                    este es el momento en que la persona se pregunta "¿y en
-                    cuánto me llega?" — responderlo después, en el correo de
-                    confirmación, ya no le sirve para decidir.
-                  */}
+                  {/* El tiempo REAL a su zona, sacado de las entregas que ya hicimos por ahí. Va aquí, junto al botón
+                     de envío, porque este es el momento en que la persona se pregunta "¿y en cuánto me llega?" —
+                     responderlo después, en el correo de confirmación, ya no le sirve para decidir. */}
                   {entrega === 'delivery' && envioCalc.fueraDeCobertura && (
                     <div
                       role="alert"
@@ -1524,13 +1378,7 @@ const ShoppingCart = ({
                     </div>
                   )}
 
-                  {/*
-                    Se elige entre las direcciones que ya guardó, no se escribe
-                    de nuevo. Antes era una caja en blanco: el cliente marcaba
-                    su casa en el mapa, la guardaba, y al pagar la tecleaba
-                    otra vez — con lo cual las coordenadas nunca llegaban al
-                    pedido y el repartidor salía con un texto a medias.
-                  */}
+                  {/* Se elige entre las direcciones que ya guardó, no se escribe de nuevo. */}
                   {entrega === 'delivery' && (
                     <div style={{ marginTop: 12 }}>
                       {direcciones.length === 0 && !agregandoDireccion ? (
@@ -1541,12 +1389,8 @@ const ShoppingCart = ({
                           <p style={{ fontSize: 13, color: 'var(--tinta-suave)', margin: '0 0 10px' }}>
                             {t('Todavía no tienes direcciones guardadas.')}
                           </p>
-                          {/*
-                            UN SOLO CAMINO: el mapa. Ya no se ofrece escribirla
-                            a ciegas —eso daba direcciones sin punto, que el
-                            repartidor no encuentra— y tampoco hay que irse a
-                            otra pantalla. Ver MapaDireccion.jsx.
-                          */}
+                          {/* UN SOLO CAMINO: el mapa. Ya no se ofrece escribirla a ciegas —eso daba direcciones sin punto,
+                             que el repartidor no encuentra— y tampoco hay que irse a otra pantalla. Ver MapaDireccion.jsx. */}
                           <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
                             <button
                               type="button"
@@ -1599,15 +1443,9 @@ const ShoppingCart = ({
                             })}
                           </div>
                           {agregandoDireccion ? (
-                            /*
-                              El mapa, aquí mismo. La referencia ("portón verde,
-                              frente a la cancha") sigue siendo opcional: es lo
-                              que de verdad usa el repartidor, pero nadie se
-                              queda sin pedir por no saber describir su cuadra.
-                              El PUNTO sí es obligatorio, y ese es el cambio:
-                              una dirección sin punto no se puede repartir bien
-                              ni cobrar bien. Ver MapaDireccion.jsx.
-                            */
+                            // El mapa, aquí mismo. La referencia ("portón verde, frente a la cancha") sigue siendo opcional:
+                            // es lo que de verdad usa el repartidor, pero nadie se queda sin pedir por no saber describir su
+                            // cuadra.
                             <div
                               style={{
                                 marginTop: 10, padding: 12, borderRadius: 12,
@@ -1691,11 +1529,8 @@ const ShoppingCart = ({
                     </p>
                   )}
 
-                  {/*
-                    Los puntos no son un método aparte sino un descuento: se
-                    restan del total y el resto se paga con lo de arriba. Se
-                    muestra acá porque es donde el cliente decide cómo pagar.
-                  */}
+                  {/* Los puntos no son un método aparte sino un descuento: se restan del total y el resto se paga con
+                     lo de arriba. Se muestra acá porque es donde el cliente decide cómo pagar. */}
                   {puedeCanjear && (
                     <label
                       style={{
@@ -1835,12 +1670,9 @@ const ShoppingCart = ({
                 <span style={{ fontSize: 22 }}>${totalAPagar.toFixed(2)}</span>
               </TotalBig>
 
-              {/*
-                Qué se acepta al pagar, con los dos documentos a un toque. Se
-                abren en otra pestaña para no perder lo elegido en el pago. A
-                12,5 px y en el gris de texto: a 11 px y en el gris más tenue
-                casi no se leía, y es justo lo que alguien debería poder leer.
-              */}
+              {/* Qué se acepta al pagar, con los dos documentos a un toque. Se abren en otra pestaña para no
+                 perder lo elegido en el pago. A 12,5 px y en el gris de texto: a 11 px y en el gris más tenue
+                 casi no se leía, y es justo lo que alguien debería poder leer. */}
               <p style={{ fontSize: 12.5, color: 'var(--tinta-suave)', marginTop: 12, lineHeight: 1.55 }}>
                 {t('Al hacer este pedido, aceptas los')}{' '}
                 <a href="/terminos" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--marca-texto-fuerte)', fontWeight: 600, textDecoration: 'underline' }}>
@@ -1908,15 +1740,9 @@ const ShoppingCart = ({
                     tener que ir a otra pantalla. */}
                 <SeguimientoConfirmacion orderId={ordenCreada?._id} esDomicilio={esDomicilioReal} />
 
-                {/*
-                  El código de entrega, aquí mismo y no solo en "Mis pedidos".
-                  Esta es la pantalla que la gente deja abierta —o de la que
-                  hace captura— justo después de pagar, así que es donde el
-                  código tiene que aparecer sin que haya que ir a buscarlo.
-
-                  Sale del pedido que acaba de devolver el servidor: el código
-                  lo emite él, nunca el navegador. Ver utils/codigoEntrega.js.
-                */}
+                {/* El código de entrega, aquí mismo y no solo en "Mis pedidos". Esta es la pantalla que la gente
+                   deja abierta —o de la que hace captura— justo después de pagar, así que es donde el código tiene
+                   que aparecer sin que haya que ir a buscarlo. */}
                 <CodigoEntrega
                   codigo={ordenCreada?.deliveryCode}
                   deliveryType={ordenCreada?.deliveryType}
@@ -1953,12 +1779,9 @@ const ShoppingCart = ({
                   ))}
                 </ProductsTable>
 
-                {/*
-                  Los números salen de cuántos productos hay, no de un "1, 2"
-                  escrito a mano: antes con 3 productos la página 2 salía vacía
-                  y con 12 no se podía llegar a la 3. Con una sola página no se
-                  muestra nada, que es lo normal en la mayoría de compras.
-                */}
+                {/* Los números salen de cuántos productos hay, no de un "1, 2" escrito a mano: antes con 3
+                   productos la página 2 salía vacía y con 12 no se podía llegar a la 3. Con una sola página no se
+                   muestra nada, que es lo normal en la mayoría de compras. */}
                 {totalPaginas > 1 && (
                   <Pagination>
                     <PageBtn

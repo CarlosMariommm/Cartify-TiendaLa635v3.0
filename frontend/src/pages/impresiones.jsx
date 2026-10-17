@@ -31,12 +31,9 @@ const Tabs = styled.div`display: flex; gap: 8px; margin-bottom: 18px;`;
 const Tab = styled.button`display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 12px; border: 1.5px solid ${p => (p.$active ? BROWN : 'var(--linea-fuerte)')}; background: ${p => (p.$active ? 'var(--marca-100)' : 'var(--papel)')}; color: ${p => (p.$active ? 'var(--marca-texto-fuerte)' : 'var(--tinta-suave)')}; font-size: 14px; font-weight: 700; cursor: pointer; transition: background-color var(--dur-press) var(--ease-out), border-color var(--dur-press) var(--ease-out), color var(--dur-press) var(--ease-out), transform var(--dur-press) var(--ease-out), box-shadow var(--dur-press) var(--ease-out);`;
 const SizesGrid = styled.div`display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; @media (max-width: 560px) { grid-template-columns: repeat(2, 1fr); }`;
 const SizeCard = styled.button`min-height: 90px; border-radius: 10px; border: 1.5px solid ${p => (p.$active ? BROWN : 'var(--linea-fuerte)')}; background: ${p => (p.$active ? 'var(--marca-100)' : 'var(--papel)')}; color: ${p => (p.$active ? 'var(--marca-texto-fuerte)' : 'var(--tinta)')}; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; transition: background-color var(--dur-press) var(--ease-out), border-color var(--dur-press) var(--ease-out), color var(--dur-press) var(--ease-out), transform var(--dur-press) var(--ease-out), box-shadow var(--dur-press) var(--ease-out); padding: 10px; &:hover { border-color: ${BROWN}; }
-  /*
-   * Sin material no se puede elegir. Se deja VISIBLE y apagado en vez de
-   * esconderlo: la tienda sí ofrece ese formato, hoy no hay con qué hacerlo.
-   * Un formato que desaparece de la lista parece que nunca existió, y la gente
-   * lo vuelve a buscar mañana sin entender qué pasó.
-   */
+  /* Sin material no se puede elegir. Se deja VISIBLE y apagado en vez de esconderlo: la tienda sí
+     ofrece ese formato, hoy no hay con qué hacerlo. Un formato que desaparece de la lista parece que
+     nunca existió, y la gente lo vuelve a buscar mañana sin entender qué pasó. */
   &:disabled { opacity: 0.5; cursor: not-allowed; background: var(--papel-suave); border-color: var(--linea-fuerte); color: var(--tinta-tenue); }
   &:disabled:hover { border-color: var(--linea-fuerte); }
 `;
@@ -54,11 +51,9 @@ const PriceBox = styled.div`display: flex; align-items: baseline; justify-conten
 const PriceLabel = styled.span`font-size: 15px; color: var(--tinta-suave);`;
 const PriceValue = styled.span`font-size: 28px; font-weight: 800; color: var(--marca-texto-fuerte);`;
 const ErrorMsg = styled.div`color: var(--peligro); font-size: 13px; margin-bottom: 16px;`;
-/*
- * Distinto del ErrorMsg rojo a propósito: esto no bloquea nada, es un
- * "ojo con esto" — mismo tono ámbar que usan los avisos de advertencia en
- * el resto de la web, no la alarma roja de "esto no se puede enviar".
- */
+// Distinto del ErrorMsg rojo a propósito: esto no bloquea nada, es un "ojo con esto" — mismo tono
+// ámbar que usan los avisos de advertencia en el resto de la web, no la alarma roja de "esto no se
+// puede enviar".
 const Advertencia = styled.div`display: flex; align-items: flex-start; gap: 8px; background: var(--aviso-fondo); border: 1px solid var(--aviso-borde); color: var(--aviso-texto); border-radius: 10px; padding: 10px 14px; font-size: 13px; line-height: 1.4; margin-top: 10px;`;
 const ContinueBtn = styled.button`width: 100%; padding: 15px; background: ${BROWN}; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; transition: background 0.2s; &:hover { background: ${BROWN_DARK}; } &:disabled { background: var(--deshabilitado); cursor: not-allowed; }`;
 const Bloque = styled.div`margin-bottom: 32px;`;
@@ -71,10 +66,8 @@ const Impresiones = () => {
   const [servicioId, setServicioId] = useState(null);
   const [modo, setModo] = useState('archivo'); // 'archivo' | 'editor'
   const [archivo, setArchivo] = useState(null);
-  /*
-   * La pantalla no se desmonta al enviar, así que para que el subidor vuelva a
-   * quedar vacío hay que avisarle: cada envío exitoso sube este número.
-   */
+  // La pantalla no se desmonta al enviar, así que para que el subidor vuelva a quedar vacío hay que
+  // avisarle: cada envío exitoso sube este número.
   const [enviosHechos, setEnviosHechos] = useState(0);
   const [color, setColor] = useState(false);
   const [copias, setCopias] = useState(1);
@@ -90,10 +83,8 @@ const Impresiones = () => {
       .catch(() => {});
   }, []);
 
-  /*
-   * Qué se puede imprimir HOY. La disponibilidad no la decide esta pantalla:
-   * la calcula el hook a partir del papel y la tinta que quedan en el panel.
-   */
+  // Qué se puede imprimir HOY. La disponibilidad no la decide esta pantalla: la calcula el hook a
+  // partir del papel y la tinta que quedan en el panel.
   const { disponibilidadDeFormato, hayTintaDeColor } = useMaterialesImpresion();
 
   const servicio = servicios.find((s) => s._id === servicioId);
@@ -101,12 +92,8 @@ const Impresiones = () => {
   // El color se apaga solo si se acabó el tóner, aunque el formato lo permita.
   const puedeColor = !!servicio?.allowsColor && hayTintaDeColor;
 
-  /*
-   * Si el material se acaba con el formato ya elegido —pasa: el empleado
-   * imprime lo último mientras alguien arma su pedido—, se suelta la selección
-   * en vez de dejarlo pagar algo que ya no se puede hacer.
-   */
-  // Se corrige en el mismo pintado: cada condición deja de cumplirse apenas se aplica.
+  // Si el material se acaba con el formato ya elegido, se suelta la selección para no cobrar algo
+  // que ya no se puede hacer.
   if (servicio && !disponibilidadDeFormato(servicio).disponible) setServicioId(null);
   if (!puedeColor && color) setColor(false);
 
@@ -131,12 +118,9 @@ const Impresiones = () => {
   // el archivo, que es lo que va a viajar en el FormData.
   const seleccionarArchivo = (file) => { setArchivo(file); setError(''); };
 
-  /*
-   * En modo "archivo" nadie ajusta la imagen a la medida elegida — se manda
-   * tal cual a la impresora (ver el comentario largo en calceImpresion.js).
-   * Esto solo avisa cuando la proporción o la resolución no calzan; en modo
-   * editor el lienzo YA fuerza la medida real, así que no hace falta.
-   */
+  // En modo "archivo" nadie ajusta la imagen a la medida elegida — se manda tal cual a la impresora
+  // (ver el comentario largo en calceImpresion.js). Esto solo avisa cuando la proporción o la
+  // resolución no calzan; en modo editor el lienzo YA fuerza la medida real, así que no hace falta.
   const advertenciaCalce = useCalceImpresion(modo === 'archivo' ? archivo : null, servicio);
 
   const enviar = async () => {
@@ -174,13 +158,8 @@ const Impresiones = () => {
 
   return (
     <Container>
-      {/*
-        El MISMO encabezado de la tienda. Antes esta pantalla tenía una barra
-        propia de dos botones —"Ir a la tienda" y "Mi Cuenta"— que la hacía
-        sentir otro sitio: sin pasillos, sin dirección de entrega, sin buscador
-        y sin carrito. Impresiones no es otra tienda, es otro pasillo de la
-        misma; ahora se ve así. Ver HeaderTienda.
-      */}
+      {/* El MISMO encabezado de la tienda. Impresiones no es otra tienda, es otro pasillo de la misma;
+         ahora se ve así. Ver HeaderTienda. */}
       <HeaderTienda />
 
       <Content>
@@ -225,11 +204,8 @@ const Impresiones = () => {
         <Bloque>
           {modo === 'archivo' ? (
             <>
-              {/*
-                Aquí la preview no es un lujo: el cliente PAGA por imprimir esto.
-                Ver el PDF completo antes de mandarlo es lo que evita el clásico
-                "imprimí el archivo equivocado" pagado y ya impreso.
-              */}
+              {/* Aquí la preview no es un lujo: el cliente PAGA por imprimir esto. Ver el PDF completo antes de
+                 mandarlo es lo que evita el clásico "imprimí el archivo equivocado" pagado y ya impreso. */}
               <SubidorArchivo
                 accept=".pdf,.jpg,.jpeg,.png"
                 maxMB={25}
@@ -261,11 +237,8 @@ const Impresiones = () => {
           <Row>
             <Label>
               {t('Color')}
-              {/*
-                Dos razones distintas para no poder elegir color, y la persona
-                merece saber cuál le tocó: el formato no lo admite (nunca va a
-                poder), o se acabó el tóner (mañana quizás sí).
-              */}
+              {/* Dos razones distintas para no poder elegir color, y la persona merece saber cuál le tocó: el
+                 formato no lo admite (nunca va a poder), o se acabó el tóner (mañana quizás sí). */}
               {servicio && !servicio.allowsColor && (
                 <span style={{ display: 'block', fontSize: 11, color: 'var(--tinta-tenue)', fontWeight: 400 }}>
                   {t('Este formato es solo en blanco y negro')}
@@ -283,11 +256,8 @@ const Impresiones = () => {
           </Row>
           <Row>
             <Label id="etiqueta-copias">{t('Copias')}</Label>
-            {/*
-              Entero entre 1 y MAX_COPIAS. Un <input type="number"> deja escribir
-              "1e258", y así llegaron pedidos con un total de 10^256. El servidor
-              también lo rechaza (ver createPrintOrder).
-            */}
+            {/* Entero entre 1 y MAX_COPIAS. Un <input type="number"> deja escribir "1e258", y así llegaron
+               pedidos con un total de 10^256. El servidor también lo rechaza (ver createPrintOrder). */}
             <NumInput
               type="number" inputMode="numeric" min="1" max={MAX_COPIAS} step="1"
               aria-labelledby="etiqueta-copias"

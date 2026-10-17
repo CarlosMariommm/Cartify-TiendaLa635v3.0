@@ -1,12 +1,4 @@
-/*
-Campos:
-    email: String,
-    userName: String,
-    password: String,
-    image: String,       // foto de perfil (Cloudinary)
-    public_id: String,   // id de esa foto en Cloudinary, para poder reemplazarla
-    isActive: Boolean,
-*/
+// Campos: email, userName, password, image, public_id, isActive.
 
 /**
  * @swagger

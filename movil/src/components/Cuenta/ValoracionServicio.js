@@ -1,24 +1,6 @@
-/*
- * ============================================================
- * ¿QUÉ TAL ESTUVO LA ENTREGA? — ValoracionServicio.js
- * ============================================================
- * Puerto del bloque `ValoracionServicio` de
- * `frontend/src/pages/cliente/MisPedidos.jsx`: las estrellas del SERVICIO de
- * reparto, no del producto.
- *
- * Solo sale en los pedidos a DOMICILIO ya ENTREGADOS: es cuando de verdad
- * hubo un reparto que juzgar. Una vez enviada se queda de solo lectura, con
- * su comentario — igual que en la web, un pedido se valora una vez.
- *
- * ── Por qué vive en el detalle y no en la lista ──
- *
- * En la web este bloque va dentro de cada tarjeta de la lista de pedidos.
- * Aquí la lista es de tarjetas compactas que se tocan para abrir el detalle
- * (ModalPedido), y meterle un formulario con estrellas y un cuadro de texto a
- * cada renglón haría de una lista de diez pedidos una pared de formularios.
- * El detalle es el mismo sitio donde la web lo pone para las reseñas.
- * ============================================================
- */
+// ¿QUÉ TAL ESTUVO LA ENTREGA? — ValoracionServicio.js
+// Puerto del bloque `ValoracionServicio` de `frontend/src/pages/cliente/MisPedidos.jsx`: las
+// estrellas del SERVICIO de reparto, no del producto.
 
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';

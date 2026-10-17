@@ -6,19 +6,9 @@ import {
 } from '../utils/idioma';
 import { areaDeRuta } from '../utils/sesion';
 
-/*
- * IdiomaProvider — el idioma elegido, para toda la tienda. Ver utils/idioma.js.
- *
- * Además de dar `t`, pone el idioma en <html lang>: el lector de pantalla lee
- * con la voz de ese idioma, y el navegador no ofrece "traducir esta página"
- * sobre una página que ya está en inglés.
- *
- * En el panel del personal todo sale en español aunque en ese navegador se
- * haya elegido inglés para la tienda: hay piezas compartidas (el subidor de
- * archivos, el campo de contraseña, la tarjeta de una promo) que ya hablan
- * los dos idiomas, y en el panel tienen que hablar el del equipo. Es la misma
- * frontera que usa tAhora (utils/idioma.js).
- */
+// IdiomaProvider — el idioma elegido, para toda la tienda. Ver utils/idioma.js. Además de dar `t`,
+// pone el idioma en <html lang>: el lector de pantalla lee con la voz de ese idioma, y el
+// navegador no ofrece "traducir esta página" sobre una página que ya está en inglés.
 export const IdiomaProvider = ({ children }) => {
   const [idioma, setIdiomaEstado] = useState(leerIdiomaGuardado);
   const { pathname } = useLocation();

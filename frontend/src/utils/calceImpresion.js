@@ -1,26 +1,12 @@
 import { tAhora } from './idioma';
 
-/*
- * ============================================================
- * CALCE DE UNA IMAGEN CONTRA EL FORMATO — calceImpresion.js
- * ============================================================
- * Cuando el cliente sube su propio archivo (pestaña "Ya tengo mi archivo",
- * en vez del editor), nadie ajusta esa imagen a la medida que pagó: se manda
- * tal cual a la impresora, a su resolución y proporción originales (ver
- * sendPrintToPrinter.js). Esto no cambia eso — el archivo real sigue
- * viajando intacto — solo calcula si vale la pena avisarle ANTES de mandarlo,
- * para que decida con los ojos abiertos en vez de enterarse hasta que el
- * papel ya salió de la impresora.
- *
- * Solo un aviso, no un bloqueo: forzar el editor para todos le quita a quien
- * ya trae su diseño listo la opción de solo subirlo.
- * ============================================================
- */
+// CALCE DE UNA IMAGEN CONTRA EL FORMATO — calceImpresion.js
+// Calcula si el archivo que subió el cliente calza con la medida que pagó, para avisarle antes de
+// mandarlo; el archivo viaja intacto a la impresora.
 
-// Cuánto se tolera de diferencia de proporción antes de avisar. Una foto
-// nunca calza EXACTO con una hoja — 12% deja pasar el ruido normal (un
-// celular no mide igual que una hoja Carta) y solo avisa cuando de verdad
-// va a sobrar o faltar imagen al recortarla a la fuerza en ese formato.
+// Cuánto se tolera de diferencia de proporción antes de avisar. Una foto nunca calza EXACTO con
+// una hoja — 12% deja pasar el ruido normal (un celular no mide igual que una hoja Carta) y solo
+// avisa cuando de verdad va a sobrar o faltar imagen al recortarla a la fuerza en ese formato.
 const TOLERANCIA_PROPORCION = 0.12;
 
 // Por debajo de esta densidad la impresión sale borrosa de cerca. 150 DPI es
@@ -29,10 +15,8 @@ const TOLERANCIA_PROPORCION = 0.12;
 const DPI_MINIMO = 150;
 const CM_POR_PULGADA = 2.54;
 
-/*
- * Devuelve el mensaje de aviso (string) si algo no calza, o null si la
- * imagen está lo bastante cerca de la medida elegida.
- */
+// Devuelve el mensaje de aviso (string) si algo no calza, o null si la imagen está lo bastante
+// cerca de la medida elegida.
 export const evaluarCalce = ({ anchoPx, altoPx, widthCm, heightCm }) => {
   if (!anchoPx || !altoPx || !widthCm || !heightCm) return null;
 

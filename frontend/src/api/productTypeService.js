@@ -1,14 +1,8 @@
 import api from './api';
 
-/*
- * ============================================================
- * SERVICIO DE CATEGORÍAS (TIPOS DE PRODUCTO) — productTypeService.js
- * ============================================================
- * Centraliza las peticiones HTTP del módulo de categorías.
- * Cada categoría pertenece a un módulo/pasillo específico.
- * Se envían como JSON simple.
- * ============================================================
- */
+// SERVICIO DE CATEGORÍAS (TIPOS DE PRODUCTO) — productTypeService.js
+// Centraliza las peticiones HTTP del módulo de categorías. Cada categoría pertenece a un
+// módulo/pasillo específico. Se envían como JSON simple.
 export const productTypeService = {
   // 1- Obtener todas las categorías (SELECT)
   getProductTypes: async () => {

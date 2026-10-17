@@ -1,13 +1,6 @@
-/*
- * Crea (o actualiza) un administrador para poder entrar al panel.
- *
- * Cómo correrlo:
- *   cd backend
- *   node src/scripts/crearAdmin.js
- *
- * La contraseña se guarda HASHEADA con bcrypt, igual que en el registro normal.
- * Es un seed de desarrollo: para producción, use una contraseña fuerte.
- */
+// Crea (o actualiza) un administrador para poder entrar al panel. Cómo correrlo: cd backend node
+// src/scripts/crearAdmin.js La contraseña se guarda HASHEADA con bcrypt, igual que en el registro
+// normal. Es un seed de desarrollo: para producción, use una contraseña fuerte.
 import dotenv from "dotenv";
 dotenv.config();
 import mongoose from "mongoose";

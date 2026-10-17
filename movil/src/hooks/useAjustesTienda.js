@@ -1,16 +1,5 @@
-/*
- * ============================================================
- * AJUSTES DE LA TIENDA — useAjustesTienda.js
- * ============================================================
- * El nombre (o el logo) que puso el dueño en Personalización, del lado del
- * teléfono. Es el mismo GET público que usa la web (`/storeSettings`); ver
- * `frontend/src/hooks/useAjustesTienda.js` para la versión completa, que
- * además guarda cambios — aquí solo hace falta leer.
- *
- * Si el servidor no contesta se queda con el respaldo. Un encabezado sin
- * nombre por una petición de adorno que falló sería peor que mostrar el
- * nombre de siempre.
- */
+// AJUSTES DE LA TIENDA — useAjustesTienda.js
+// El nombre (o el logo) que puso el dueño en Personalización, del lado del teléfono.
 
 import { useCallback, useEffect, useState } from 'react';
 import peticion from '../api/api';

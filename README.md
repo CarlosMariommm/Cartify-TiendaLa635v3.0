@@ -260,7 +260,7 @@ git commit -m "Fix(web,movil): la direccion de la tienda en el carrito" -m "- El
 ### Código
 
 - El código nuevo se escribe en español: nombres, comentarios y mensajes.
-- Los comentarios explican el porqué, no solo el qué.
+- Los comentarios dicen, en máximo 3 líneas, qué hace cada parte. Solo los de Swagger (que arman `/api-docs`) pueden ser más largos.
 - **Componentes y páginas de React**: PascalCase (`ShoppingCart.jsx`, `JuegoTiqui.jsx`).
 - **Hooks**: camelCase con `use` (`useJuegoTiqui`).
 - **Funciones y variables**: camelCase.

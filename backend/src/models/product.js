@@ -1,30 +1,5 @@
-/*
-Campos:
-    name: String,
-    image: Array,
-    typeId: objectId,
-    brandId: objectId,
-    expirationDate: Date,
-    priceCost: Number,
-    salePrice: Number,
-    description: String,
-    barCode: String,
-    stock: Number,
-    moduleId: objectId,
-    supplierId: objectId,
-    isActive: Boolean,
-
-    Campos que no están declarados en el schema (entran por strict:false) pero
-    que sí se usan y se guardan:
-    familia: String,        clave del estante al que pertenece el producto
-                            ("quesos", "bebidas-energizantes"...). La lista
-                            cerrada de claves está en src/utils/familias.js.
-                            Con ella la tienda arma sus filas temáticas solas.
-    familiaOrigen: String,  quién decidió esa familia: 'ia' cuando la resolvió
-                            el clasificador de /api/ai/clasificar. Sirve para
-                            saber qué se puede revisar o borrar si algún día
-                            una clasificación quedó mal.
-*/
+// Campos: name, image, expirationDate, priceCost, salePrice, description, barCode, stock,
+// isActive.
 
 /**
  * @swagger
@@ -147,30 +122,16 @@ const productSchema = new Schema({
     salePrice: { type: Number},
     description: { type:"String"},
     barCode: { type:"String"},
-    /*
-     * Cómo se vende: por pieza o por peso.
-     *
-     * Cambia el significado de los DOS campos de abajo: con 'libra',
-     * `salePrice` es el precio de UNA libra y `stock` son libras (y puede
-     * llevar decimales — 3.5 libras de queso es una existencia normal).
-     *
-     * Por defecto 'unidad' porque es lo que había: miles de productos ya
-     * cargados sin este campo, y asumir lo contrario los pondría todos a
-     * venderse por peso de un día para otro. Ver frontend/src/utils/unidades.js.
-     */
+    // Cómo se vende: por pieza o por peso. Cambia el significado de los DOS campos de abajo: con
+    // 'libra', `salePrice` es el precio de UNA libra y `stock` son libras (y puede llevar decimales —
+    // 3.5 libras de queso es una existencia normal).
     unidadVenta: { type: String, enum: ["unidad", "libra"], default: "unidad" },
-    /*
-     * Cuántas PIEZAS son esas libras. Opcional y solo informativo: 15 libras
-     * de queso pueden ser tres bloques o veinte porciones, y esa diferencia
-     * importa para acomodar la vitrina y para saber qué pedirle al proveedor.
-     * No se cobra por aquí — se cobra por libra.
-     */
+    // Cuántas PIEZAS son esas libras. Opcional y solo informativo: 15 libras de queso pueden ser tres
+    // bloques o veinte porciones, y esa diferencia importa para acomodar la vitrina y para saber qué
+    // pedirle al proveedor. No se cobra por aquí — se cobra por libra.
     piezas: { type: Number },
-    /*
-     * Venta restringida a mayores de edad: licores, cigarros. Marca el producto
-     * en el inventario y en la tienda, y avisa en el carrito que se pedirá
-     * documento al entregar.
-     */
+    // Venta restringida a mayores de edad: licores, cigarros. Marca el producto en el inventario y en
+    // la tienda, y avisa en el carrito que se pedirá documento al entregar.
     soloAdultos: { type: Boolean, default: false },
     stock: { type: Number},
     moduleId: { type: Schema.Types.ObjectId, ref: "moduleModel"},

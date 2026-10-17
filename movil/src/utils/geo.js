@@ -1,27 +1,14 @@
-/*
- * ============================================================
- * GEO — geo.js
- * ============================================================
- * Cuentas de distancia y tiempo entre dos puntos del mapa, para el
- * seguimiento en vivo del repartidor. Copia de `frontend/src/utils/geo.js`
- * — son funciones puras, sin nada del navegador, así que se traen tal cual.
- *
- * Todo es en línea recta: no sabemos por qué calles va a agarrar y pedirle
- * una ruta real a un servicio ajeno costaría llave y tarjeta. Para "¿ya
- * viene?" la línea recta alcanza, siempre que lo que se muestre sea un
- * aproximado y no una promesa.
- * ============================================================
- */
+// GEO — geo.js
+// Cuentas de distancia y tiempo entre dos puntos del mapa, para el seguimiento en vivo del
+// repartidor.
 
 import { tAhora } from './idioma';
 
 const RADIO_TIERRA_M = 6371000;
 const aRadianes = (g) => (g * Math.PI) / 180;
 
-/*
- * Distancia en metros entre dos coordenadas (fórmula de Haversine, la de
- * siempre para distancias sobre la esfera de la Tierra).
- */
+// Distancia en metros entre dos coordenadas (fórmula de Haversine, la de siempre para distancias
+// sobre la esfera de la Tierra).
 export const distanciaMetros = (a, b) => {
   if (!a || !b) return null;
   if (a.lat == null || a.lng == null || b.lat == null || b.lng == null) return null;
@@ -42,12 +29,9 @@ export const formatoDistancia = (metros) => {
   return `${(metros / 1000).toFixed(1)} km`;
 };
 
-/*
- * Cuánto falta, en minutos. La velocidad la medimos del propio viaje cuando
- * hay con qué; si todavía no hay historia, se asume una moto de barrio a
- * 18 km/h, con un colchón de 1.35 porque la línea recta siempre miente a
- * favor (las calles dan vuelta).
- */
+// Cuánto falta, en minutos. La velocidad la medimos del propio viaje cuando hay con qué; si
+// todavía no hay historia, se asume una moto de barrio a 18 km/h, con un colchón de 1.35 porque la
+// línea recta siempre miente a favor (las calles dan vuelta).
 const VELOCIDAD_POR_DEFECTO_MS = 18000 / 3600; // 18 km/h en metros por segundo
 const RODEO_DE_CALLES = 1.35;
 
@@ -60,10 +44,8 @@ export const minutosDeViaje = (metros, velocidadMs) => {
   return Math.max(1, Math.round(segundos / 60));
 };
 
-/*
- * Texto de la espera. Se habla en rangos y con "aprox" a propósito: dar un
- * minuto exacto es prometer algo que no controlamos.
- */
+// Texto de la espera. Se habla en rangos y con "aprox" a propósito: dar un minuto exacto es
+// prometer algo que no controlamos.
 export const textoDeEspera = (minutos) => {
   if (minutos == null) return tAhora('Va en camino');
   if (minutos <= 2) return tAhora('Está llegando');

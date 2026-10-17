@@ -1,10 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { ofertaDicha, respuestaDirecta } from "./respuestasTiqui.js";
 
-/*
- * Lo que Tiqui contesta sola: con los datos que hay, y sin inventar los que
- * no hay.
- */
+// Lo que Tiqui contesta sola: con los datos que hay, y sin inventar los que no hay.
 
 const siempreLaPrimera = () => 0;
 

@@ -3,23 +3,9 @@ import { UserX, Trash2, Archive } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { modalTransition } from '../../utils/motion';
 
-/*
- * ============================================================
- * ELIMINAR UN CLIENTE — ModalEliminarCliente.jsx
- * ============================================================
- * No se puede deshacer, así que antes de confirmar se dice qué se va y qué
- * se queda (lo mismo que promete la política de privacidad), y hay que
- * marcar que se entiende. Es una casilla y no "escriba ELIMINAR": quien usa
- * el panel puede tener dificultad para escribir, y lo que importa es que lea
- * lo que va a pasar, no que pase una prueba de tipeo.
- *
- * Si el cliente tiene un pedido en curso, el servidor responde 409 y el modal
- * se queda abierto con el aviso (lo pinta el interceptor de api.js).
- *
- * El `key` con el id lo pone Customers.jsx: cada cliente empieza con la
- * casilla desmarcada.
- * ============================================================
- */
+// ELIMINAR UN CLIENTE — ModalEliminarCliente.jsx
+// No se puede deshacer, así que antes de confirmar se dice qué se va y qué se queda (lo mismo que
+// promete la política de privacidad), y hay que marcar que se entiende.
 
 const SE_VA = [
   'Su cuenta: nombre, correo, teléfono, DUI y fecha de nacimiento.',

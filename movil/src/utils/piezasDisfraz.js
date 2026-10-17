@@ -1,29 +1,6 @@
-/*
- * ============================================================
- * LAS PIEZAS DEL DISFRAZ DE TIQUI — piezasDisfraz.js
- * ============================================================
- * Todo lo que Tiqui se puede poner: gorros y sombreros en la cabeza, lentes
- * en la cara, y corbatín, bufanda o collar en el cuello. El dueño arma su
- * disfraz para cada temporada escogiendo una pieza de cada lugar y sus
- * colores (Personalización → Apariencia → El disfraz de Tiqui).
- *
- * SON DATOS, NO DIBUJOS. Cada pieza es una lista de formas (trazos,
- * rectángulos, círculos) y de qué color va cada una: 'principal', 'acento' o
- * un color fijo. Así la web (SVG) y la app (react-native-svg) dibujan
- * exactamente lo mismo, cada una con su propio componente.
- *
- * ESTE ARCHIVO ESTÁ COPIADO TAL CUAL en movil/src/utils/piezasDisfraz.js. Una
- * prueba de la app avisa si las dos copias dejan de ser iguales: si se cambia
- * aquí, se copia allá.
- *
- * Las coordenadas son las del lienzo de Tiqui (400 × 470, mascotaFormas.js):
- * la punta de la cabeza en (200, 118), los ojos en (174, 252) y (226, 252),
- * las cejas entre 222 y 231, la boca entre 280 y 300 y el cuello desde 314.
- * Los sombreros cubren la cabeza ENTERA, de hombro a hombro (uno parado en la
- * punta se ve puesto encima, no puesto), y los lentes llegan hasta el borde
- * de la etiqueta, como si tuviera orejas.
- * ============================================================
- */
+// LAS PIEZAS DEL DISFRAZ DE TIQUI — piezasDisfraz.js
+// Todo lo que Tiqui se puede poner: gorros y sombreros en la cabeza, lentes en la cara, y
+// corbatín, bufanda o collar en el cuello.
 
 export const RANURAS_DISFRAZ = [
   { clave: 'cabeza', nombre: 'Cabeza' },
@@ -82,29 +59,9 @@ const patitas = (y, relleno, desde = 153) => [
   { el: 'rect', x: 400 - desde, y, width: desde - 117, height: 6, rx: 3, relleno },
 ];
 
-/*
- * Cada pieza:
- *   ranura           dónde va: cabeza, cara o cuello
- *   nombre           cómo se le dice en el panel
- *   colores          los de cuando se elige (el principal y el de acento)
- *   nombresColores   qué pinta cada color, para el panel
- *   giro             si la pieza entera va ladeada
- *   formas           lo que se dibuja, en orden. Cada forma lleva su `el`
- *                    (path, rect, circle o ellipse), sus medidas y:
- *                      relleno       'principal', 'acento', un color o 'none'
- *                      trazo         un trazo propio (las costuras, las rayas)
- *                      anchoTrazo, opacidadTrazo, opacidad, redondo
- *                      evenodd       agujerea con sus propios óvalos
- *                      sinContorno   no cuenta para el borde de la pieza
- *                      separar       lleva también su propio borde (ver abajo)
- *
- * EL BORDE va alrededor de la pieza ENTERA, no de cada forma: si cada forma
- * llevara el suyo, donde una se encima a otra quedaría una raya blanca
- * cruzándola (la visera de la gorra contra la copa). Solo las formas con
- * `separar` llevan además su propio borde, para cuando dos partes del MISMO
- * color tienen que distinguirse: el ala del sombrero sobre la copa, el nudo
- * de la bufanda sobre la bufanda.
- */
+// Cada pieza: ranura dónde va: cabeza, cara o cuello nombre cómo se le dice en el panel colores
+// los de cuando se elige (el principal y el de acento) nombresColores qué pinta cada color, para
+// el panel giro si la pieza entera va ladeada formas lo que se dibuja, en orden.
 export const PIEZAS_DISFRAZ = {
   /* ── Cabeza ── */
 
@@ -210,11 +167,9 @@ export const PIEZAS_DISFRAZ = {
     ],
   },
 
-  /*
-   * Gorra con la visera saliendo de lado, del lado contrario al cordón. De
-   * frente la visera se leía como la franja de un gorro de lana. Oscura de
-   * fábrica: queda fuera de la etiqueta, y blanca se perdía en el fondo.
-   */
+  // Gorra con la visera saliendo de lado, del lado contrario al cordón. De frente la visera se leía
+  // como la franja de un gorro de lana. Oscura de fábrica: queda fuera de la etiqueta, y blanca se
+  // perdía en el fondo.
   gorra: {
     ranura: 'cabeza',
     nombre: 'Gorra',

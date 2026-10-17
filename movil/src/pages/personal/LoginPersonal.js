@@ -1,27 +1,6 @@
-/*
- * ============================================================
- * "¿TRABAJAS EN LA TIENDA?" — la entrada del personal (LoginPersonal.js)
- * ============================================================
- * Por aquí entra quien trabaja en la tienda desde el teléfono. Es el MISMO
- * inicio de sesión del panel web, con sus dos pasos: correo y contraseña, y
- * después el código que llega al correo. Sin el segundo paso, quien adivine
- * la contraseña podría mover pedidos y precios desde cualquier teléfono.
- *
- * Lo que ve después depende de su cuenta (ver ModoPersonal):
- *   - el administrador, el Reparto y el panel web (con Tiqui del panel adentro);
- *   - el empleado, el Reparto.
- *
- * Reemplaza al "Estoy trabajando" de Mi cuenta en la web, que mezclaba la
- * sesión de cliente con la de personal de la misma persona.
- *
- * `correoInicial`: si el personal escribió su cuenta en el login de CLIENTES,
- * el servidor le contesta `esPersonal` y LoginClient lo manda aquí con el
- * correo ya puesto; solo le falta la contraseña.
- *
- * Al terminar no se navega a ningún lado: PersonalContext guarda la sesión y
- * App.js cambia la app entera al modo personal.
- * ============================================================
- */
+// "¿TRABAJAS EN LA TIENDA?" — la entrada del personal (LoginPersonal.js)
+// Por aquí entra quien trabaja en la tienda desde el teléfono. Es el MISMO inicio de sesión del
+// panel web, con sus dos pasos: correo y contraseña, y después el código que llega al correo.
 
 import { useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';

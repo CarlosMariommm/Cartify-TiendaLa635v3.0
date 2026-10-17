@@ -1,29 +1,8 @@
 import styled from 'styled-components';
 
-/*
- * ============================================================
- * ESQUELETOS DE PRODUCTO — EsqueletoProductos.jsx
- * ============================================================
- * Lo que se ve mientras el catálogo viene en camino.
- *
- * POR QUÉ EXISTE, que no es por bonito: mientras el servidor contestaba, la
- * tienda mostraba "Todavía no hay productos en la tienda". O sea que un
- * arranque lento se leía como una tienda vacía — lo peor que puede decir un
- * negocio de sí mismo. "Cargando…" a secas tampoco servía: es una línea de
- * texto donde después aparece una cuadrícula, así que todo se recorría de
- * golpe al llegar los datos.
- *
- * Estos bloques ocupan EXACTAMENTE el lugar de las tarjetas de verdad, así que
- * al llegar el catálogo nada salta: solo se rellena lo que ya estaba dibujado.
- *
- * No trae grilla propia a propósito: se pinta DENTRO de la cuadrícula de quien
- * lo llama, porque la tienda y la sección usan anchos distintos y el esqueleto
- * tiene que mentir del mismo tamaño que la verdad.
- *
- * El brillo y su apagado con prefers-reduced-motion viven en la clase
- * `.esqueleto` de index.css, con el resto del vocabulario de movimiento.
- * ============================================================
- */
+// ESQUELETOS DE PRODUCTO — EsqueletoProductos.jsx
+// Lo que se ve mientras el catálogo viene en camino. O sea que un arranque lento se leía como una
+// tienda vacía — lo peor que puede decir un negocio de sí mismo.
 
 const Tarjeta = styled.div`
   border: 1px solid var(--linea, #ECE7E1);
@@ -51,10 +30,8 @@ const Linea = styled.div`
   width: ${(p) => p.$ancho || '100%'};
 `;
 
-/*
- * `cuantos` por defecto en 8: llena la primera pantalla sin pasarse. Pintar
- * treinta esqueletos para después reemplazarlos es trabajo tirado.
- */
+// `cuantos` por defecto en 8: llena la primera pantalla sin pasarse. Pintar treinta esqueletos
+// para después reemplazarlos es trabajo tirado.
 const EsqueletoProductos = ({ cuantos = 8 }) =>
   Array.from({ length: cuantos }).map((_, i) => (
     <Tarjeta key={i} aria-hidden="true">

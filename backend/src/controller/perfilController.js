@@ -4,23 +4,9 @@ import { v2 as cloudinary } from "cloudinary";
 import { esTokenExpo } from "../utils/pushExpo.js";
 import { anotarTelefono } from "../utils/avisosPersonal.js";
 
-/*
- * ============================================================
- * MI PERFIL — perfilController.js
- * ============================================================
- * La foto de perfil de quien está conectado en el panel, sea administrador o
- * empleado.
- *
- * Por qué un controlador aparte y no reusar updateAdmin / updateEmployee:
- *   - updateEmployee exige TODOS los campos (nombre, DUI, teléfono, contraseña);
- *     para cambiar solo la foto habría que reenviarlos todos, incluida la
- *     contraseña, que la pantalla de Cuenta no tiene.
- *   - updateAdmin no maneja imágenes.
- *   - Y sobre todo: aquí NO se recibe el id por la URL. Se saca de la sesión
- *     (req.usuario, que pone validarSesion), así nadie puede cambiarle la foto
- *     a otra cuenta pasando otro id.
- * ============================================================
- */
+// MI PERFIL — perfilController.js
+// La foto de perfil de quien está conectado en el panel, sea administrador o empleado. -
+// updateAdmin no maneja imágenes. - Y sobre todo: aquí NO se recibe el id por la URL.
 const perfilController = {};
 
 // A qué colección pertenece quien pregunta, según su sesión.
@@ -91,11 +77,8 @@ perfilController.quitarFoto = async (req, res) => {
   }
 };
 
-/*
- * El teléfono donde le suenan los pedidos nuevos. Lo manda la app al entrar
- * al modo personal; la baja va al cerrar sesión (ver logoutAdmin.js y
- * utils/avisosPersonal.js).
- */
+// El teléfono donde le suenan los pedidos nuevos. Lo manda la app al entrar al modo personal; la
+// baja va al cerrar sesión (ver logoutAdmin.js y utils/avisosPersonal.js).
 perfilController.apuntarTelefono = async (req, res) => {
   try {
     const token = req.body?.token;

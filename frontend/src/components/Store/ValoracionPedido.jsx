@@ -5,18 +5,9 @@ import { reviewService } from '../../api/reviewService';
 import { useAuth } from '../../hooks/useAuth';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * ============================================================
- * VALORAR EL PEDIDO — ValoracionPedido.jsx
- * ============================================================
- * Cuando un pedido ya está ENTREGADO, el cliente lo califica EN GENERAL: unas
- * estrellas y un comentario para todo el pedido, no producto por producto.
- *
- * Esa calificación se guarda como reseña de los productos que llevó (reusa
- * reviewService), así no queda flotando sin destino y de paso alimenta la nota
- * de cada producto. Un pedido se califica una sola vez.
- * ============================================================
- */
+// VALORAR EL PEDIDO — ValoracionPedido.jsx
+// Cuando un pedido ya está ENTREGADO, el cliente lo califica EN GENERAL: unas estrellas y un
+// comentario para todo el pedido, no producto por producto.
 const ESTRELLAS = [1, 2, 3, 4, 5];
 
 // Una clave por pedido: omitir uno no debe ocultar el aviso de los demás.

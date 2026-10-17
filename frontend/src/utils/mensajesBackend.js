@@ -1,35 +1,10 @@
-/*
- * ============================================================
- * MENSAJES DEL SERVIDOR, EN ESPAÑOL — mensajesBackend.js
- * ============================================================
- * La última red antes de que un mensaje en inglés le caiga en la cara a
- * alguien que solo vino a comprar arroz.
- *
- * Los controladores del backend ya se limpiaron y hoy responden en español,
- * así que este archivo podría parecer de sobra. No lo es. El día que se
- * agregue un endpoint nuevo y se escape un "Product not found" —y se va a
- * escapar, siempre pasa— el interceptor de api.js lo va a traducir igual,
- * sin que nadie tenga que acordarse de nada. Traducir en la puerta de
- * entrada es lo único que no depende de la memoria de quien programe mañana.
- *
- * Cómo decide, en orden:
- *   1. ¿Está en el diccionario? Se usa esa traducción.
- *   2. ¿Cae en una familia conocida ("X not found", "X created successfully")?
- *      Se arma la frase con el glosario de entidades.
- *   3. ¿Ya viene en español? Se devuelve intacto. El backend escribe mejores
- *      mensajes que cualquier traducción automática nuestra ("Solo quedan 3
- *      de Leche Salud" no lo mejora nadie desde aquí).
- *   4. ¿Parece inglés pero no lo reconocemos? Se cambia por el mensaje
- *      genérico del código HTTP. Un "No se encontró lo que buscaba" honesto
- *      es mejor que inglés crudo en una tienda de barrio.
- * ============================================================
- */
+// MENSAJES DEL SERVIDOR, EN ESPAÑOL — mensajesBackend.js
+// La última red antes de que un mensaje en inglés le caiga en la cara a alguien que solo vino a
+// comprar arroz.
 
-/*
- * Un mensaje decente para cada código, por si no hay nada mejor que decir.
- * Están escritos para el cliente, no para quien programa: nada de "Bad
- * Request", que no le dice a nadie qué hacer a continuación.
- */
+// Un mensaje decente para cada código, por si no hay nada mejor que decir. Están escritos para el
+// cliente, no para quien programa: nada de "Bad Request", que no le dice a nadie qué hacer a
+// continuación.
 const POR_ESTADO = {
   400: 'Revisa los datos: algo quedó incompleto o no es válido.',
   401: 'Tu sesión venció o no es válida. Inicia sesión de nuevo.',
@@ -47,11 +22,9 @@ const POR_ESTADO = {
 
 const POR_DEFECTO = 'Ha ocurrido un error inesperado.';
 
-/*
- * Glosario de entidades: cómo se llama cada cosa en la tienda y de qué
- * género es. El género hace falta para no terminar diciendo "Marca creado".
- * Las claves van en minúscula porque el texto llega normalizado.
- */
+// Glosario de entidades: cómo se llama cada cosa en la tienda y de qué género es. El género hace
+// falta para no terminar diciendo "Marca creado". Las claves van en minúscula porque el texto
+// llega normalizado.
 const ENTIDADES = {
   'admin': ['administrador', 'm'],
   'administrator': ['administrador', 'm'],
@@ -74,12 +47,9 @@ const ENTIDADES = {
   'user': ['usuario', 'm'],
 };
 
-/*
- * Traducciones exactas. Son los mensajes que el backend manda hoy (o mandaba
- * hasta hace poco) y que no encajan en ninguna familia: cada uno merece su
- * propia frase porque decirlos bien importa más que decirlos parejo.
- * La clave va normalizada: minúsculas, sin espacios de más, sin punto final.
- */
+// Traducciones exactas. Son los mensajes que el backend manda hoy (o mandaba hasta hace poco) y
+// que no encajan en ninguna familia: cada uno merece su propia frase porque decirlos bien importa
+// más que decirlos parejo.
 const DICCIONARIO = {
   // Errores generales
   'internal server error': 'Error interno del servidor.',
@@ -129,13 +99,8 @@ const DICCIONARIO = {
   'administrator already exists': 'Ya existe un administrador con ese correo.',
 };
 
-/*
- * Palabras que en español no existen. Sirven para distinguir "esto es inglés
- * que no supimos traducir" de "esto ya venía en español y hay que respetarlo".
- * Se exige encontrar DOS distintas antes de dar por perdido el mensaje: con
- * una sola, un nombre de producto ("Pack not found"... o "Kit Escolar") podría
- * hacernos tirar a la basura un mensaje que sí servía.
- */
+// Palabras que en español no existen. Sirven para distinguir "esto es inglés que no supimos
+// traducir" de "esto ya venía en español y hay que respetarlo".
 const SENALES_INGLES = new Set([
   'the', 'not', 'found', 'required', 'successfully', 'fields', 'invalid',
   'password', 'already', 'exists', 'failed', 'attempts', 'please', 'again',
@@ -148,10 +113,8 @@ const SENALES_INGLES = new Set([
 // Marcas inconfundibles de que el texto ya viene en español.
 const MARCAS_ESPANOL = /[áéíóúüñ¿¡]/i;
 
-/*
- * Deja el texto comparable: minúsculas, sin espacios sobrantes y sin el punto
- * final. Así "Client not found." y "client  not found" son la misma llave.
- */
+// Deja el texto comparable: minúsculas, sin espacios sobrantes y sin el punto final. Así "Client
+// not found." y "client not found" son la misma llave.
 const normalizar = (texto) =>
   String(texto).toLowerCase().replace(/\s+/g, ' ').trim().replace(/\.$/, '');
 
@@ -172,10 +135,8 @@ const pareceIngles = (normalizado) => {
   return distintas.size >= 2;
 };
 
-/*
- * Las familias repetitivas del backend. Cada regla devuelve la frase ya armada
- * o null si no aplica; el orden importa poco porque los patrones no se pisan.
- */
+// Las familias repetitivas del backend. Cada regla devuelve la frase ya armada o null si no
+// aplica; el orden importa poco porque los patrones no se pisan.
 const FAMILIAS = [
   // "Internal Server Error getBrands" — el nombre de la función no le sirve de
   // nada a quien está comprando. Eso es para el log del servidor.
@@ -231,13 +192,9 @@ const FAMILIAS = [
   },
 ];
 
-/*
- * El único punto de entrada. Recibe lo que devolvió el servidor y el código
- * HTTP, y devuelve algo que se pueda leer en voz alta en la tienda.
- *
- * `status` es opcional: solo se usa cuando no hay texto o cuando el texto es
- * inglés que no reconocimos.
- */
+// El único punto de entrada. Recibe lo que devolvió el servidor y el código HTTP, y devuelve algo
+// que se pueda leer en voz alta en la tienda. `status` es opcional: solo se usa cuando no hay
+// texto o cuando el texto es inglés que no reconocimos.
 export const mensajeEnEspanol = (textoDelServidor, statusHttp) => {
   const respaldo = POR_ESTADO[statusHttp] || POR_DEFECTO;
 

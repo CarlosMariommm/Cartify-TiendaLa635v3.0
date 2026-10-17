@@ -1,21 +1,6 @@
-/*
- * ============================================================
- * EXPORTAR LA DEMOSTRACIÓN DEL PRONÓSTICO — exportarDemoPronostico.js
- * ============================================================
- * Resume la base LOCAL de demostración (cartify_demo, la que siembra
- * videos-tutoriales/demo/datos-demo.mjs) en src/datos/pronosticoDemo.json:
- * lo vendido por día y por producto, existencias, proveedores (con por dónde
- * se les pide) y compras.
- * Nada de clientes. Con ese archivo, la pantalla Pronóstico del panel
- * publicado tiene su modo "Demostración" sin tocar la base de producción
- * (ver utils/pronostico.js, solicitudDeDemostracion).
- *
- * Se corre solo cuando cambia la demostración, desde backend/, y después
- * hay que volver a calcular su resultado (el panel lo usa ya calculado):
- *   node src/scripts/exportarDemoPronostico.js
- *   node src/scripts/calcularDemoPronostico.js
- * ============================================================
- */
+// EXPORTAR LA DEMOSTRACIÓN DEL PRONÓSTICO — exportarDemoPronostico.js
+// Resume la base local de demostración en src/datos/pronosticoDemo.json (ventas por día,
+// existencias, proveedores y compras; sin clientes) para el modo Demostración.
 
 import { writeFileSync } from "node:fs";
 import mongoose from "mongoose";

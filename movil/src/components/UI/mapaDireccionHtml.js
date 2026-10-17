@@ -1,31 +1,6 @@
-/*
- * ============================================================
- * MAPA PARA MARCAR LA DIRECCIÓN — la página que corre DENTRO del WebView
- * ============================================================
- * Hace lo mismo que `frontend/src/components/Store/MapaDireccion.jsx`: el
- * mismo MapLibre, el mismo estilo de CARTO y el mismo pin con forma de gota
- * (ver mapaMapLibre.js), pero escrito en HTML/JS plano porque vive en un
- * WebView (ver el comentario grande en ModalMapaDireccion.js).
- *
- * ── Cómo habla con la pantalla nativa ──
- * Esto vive en un mundo aparte (el WebView), así que no puede llamar
- * funciones de React directo. La única salida es
- * `window.ReactNativeWebView.postMessage(texto)`: cada vez que se toca el
- * mapa o se suelta el pin arrastrado, manda `{lat, lng}` como JSON. Del otro
- * lado, `ModalMapaDireccion` lo recibe en `onMessage` y sigue desde ahí
- * (pide la dirección a Nominatim, etc.) — este archivo no sabe nada de eso.
- *
- * El camino inverso (RN → mapa) es `window.marcarPinExterno(lat, lng)`, que
- * ModalMapaDireccion llama con `injectJavaScript` cuando la posición cambió
- * por el botón de "Dirección actual" en vez de un toque: el GPS lo resuelve
- * React Native (con expo-location), y el mapa solo necesita enterarse de
- * dónde quedó el pin para centrarse ahí — no vuelve a avisar la posición
- * hacia afuera, porque RN ya la tiene.
- *
- * OJO: MapLibre ordena las coordenadas como [lng, lat]; hacia afuera siempre
- * se habla en {lat, lng}.
- * ============================================================
- */
+// MAPA PARA MARCAR LA DIRECCIÓN — la página que corre DENTRO del WebView
+// El mismo mapa de la web (MapLibre, CARTO y el pin de gota) en HTML plano, que le avisa a la
+// pantalla dónde quedó el pin.
 
 import { MAPLIBRE_CSS, MAPLIBRE_JS, JS_PLEGAR_CREDITO, cssComun, estiloMapa } from './mapaMapLibre';
 

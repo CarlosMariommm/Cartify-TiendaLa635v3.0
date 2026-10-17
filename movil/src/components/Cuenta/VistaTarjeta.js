@@ -1,19 +1,6 @@
-/*
- * ============================================================
- * LA TARJETA DE VISTA PREVIA — VistaTarjeta.js
- * ============================================================
- * Puerto de `frontend/src/components/Cuenta/VistaTarjeta.jsx`: la tarjeta de
- * plástico dibujada mientras se llenan los datos. El número aparece dígito a
- * dígito, el nombre y el vencimiento en su lugar, y el color cambia con la
- * marca apenas se reconoce por los primeros dígitos.
- *
- * No es adorno: es la forma más rápida de que la persona compare lo que
- * escribió con la tarjeta que tiene en la mano.
- *
- * Los colores son los de cada marca y NO cambian con el modo claro/oscuro —
- * una Visa es azul marino de día y de noche.
- * ============================================================
- */
+// LA TARJETA DE VISTA PREVIA — VistaTarjeta.js
+// Puerto de `frontend/src/components/Cuenta/VistaTarjeta.jsx`: la tarjeta de plástico dibujada
+// mientras se llenan los datos.
 
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';

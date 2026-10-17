@@ -1,26 +1,6 @@
-/*
- * ============================================================
- * FAMILIAS DE PRODUCTOS (lista cerrada) — familias.js
- * ============================================================
- * Los estantes que de verdad tiene una tienda de barrio salvadoreña. El backend
- * la necesita para UNA cosa: revisar lo que devuelve la IA. Al modelo se le
- * manda esta lista y se le prohíbe salirse de ella, pero eso es un pedido, no
- * una garantía — si contesta con una familia que no está aquí, se descarta en
- * silencio. Nunca se guarda en la base algo que el modelo se inventó.
- *
- * OJO: esta lista está DUPLICADA en frontend/src/utils/familias.js. Es a
- * propósito: en este repo el frontend y el backend no comparten código, y
- * tenerla dos veces es menos malo que montar un paquete compartido para 28
- * líneas. Lo que NO se puede es desincronizarlas — si agregás o renombrás una
- * clave, hacelo en los dos archivos el mismo día o el backend empezará a
- * botar en silencio lo que el frontend sí espera.
- *
- * El léxico de palabras clave (los "red bull", "quesillo", "guisquil") vive
- * solo en el frontend, porque la clasificación por reglas corre allá. Aquí
- * únicamente hacen falta las claves, los títulos y un ejemplo de cada estante
- * para que el modelo entienda qué se guarda en cada uno.
- * ============================================================
- */
+// FAMILIAS DE PRODUCTOS (lista cerrada) — familias.js
+// Los estantes que de verdad tiene una tienda de barrio salvadoreña. El backend la necesita para
+// UNA cosa: revisar lo que devuelve la IA.
 
 export const FAMILIAS = [
   { clave: "bebidas-energizantes", titulo: "Bebidas energizantes", ejemplo: "Red Bull, Monster, Volt, Raptor" },
@@ -58,11 +38,9 @@ export const CLAVES_VALIDAS = new Set(FAMILIAS.map((f) => f.clave));
 
 export const esFamiliaValida = (clave) => CLAVES_VALIDAS.has(String(clave || ""));
 
-/*
- * La lista tal como se le muestra al modelo. Va la clave (que es lo que tiene
- * que devolver) junto al título y unos ejemplos, porque "bebe" a secas no le
- * dice nada y "Para el bebé: pañales, fórmula" sí.
- */
+// La lista tal como se le muestra al modelo. Va la clave (que es lo que tiene que devolver) junto
+// al título y unos ejemplos, porque "bebe" a secas no le dice nada y "Para el bebé: pañales,
+// fórmula" sí.
 export const LISTA_PARA_IA = FAMILIAS.map(
   (f) => `${f.clave} = ${f.titulo} (${f.ejemplo})`
 ).join("\n");

@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-/*
- * Quien compra esto también lleva: qué se recomienda con cada producto, sacado
- * de los pedidos. La base es de mentira.
- */
+// Quien compra esto también lleva: qué se recomienda con cada producto, sacado de los pedidos. La
+// base es de mentira.
 
 const pedidosDeLaBase = vi.fn(() => []);
 const productosDeLaBase = vi.fn(() => []);

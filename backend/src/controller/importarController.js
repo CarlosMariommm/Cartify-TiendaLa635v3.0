@@ -1,15 +1,7 @@
 import { CAMPOS, POR_TANDA, analizarLote, columnasConIA, importarLote } from "../utils/importarProductos.js";
 
-/*
- * ============================================================
- * IMPORTAR EL INVENTARIO DESDE EXCEL — importarController.js
- * ============================================================
- * Las tres rutas de panel › Inventario › "Importar desde Excel", solo para
- * el administrador. La web lee el archivo y manda las filas por tandas de
- * 20 (así ninguna petición tarda más de unos segundos). Ver
- * utils/importarProductos.js.
- * ============================================================
- */
+// IMPORTAR EL INVENTARIO DESDE EXCEL — importarController.js
+// Las tres rutas de panel › Inventario › "Importar desde Excel", solo para el administrador.
 
 const importarController = {};
 

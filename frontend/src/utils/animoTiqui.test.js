@@ -1,10 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { animoDeFrase, caraDeAnimo } from './animoTiqui';
 
-/*
- * El ánimo de las frases fijas de Tiqui, y la cara que pone con cada uno.
- * Antes la cara salía de estas mismas reglas: tienen que seguir dando lo mismo.
- */
+// El ánimo de las frases fijas de Tiqui, y la cara que pone con cada uno.
 describe('el ánimo de las frases fijas', () => {
   it('cerrar la compra la emociona y agregar la alegra', () => {
     expect(animoDeFrase('¡Listo! Te abro el pago para que elijas cómo recibirlo y cómo pagar.')).toBe('emocionada');

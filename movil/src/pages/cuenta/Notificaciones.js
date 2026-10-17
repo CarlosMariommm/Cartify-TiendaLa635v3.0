@@ -1,41 +1,6 @@
-/*
- * ============================================================
- * NOTIFICACIONES — qué avisos quiere recibir, y por dónde
- * ============================================================
- * La misma lista que `frontend/src/pages/cliente/Notificaciones.jsx`, con las
- * mismas claves, porque escriben en el mismo documento: cambiar uno desde el
- * teléfono tiene que verse al abrir la tienda en la computadora.
- *
- * Cada aviso tiene su interruptor EN LA APP (`avisosApp`) y, si sale por
- * correo, el suyo POR CORREO (`notificationPrefs`). Apagar uno no toca al
- * otro: quien se cansó de los correos de promociones puede seguir
- * enterándose en el teléfono (ver backend/src/utils/preferenciasAvisos.js).
- *
- * ── Se guarda solo (y se deshace solo si falla) ──
- *
- * No hay botón de guardar. Un interruptor que se mueve pero no cuenta hasta que
- * uno baja a apretar "Guardar" es la manera de que la gente salga de la
- * pantalla creyendo que ya quedó. Se manda al tocarlo, como en la web.
- *
- * El interruptor se pinta ANTES de que conteste el servidor, porque un switch
- * que se queda quieto medio segundo se toca dos veces. Si el guardado falla, se
- * devuelve a donde estaba y se avisa: quedarse encendido de mentira sería
- * prometer avisos que nunca van a llegar.
- *
- * ── Dos cosas distintas: QUÉ quiere y A DÓNDE se lo mandamos ──
- *
- * El interruptor guarda la preferencia en la cuenta, igual que en la web. Lo
- * que hace que además SUENE es el token de este teléfono, que se registra la
- * primera vez que se enciende algo (ver utils/notificaciones.js) y que el
- * backend cruza con la preferencia al mandar el aviso (utils/pushExpo.js).
- *
- * Son dos pasos y no uno porque el permiso del sistema puede faltar aunque la
- * preferencia esté encendida: ahí la cuenta dice "sí quiero" y el teléfono
- * dice "no me avises". El pie de la lista cuenta en cuál de los dos estados
- * está, sin adornos — prometer "le avisamos cuando su pedido esté cerca" y que
- * nunca suene nada es peor que no ofrecerlo.
- * ============================================================
- */
+// NOTIFICACIONES — qué avisos quiere recibir, y por dónde
+// Cada aviso con su interruptor en la app (`avisosApp`) y, si sale por correo, el suyo por
+// correo; son las mismas claves que la web.
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -71,11 +36,9 @@ const desdeCliente = (cliente) => ({
   app: { ...POR_DEFECTO.app, ...(cliente?.avisosApp || {}) },
 });
 
-/*
- * `app`: la clave en avisosApp. `correo`: la de notificationPrefs, solo si ese
- * aviso también sale por correo. "Sale o está listo" usa `pedidoCerca`, el
- * correo de siempre de "tu pedido va en camino".
- */
+// `app`: la clave en avisosApp. `correo`: la de notificationPrefs, solo si ese aviso también sale
+// por correo. "Sale o está listo" usa `pedidoCerca`, el correo de siempre de "tu pedido va en
+// camino".
 const GRUPOS = [
   {
     titulo: 'Ofertas y novedades',
@@ -102,13 +65,9 @@ const COLUMNA = 54;
 // Mismo tiempo que --dur-press en la web: es el mismo interruptor, misma duración.
 const DURACION_INTERRUPTOR = 160;
 
-/*
- * El interruptor. La bolita se mueve con `transform` y no cambiando `left`
- * porque es lo único que no obliga a recalcular la posición de todo lo que
- * tiene al lado en cada fotograma — mismo criterio que el de la web. El color
- * del riel no admite el driver nativo, así que todo el progreso (bolita y
- * color) corre por un solo `Animated.Value` en el hilo de JS.
- */
+// El interruptor. La bolita se mueve con `transform` y no cambiando `left` porque es lo único que
+// no obliga a recalcular la posición de todo lo que tiene al lado en cada fotograma — mismo
+// criterio que el de la web.
 const Interruptor = ({ encendido, alTocar, color, etiqueta }) => {
   const COLORES = useColores();
   const estilos = useEstilos(crearEstilos);
@@ -185,18 +144,14 @@ const Notificaciones = ({ alVolver }) => {
     cargar();
   }, [cargar]);
 
-  /*
-   * En qué estado está ESTE teléfono: 'listo' si el aviso va a sonar, o el
-   * motivo por el que no. Empieza en null (todavía comprobando) para no
-   * mostrar una advertencia durante el medio segundo que tarda en saberse.
-   */
+  // En qué estado está ESTE teléfono: 'listo' si el aviso va a sonar, o el motivo por el que no.
+  // Empieza en null (todavía comprobando) para no mostrar una advertencia durante el medio segundo
+  // que tarda en saberse.
   const [avisos, setAvisos] = useState(null);
 
-  /*
-   * Al entrar, sin molestar a nadie: si el permiso YA estaba dado, se vuelve a
-   * mandar el token al servidor. No es redundante — Expo puede rotarlo, y un
-   * token viejo es un aviso que no llega sin que nada parezca roto.
-   */
+  // Al entrar, sin molestar a nadie: si el permiso YA estaba dado, se vuelve a mandar el token al
+  // servidor. No es redundante — Expo puede rotarlo, y un token viejo es un aviso que no llega sin
+  // que nada parezca roto.
   useEffect(() => {
     if (!user?.id) return;
     tokenActual().then((token) => {
@@ -209,12 +164,9 @@ const Notificaciones = ({ alVolver }) => {
     });
   }, [user?.id]);
 
-  /*
-   * Pide el permiso y registra el teléfono. Se llama al ENCENDER, no al
-   * entrar: el sistema muestra el cuadro de permiso una sola vez en la vida de
-   * la instalación, y gastarlo apenas se abre la pantalla —antes de que la
-   * persona haya pedido nada— es la forma más rápida de que lo rechace.
-   */
+  // Pide el permiso y registra el teléfono. Se llama al ENCENDER, no al entrar: el sistema muestra
+  // el cuadro de permiso una sola vez en la vida de la instalación, y gastarlo apenas se abre la
+  // pantalla —antes de que la persona haya pedido nada— es la forma más rápida de que lo rechace.
   const asegurarAvisos = async () => {
     const { token, motivo } = await registrarParaAvisos();
     if (!token) {
@@ -244,22 +196,14 @@ const Notificaciones = ({ alVolver }) => {
       return;
     }
 
-    /*
-     * Encender un aviso de la app es el momento de pedir el permiso, y va
-     * DESPUÉS de guardar la preferencia: si el permiso se rechaza, lo que la
-     * persona eligió queda guardado igual. Mañana lo concede desde los ajustes
-     * y los avisos empiezan a llegar sin tener que volver a tocar el
-     * interruptor. Un correo no necesita nada del teléfono.
-     */
+    // Encender un aviso de la app es el momento de pedir el permiso, y va DESPUÉS de guardar la
+    // preferencia: si el permiso se rechaza, lo que la persona eligió queda guardado igual.
     if (canal === 'app' && valor && avisos !== 'listo') asegurarAvisos();
   };
 
-  /*
-   * El pie dice la verdad de este teléfono. Cada estado lleva a un lugar
-   * distinto: el "no" del sistema se arregla en los ajustes, un emulador no se
-   * arregla, y sin proyecto de Expo configurado el que tiene que hacer algo es
-   * quien compila la app, no quien la usa.
-   */
+  // El pie dice la verdad de este teléfono. Cada estado lleva a un lugar distinto: el "no" del
+  // sistema se arregla en los ajustes, un emulador no se arregla, y sin proyecto de Expo configurado
+  // el que tiene que hacer algo es quien compila la app, no quien la usa.
   const PIES = {
     listo: 'Te avisamos en este teléfono.',
     'sin-permiso': 'Este teléfono tiene los avisos bloqueados. Se cambia en los ajustes del sistema.',

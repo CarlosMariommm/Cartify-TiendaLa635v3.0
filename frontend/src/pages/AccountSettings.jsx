@@ -10,11 +10,8 @@ import { formatearDui, formatearTelefono, LARGO_DUI, LARGO_TELEFONO } from '../u
 import OpcionesLectura from '../components/Layout/OpcionesLectura';
 
 const AccountSettings = () => {
-  /*
-   * Las paletas del contexto, no las del módulo: esas no traen "Mi marca" (la
-   * arma el contexto), y quien se cambiaba de paleta aquí no tenía cómo volver
-   * a la de siempre.
-   */
+  // Las paletas del contexto, no las del módulo: esas no traen "Mi marca" (la arma el contexto), y
+  // quien se cambiaba de paleta aquí no tenía cómo volver a la de siempre.
   const { paletteId, setPaletteId, palettes } = useTheme();
   const [activeTab, setActiveTab] = useState('profile');
   const [verPass, setVerPass] = useState(false);
@@ -71,10 +68,8 @@ const AccountSettings = () => {
 
   const userType = user?.type || 'employee';
 
-  /*
-   * El botón del PANEL cierra las dos sesiones (ver logoutTodo en
-   * AuthContext) — mismo criterio que TopBar.jsx.
-   */
+  // El botón del PANEL cierra las dos sesiones (ver logoutTodo en AuthContext) — mismo criterio que
+  // TopBar.jsx.
   const handleLogout = () => {
     logoutTodo();
     navigate('/admin');
@@ -194,11 +189,8 @@ const AccountSettings = () => {
 
               <div className="space-y-2 relative">
                 <label className="block text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>Contraseña</label>
-                {/*
-                  El ojo reemplaza al chulito verde que había: aquel estaba
-                  siempre encendido, sin comprobar nada, así que decía "todo
-                  bien" incluso con el campo vacío.
-                */}
+                {/* El ojo reemplaza al chulito verde que había: aquel estaba siempre encendido, sin comprobar nada,
+                   así que decía "todo bien" incluso con el campo vacío. */}
                 <div className="relative">
                   <input type={verPass ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange} placeholder="••••••••"
                     className="w-full px-5 py-2.5 rounded-full border focus:outline-none pr-12 tracking-wider transition-colors"

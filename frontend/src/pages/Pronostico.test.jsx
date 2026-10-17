@@ -7,10 +7,8 @@ import { dashboardService } from '../api/dashboardService';
 import { descargarReportePredictivo } from '../utils/descargarPredictivo';
 import toast from 'react-hot-toast';
 
-/*
- * La pantalla Pronóstico del panel. El servidor (y el servicio de análisis
- * detrás) son de mentira; la gráfica no se dibuja en jsdom, pero lo demás sí.
- */
+// La pantalla Pronóstico del panel. El servidor (y el servicio de análisis detrás) son de mentira;
+// la gráfica no se dibuja en jsdom, pero lo demás sí.
 
 vi.mock('../api/dashboardService', () => ({ dashboardService: { getPronostico: vi.fn() } }));
 vi.mock('../utils/descargarPredictivo', () => ({ descargarReportePredictivo: vi.fn() }));

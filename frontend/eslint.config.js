@@ -17,25 +17,8 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
-    /*
-     * Las reglas que trae react-hooks 7 para el React Compiler. La tienda no
-     * usa ese compilador; se revisaron los 94 avisos uno por uno (06-10-2026):
-     *
-     *   - Los que eran fallas de verdad se arreglaron: dependencias que
-     *     faltaban, refs escritos durante el pintado, estado que se reiniciaba
-     *     un cuadro tarde.
-     *   - Estas tres quedan APAGADAS porque solo hablan del compilador:
-     *       incompatible-library y preserve-manual-memoization dicen "aquí el
-     *       compilador no optimizaría", y set-state-in-effect marca cargar
-     *       datos al abrir una pantalla con un efecto, que es lo normal sin
-     *       una librería de datos (la marca aunque el estado cambie después
-     *       de esperar la respuesta).
-     *
-     * Las demás quedan como AVISO. Las de siempre —las reglas de los hooks,
-     * las dependencias, las variables sin usar— sí son error o aviso que
-     * importa, y la revisión automática de GitHub (pruebas.yml) no deja pasar
-     * un cambio con un error.
-     */
+    // Las reglas de react-hooks 7 pensadas para el React Compiler quedan apagadas: la tienda no usa
+    // ese compilador.
     rules: {
       'react-hooks/set-state-in-effect': 'off',
       'react-hooks/incompatible-library': 'off',
@@ -50,20 +33,15 @@ export default defineConfig([
     },
   },
   {
-    /*
-     * Cada archivo de contexto exporta su proveedor y el gancho para leerlo,
-     * juntos a propósito. Lo único que cambia es que, al programar, editar uno
-     * recarga la página entera en vez de solo el componente.
-     */
+    // Cada archivo de contexto exporta su proveedor y el gancho para leerlo, juntos a propósito. Lo
+    // único que cambia es que, al programar, editar uno recarga la página entera en vez de solo el
+    // componente.
     files: ['src/context/**/*.{js,jsx}'],
     rules: { 'react-refresh/only-export-components': 'off' },
   },
   {
-    /*
-     * El mapa (components/mapcn) es el componente de mapcn copiado tal cual.
-     * Se deja igual al original para poder actualizarlo: sus avisos son de
-     * esa librería, no de la tienda.
-     */
+    // El mapa (components/mapcn) es el componente de mapcn copiado tal cual. Se deja igual al original
+    // para poder actualizarlo: sus avisos son de esa librería, no de la tienda.
     files: ['src/components/mapcn/**/*.{js,jsx}'],
     rules: {
       'react-hooks/refs': 'off',

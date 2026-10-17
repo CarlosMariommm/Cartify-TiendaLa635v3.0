@@ -4,10 +4,8 @@ import { useMyOrders } from '../../hooks/useMyOrders';
 import Mascota, { CargandoMascota } from '../../components/UI/Mascota';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * Recibidos — "Recibos": los pedidos ya ENTREGADOS del cliente, como
- * comprobante de compra. Reutiliza useMyOrders filtrando por estado 'entregado'.
- */
+// Recibidos — "Recibos": los pedidos ya ENTREGADOS del cliente, como comprobante de compra.
+// Reutiliza useMyOrders filtrando por estado 'entregado'.
 
 const formatFecha = (iso, locale) => {
   if (!iso) return '';

@@ -3,13 +3,9 @@ import moduleController from '../controller/module.js';
 
 import { soloAdmin } from '../middlewares/validarSesion.js';
 
-/*
- * ── Documentación de la API (Swagger) ──
- *
- * Viene de main. Va agrupada aquí y no pegada a cada ruta porque
- * swagger-jsdoc rastrea el archivo entero: dónde esté no cambia lo que
- * documenta, y así el código de las rutas se lee sin interrupciones.
- */
+// ── Documentación de la API (Swagger) ──
+// Va agrupada aquí y no pegada a cada ruta porque swagger-jsdoc rastrea el archivo entero: dónde
+// esté no cambia lo que documenta, y así el código de las rutas se lee sin interrupciones.
 
 /**
  * @swagger

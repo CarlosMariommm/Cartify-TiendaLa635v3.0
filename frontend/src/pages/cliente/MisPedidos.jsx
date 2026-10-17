@@ -12,17 +12,13 @@ import { textoDevuelto, sellosDeCancelacion } from '../../utils/pasosPedido';
 import ModalCancelarMiPedido from '../../components/Cuenta/ModalCancelarMiPedido';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * MisPedidos — historial de pedidos del cliente (área "Mi Cuenta").
- * Migrada de mockup a datos reales (modelo Order). La lógica de carga vive en
- * useMyOrders; aquí solo pintamos la lista de tarjetas de pedido.
- */
+// MisPedidos — historial de pedidos del cliente (área "Mi Cuenta"). Migrada de mockup a datos
+// reales (modelo Order). La lógica de carga vive en useMyOrders; aquí solo pintamos la lista de
+// tarjetas de pedido.
 
-/*
- * Valoración del SERVICIO de entrega (no del producto). Sale solo en los
- * pedidos a domicilio ya entregados: es cuando de verdad hubo un reparto que
- * juzgar. Una vez enviada, se muestra de solo lectura.
- */
+// Valoración del SERVICIO de entrega (no del producto). Sale solo en los pedidos a domicilio ya
+// entregados: es cuando de verdad hubo un reparto que juzgar. Una vez enviada, se muestra de solo
+// lectura.
 const ValoracionServicio = ({ order, c }) => {
   const { t } = useIdioma();
   const [sel, setSel] = useState(order.serviceRating?.rating || 0);
@@ -105,12 +101,9 @@ const ValoracionServicio = ({ order, c }) => {
 const estadoInfo = {
   pagado:     { label: 'Pagado',     color: 'var(--info-vivo)', bg: 'rgba(37,99,235,.12)' },
   preparando: { label: 'Preparando', color: 'var(--aviso-vivo)', bg: 'rgba(217,119,6,.14)' },
-  /*
-   * "En camino" FALTABA en esta lista, y el respaldo de abajo es `pagado`.
-   * O sea: un pedido que ya iba en la moto se etiquetaba "Pagado" en la misma
-   * tarjeta donde la linea de tiempo decia "En camino". Dos cosas distintas
-   * sobre el mismo pedido, a diez centimetros una de la otra.
-   */
+  // "En camino" FALTABA en esta lista, y el respaldo de abajo es `pagado`. O sea: un pedido que ya
+  // iba en la moto se etiquetaba "Pagado" en la misma tarjeta donde la linea de tiempo decia "En
+  // camino". Dos cosas distintas sobre el mismo pedido, a diez centimetros una de la otra.
   en_camino:  { label: 'En camino',  color: 'var(--info-vivo)', bg: 'rgba(29,78,216,.14)' },
   // Solo retiro en la tienda. Con los tokens de la marca, que ya se leen en claro y en oscuro.
   listo:      { label: 'Listo para recoger', color: 'var(--marca-texto)', bg: 'var(--marca-100)' },
@@ -129,11 +122,9 @@ const MisPedidos = () => {
   const c = palette.colors;
   const { orders, loading } = useMyOrders();
   const { t, locale } = useIdioma();
-  /*
-   * Cancelar un pedido por preparar. `cambios` guarda lo que devolvió el
-   * servidor por id, y se pinta encima de la lista: así la tarjeta cambia al
-   * instante sin volver a cargar todo (y sin el "Cargando…" de por medio).
-   */
+  // Cancelar un pedido por preparar. `cambios` guarda lo que devolvió el servidor por id, y se pinta
+  // encima de la lista: así la tarjeta cambia al instante sin volver a cargar todo (y sin el
+  // "Cargando…" de por medio).
   const [aCancelar, setACancelar] = useState(null);
   const [cambios, setCambios] = useState({});
 
@@ -177,12 +168,9 @@ const MisPedidos = () => {
                   </span>
                 </div>
 
-                {/*
-                  Por donde va el pedido, sin tener que entrar a cada uno.
-                  Esta era la unica pantalla con pedidos EN CURSO que no lo
-                  decia. Se calla solo en los ya entregados o cancelados.
-                  Ver SeguimientoCompacto.
-                */}
+                {/* Por donde va el pedido, sin tener que entrar a cada uno. Esta era la unica pantalla con pedidos
+                   EN CURSO que no lo decia. Se calla solo en los ya entregados o cancelados. Ver
+                   SeguimientoCompacto. */}
                 <SeguimientoCompacto pedido={order} />
 
                 {/* Cancelado: por qué, y lo que se le devolvió. */}
@@ -204,13 +192,9 @@ const MisPedidos = () => {
                   </div>
                 )}
 
-                {/*
-                  El código de entrega, en pequeño. En la lista va la versión
-                  compacta y no la tarjeta entera: aquí solo hace falta poder
-                  encontrarlo rápido —el cliente ya está en la puerta con el
-                  teléfono en la mano—, y el componente se calla solo en los
-                  pedidos ya entregados o cancelados.
-                */}
+                {/* El código de entrega, en pequeño. En la lista va la versión compacta y no la tarjeta entera:
+                   aquí solo hace falta poder encontrarlo rápido —el cliente ya está en la puerta con el teléfono
+                   en la mano—, y el componente se calla solo en los pedidos ya entregados o cancelados. */}
                 {order.deliveryCode && (
                   <div className="mb-3">
                     <CodigoEntrega

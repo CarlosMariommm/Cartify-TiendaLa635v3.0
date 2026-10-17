@@ -1,29 +1,6 @@
-/*
- * ============================================================
- * LA RUTA DEL REPARTIDOR — rutaReparto.js
- * ============================================================
- * El cliente que espera ve en el mapa, además del punto del repartidor y su
- * casa, la línea por las calles que le falta recorrer, y el "llega en…" sale
- * de esa ruta y no de una línea recta.
- *
- * La ruta la calcula OpenRouteService (gratis hasta 2,000 consultas al día,
- * con llave: OPENROUTESERVICE_API_KEY en el .env / Render). Sin llave no hay
- * línea y todo sigue como antes.
- *
- * NO SE PIDE EN CADA CONSULTA. El cliente pregunta cada 10 segundos dónde va
- * el repartidor; pedir una ruta nueva cada vez gastaría el tope en una tarde.
- * Se guarda la ruta del pedido y, mientras el repartidor vaya sobre ella, solo
- * se RECORTA: la línea empieza donde va él y se acorta conforme avanza. Se
- * pide otra solo si se desvió (tomó otra calle) o si la guardada ya tiene sus
- * minutos, y nunca más de una vez cada 30 segundos por pedido.
- *
- * Vive en memoria, no en la base: es del viaje en curso y se olvida al
- * terminar. Igual que el punto del repartidor, no es un historial.
- *
- * Si el GPS del repartidor no llega, el cliente ve la ruta desde la tienda y
- * un tiempo aproximado: ver estimadoDesdeLaTienda, al final.
- * ============================================================
- */
+// LA RUTA DEL REPARTIDOR — rutaReparto.js
+// El cliente que espera ve en el mapa, además del punto del repartidor y su casa, la línea por las
+// calles que le falta recorrer, y el "llega en…" sale de esa ruta y no de una línea recta.
 
 // La dirección nueva de OpenRouteService: api.openrouteservice.org se está
 // retirando (aviso en su panel, octubre de 2026). Misma llave, mismo formato.
@@ -66,11 +43,9 @@ const alTramo = (p, a, b) => {
   return Math.hypot(A.x + t * dx, A.y + t * dy);
 };
 
-/*
- * Lo que falta de la ruta, visto desde donde va el repartidor: la línea arranca
- * en él y sigue desde el tramo más cercano. Devuelve también qué tan lejos está
- * de la ruta (para saber si se desvió) y cuántos metros faltan.
- */
+// Lo que falta de la ruta, visto desde donde va el repartidor: la línea arranca en él y sigue
+// desde el tramo más cercano. Devuelve también qué tan lejos está de la ruta (para saber si se
+// desvió) y cuántos metros faltan.
 export const recortarRuta = (puntos, posicion) => {
   if (!Array.isArray(puntos) || puntos.length < 2 || !valido(posicion)) return null;
   let mejor = { i: 0, metros: Infinity };
@@ -84,10 +59,8 @@ export const recortarRuta = (puntos, posicion) => {
   return { puntos: linea, desvioM: mejor.metros, metrosRestantes };
 };
 
-/*
- * La consulta a OpenRouteService. Devuelve { puntos: [[lng, lat]…], metros,
- * segundos } o null si no encontró camino (un punto lejos de toda calle).
- */
+// La consulta a OpenRouteService. Devuelve { puntos: [[lng, lat]…], metros, segundos } o null si
+// no encontró camino (un punto lejos de toda calle).
 export const pedirRutaORS = async ({ desde, hacia, llave }) => {
   const corte = new AbortController();
   const reloj = setTimeout(() => corte.abort(), 6000);
@@ -133,11 +106,9 @@ const respuesta = (base, recorte) => ({
   segundos: base.metros > 0 ? Math.round(base.segundos * Math.min(1, recorte.metrosRestantes / base.metros)) : null,
 });
 
-/*
- * La ruta que le falta al repartidor de este pedido, o null si no hay (sin
- * llave, sin destino, o el servicio no encontró camino). Nunca lanza: si algo
- * falla, el mapa se queda con los dos puntos de siempre.
- */
+// La ruta que le falta al repartidor de este pedido, o null si no hay (sin llave, sin destino, o
+// el servicio no encontró camino). Nunca lanza: si algo falla, el mapa se queda con los dos puntos
+// de siempre.
 export const rutaDelRepartidor = async ({ pedidoId, desde, hacia, llave, pedir = pedirRutaORS, ahora = Date.now() }) => {
   if (!llave || !valido(desde) || !valido(hacia)) return null;
   const id = String(pedidoId);
@@ -173,24 +144,9 @@ export const rutaDelRepartidor = async ({ pedidoId, desde, hacia, llave, pedir =
   return recorte ? respuesta(guardada, recorte) : null;
 };
 
-/*
- * ── MIENTRAS NO LLEGA EL GPS DEL REPARTIDOR ──
- * El pedido ya salió, pero el teléfono del repartidor no ha mandado su punto:
- * lo pusieron en camino desde el panel web (que no comparte ubicación), el GPS
- * no agarra señal adentro de la casa, o la app se cerró en la calle. Antes el
- * cliente se quedaba sin mapa ni tiempo toda la entrega.
- *
- * Ahora ve lo que sí se sabe: la ruta de la TIENDA a su casa y cuánto falta,
- * contado desde que salió (`enCaminoAt`). Es un aproximado y en pantalla se
- * dice así. No se inventa un punto del repartidor avanzando por la línea: un
- * punto falso es peor que no tener punto (ver useSeguimientoEnVivo.js).
- *
- * La tienda no se mueve, así que la ruta se pide UNA vez por pedido. Sin llave
- * del servicio de rutas, la línea no sale y el tiempo se saca de la línea
- * recta, con la misma moto de barrio que usa la web (frontend/src/utils/geo.js).
- * Devuelve { desde, puntos ([[lng, lat]…] o null), metros, segundos que faltan },
- * o null sin la ubicación de la tienda (Personalización › Envío) o sin destino.
- */
+// ── MIENTRAS NO LLEGA EL GPS DEL REPARTIDOR ── El pedido ya salió, pero el teléfono del
+// repartidor no ha mandado su punto: lo pusieron en camino desde el panel web (que no comparte
+// ubicación), el GPS no agarra señal adentro de la casa, o la app se cerró en la calle.
 const VELOCIDAD_SIN_RUTA_MS = 18000 / 3600; // 18 km/h
 const RODEO_DE_CALLES = 1.35;
 

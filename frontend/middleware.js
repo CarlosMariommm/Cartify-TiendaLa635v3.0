@@ -1,24 +1,5 @@
-/*
- * ============================================================
- * VISTA PREVIA DE LOS ENLACES — middleware.js (Vercel)
- * ============================================================
- * La tienda es una sola página que arma React en el navegador. WhatsApp,
- * Facebook, Telegram y Google no ejecutan ese código: leen el HTML tal cual
- * llega, y el HTML es el mismo index.html para todas las direcciones. Así
- * que un enlace a las fresas se veía igual que uno a la portada.
- *
- * Esto corre en Vercel ANTES de servir la página:
- *
- *   /producto/:id  Si quien pide es uno de esos lectores de enlaces, se le
- *                  devuelve index.html con la foto, el nombre y el precio de
- *                  ESE producto. Las personas no pasan por aquí: siguen
- *                  directo a la tienda, sin esperar al servidor.
- *   /sitemap.xml   La lista de páginas para los buscadores, con cada producto.
- *
- * Si el servidor no contesta a tiempo (Render dormido), el lector se lleva la
- * vista previa general de la tienda: nunca un error.
- * ============================================================
- */
+// VISTA PREVIA DE LOS ENLACES — middleware.js (Vercel)
+// La tienda es una sola página que arma React en el navegador.
 
 export const config = { matcher: ['/producto/:path*', '/sitemap.xml'] };
 
@@ -42,11 +23,9 @@ const conPlazo = (url) => {
 const escapar = (texto) => String(texto ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-/*
- * La foto en 1200 × 630 (lo que piden WhatsApp y Facebook), centrada sobre
- * blanco y en JPG: las fotos de la tienda son WebP con fondo transparente,
- * y algunos lectores no muestran ninguna de las dos cosas.
- */
+// La foto en 1200 × 630 (lo que piden WhatsApp y Facebook), centrada sobre blanco y en JPG: las
+// fotos de la tienda son WebP con fondo transparente, y algunos lectores no muestran ninguna de
+// las dos cosas.
 const fotoParaCompartir = (url) => {
   if (typeof url !== 'string' || !url.includes('/image/upload/')) return null;
   return url.replace('/image/upload/', '/image/upload/f_jpg,q_auto,c_pad,w_1200,h_630,b_rgb:FFFFFF/');

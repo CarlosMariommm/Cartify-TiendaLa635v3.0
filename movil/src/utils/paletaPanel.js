@@ -1,18 +1,6 @@
-/*
- * ============================================================
- * LA PALETA DEL PANEL EN LA APP — paletaPanel.js
- * ============================================================
- * El panel de la web tiene sus paletas (Lectura, Contraste reforzado, Modo
- * oscuro, Calma, Calma noche; ver frontend/src/context/ThemeContext.jsx).
- * Cuando el administrador elige una en el panel abierto dentro de la app
- * (pages/personal/PanelWeb.js), el panel se lo avisa a la app y el modo del
- * personal ENTERO se pinta con ella: la barra de arriba, Tiqui, el Reparto, los
- * avisos. La tienda no: es la de los clientes y sigue con sus colores.
- *
- * Aquí se traducen los colores del panel a los nombres de la paleta de la app
- * (theme/colores.js). "Mi marca" es la de siempre: no cambia nada.
- * ============================================================
- */
+// LA PALETA DEL PANEL EN LA APP — paletaPanel.js
+// El panel de la web tiene sus paletas (Lectura, Contraste reforzado, Modo oscuro, Calma, Calma
+// noche; ver frontend/src/context/ThemeContext.jsx).
 
 import { COLORES_CLARO, COLORES_OSCURO } from '../theme/colores';
 
@@ -24,11 +12,8 @@ const CLAVES = [
   'peligro', 'aviso', 'exito',
 ];
 
-/*
- * { id, oscuro, colores } tal como lo manda el panel →
- * { id, clave, colores (la paleta de la app), marca (la de TemaContext) },
- * o null si es "Mi marca" o si llegó algo que no se puede pintar.
- */
+// { id, oscuro, colores } tal como lo manda el panel → { id, clave, colores (la paleta de la app),
+// marca (la de TemaContext) }, o null si es "Mi marca" o si llegó algo que no se puede pintar.
 export const paletaDesdePanel = (datos) => {
   if (!datos || typeof datos !== 'object' || datos.id === 'marca') return null;
   const id = String(datos.id || '');

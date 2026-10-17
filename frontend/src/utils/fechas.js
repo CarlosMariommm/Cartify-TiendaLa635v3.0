@@ -1,42 +1,21 @@
-/*
- * ============================================================
- * FECHAS QUE PUEDEN NO EXISTIR — fechas.js
- * ============================================================
- * Formatear una fecha es fácil. Lo difícil es el caso de que no haya fecha, y
- * ahí es donde JavaScript traiciona: `new Date(null)` no falla, devuelve el
- * instante cero de Unix, y `toLocaleDateString()` lo pinta tan tranquilo como
- * "31/12/1969". Así aparecieron seis frutas del inventario avisando que se
- * vencieron hace más de cincuenta años.
- *
- * La regla de esta casa: si el dato no está, se dice; no se rellena. Por eso
- * `formatearFecha` devuelve null cuando no hay nada que mostrar, y quien la
- * llama decide si esconde la línea o escribe "Sin fecha". Devolver una cadena
- * de relleno desde aquí obligaría a todos a adivinar cuál era.
- * ============================================================
- */
+// FECHAS QUE PUEDEN NO EXISTIR — fechas.js
+// Formatear una fecha es fácil.
 
 // Locale de la tienda. Un solo lugar, para que el inventario y el panel no
 // terminen escribiendo la misma fecha de dos formas distintas.
 const LOCAL = 'es-SV';
 
-/*
- * ¿Vale la pena tratar esto como una fecha?
- *
- * Se rechaza lo vacío ANTES de construir el Date: null, undefined, '' y 0 son
- * "no hay dato", no son 1969. Después se rechaza lo que sí llegó pero no se
- * puede leer (texto suelto, una fecha a medio guardar).
- */
+// ¿Vale la pena tratar esto como una fecha? Se rechaza lo vacío ANTES de construir el Date: null,
+// undefined, '' y 0 son "no hay dato", no son 1969. Después se rechaza lo que sí llegó pero no se
+// puede leer (texto suelto, una fecha a medio guardar).
 export const esFechaValida = (valor) => {
   if (!valor) return false;
   const fecha = valor instanceof Date ? valor : new Date(valor);
   return !Number.isNaN(fecha.getTime());
 };
 
-/*
- * Devuelve la fecha ya escrita, o null si no hay fecha que escribir.
- * Las opciones son las mismas de toLocaleDateString, por si alguien quiere el
- * mes con letras.
- */
+// Devuelve la fecha ya escrita, o null si no hay fecha que escribir. Las opciones son las mismas
+// de toLocaleDateString, por si alguien quiere el mes con letras.
 export const formatearFecha = (valor, opciones) =>
   esFechaValida(valor) ? new Date(valor).toLocaleDateString(LOCAL, opciones) : null;
 

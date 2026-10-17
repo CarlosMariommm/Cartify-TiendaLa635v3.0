@@ -1,19 +1,6 @@
-/*
- * ============================================================
- * LOS REPORTES DEL TABLERO — reportesTienda.js
- * ============================================================
- * "Resumen de la tienda" e "Inventario completo", con el mismo formato que el
- * reporte predictivo (utils/reportesPdf.js): el encabezado con los datos de
- * la tienda, un resumen en palabras de lo que hay que saber, y tablas sobrias
- * con los números a la derecha y sus totales.
- *
- * Antes eran una franja azul con "Tienda la 635" y tablas con rejilla: se
- * veían como de un sistema escolar, no como el papel de una empresa.
- *
- * Los resúmenes en palabras van aparte (resumenDeLaTienda,
- * resumenDelInventario) para poder probarlos.
- * ============================================================
- */
+// LOS REPORTES DEL TABLERO — reportesTienda.js
+// "Resumen de la tienda" e "Inventario completo" en PDF, con el formato del reporte predictivo:
+// encabezado de la tienda, resumen en palabras y tablas.
 
 import {
   COLOR, COLOR_GRAFICA, MESES_CORTOS, dinero, fechaLarga, graficaDeBarras, hoyLocal,

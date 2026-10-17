@@ -1,30 +1,6 @@
-/*
- * ============================================================
- * CONFIRMACIÓN — el pedido ya está hecho
- * ============================================================
- * La tercera vista de `ShoppingCart.jsx`: el visto verde, el número del
- * pedido, en qué va y qué llevaba.
- *
- * ── Se pinta el pedido que devolvió el servidor, no el carrito ──
- *
- * Es la diferencia con la web, y no es un capricho. Allá esta pantalla dibuja
- * los `items` del carrito y una fecha hecha con `new Date()` en el navegador:
- * lo que se enseña es lo que se PIDIÓ, no lo que quedó guardado. Los dos casi
- * siempre coinciden, pero cuando no —el servidor recalcula el total, aplica los
- * puntos que de verdad tenía, redondea distinto— el cliente se lleva un número
- * que nadie más va a volver a ver.
- *
- * Aquí se pinta la respuesta de `POST /order`, que trae el pedido tal cual
- * quedó, con su `_id` de verdad. Ese número es el que va a decir en el
- * mostrador, y el mismo que va a encontrar en "Mis pedidos".
- *
- * ── El carrito se vacía al SALIR de aquí, no al llegar ──
- *
- * Si se vaciara al crear el pedido, esta pantalla se dibujaría sobre una lista
- * que se acaba de quedar vacía. Se vacía cuando el cliente cierra, que es
- * cuando ya no lo necesita nadie.
- * ============================================================
- */
+// CONFIRMACIÓN — el pedido ya está hecho
+// La tercera vista de `ShoppingCart.jsx`: el visto verde, el número del pedido, en qué va y qué
+// llevaba. ── Se pinta el pedido que devolvió el servidor, no el carrito ──
 
 import { useMemo, useState } from 'react';
 import { StyleSheet, ScrollView, Text, View } from 'react-native';
@@ -47,14 +23,7 @@ import ModalMapaSeguimiento from '../components/Tienda/ModalMapaSeguimiento';
 import { useIdioma } from '../context/IdiomaContext';
 import { foto, ANCHO } from '../utils/fotos';
 
-/*
- * Una fila por producto, con su propia foto. El pedido que devuelve
- * `POST /order` no viene con `items.productId` poblado (ver el comentario
- * grande más arriba: acá se pinta la respuesta cruda del servidor) — así que
- * la imagen no sale de ahí, sino del catálogo que la tienda YA tiene cargado
- * en memoria para el listado normal (mismo id de producto, cero peticiones
- * nuevas y sin tocar el backend).
- */
+// Una fila por producto, con su propia foto.
 const FilaProducto = ({ item, imagen }) => {
   const { t } = useIdioma();
   const COLORES = useColores();
@@ -109,25 +78,18 @@ const Confirmacion = ({ respuesta, alCerrar }) => {
   // la franja de gestos de Android.
   const { bottom } = useSafeAreaInsets();
   const { vaciarTrasPedido, productos } = useTienda();
-  // El mapa en grande: vive AQUÍ, en la pantalla entera, y no dentro de
-  // MapaSeguimiento.js — ver el porqué en el comentario grande de ese
-  // archivo (un `position:absolute` ahí adentro quedaría encajonado en
-  // `marcoMapa`, no cubriría la pantalla).
+  // El mapa en grande: vive AQUÍ, en la pantalla entera, y no dentro de MapaSeguimiento.js — ver el
+  // porqué en el comentario grande de ese archivo (un `position:absolute` ahí adentro quedaría
+  // encajonado en `marcoMapa`, no cubriría la pantalla).
   const [mapaGrande, setMapaGrande] = useState(false);
   const imagenPorId = useMemo(
     () => new Map(productos.map((p) => [String(p.id), p.imagen])),
     [productos]
   );
 
-  /*
-   * Cerrar es lo único que se puede hacer desde aquí, así que el carrito se
-   * vacía justo aquí y no en el checkout: mientras esta pantalla está abierta,
-   * el pedido todavía se está leyendo.
-   *
-   * El botón de atrás de Android hace lo mismo. Sin esto cerraba la app y
-   * dejaba el carrito con los productos que ya se habían comprado: al volver a
-   * abrir, el contador seguía marcando tres.
-   */
+  // Cerrar es lo único que se puede hacer desde aquí, así que el carrito se vacía justo aquí y no en
+  // el checkout: mientras esta pantalla está abierta, el pedido todavía se está leyendo. El botón de
+  // atrás de Android hace lo mismo.
   const cerrar = () => {
     vaciarTrasPedido();
     alCerrar();
@@ -144,33 +106,18 @@ const Confirmacion = ({ respuesta, alCerrar }) => {
   const envio = Number(pedido.shippingCost) || 0;
   const servicio = Number(pedido.serviceFee) || 0;
 
-  /*
-   * El pedido en sí (productos, subtotal, total, puntos) se queda como llegó
-   * de POST /order a propósito — ver el comentario grande arriba de este
-   * archivo. Pero el ESTADO no: recién hecho el pedido, esta pantalla se
-   * queda abierta un rato (el cliente lee el código, la dirección...), y si
-   * en ese rato la tienda ya lo puso a preparar, mostrar "Recibido" tachado
-   * de pasado es peor que no decir nada — la burbuja de abajo, viendo el
-   * mismo pedido, ya lo diría distinto. Mismo hook y mismo criterio que
-   * BurbujaPedido.js: `seguimiento.estado` manda si contesta, `pedido.status`
-   * de respaldo mientras no ha contestado la primera vez.
-   */
+  // El pedido en sí (productos, subtotal, total, puntos) se queda como llegó de POST /order a
+  // propósito — ver el comentario grande arriba de este archivo.
   const seguimiento = useSeguimientoEnVivo(pedido._id, !!pedido._id);
   const estado = seguimiento.estado || pedido.status;
 
   // Los pasos que le tocan a ESTE pedido: "En camino" solo si es a domicilio.
-  // Antes esta pantalla traía sus tres pasos fijos ("Recibida, En camino,
-  // Entregada") sin importar cómo lo pidieron, así que un retiro en el local
-  // se veía con un paso de reparto que nunca le iba a tocar.
   const PASOS = pasosDe(pedido.deliveryType);
   const pasoActual = indiceDePaso(PASOS, estado);
 
-  /*
-   * El mapa: la dirección de entrega desde el principio (para que el
-   * cliente vea A DÓNDE se lo van a llevar apenas paga), y el punto del
-   * repartidor solo cuando de verdad va en camino con señal fresca. Mismo
-   * criterio que `SeguimientoConfirmacion.jsx` en la web.
-   */
+  // El mapa: la dirección de entrega desde el principio (para que el cliente vea A DÓNDE se lo van a
+  // llevar apenas paga), y el punto del repartidor solo cuando de verdad va en camino con señal
+  // fresca. Mismo criterio que `SeguimientoConfirmacion.jsx` en la web.
   const esDomicilio = pedido.deliveryType === 'delivery';
   // Con el punto fresco del repartidor, o con la ruta aproximada desde la tienda.
   const enCamino = esDomicilio && (seguimiento.enVivo || seguimiento.estimado);
@@ -195,22 +142,14 @@ const Confirmacion = ({ respuesta, alCerrar }) => {
         {/* ── En qué va ── */}
         <View style={estilos.linea}>
           {PASOS.map((paso, i) => {
-            // Inclusivo (<=), no exclusivo: el paso actual también cuenta
-            // como "hecho" aquí — esta fila no distingue "en curso" de
-            // "completado" con un tercer color, a propósito, para que se lea
-            // igual de simple que en la web (ver EstadoPedido.jsx).
+            // Inclusivo (<=), no exclusivo: el paso actual también cuenta como "hecho" aquí — esta fila no
+            // distingue "en curso" de "completado" con un tercer color, a propósito, para que se lea igual de
+            // simple que en la web (ver EstadoPedido.jsx).
             const hecho = i <= pasoActual;
             return (
               <View key={paso.id} style={estilos.paso}>
                 <View style={estilos.pasoMarca}>
-                  {/*
-                    La rayita va PRIMERO en el árbol para que el punto se
-                    pinte encima de ella y no al revés. React Native apila por
-                    orden de aparición sin importar `position: absolute`, así
-                    que con el punto primero la raya terminaba tapando la
-                    mitad de los puntos apagados —del mismo tono que ella— y
-                    se veían mordidos en vez de redondos.
-                  */}
+                  {/* La rayita va PRIMERO en el árbol para que el punto se pinte encima de ella y no al revés. */}
                   {i < PASOS.length - 1 && <View style={estilos.raya} />}
                   <View
                     style={[
@@ -321,11 +260,8 @@ const Confirmacion = ({ respuesta, alCerrar }) => {
           {!!pedido.deliveryReference && (
             <Text style={estilos.referencia}>{pedido.deliveryReference}</Text>
           )}
-          {/*
-            Se dice DÓNDE se paga, no solo con qué. Es la pregunta que sigue
-            —"¿entonces cuándo pago?"— y con la pasarela todavía sin conectar la
-            respuesta importa: nadie va a cobrarle desde la app.
-          */}
+          {/* Se dice DÓNDE se paga, no solo con qué. Es la pregunta que sigue —"¿entonces cuándo pago?"— y
+             con la pasarela todavía sin conectar la respuesta importa: nadie va a cobrarle desde la app. */}
           {pedido.paymentMethod !== 'saldo' && (
             <Text style={estilos.aclaracion}>
               {pedido.deliveryType === 'delivery'

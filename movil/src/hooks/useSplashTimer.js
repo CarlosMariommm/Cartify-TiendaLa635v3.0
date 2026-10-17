@@ -1,11 +1,5 @@
-/*
- * useSplashTimer — cuánto se queda la pantalla de carga personalizada.
- *
- * El splash nativo (app.json) ya se fue en cuanto el JS arrancó. Esta pantalla
- * es la que se ve MIENTRAS se revisa si hay sesión guardada, y se queda un
- * mínimo de tiempo aunque esa revisión sea instantánea — sin el mínimo, en un
- * teléfono rápido parpadea y desaparece antes de poder leerse.
- */
+// useSplashTimer — cuánto se queda la pantalla de carga personalizada. El splash nativo (app.json)
+// ya se fue en cuanto el JS arrancó.
 
 import { useEffect, useState } from 'react';
 

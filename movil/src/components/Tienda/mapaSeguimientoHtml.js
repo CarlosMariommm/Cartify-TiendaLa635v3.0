@@ -1,36 +1,14 @@
-/*
- * ============================================================
- * MAPA DE SEGUIMIENTO — la página que corre DENTRO del WebView
- * ============================================================
- * Mismo MapLibre + estilo de CARTO que `mapaDireccionHtml.js` (el mapa de
- * marcar dirección) y que la web — en un archivo aparte porque este pinta DOS
- * pines (repartidor y casa) y encuadra los dos a la vez, en vez de uno solo
- * arrastrable.
- *
- * `interactivo` decide si es la miniatura de reojo que usa
- * `MapaSeguimiento.js` (zoom y arrastre apagados) o el mapa grande que
- * `ModalMapaSeguimiento.js` abre al tocarla (zoom y arrastre de verdad,
- * igual que el de marcar dirección) — las DOS usan este mismo generador,
- * para que los pines no puedan desalinearse entre una versión y la otra.
- *
- * `ruta` ([{lat,lng}…]) es la línea por las calles que le falta al
- * repartidor, la misma que dibuja la web (ver backend/src/utils/rutaReparto.js).
- * Va en el azul de su punto, con un borde del color de las calles debajo, y el
- * encuadre la abarca entera.
- *
- * OJO: MapLibre ordena las coordenadas como [lng, lat].
- * ============================================================
- */
+// MAPA DE SEGUIMIENTO — la página que corre DENTRO del WebView
+// MapLibre con los mapas de CARTO: pinta la casa, el repartidor (o la tienda) y la ruta, y los
+// encuadra juntos. `interactivo` decide si es la miniatura o el mapa en grande.
 
 import { MAPLIBRE_CSS, MAPLIBRE_JS, JS_PLEGAR_CREDITO, cssComun, estiloMapa } from '../UI/mapaMapLibre';
 
 const esCoord = (p) => !!p && Number.isFinite(Number(p.lat)) && Number.isFinite(Number(p.lng));
 
-/*
- * `origen` es la tienda: solo llega cuando el GPS del repartidor no llega y la
- * ruta es la aproximada desde ahí. Va como una gota gris, más chica que la de
- * la casa, para que se lea de dónde sale la línea.
- */
+// `origen` es la tienda: solo llega cuando el GPS del repartidor no llega y la ruta es la
+// aproximada desde ahí. Va como una gota gris, más chica que la de la casa, para que se lea de
+// dónde sale la línea.
 export const crearHtmlSeguimiento = ({ punto, destino, ruta, origen, colorMarca, interactivo = false, oscuro = false }) => `<!DOCTYPE html>
 <html>
 <head>
@@ -118,11 +96,9 @@ export const crearHtmlSeguimiento = ({ punto, destino, ruta, origen, colorMarca,
       });
     }
 
-    // Mismo encuadre en las dos versiones: los dos puntos a la vez si hay
-    // los dos (y la ruta entera, que puede dar la vuelta por fuera de ese
-    // rectángulo), y se va cerrando solo conforme el repartidor se acerca a la
-    // casa. En la versión grande el cliente puede alejarlo a mano después.
-    // Sin GPS del repartidor, lo mismo con la tienda en su lugar.
+    // Mismo encuadre en las dos versiones: los dos puntos a la vez si hay los dos (y la ruta entera,
+    // que puede dar la vuelta por fuera de ese rectángulo), y se va cerrando solo conforme el
+    // repartidor se acerca a la casa. En la versión grande el cliente puede alejarlo a mano después.
     var todos = [punto, origen, destino]
       .filter(function (p) { return p; })
       .map(function (p) { return [p.lng, p.lat]; })

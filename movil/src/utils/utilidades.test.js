@@ -3,10 +3,8 @@ import { idDeProductoEnEnlace, pedirProducto, soltarProductoPedido } from './enl
 import { foto, ANCHO } from './fotos';
 import { URL_WEB_LEGAL } from './legales';
 
-/*
- * Lo que la app hace sin pantallas de por medio: reconocer un enlace a un
- * producto y pedir las fotos al tamaño justo. Ver también i18n/traducciones.test.js.
- */
+// Lo que la app hace sin pantallas de por medio: reconocer un enlace a un producto y pedir las
+// fotos al tamaño justo. Ver también i18n/traducciones.test.js.
 
 const ID = '6a66fd61802fdcc013afb642';
 

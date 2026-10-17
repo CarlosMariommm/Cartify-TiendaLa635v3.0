@@ -1,14 +1,8 @@
 import api from './api';
 
-/*
- * ============================================================
- * SERVICIO DE PROVEEDORES — supplierService.js
- * ============================================================
- * Centraliza las peticiones HTTP del módulo de proveedores.
- * Los proveedores no llevan imagen, por lo que se envían como
- * JSON normal (sin FormData).
- * ============================================================
- */
+// SERVICIO DE PROVEEDORES — supplierService.js
+// Centraliza las peticiones HTTP del módulo de proveedores. Los proveedores no llevan imagen, por
+// lo que se envían como JSON normal (sin FormData).
 export const supplierService = {
   // 1- Obtener todos los proveedores (SELECT)
   getSuppliers: async () => {

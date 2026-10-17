@@ -1,39 +1,6 @@
-/*
- * ============================================================
- * LOS DISFRACES DE TIQUI — disfracesTiqui.js
- * ============================================================
- * Tiqui se viste según la temporada que tenga puesta la tienda: gorro
- * navideño en diciembre, sombrero de bruja en Halloween, corbatín azul y
- * blanco para las fiestas patrias...
- *
- * Tiqui NO cambia de color con la temporada, y eso sigue igual: es navy con
- * rasgos blancos (o al revés en modo oscuro) todo el año, porque es la cara
- * de la tienda. Lo que cambia es lo que LLEVA PUESTO, que es como se nota una
- * fecha en una persona: nadie se pinta de verde en Navidad, se pone el gorro.
- *
- * UN DISFRAZ es una pieza por lugar, cada una con sus dos colores, y los
- * cachetes colorados prendidos o no:
- *
- *   { cabeza: { tipo: 'corona', principal: '#FFC23D', acento: '#E11D48' },
- *     cara: null,
- *     cuello: { tipo: 'corbatin', principal: '#0F47AF', acento: '#FFFFFF' },
- *     rubor: false }
- *
- * De dónde sale el de cada temporada:
- *   1. El que armó el dueño en el panel, si armó uno (temporada.disfraces,
- *      por la clave de la temporada). Armado sin ninguna pieza quiere decir
- *      "esta temporada Tiqui va sin disfraz".
- *   2. Si no armó ninguno, el de fábrica: las temporadas de fábrica traen el
- *      suyo pensado a mano y las propias lo sacan de la figura que cae de
- *      fondo, pintado con sus dos colores.
- *
- * Aquí solo se decide QUÉ lleva. Las piezas están en piezasDisfraz.js y cada
- * plataforma las dibuja con su componente.
- *
- * ESTE ARCHIVO ESTÁ COPIADO TAL CUAL en movil/src/utils/disfracesTiqui.js
- * (una prueba de la app avisa si dejan de ser iguales).
- * ============================================================
- */
+// LOS DISFRACES DE TIQUI — disfracesTiqui.js
+// Tiqui se viste según la temporada que tenga puesta la tienda: gorro navideño en diciembre,
+// sombrero de bruja en Halloween, corbatín azul y blanco para las fiestas patrias...
 
 import { PIEZAS_DISFRAZ, RANURAS_DISFRAZ } from './piezasDisfraz';
 
@@ -48,11 +15,9 @@ export const piezaCon = (tipo, principal, acento) => {
   return { tipo, principal: hexO(principal, p), acento: hexO(acento, a) };
 };
 
-/*
- * Deja un disfraz limpio: solo piezas que existen, cada una en su lugar y con
- * colores válidos. También entiende la forma de antes —una sola pieza,
- * { tipo, principal, acento, rubor }— por si llega alguno guardado así.
- */
+// Deja un disfraz limpio: solo piezas que existen, cada una en su lugar y con colores válidos.
+// También entiende la forma de antes —una sola pieza, { tipo, principal, acento, rubor }— por si
+// llega alguno guardado así.
 export const normalizarDisfraz = (entrada) => {
   if (!entrada || typeof entrada !== 'object') return null;
   if (typeof entrada.tipo === 'string') {
@@ -83,10 +48,8 @@ const DE_FABRICA = {
   'san-valentin': { cabeza: piezaCon('mono', '#E11D74', '#9D174D'), rubor: true },
 };
 
-/*
- * Las temporadas que crea el dueño, si no les armó disfraz: se elige por la
- * figura que cae de fondo, que es lo que más dice de qué va la fecha.
- */
+// Las temporadas que crea el dueño, si no les armó disfraz: se elige por la figura que cae de
+// fondo, que es lo que más dice de qué va la fecha.
 const POR_FIGURA = {
   confeti: 'gorro-fiesta',
   estrella: 'gorro-estrella',
@@ -110,10 +73,8 @@ export const disfrazDeFabrica = (tema) => {
   const tipo = POR_FIGURA[tema.decoracion?.figura] || 'gorro-fiesta';
   const principal = principalDe(tema);
   const acento = acentoDe(tema);
-  /*
-   * Si el dueño eligió el mismo color para las dos cosas, las rayas del
-   * gorro o la bufanda desaparecerían sobre su propio fondo: van en blanco.
-   */
+  // Si el dueño eligió el mismo color para las dos cosas, las rayas del gorro o la bufanda
+  // desaparecerían sobre su propio fondo: van en blanco.
   const distinto = acento && String(acento).toLowerCase() !== String(principal).toLowerCase();
   return normalizarDisfraz({
     [PIEZAS_DISFRAZ[tipo].ranura]: { tipo, principal, acento: distinto ? acento : '#FFFFFF' },
@@ -121,10 +82,8 @@ export const disfrazDeFabrica = (tema) => {
   });
 };
 
-/*
- * El disfraz de un tema (de fábrica o propio), con lo que haya armado el
- * dueño. Null si no le toca ninguno: sin temporada, Tiqui va como siempre.
- */
+// El disfraz de un tema (de fábrica o propio), con lo que haya armado el dueño. Null si no le toca
+// ninguno: sin temporada, Tiqui va como siempre.
 export const disfrazDeTema = (tema, disfraces) => {
   if (!tema) return null;
   const armado = disfraces?.[tema.clave];
@@ -132,15 +91,8 @@ export const disfrazDeTema = (tema, disfraces) => {
   return estaVacio(disfraz) ? null : disfraz;
 };
 
-/*
- * El mismo disfraz, pero sin nada en la cabeza: lo de la cabeza pasa al
- * cuello, si el cuello está libre.
- *
- * Lo usa la Tiqui que cuelga en el login. Ahí cuelga junto al título, y un
- * sombrero la hace crecer justo hacia arriba y hacia los lados, que es donde
- * está el texto: el gorro de Navidad quedaba detrás de "esquina". La
- * condición para que cuelgue ahí es que no se encime a nada.
- */
+// El mismo disfraz, pero sin nada en la cabeza: lo de la cabeza pasa al cuello, si el cuello está
+// libre. Lo usa la Tiqui que cuelga en el login.
 const DEL_CUELLO = { 'gorro-navidad': 'bufanda', flor: 'collar-flores' };
 
 export const sinSombrero = (disfraz) => {
@@ -150,10 +102,8 @@ export const sinSombrero = (disfraz) => {
   return { ...disfraz, cabeza: null, cuello };
 };
 
-/*
- * Cómo se lo cuenta el panel al dueño: "corona, lentes de sol y corbatín",
- * "moño y cachetes colorados".
- */
+// Cómo se lo cuenta el panel al dueño: "corona, lentes de sol y corbatín", "moño y cachetes
+// colorados".
 export const describirDisfraz = (disfraz) => {
   if (estaVacio(disfraz)) return '';
   const partes = RANURAS_DISFRAZ

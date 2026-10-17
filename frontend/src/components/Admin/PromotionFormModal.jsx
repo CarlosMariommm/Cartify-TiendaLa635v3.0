@@ -12,13 +12,9 @@ import { ICONOS } from '../../utils/iconosAviso';
 import { TEMAS, TEMAS_BASE, TEMAS_FESTIVOS } from '../../utils/temasPromo';
 import { ICONOS_PROMO } from '../../utils/iconosPromo';
 
-/*
- * PromotionFormModal — crear/editar una promoción (multi-tipo).
- *   - descuento    : cada producto con su %.
- *   - precio_fijo  : cada producto con un precio de oferta.
- *   - nxm          : compra N, paga M sobre los productos.
- * Los productos se agregan con buscador (sin bajar por toda la lista).
- */
+// PromotionFormModal — crear/editar una promoción (multi-tipo). - descuento : cada producto con su
+// %. - precio_fijo : cada producto con un precio de oferta. - nxm : compra N, paga M sobre los
+// productos. Los productos se agregan con buscador (sin bajar por toda la lista).
 const TIPOS = [
   { v: 'descuento', l: 'Descuento %' },
   { v: 'precio_fijo', l: 'Precio fijo' },
@@ -40,31 +36,21 @@ const aInputDate = (valor) => {
 
 const hoyInputDate = () => aInputDate(new Date());
 
-/*
- * Para la vista previa: la fecha escrita vale hasta el final de ese día, igual
- * que la guarda el backend. Sin esto, "vence hoy" se vería como vencida — un
- * "2026-08-03" pelón es medianoche UTC, que aquí ya pasó.
- */
+// Para la vista previa: la fecha escrita vale hasta el final de ese día, igual que la guarda el
+// backend. Sin esto, "vence hoy" se vería como vencida — un "2026-08-03" pelón es medianoche UTC,
+// que aquí ya pasó.
 const finDelDia = (valor) => (valor ? `${valor}T23:59:59.999` : null);
 
-/*
- * Saca los dos colores de un fondo de tema ("linear-gradient(135deg, #00283D
- * 0%, #003049 100%)") para poder seguir editándolos con los selectores de
- * color, que solo entienden hex sueltos.
- */
+// Saca los dos colores de un fondo de tema ("linear-gradient(135deg, #00283D 0%, #003049 100%)")
+// para poder seguir editándolos con los selectores de color, que solo entienden hex sueltos.
 const extraerColoresDeFondo = (fondo = '') => {
   const hex = fondo.match(/#[0-9a-fA-F]{3,8}/g) || [];
   return [hex[0] || '#003049', hex[1] || ''];
 };
 
-/*
- * Estilo de las píldoras que se eligen (temas e iconos).
- *
- * Va con las variables del tema y no con hex fijos porque el panel tiene
- * paletas de accesibilidad: en alto contraste o modo oscuro, un café clavado
- * a mano se queda solo en medio de la pantalla. Y como es `style` inline, los
- * mapeos de .admin-theme no lo alcanzan: hay que pedir la variable aquí.
- */
+// Estilo de las píldoras que se eligen (temas e iconos). Va con las variables del tema y no con
+// hex fijos porque el panel tiene paletas de accesibilidad: en alto contraste o modo oscuro, un
+// café clavado a mano se queda solo en medio de la pantalla.
 const seleccionable = (activo) => ({
   borderColor: activo ? 'var(--theme-primary)' : 'var(--theme-card-border)',
   background: activo ? 'var(--theme-primary-light)' : 'var(--theme-card-bg)',
@@ -115,19 +101,14 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
   const [colorFlecha, setColorFlecha] = useState('');
   const { generando, generarPromo } = usePromoAI();
 
-  /*
-   * De donde salio el ultimo texto: 'ia', 'plantilla' o null si todavia no se
-   * ha generado. Se pinta debajo del boton en vez de en un toast que se va
-   * solo, para que siga a la vista mientras se revisa lo que escribio.
-   */
+  // De donde salio el ultimo texto: 'ia', 'plantilla' o null si todavia no se ha generado. Se pinta
+  // debajo del boton en vez de en un toast que se va solo, para que siga a la vista mientras se
+  // revisa lo que escribio.
   const [origenTexto, setOrigenTexto] = useState(null);
 
-  /*
-   * Pasar a "Personalizado" arranca desde el tema que estaba puesto, no desde
-   * el café de siempre. Personalizar es corregir un detalle de algo que ya
-   * gustó; obligar a rearmar la paleta desde cero era la razón por la que el
-   * editor se sentía limitado.
-   */
+  // Pasar a "Personalizado" arranca desde el tema que estaba puesto, no desde el café de siempre.
+  // Personalizar es corregir un detalle de algo que ya gustó; obligar a rearmar la paleta desde cero
+  // era la razón por la que el editor se sentía limitado.
   const activarPersonalizado = () => {
     if (tema !== 'personalizado') {
       const base = TEMAS.find((t) => t.id === tema) || TEMAS[0];
@@ -199,14 +180,9 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
     setValorCategoria('');
   }, [isOpen, promoData]);
 
-  /*
-   * El subidor ya nos entrega el archivo y la URL que está mostrando: reusamos
-   * esa misma en lugar de crear otra. Dos createObjectURL del mismo archivo son
-   * dos blobs vivos y solo uno se llegaría a revocar.
-   *
-   * Al quitarla se apaga también "banner completo": sin foto no hay banner
-   * completo que valga, y dejarlo prendido escondía el título sin motivo.
-   */
+  // El subidor ya nos entrega el archivo y la URL que está mostrando: reusamos esa misma en lugar de
+  // crear otra. Dos createObjectURL del mismo archivo son dos blobs vivos y solo uno se llegaría a
+  // revocar.
   const onImagen = (file, url) => {
     setImagen(file);
     setPreview(url);
@@ -226,13 +202,8 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
       (p.name || '').toLowerCase().includes(busqueda.toLowerCase().trim())
   );
 
-  /*
-   * ── Categorías ──
-   * Salen de los productos cargados, no de un endpoint aparte: una categoría
-   * sin productos no se puede promocionar, así que no tiene por qué aparecer.
-   */
-  // Los tipos que piden un número por producto. El NxM aplica igual a todos y
-  // el anuncio no toca precios, así que ninguno de los dos pide importe.
+  // ── Categorías ── Salen de los productos cargados: sin productos no hay qué promocionar.
+  // Solo el descuento y el precio fijo piden un número por producto.
   const pideImporte = type === 'descuento' || type === 'precio_fijo';
 
   const idCategoria = (p) => p.typeId?._id || p.typeId || null;
@@ -249,16 +220,8 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
       .sort((a, b) => a.nombre.localeCompare(b.nombre));
   }, [productos]);
 
-  /*
-   * Agrega de un golpe todos los productos de una categoría, con el mismo
-   * precio o descuento para todos.
-   *
-   * Se guardan producto por producto (una foto del momento) y no como "la
-   * categoría entera": así el gerente ve y puede corregir el precio de cada
-   * uno ANTES de guardar, la alerta de venta bajo costo sigue funcionando, y
-   * un producto que se agregue mañana a esa categoría no entra solo a una
-   * promo que nadie revisó.
-   */
+  // Agrega de un golpe todos los productos de una categoría, con el mismo precio o descuento para
+  // todos.
   const agregarCategoria = () => {
     if (!categoriaElegida) return;
 
@@ -310,12 +273,9 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
     return [...mapa.values()];
   }, [items]);
 
-  /*
-   * Los pasillos donde va a salir la promo, sacados de los productos elegidos.
-   * La tienda muestra cada promo en el pasillo de sus productos (la del pan en
-   * Panadería), así que aquí se le adelanta al encargado dónde aparecerá. El
-   * nombre del módulo viene poblado en cada producto (ver product.js).
-   */
+  // Los pasillos donde va a salir la promo, sacados de los productos elegidos. La tienda muestra
+  // cada promo en el pasillo de sus productos (la del pan en Panadería), así que aquí se le adelanta
+  // al encargado dónde aparecerá.
   const pasillosPromo = useMemo(() => {
     const nombres = new Set();
     items.forEach((it) => {
@@ -326,33 +286,19 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
     return [...nombres].sort();
   }, [items, productos]);
 
-  /*
-   * El precio normal de cada producto, para las reglas del negocio. Vive aquí
-   * arriba porque lo miran DOS cosas: el guard de la IA y el de guardar.
-   */
+  // El precio normal de cada producto, para las reglas del negocio. Vive aquí arriba porque lo miran
+  // DOS cosas: el guard de la IA y el de guardar.
   const precios = useMemo(
     () => Object.fromEntries(productos.map((p) => [p._id, Number(p.salePrice) || 0])),
     [productos]
   );
 
-  /*
-   * La IA solo escribe el TEXTO. El banner se diseña acá con los colores, así
-   * que se puede seguir ajustando después sin regenerar nada.
-   */
+  // La IA solo escribe el TEXTO. El banner se diseña acá con los colores, así que se puede seguir
+  // ajustando después sin regenerar nada.
   const onGenerarIA = async () => {
-    /*
-     * SE VALIDA ANTES DE ESCRIBIR, con las mismas reglas que al guardar.
-     *
-     * Antes solo se validaba al guardar, y en el medio la IA ya había escrito.
-     * Con un descuento en 0 eso producía anuncios absurdos —"Llévese Fresas
-     * con 0% de descuento: de $2.50 a $2.50"— que quedaban puestos en el
-     * título y la descripción; recién al tocar Guardar aparecía el error. O
-     * sea: primero un texto sin sentido y después un regaño por algo que se
-     * podía haber avisado antes de empezar.
-     *
-     * Validar aquí ahorra además la llamada: la cuota de la IA no se gasta en
-     * redactar una promoción que no se va a poder guardar.
-     */
+    // SE VALIDA ANTES DE ESCRIBIR, con las mismas reglas que al guardar. Con un descuento en 0 eso
+    // producía anuncios absurdos —"Llévese Fresas con 0% de descuento: de $2.50 a $2.50"— que quedaban
+    // puestos en el título y la descripción; recién al tocar Guardar aparecía el error.
     const problema = validarPromocion({ tipo: type, items, buyQty, payQty, precios });
     if (problema) { toast.error(problema); return; }
 
@@ -376,18 +322,15 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
     e.preventDefault();
     if (!form.promoDescription.trim()) { toast.error('La descripción es requerida'); return; }
 
-    // Reglas del negocio según el tipo (descuentos 0-100, precio de oferta menor
-    // al normal, y que en un NxM se pague menos de lo que se lleva). Son las
-    // MISMAS que revisa el botón de la IA, arriba: si una promo no se puede
-    // guardar, tampoco vale la pena redactarla.
+    // Reglas del negocio según el tipo (descuentos 0-100, precio de oferta menor al normal, y que en
+    // un NxM se pague menos de lo que se lleva). Son las MISMAS que revisa el botón de la IA, arriba:
+    // si una promo no se puede guardar, tampoco vale la pena redactarla.
     const error = validarPromocion({ tipo: type, items, buyQty, payQty, precios });
     if (error) { toast.error(error); return; }
 
-    /*
-     * Aviso (no bloqueo) si la promo vende por debajo del costo. Un producto
-     * gancho a pérdida puede ser intencional, pero tiene que ser una decisión:
-     * un 50% sobre algo con 40% de margen pierde plata en cada venta.
-     */
+    // Aviso (no bloqueo) si la promo vende por debajo del costo. Un producto gancho a pérdida puede
+    // ser intencional, pero tiene que ser una decisión: un 50% sobre algo con 40% de margen pierde
+    // plata en cada venta.
     const costos = Object.fromEntries(productos.map((p) => [p._id, Number(p.priceCost) || 0]));
     const aviso = avisoVentaBajoCosto({ tipo: type, items, buyQty, payQty, costos, precios });
     if (aviso) {
@@ -396,20 +339,15 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
       toast(aviso, { duration: 7000, icon: ICONOS.atencion });
     }
 
-    /*
-     * Ya no se exige imagen: la tarjeta se dibuja con el texto y los colores.
-     * Lo que sí hace falta para anunciarla es un título — sin él el banner
-     * saldría con el texto de relleno.
-     */
+    // Ya no se exige imagen: la tarjeta se dibuja con el texto y los colores. Lo que sí hace falta
+    // para anunciarla es un título — sin él el banner saldría con el texto de relleno.
     if (form.showBanner && !form.title.trim()) {
       toast.error('Ponle un título a la promoción, o desmarca "Anunciar en la tienda"');
       return;
     }
 
-    /*
-     * Una fecha ya pasada es siempre un dedazo: la promo nacería vencida y el
-     * gerente la buscaría en la tienda sin encontrarla nunca.
-     */
+    // Una fecha ya pasada es siempre un dedazo: la promo nacería vencida y el gerente la buscaría en
+    // la tienda sin encontrarla nunca.
     if (endsAt && endsAt < hoyInputDate()) {
       toast.error('Esa fecha ya pasó. Elige una de hoy en adelante, o déjala vacía.');
       return;
@@ -438,11 +376,9 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
     // Diseño del banner (solo se usa si no hay imagen propia).
     fd.append('tema', tema);
     fd.append('icono', icono);
-    /*
-     * Quitó la imagen que ya tenía y no puso otra en su lugar. Sin avisarlo, el
-     * backend no tiene forma de saberlo —un FormData sin 'image' se lee igual
-     * que "no la tocó"— y la foto seguía viva en Cloudinary y en el banner.
-     */
+    // Quitó la imagen que ya tenía y no puso otra en su lugar. Sin avisarlo, el backend no tiene forma
+    // de saberlo —un FormData sin 'image' se lee igual que "no la tocó"— y la foto seguía viva en
+    // Cloudinary y en el banner.
     const quitoImagen = isEditing && !!promoData?.image && !preview && !imagen;
     fd.append('removeImage', quitoImagen ? 'true' : 'false');
     if (tema === 'personalizado') {
@@ -495,11 +431,8 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
                   </div>
                 </div>
 
-                {/*
-                  Anuncio: no hay importes que pedir, solo el sello. Se explica
-                  aquí mismo porque "Solo anunciar" puede leerse como que la
-                  promo no hace nada.
-                */}
+                {/* Anuncio: no hay importes que pedir, solo el sello. Se explica aquí mismo porque "Solo anunciar"
+                   puede leerse como que la promo no hace nada. */}
                 {type === 'anuncio' && (
                   <div className="rounded-xl border border-gray-200 bg-[#F1F6F9] p-3">
                     <label className="block text-sm font-bold text-gray-700 mb-1">Sello del anuncio</label>
@@ -567,10 +500,8 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
                         </button>
                       </div>
 
-                      {/*
-                        Las de temporada van aparte: se usan tres semanas al año
-                        y mezcladas harían buscar "Café" entre nueve píldoras.
-                      */}
+                      {/* Las de temporada van aparte: se usan tres semanas al año y mezcladas harían buscar "Café" entre
+                         nueve píldoras. */}
                       <span className="block text-xs font-bold text-gray-600 mt-3 mb-2">Fechas especiales</span>
                       <div className="flex flex-wrap gap-2">
                         {TEMAS_FESTIVOS.map((t) => (
@@ -654,11 +585,8 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
                     </div>
                   )}
 
-                  {/*
-                    Va chiquito a propósito: la vista previa que manda es la
-                    PromoCard de arriba, que muestra el banner armado. Esto de
-                    acá solo confirma qué archivo se eligió y deja quitarlo.
-                  */}
+                  {/* Va chiquito a propósito: la vista previa que manda es la PromoCard de arriba, que muestra el
+                     banner armado. Esto de acá solo confirma qué archivo se eligió y deja quitarlo. */}
                   <div className="mt-3">
                     <SubidorArchivo
                       accept="image/*"
@@ -676,11 +604,8 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
                     />
                   </div>
 
-                  {/*
-                    La foto acompaña al texto por defecto. Ocupar la tarjeta
-                    entera se puede, pero eligiéndolo: así nadie pierde el
-                    título y el precio sin darse cuenta por subir una foto.
-                  */}
+                  {/* La foto acompaña al texto por defecto. Ocupar la tarjeta entera se puede, pero eligiéndolo: así
+                     nadie pierde el título y el precio sin darse cuenta por subir una foto. */}
                   {preview && (
                     <label className="flex items-start cursor-pointer mt-2">
                       <input
@@ -705,11 +630,8 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
                   </p>
                 </div>
 
-                {/*
-                  Vencimiento: la promo se apaga sola. Sin esto, apagarla era
-                  acordarse un domingo de entrar al sistema — y mientras tanto
-                  seguía descontando.
-                */}
+                {/* Vencimiento: la promo se apaga sola. Sin esto, apagarla era acordarse un domingo de entrar al
+                   sistema — y mientras tanto seguía descontando. */}
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">Vence el (opcional)</label>
                   <div className="flex items-center gap-3 flex-wrap">
@@ -767,10 +689,8 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
                     </div>
                   )}
 
-                  {/*
-                    Alta por categoría completa. Para una promo de "todos los
-                    lácteos" nadie debería buscar treinta productos a mano.
-                  */}
+                  {/* Alta por categoría completa. Para una promo de "todos los lácteos" nadie debería buscar treinta
+                     productos a mano. */}
                   {categorias.length > 0 && (
                     <div className="rounded-xl border border-gray-200 bg-[#F1F6F9] p-3 mb-2">
                       <div className="flex items-center gap-2 mb-2">
@@ -872,11 +792,8 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
                   </div>
                   <p className="text-xs text-gray-400 mt-1">Al hacer click en el banner, la tienda mostrará estos productos con su promo.</p>
 
-                  {/*
-                    Dónde va a salir: la tienda muestra cada promo en el pasillo
-                    de sus productos. Se le adelanta al encargado para que no se
-                    sorprenda de no verla en "toda la tienda" únicamente.
-                  */}
+                  {/* Dónde va a salir: la tienda muestra cada promo en el pasillo de sus productos. Se le adelanta al
+                     encargado para que no se sorprenda de no verla en "toda la tienda" únicamente. */}
                   {pasillosPromo.length > 0 && (
                     <div className="mt-2 flex items-start gap-2 rounded-xl border border-gray-200 bg-[#F1F6F9] p-3">
                       <MapPin size={15} className="mt-0.5 flex-none" style={{ color: 'var(--theme-primary)' }} />
@@ -891,23 +808,8 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
                   )}
                 </div>
 
-                {/*
-                  ── EL AYUDANTE DE IA, Y EL TEXTO QUE ESCRIBE ──
-
-                  Este bloque estaba ARRIBA DEL TODO, y los productos abajo.
-                  Como la IA necesita los productos para escribir, el botón
-                  salía apagado hasta que alguien bajara a elegirlos, y después
-                  había que volver a subir a tocarlo. Se leía "agregá los
-                  productos más abajo" en un botón que no se podía usar todavía.
-
-                  Ahora el orden sigue la dependencia real:
-                    productos → IA → el texto que escribió.
-
-                  Todo baja, nada obliga a volver: se eligen los productos, se
-                  toca el botón que está justo debajo, y el título y la
-                  descripción que redactó aparecen a continuación para
-                  revisarlos sin moverse de donde uno está.
-                */}
+                {/* ── EL AYUDANTE DE IA, Y EL TEXTO QUE ESCRIBE ──
+                   Este bloque estaba ARRIBA DEL TODO, y los productos abajo. */}
                 <div className="rounded-xl border border-[#E4D5C3] bg-[#F1F6F9] p-3">
                   <div className="flex items-center gap-3">
                     <button
@@ -916,14 +818,9 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
                       disabled={generando || items.length === 0}
                       className="hover-scale press flex items-center gap-2 bg-[#00283D] hover:bg-[#6B4423] text-white text-sm font-medium px-4 py-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {/*
-                        EL CÍRCULO QUE GIRA, y no un aviso arriba a la derecha.
-
-                        El toast salía lejos del botón que se acababa de tocar y
-                        se iba solo a los pocos segundos: no había forma de saber
-                        si la IA seguía trabajando. El círculo gira exactamente
-                        mientras dura el trabajo y está donde se está mirando.
-                      */}
+                      {/* EL CÍRCULO QUE GIRA, y no un aviso arriba a la derecha. El toast salía lejos del botón que se
+                         acababa de tocar y se iba solo a los pocos segundos: no había forma de saber si la IA seguía
+                         trabajando. El círculo gira exactamente mientras dura el trabajo y está donde se está mirando. */}
                       {generando ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
                       {generando ? 'Redactando…' : 'Generar con IA'}
                     </button>
@@ -937,12 +834,9 @@ const PromotionFormModal = ({ isOpen, onClose, promoData, onSave }) => {
                     </p>
                   </div>
 
-                  {/*
-                    De dónde salió el texto. Se queda a la vista mientras se
-                    revisa —antes era un toast que desaparecía solo— porque si
-                    lo escribió una plantilla y no la IA, eso cambia cuánto hay
-                    que revisarlo.
-                  */}
+                  {/* De dónde salió el texto. Se queda a la vista mientras se revisa —antes era un toast que
+                     desaparecía solo— porque si lo escribió una plantilla y no la IA, eso cambia cuánto hay que
+                     revisarlo. */}
                   {!generando && origenTexto && (
                     <div className="flex items-start gap-2 mt-3 pt-3 border-t border-[#E4D5C3]">
                       <Check size={14} className="mt-0.5 flex-none text-green-600" />

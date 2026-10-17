@@ -1,10 +1,5 @@
-# El servicio de analítica en un contenedor: lo que Render construye y corre.
-# Python 3.12 con solo lo que el servicio necesita (requirements.txt), sin
-# las herramientas de prueba.
-#
-# Para probarlo en una compu con Docker, desde esta carpeta:
-#   docker build -t analitica-la635 .
-#   docker run -p 8000:8000 -e ANALITICA_CLAVE=una-clave analitica-la635
+# El servicio de analítica en un contenedor: lo que Render construye y corre. Python 3.12 con solo
+# lo que el servicio necesita (requirements.txt), sin las herramientas de prueba.
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \

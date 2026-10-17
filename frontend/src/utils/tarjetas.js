@@ -1,17 +1,6 @@
-/*
- * ============================================================
- * TARJETAS — tarjetas.js
- * ============================================================
- * Lo que hace falta para que agregar una tarjeta se sienta como en cualquier
- * tienda seria: reconocer la marca por los primeros dígitos, separar el
- * número en grupos mientras se escribe, saber si el número es válido
- * (algoritmo de Luhn, el mismo dígito verificador que traen todas las
- * tarjetas) y revisar que no esté vencida.
- *
- * NADA DE ESTO SALE DEL NAVEGADOR. Con el número completo solo se calcula;
- * al servidor viajan la marca, los últimos 4, el titular y el vencimiento.
- * ============================================================
- */
+// TARJETAS — tarjetas.js
+// Reconoce la marca, separa el número en grupos, revisa que sea válido (Luhn) y que no esté
+// vencida. El número completo nunca sale del navegador.
 
 export const soloDigitos = (texto) => String(texto || '').replace(/\D/g, '');
 

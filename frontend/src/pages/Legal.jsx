@@ -7,27 +7,9 @@ import { Link } from 'react-router-dom';
 import TextoTerminos from '../components/Store/TextoTerminos';
 import { useDocumentoLegal } from '../hooks/useTerminos';
 
-/*
- * ============================================================
- * LAS PÁGINAS LEGALES — Legal.jsx
- * ============================================================
- * El documento que hasta ahora no existía: se pedían nombre, DUI, teléfono,
- * correo y dirección sin decir en ninguna parte para qué.
- *
- * La apuesta de esta pantalla es que un texto legal SE PUEDE leer si se escribe
- * para leerse. Por eso el corazón del aviso de privacidad no es un párrafo
- * larguísimo sino una tabla de cuatro columnas —qué dato, para qué, quién más
- * lo ve, cuánto se guarda— que se recorre de una pasada. Y por eso "cómo pedir
- * que borren sus datos" es un botón que abre WhatsApp con el mensaje escrito,
- * en vez de un correo de contacto que nadie contesta.
- *
- * Una sola pantalla para los cuatro documentos: /terminos, /privacidad,
- * /cookies y /devoluciones (ver App.jsx). El texto lo pinta TextoTerminos,
- * el mismo del modal del registro; aquí va lo que rodea al documento: el
- * encabezado de la tienda, el índice, la forma de volver y los enlaces a los
- * otros documentos.
- * ============================================================
- */
+// LAS PÁGINAS LEGALES — Legal.jsx
+// El documento que hasta ahora no existía: se pedían nombre, DUI, teléfono, correo y dirección sin
+// decir en ninguna parte para qué.
 
 const Contenedor = styled.div`
   min-height: 100vh;
@@ -80,13 +62,8 @@ const Volver = styled.button`
   &:active { transform: scale(0.97); }
 `;
 
-/*
- * Dos columnas: el índice a la izquierda y el documento a la derecha.
- *
- * El ancho del texto se topa a 74ch y no al ancho del monitor. Una línea de
- * doscientos caracteres obliga al ojo a buscar dónde empieza la siguiente, y es
- * justo lo que hace que la gente abandone un documento a la tercera línea.
- */
+// Dos columnas: el índice a la izquierda y el documento a la derecha. El ancho del texto se topa a
+// 74ch y no al ancho del monitor.
 const Cuerpo = styled.main`
   flex: 1;
   width: 100%;
@@ -104,13 +81,8 @@ const Cuerpo = styled.main`
   @media (max-width: 560px) { padding: 24px 16px 20px; }
 `;
 
-/*
- * El índice se queda a la vista mientras se baja. En un documento largo es la
- * diferencia entre "leo lo que me interesa" y "hago scroll a ciegas".
- * En pantalla angosta se convierte en una fila de pastillas arriba del texto:
- * un índice vertical de ocho renglones empujaría el documento fuera de la
- * primera pantalla del teléfono.
- */
+// El índice se queda a la vista mientras se baja. En un documento largo es la diferencia entre
+// "leo lo que me interesa" y "hago scroll a ciegas".
 const Indice = styled.nav`
   position: sticky;
   top: 86px;
@@ -221,14 +193,7 @@ const Legal = ({ clave = 'terminos' }) => {
     return () => { document.title = previo; };
   }, [documento.titulo, nombre]);
 
-  /*
-   * Cada documento empieza desde arriba. Se llega aquí desde el pie de la
-   * tienda —o desde el enlace de otro documento—, o sea, con la página ya
-   * bajada hasta el fondo; y al pasar de un documento a otro el componente
-   * es el mismo, así que el navegador conservaba la altura y la persona caía
-   * a media página de algo que ni había empezado a leer. Sin animación: es
-   * un documento nuevo, no un desplazamiento.
-   */
+  // Cada documento empieza desde arriba.
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [clave]);

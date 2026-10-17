@@ -18,19 +18,13 @@ import { ordenarLista, ORDEN_INICIAL } from '../utils/listasPanel';
 // Los que todavía se pueden cancelar: los entregados ya no, y los cancelados ya lo están.
 const SE_PUEDE_CANCELAR = ['pagado', 'preparando', 'en_camino', 'listo'];
 
-/*
- * Orders (Admin/Empleado) — pantalla de PREPARACIÓN de pedidos.
- * El empleado ve los pedidos pagados, la lista de productos a juntar, y avanza
- * el estado: pagado → preparando → entregado. Datos reales (modelo Order).
- * La lógica vive en useOrders; aquí solo pintamos.
- */
+// Orders (Admin/Empleado) — pantalla de PREPARACIÓN de pedidos. El empleado ve los pedidos
+// pagados, la lista de productos a juntar, y avanza el estado: pagado → preparando → entregado.
+// Datos reales (modelo Order). La lógica vive en useOrders; aquí solo pintamos.
 
-/*
- * Cada estado con su color, icono y etiqueta. El color se usa en el chip y en
- * el filo izquierdo de la tarjeta, para que el empleado ubique de un vistazo qué
- * hay que hacer con cada pedido. Son los colores de estado protegidos en
- * index.css (no los repinta ninguna paleta).
- */
+// Cada estado con su color, icono y etiqueta. El color se usa en el chip y en el filo izquierdo de
+// la tarjeta, para que el empleado ubique de un vistazo qué hay que hacer con cada pedido. Son los
+// colores de estado protegidos en index.css (no los repinta ninguna paleta).
 const estadoInfo = {
   pagado:     { label: 'Por preparar',   corto: 'Por preparar',   Icono: Package,      color: '#3b82f6' },
   preparando: { label: 'En preparación', corto: 'Preparando',     Icono: ChefHat,      color: '#f97316' },
@@ -100,20 +94,8 @@ const imprimirArchivo = (url) => {
   win.document.close();
 };
 
-/*
- * La descarga de un trabajo de impresión SIEMPRE sale en PDF, con un nombre
- * que dice de qué pedido es.
- *
- * Antes se bajaba tal cual se guardó: las hojas armadas en el editor viejo y
- * las fotos que suben los clientes llegaban como PNG o JPG sueltos, con el
- * nombre al azar de Cloudinary ("f1xpr6sgbcnk2ri0xsvb.png"). Un documento que
- * se va a imprimir tiene que llegar como documento.
- *
- * No hace falta convertir nada aquí: Cloudinary entrega una imagen como PDF
- * con solo pedirle la extensión .pdf, y fl_attachment:<nombre> hace que el
- * navegador lo descargue con ese nombre en vez de abrirlo. Los que ya eran
- * PDF quedan igual, solo con el nombre nuevo.
- */
+// La descarga de un trabajo de impresión SIEMPRE sale en PDF, con un nombre que dice de qué pedido
+// es. Un documento que se va a imprimir tiene que llegar como documento.
 const urlDescarga = (order) => {
   const url = order.printJob.fileUrl;
   if (!url.includes('/image/upload/')) {
@@ -138,12 +120,8 @@ const Orders = () => {
   const [pago, setPago] = useState('Todos');
   const [orden, setOrden] = useState(ORDEN_INICIAL);
 
-  /*
-   * ?estado=… y ?buscar=… en la dirección: así llega Tiqui del panel cuando le
-   * piden "muéstrame los pedidos por preparar" o "el pedido de María". Se lee
-   * también si ya se estaba en Pedidos: la dirección cambia sin recargar, y
-   * al cambiar se ajusta el filtro en el mismo render (sin un efecto de más).
-   */
+  // ?estado=… y ?buscar=… en la dirección: así llega Tiqui del panel cuando le piden "muéstrame los
+  // pedidos por preparar" o "el pedido de María".
   const [params] = useSearchParams();
   const [dirLeida, setDirLeida] = useState(null);
   if (params.toString() !== dirLeida) {
@@ -152,18 +130,13 @@ const Orders = () => {
     if (estado && filtros.some((f) => f.id === estado)) setFiltro(estado);
     if (params.has('buscar')) setBusqueda(params.get('buscar') || '');
   }
-  /*
-   * El pedido que se está por entregar, esperando que el cliente dicte su
-   * código. `null` = el modal está cerrado. Ver ModalCodigoEntrega.
-   */
+  // El pedido que se está por entregar, esperando que el cliente dicte su código. `null` = el modal
+  // está cerrado. Ver ModalCodigoEntrega.
   const [pedidoAEntregar, setPedidoAEntregar] = useState(null);
 
-  /*
-   * Confirmar la entrega. Si el código no coincide, el backend responde 400,
-   * el hook relanza el error y el modal se queda ABIERTO para volver a
-   * intentar — cerrarlo obligaría a buscar el pedido otra vez en la lista con
-   * el cliente esperando en la puerta.
-   */
+  // Confirmar la entrega. Si el código no coincide, el backend responde 400, el hook relanza el
+  // error y el modal se queda ABIERTO para volver a intentar — cerrarlo obligaría a buscar el pedido
+  // otra vez en la lista con el cliente esperando en la puerta.
   const confirmarEntrega = async (extras) => {
     try {
       await cambiarEstado(pedidoAEntregar._id, 'entregado', extras);
@@ -174,10 +147,8 @@ const Orders = () => {
     }
   };
 
-  /*
-   * El pedido que se está por cancelar, esperando el motivo. Como en la
-   * entrega, si el servidor dice que no, el modal se queda abierto.
-   */
+  // El pedido que se está por cancelar, esperando el motivo. Como en la entrega, si el servidor dice
+  // que no, el modal se queda abierto.
   const [pedidoACancelar, setPedidoACancelar] = useState(null);
   const confirmarCancelacion = async (motivo) => {
     try {
@@ -415,13 +386,9 @@ const Orders = () => {
                         <div key={idx} className="flex items-center justify-between gap-3 text-sm py-0.5">
                           <span className="font-medium min-w-0 truncate" style={{ color: 'var(--theme-text-primary)' }}>
                             <span className="font-bold" style={{ color: 'var(--theme-primary)' }}>{item.amount}×</span> {item.name || item.productId?.name || 'Producto'}
-                            {/*
-                              La marca: sin ella "Oreja" o "Semita" no dicen de
-                              cuál producto se trata cuando hay más de uno con
-                              el mismo nombre. Solo sale si el producto sigue
-                              en el catálogo — uno eliminado no tiene de dónde
-                              sacarla.
-                            */}
+                            {/* La marca: sin ella "Oreja" o "Semita" no dicen de cuál producto se trata cuando hay más de uno
+                               con el mismo nombre. Solo sale si el producto sigue en el catálogo — uno eliminado no tiene de
+                               dónde sacarla. */}
                             {item.productId?.brandId?.name && (
                               // text-muted se perdía sobre el fondo rosado de la fila; secondary tiene más contraste.
                               <span className="font-normal" style={{ color: 'var(--theme-text-secondary)' }}> · {item.productId.brandId.name}</span>
@@ -433,11 +400,8 @@ const Orders = () => {
                     </div>
                   )}
 
-                  {/*
-                    Cancelado: el motivo que se le mandó al cliente, quién y
-                    cuándo, y lo que se le devolvió. Es lo primero que se
-                    pregunta si el cliente llama.
-                  */}
+                  {/* Cancelado: el motivo que se le mandó al cliente, quién y cuándo, y lo que se le devolvió. Es lo
+                     primero que se pregunta si el cliente llama. */}
                   {order.status === 'cancelado' && (
                     <div className="rounded-xl p-3 mb-3 text-sm bg-red-50 border border-red-200">
                       <div className="font-semibold text-red-600 mb-0.5">Motivo de la cancelación</div>
@@ -459,12 +423,8 @@ const Orders = () => {
                     </span>
 
                     <div className="flex flex-wrap items-center gap-2">
-                    {/*
-                      El comprobante en PDF, para imprimirlo o mandárselo al
-                      cliente si lo pide (él no lo baja por su cuenta). Sin
-                      relleno: es una consulta, no el paso siguiente. Uno
-                      cancelado no tiene.
-                    */}
+                    {/* El comprobante en PDF, para imprimirlo o mandárselo al cliente si lo pide (él no lo baja por su
+                       cuenta). Sin relleno: es una consulta, no el paso siguiente. Uno cancelado no tiene. */}
                     {order.status !== 'cancelado' && (
                       <button
                         onClick={() => bajarComprobante(order)}
@@ -475,10 +435,8 @@ const Orders = () => {
                         <Download className="w-4 h-4" /> {descargandoComprobante === order._id ? 'Preparando…' : 'Comprobante'}
                       </button>
                     )}
-                    {/*
-                      Cancelar va de segundo y sin relleno: es la salida, no el
-                      paso siguiente, y no tiene que competir con él.
-                    */}
+                    {/* Cancelar va de segundo y sin relleno: es la salida, no el paso siguiente, y no tiene que
+                       competir con él. */}
                     {SE_PUEDE_CANCELAR.includes(order.status) && (
                       <button
                         onClick={() => setPedidoACancelar(order)}
@@ -496,12 +454,9 @@ const Orders = () => {
                         <ChefHat className="w-4 h-4" /> Empezar a preparar
                       </button>
                     )}
-                    {/*
-                      "En camino" solo existe para domicilio: un retiro en
-                      local no tiene a quién seguirle el mapa. El retiro pasa
-                      por "Listo para recoger", que es cuando al cliente le
-                      llega el aviso de que ya puede pasar por él.
-                    */}
+                    {/* "En camino" solo existe para domicilio: un retiro en local no tiene a quién seguirle el mapa. El
+                       retiro pasa por "Listo para recoger", que es cuando al cliente le llega el aviso de que ya puede
+                       pasar por él. */}
                     {order.status === 'preparando' && esDomicilio && (
                       <button
                         onClick={() => { cambiarEstado(order._id, 'en_camino').catch(() => {}); }}
@@ -556,15 +511,9 @@ const Orders = () => {
         </motion.div>
       )}
 
-      {/*
-        Se le piden al cliente los cuatro dígitos antes de dar el pedido por
-        entregado.
-
-        El `key` atado al id es lo que reinicia el formulario entre un pedido y
-        el siguiente: sin él, el código del anterior se quedaba escrito y el
-        siguiente se confirmaba con un número que no era suyo. Ver el comentario
-        de ModalCodigoEntrega.
-      */}
+      {/* Se le piden al cliente los cuatro dígitos antes de dar el pedido por entregado. El `key` atado
+         al id es lo que reinicia el formulario entre un pedido y el siguiente: sin él, el código del
+         anterior se quedaba escrito y el siguiente se confirmaba con un número que no era suyo. */}
       <ModalCodigoEntrega
         key={pedidoAEntregar?._id || 'sin-pedido'}
         isOpen={!!pedidoAEntregar}

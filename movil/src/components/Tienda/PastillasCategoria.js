@@ -1,15 +1,6 @@
-/*
- * ============================================================
- * PASTILLAS DE CATEGORÍA
- * ============================================================
- * La misma barra de la web: "Todos" y después cada categoría. La activa es
- * café SÓLIDO con texto blanco; las demás, blancas con borde.
- *
- * En la web las pastillas van centradas cuando caben y se vuelven deslizables
- * cuando no. Aquí nunca caben —son diez categorías en 360 px— así que siempre
- * se deslizan, y por eso la primera arranca pegada a la izquierda.
- * ============================================================
- */
+// PASTILLAS DE CATEGORÍA
+// La misma barra de la web: "Todos" y después cada categoría. La activa es café SÓLIDO con texto
+// blanco; las demás, blancas con borde.
 
 import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 import { useEstilos } from '../../context/ModoContext';

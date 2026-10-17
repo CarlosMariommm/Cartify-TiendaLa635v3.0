@@ -21,13 +21,8 @@ import { useSeguimientoEnVivo } from '../../hooks/useSeguimientoEnVivo';
 import MapaSeguimiento from './MapaSeguimiento';
 import ModalMapaSeguimiento from './ModalMapaSeguimiento';
 
-/*
- * Una fila por producto, con su propio estado de "la imagen no cargó": cada
- * línea trae su propia foto, así que el fallback es por línea, no por todo
- * el modal. `item.productId` llega poblado desde el backend (getOrdersByClient
- * hace populate) con el producto completo, `image` incluida — mismo array de
- * URLs de Cloudinary que ya usa el catálogo, ver utils/catalogo.js.
- */
+// Una fila por producto, con su propio estado de "la imagen no cargó": cada línea trae su propia
+// foto, así que el fallback es por línea, no por todo el modal.
 const FilaProducto = ({ item }) => {
   const { t } = useIdioma();
   const COLORES = useColores();
@@ -60,23 +55,8 @@ const FilaProducto = ({ item }) => {
   );
 };
 
-/*
- * ============================================================
- * DETALLE DE PEDIDO — ModalPedido.js
- * ============================================================
- * Qué llevaba, en qué va y cómo se paga un pedido del historial. Se abre al
- * tocar su tarjeta en "Mis pedidos" — mismo patrón que ModalProducto (hoja
- * que sube desde abajo, con asa para arrastrar y cerrar); ver ese archivo
- * para el porqué de cada pieza del gesto, no se repite aquí.
- *
- * Un pedido a domicilio que sigue abierto se sigue EN VIVO mientras se mira
- * (useSeguimientoEnVivo): el paso al día y, si va en camino, el mapa con el
- * repartidor y su ruta. Antes era solo una foto del pedido, porque para
- * seguirlo estaba la burbuja; pero con dos pedidos abiertos (uno a domicilio
- * y otro para recoger) la burbuja mostraba el otro y el que iba en camino se
- * quedaba sin mapa en ningún lado.
- * ============================================================
- */
+// DETALLE DE PEDIDO — ModalPedido.js
+// Qué llevaba, en qué va y cómo se paga un pedido del historial.
 
 // Los mismos motivos que en la web (ModalCancelarMiPedido): los lee el personal.
 const MOTIVOS_CANCELAR = [
@@ -169,10 +149,8 @@ const ModalPedido = ({ pedido, alCerrar }) => {
     })
   ).current;
 
-  /*
-   * Cancelar, mientras está por preparar. Se abre aquí mismo, debajo del
-   * estado: elegir el motivo con un toque y confirmar, sin otra pantalla.
-   */
+  // Cancelar, mientras está por preparar. Se abre aquí mismo, debajo del estado: elegir el motivo
+  // con un toque y confirmar, sin otra pantalla.
   const { actualizarPedido, refrescar } = usePedidoActivoCtx();
   const [cancelando, setCancelando] = useState(false);
   const [motivo, setMotivo] = useState('');
@@ -221,11 +199,9 @@ const ModalPedido = ({ pedido, alCerrar }) => {
   const items = Array.isArray(pedido.items) ? pedido.items : [];
   const esCancelado = estadoActual === 'cancelado';
 
-  /*
-   * Los números del desglose. Los pedidos viejos (de antes de que existieran
-   * el envío y la tarifa) no traen estos campos: ahí el subtotal cae al total
-   * y las demás líneas quedan en cero, que es justo lo que había que cobrar.
-   */
+  // Los números del desglose. Los pedidos viejos (de antes de que existieran el envío y la tarifa)
+  // no traen estos campos: ahí el subtotal cae al total y las demás líneas quedan en cero, que es
+  // justo lo que había que cobrar.
   const subtotal = Number(pedido.subtotal ?? pedido.total ?? 0);
   const envio = Number(pedido.shippingCost || 0);
   const servicio = Number(pedido.serviceFee || 0);
@@ -307,11 +283,8 @@ const ModalPedido = ({ pedido, alCerrar }) => {
               </View>
             )}
 
-            {/*
-              Cancelado: por qué y lo que se le devolvió, igual que en la web.
-              Los pedidos cancelados antes de que se pidiera un motivo no
-              traen ninguno y se quedan con la frase de siempre.
-            */}
+            {/* Cancelado: por qué y lo que se le devolvió, igual que en la web. Los pedidos cancelados antes de
+               que se pidiera un motivo no traen ninguno y se quedan con la frase de siempre. */}
             {esCancelado ? (
               <View style={estilos.notaCancelado}>
                 {pedido.cancelledByClient && (
@@ -335,10 +308,8 @@ const ModalPedido = ({ pedido, alCerrar }) => {
               </View>
             )}
 
-            {/*
-              Cancelar: solo mientras está por preparar (el servidor también
-              lo revisa), y nunca el pedido de prueba del simulador.
-            */}
+            {/* Cancelar: solo mientras está por preparar (el servidor también lo revisa), y nunca el pedido de
+               prueba del simulador. */}
             {estadoActual === 'pagado' && !pedido.simulado && (
               !cancelando ? (
                 <Pressable
@@ -400,15 +371,9 @@ const ModalPedido = ({ pedido, alCerrar }) => {
               ))}
               <View style={estilos.separador} />
 
-              {/*
-                El desglose, igual que el "Resumen del pedido" de la web: qué
-                era producto, qué era envío y qué descontaron los puntos. Antes
-                aquí solo estaba el Total, y un total sin desglose deja al
-                cliente sumando a mano para entender por qué pagó eso.
-
-                Las líneas que valen cero no se pintan (salvo el envío, que
-                dice "Gratis" porque eso sí es una buena noticia).
-              */}
+              {/* El desglose, igual que el "Resumen del pedido" de la web: qué era producto, qué era envío y qué
+                 descontaron los puntos. Las líneas que valen cero no se pintan (salvo el envío, que dice
+                 "Gratis" porque eso sí es una buena noticia). */}
               <View style={estilos.filaResumen}>
                 <Text style={estilos.resumenEtiqueta}>{t('Productos')}</Text>
                 <Text style={estilos.resumenValor}>${subtotal.toFixed(2)}</Text>
@@ -465,12 +430,9 @@ const ModalPedido = ({ pedido, alCerrar }) => {
               </View>
             </View>
 
-            {/*
-              Las dos formas de calificar que ya tenía la web: el reparto (solo
-              domicilios entregados) y el pedido en sí, que se guarda como
-              reseña de cada producto. Cada bloque decide solo si le toca
-              aparecer.
-            */}
+            {/* Las dos formas de calificar que ya tenía la web: el reparto (solo domicilios entregados) y el
+               pedido en sí, que se guarda como reseña de cada producto. Cada bloque decide solo si le toca
+               aparecer. */}
             {/* El pedido de prueba no se califica: guardaría reseñas de verdad. */}
             {!pedido.simulado && <ValoracionServicio pedido={pedido} />}
             {!pedido.simulado && <ValoracionPedido pedido={pedido} />}
@@ -506,13 +468,8 @@ const ModalPedido = ({ pedido, alCerrar }) => {
 const crearEstilos = (COLORES) => StyleSheet.create({
   capa: {
     ...StyleSheet.absoluteFillObject,
-    /*
-     * Más alto que BurbujaPedido.js (zIndex 900 / elevation 12): quien monta
-     * ESTE componente (`PedidoDetalleFlotante`, ver App.js) va como el
-     * ÚLTIMO hermano del árbol, así que ya gana por orden de pintado nomás
-     * — este número de más es solo un cinturón y tirantes, para que ni un
-     * `elevation` suelto de otra pantalla alcance a colarse encima.
-     */
+    // Por encima de la burbuja (zIndex y elevation mayores), para que nada de otra pantalla se cuele
+    // encima del detalle del pedido.
     zIndex: 950,
     elevation: 20,
   },
@@ -736,10 +693,9 @@ const crearEstilos = (COLORES) => StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
   },
-  // Fila de producto CON foto (ver FilaProducto, arriba); distinta de
-  // filaProducto porque esa otra la reutiliza "Método de pago" ahí abajo,
-  // sin miniatura, y ese `justifyContent:'space-between'` con solo dos
-  // textos se rompería si le metiéramos una tercera vista en medio.
+  // Fila de producto CON foto (ver FilaProducto, arriba); distinta de filaProducto porque esa otra
+  // la reutiliza "Método de pago" ahí abajo, sin miniatura, y ese `justifyContent:'space-between'`
+  // con solo dos textos se rompería si le metiéramos una tercera vista en medio.
   filaProductoImagen: {
     flexDirection: 'row',
     alignItems: 'center',

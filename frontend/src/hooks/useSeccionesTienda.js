@@ -2,36 +2,15 @@ import { useMemo } from 'react';
 import { agruparPorFamilia } from '../utils/similitud';
 import { useClasificacionIA } from './useClasificacionIA';
 
-/*
- * useSeccionesTienda — arma solas las filas de la portada de la tienda.
- *
- * La idea: que el empleado no tenga que configurar nada. Sube productos en el
- * admin y las secciones aparecen a partir de esos datos. Si mañana la tienda
- * empieza a vender pupusas, va a salir sola una fila "Pupusas" sin tocar código.
- *
- * Las filas están tomadas de lo que hacen bien las tiendas en línea grandes,
- * quedándonos solo con lo que tiene sentido en una tienda de barrio:
- *
- *   - "Volver a comprar"   : lo que ESTE cliente ya compró. En abarrotes es la
- *                            fila más útil que existe — la gente repite compra.
- *   - "Se están acabando"  : urgencia REAL, calculada contra el stock máximo
- *                            de cada producto. Nada de urgencia inventada.
- *   - "Nuevos en la tienda": lo recién agregado.
- *   - familias             : "Quesos", "Bebidas energizantes"... reconocidas
- *                            por el clasificador (reglas primero, IA después).
- *
- * Ojo con el orden: primero lo personal, después lo urgente, al final lo
- * temático. Un cliente nuevo no ve "Volver a comprar" y no pasa nada: la fila
- * simplemente no se arma.
- */
+// useSeccionesTienda — arma solas las filas de la portada de la tienda. La idea: que el empleado
+// no tenga que configurar nada. Sube productos en el admin y las secciones aparecen a partir de
+// esos datos.
 
 const RATIO_POR_ACABARSE = 0.3; // 30% o menos de su tope
 const MINIMO_PARA_FILA = 4;     // menos de esto no llena la fila y se ve pobre
 
-/*
- * El armado de las filas, sin React de por medio: entra el catálogo y sale la
- * lista de secciones. El hook de abajo solo se encarga de cuándo recalcularlo.
- */
+// El armado de las filas, sin React de por medio: entra el catálogo y sale la lista de secciones.
+// El hook de abajo solo se encarga de cuándo recalcularlo.
 const armarSecciones = (productos, pedidos, familiasIA) => {
   const disponibles = (productos || []).filter((p) => p.stock > 0);
   if (disponibles.length === 0) return [];
@@ -98,10 +77,9 @@ const armarSecciones = (productos, pedidos, familiasIA) => {
   }
 
   /* ── Familias reconocidas (energizantes, quesos, limpieza...) ── */
-  // El mapa de la IA entra aquí: son las familias que se acaban de resolver y
-  // que todavía no están guardadas en el producto. Sin él, esos productos
-  // caerían en el respaldo viejo (la primera palabra del nombre) hasta la
-  // siguiente visita.
+  // El mapa de la IA entra aquí: son las familias que se acaban de resolver y que todavía no están
+  // guardadas en el producto. Sin él, esos productos caerían en el respaldo viejo (la primera
+  // palabra del nombre) hasta la siguiente visita.
   agruparPorFamilia(disponibles, MINIMO_PARA_FILA, familiasIA)
     .slice(0, 4) // no queremos una portada infinita
     .forEach((familia) => {
@@ -113,12 +91,9 @@ const armarSecciones = (productos, pedidos, familiasIA) => {
         subtitulo: '{n} productos',
         subtituloVars: { n: familia.productos.length },
         productos: familia.productos.slice(0, 12),
-        /*
-         * La fila muestra 12; la lista completa va aparte para la pantalla de
-         * "ver todos". Se guardan las dos y no una sola con el corte hecho
-         * después, porque el corte de 12 es una decisión de la FILA (lo que
-         * cabe deslizándose de lado), no de la sección.
-         */
+        // La fila muestra 12; la lista completa va aparte para la pantalla de "ver todos". Se guardan las
+        // dos y no una sola con el corte hecho después, porque el corte de 12 es una decisión de la FILA
+        // (lo que cabe deslizándose de lado), no de la sección.
         todos: familia.productos,
       });
     });
@@ -127,12 +102,8 @@ const armarSecciones = (productos, pedidos, familiasIA) => {
 };
 
 export const useSeccionesTienda = ({ productos, pedidos = [] }) => {
-  /*
-   * La clasificación se pide desde aquí y no desde la pantalla: la tienda solo
-   * pinta filas, no tiene por qué enterarse de que existe una IA de por medio.
-   * Y si no hay nada que preguntar —el caso normal, porque las reglas resuelven
-   * casi todo y lo demás ya quedó guardado— esto no dispara ni una petición.
-   */
+  // La clasificación se pide desde aquí y no desde la pantalla: la tienda solo pinta filas, no tiene
+  // por qué enterarse de que existe una IA de por medio.
   const { familias: familiasIA } = useClasificacionIA(productos);
 
   return useMemo(

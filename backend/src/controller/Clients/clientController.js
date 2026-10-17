@@ -13,15 +13,9 @@ const clientController = {};
 // GET ALL CLIENTS
 clientController.getClients = async (req, res) => {
   try {
-    /*
-     * El `-password` no es un adorno: sin él, esta ruta devolvía el HASH de la
-     * contraseña de todos los clientes de la tienda, y devolvía la lista
-     * entera a quien preguntara, porque hoy ninguna ruta de la API valida a
-     * nadie. Un hash no es una contraseña, pero es material para atacarla sin
-     * apuro y contra nuestro propio servidor nunca más.
-     *
-     * getClientById ya lo hacía bien (más abajo); esta se había quedado atrás.
-     */
+    // El `-password` no es un adorno: sin él, esta ruta devolvía el HASH de la contraseña de todos los
+    // clientes de la tienda, y devolvía la lista entera a quien preguntara, porque hoy ninguna ruta de
+    // la API valida a nadie.
     const clients = await clientModel.find().select("-password");
 
     return res.status(200).json(clients);
@@ -73,14 +67,9 @@ clientController.updateClient = async (req, res) => {
     email = email?.trim();
     userName = userName?.trim();
 
-    /*
-     * Obligatorios: nombre, teléfono, correo y usuario.
-     *
-     * El DUI quedó fuera a propósito: es opcional desde el registro y exigirlo
-     * aquí impediría corregirle el teléfono a un cliente que nunca lo dio.
-     * La dirección también salió: las de entrega se editan por su propio
-     * endpoint (updateAddresses), no por este.
-     */
+    // Obligatorios: nombre, teléfono, correo y usuario. El DUI quedó fuera a propósito: es opcional
+    // desde el registro y exigirlo aquí impediría corregirle el teléfono a un cliente que nunca lo
+    // dio.
     if (!fullName || !phoneNumber || !email || !userName) {
       return res.status(400).json({
         message: "Faltan campos obligatorios",
@@ -102,12 +91,9 @@ clientController.updateClient = async (req, res) => {
       userName,
     };
 
-    /*
-     * El DUI es opcional. Si viene con algo se guarda; si viene vacío se
-     * BORRA el campo con $unset en vez de dejar una cadena "". Son veinte
-     * clientes con el mismo "" lo que rompería un índice único el día que
-     * alguien lo agregue; sin el campo, ese índice los ignora a todos.
-     */
+    // El DUI es opcional. Si viene con algo se guarda; si viene vacío se BORRA el campo con $unset en
+    // vez de dejar una cadena "". Son veinte clientes con el mismo "" lo que rompería un índice único
+    // el día que alguien lo agregue; sin el campo, ese índice los ignora a todos.
     if (dui !== undefined) {
       if (dui?.trim()) updatedData.dui = dui.trim();
       else updatedData.$unset = { ...(updatedData.$unset || {}), dui: 1 };
@@ -150,12 +136,8 @@ clientController.updateClient = async (req, res) => {
   }
 };
 
-// DELETE CLIENT
-/*
- * Borra la cuenta y sus datos personales, y deja sus pedidos en la
- * contabilidad sin nada que lo identifique. Todo lo que eso implica vive en
- * utils/eliminarCliente.js. Con un pedido en curso, no se puede (409).
- */
+// DELETE CLIENT: borra la cuenta y sus datos personales y deja sus pedidos sin nada que lo
+// identifique (ver utils/eliminarCliente.js). Con un pedido en curso no se puede (409).
 clientController.deleteClient = async (req, res) => {
   try {
     if (!isValidObjectId(req.params.id)) {
@@ -180,9 +162,6 @@ clientController.deleteClient = async (req, res) => {
 };
 
 // UPDATE PROFILE (self) — el cliente edita SUS datos básicos desde "Mi Cuenta".
-// Acepta tanto JSON (los campos de texto) como multipart con una imagen: el
-// campo "image" es opcional, y cuando llega se sube igual que en updateClient
-// (admin) — se borra la anterior de Cloudinary antes de guardar la nueva.
 clientController.updateClientProfile = async (req, res) => {
   try {
     const { fullName, userName, email, phoneNumber, fechaNacimiento, dui } = req.body;
@@ -199,10 +178,8 @@ clientController.updateClientProfile = async (req, res) => {
       else updates.$unset = { ...(updates.$unset || {}), fechaNacimiento: 1 };
     }
 
-    /*
-     * DUI opcional, mismo criterio que en el registro: vacío BORRA el campo con
-     * $unset en vez de dejar "", para no chocar contra un eventual índice único.
-     */
+    // DUI opcional, mismo criterio que en el registro: vacío BORRA el campo con $unset en vez de dejar
+    // "", para no chocar contra un eventual índice único.
     if (dui !== undefined) {
       if (dui?.trim()) updates.dui = dui.trim();
       else updates.$unset = { ...(updates.$unset || {}), dui: 1 };
@@ -238,12 +215,8 @@ clientController.updateClientProfile = async (req, res) => {
   }
 };
 
-// El cliente reemplaza su lista de direcciones de entrega (área "Mi Cuenta").
-// clientAddress es un arreglo de strings; aquí lo sobrescribimos completo.
-/*
- * Los favoritos del cliente, con el producto ya poblado: la pantalla de
- * "Mis favoritos" necesita nombre, precio e imagen, no una lista de ids.
- */
+// El cliente reemplaza su lista de direcciones de entrega (arreglo de textos, se guarda completo).
+// getFavorites: sus favoritos con el producto ya poblado (nombre, precio e imagen).
 clientController.getFavorites = async (req, res) => {
   try {
     const cliente = await clientModel
@@ -260,12 +233,9 @@ clientController.getFavorites = async (req, res) => {
 
     if (!cliente) return res.status(404).json({ message: "No se encontró el cliente" });
 
-    /*
-     * Se filtran los nulos: si borraron un producto que alguien tenía en
-     * favoritos, la referencia queda colgando y populate devuelve null. Sin
-     * esto, la pantalla reventaba al leer el nombre de un producto que ya no
-     * existe.
-     */
+    // Se filtran los nulos: si borraron un producto que alguien tenía en favoritos, la referencia
+    // queda colgando y populate devuelve null. Sin esto, la pantalla reventaba al leer el nombre de un
+    // producto que ya no existe.
     const favoritos = (cliente.favorites || []).filter(Boolean);
     return res.status(200).json(favoritos);
   } catch (error) {
@@ -274,11 +244,9 @@ clientController.getFavorites = async (req, res) => {
   }
 };
 
-/*
- * Marca o desmarca un producto. Un solo endpoint para los dos casos: el
- * cliente aprieta el mismo corazón para poner y quitar, y así no hay forma de
- * que el frontend y la base se desincronicen sobre cuál era el estado.
- */
+// Marca o desmarca un producto. Un solo endpoint para los dos casos: el cliente aprieta el mismo
+// corazón para poner y quitar, y así no hay forma de que el frontend y la base se desincronicen
+// sobre cuál era el estado.
 clientController.toggleFavorite = async (req, res) => {
   try {
     const { productId } = req.body;
@@ -344,11 +312,9 @@ clientController.updatePaymentMethods = async (req, res) => {
       return res.status(400).json({ message: "paymentMethods debe ser un arreglo" });
     }
 
-    /*
-     * Blindaje: guardamos SOLO campos no sensibles, aunque el front mande de
-     * más. Si alguien manda el número completo o el CVV, no hay campo donde
-     * caigan: de `last4` se quedan solo los últimos 4 dígitos.
-     */
+    // Blindaje: guardamos SOLO campos no sensibles, aunque el front mande de más. Si alguien manda el
+    // número completo o el CVV, no hay campo donde caigan: de `last4` se quedan solo los últimos 4
+    // dígitos.
     const MARCAS = ["visa", "mastercard", "amex", "discover", "otra"];
     const limpios = paymentMethods.map((m) => {
       const esEfectivo = m.type === "efectivo";
@@ -391,11 +357,8 @@ clientController.updatePaymentMethods = async (req, res) => {
   }
 };
 
-/*
- * El cliente actualiza sus preferencias de notificación (interruptores): por
- * correo (`correo`) y en la app (`app`), cada uno por su lado. Ver
- * utils/preferenciasAvisos.js.
- */
+// El cliente actualiza sus preferencias de notificación (interruptores): por correo (`correo`) y
+// en la app (`app`), cada uno por su lado. Ver utils/preferenciasAvisos.js.
 clientController.updateNotifications = async (req, res) => {
   try {
     // Notación de punto: solo se toca la preferencia que cambió.
@@ -422,19 +385,8 @@ clientController.updateNotifications = async (req, res) => {
   }
 };
 
-/*
- * EL TELÉFONO DICE DÓNDE ENCONTRARLO.
- *
- * Lo llama la app al conceder el permiso de avisos, con el token que le dio
- * Expo. Es el complemento de las preferencias de arriba: aquellas dicen QUÉ
- * avisos quiere, esto A DÓNDE mandarlos.
- *
- * Se agrega con $addToSet y no con push: abrir la app diez veces no tiene por
- * qué dejar diez veces el mismo token. Y se manda `activo: false` al cerrar
- * sesión — el aparato sigue siendo el mismo, pero ya no es de esta cuenta, y
- * seguir avisándole ahí sería contarle a quien se quedó con el teléfono que
- * el pedido de otro va en camino.
- */
+// EL TELÉFONO DICE DÓNDE ENCONTRARLO.
+// Lo llama la app al conceder el permiso de avisos, con el token que le dio Expo.
 clientController.updatePushToken = async (req, res) => {
   try {
     const { token, activo = true } = req.body;
@@ -466,30 +418,13 @@ clientController.updatePushToken = async (req, res) => {
   }
 };
 
-/*
- * DARSE DE BAJA DE UN AVISO, SIN INICIAR SESIÓN.
- *
- * El enlace del pie de los correos cae aquí. NO lleva middleware de sesión a
- * propósito: pedirle a alguien que se loguee para dejar de recibir correos que
- * no pidió es la forma elegante de no dejarlo salir. Quien no se acuerda de su
- * contraseña se da de baja marcando el correo como spam, y eso le cuesta a la
- * tienda mucho más caro que perder un suscriptor.
- *
- * Lo que hace de puerta es el token firmado: solo el servidor puede fabricarlo
- * y nadie puede fabricar el de otra persona. Ver utils/tokenBaja.js.
- */
+// DARSE DE BAJA DE UN AVISO, SIN INICIAR SESIÓN.
+// El enlace del pie de los correos cae aquí.
 clientController.bajaNotificacion = async (req, res) => {
   try {
-    /*
-     * El token viene del CUERPO cuando lo manda la pantalla /baja (alguien
-     * leyendo el correo, tocando el enlace) — o de la URL cuando lo manda el
-     * propio cliente de correo (Gmail, Outlook) con el botón "Cancelar
-     * suscripción" que pone junto al remitente. Ese botón NO carga ninguna
-     * pantalla: manda un POST directo a la URL del encabezado List-Unsubscribe
-     * con un cuerpo fijo que no controlamos, así que el token tiene que venir
-     * ya puesto en la URL. Ver la ruta /notificaciones/baja/:token y
-     * utils/tokenBaja.js.
-     */
+    // El token viene del CUERPO cuando lo manda la pantalla /baja (alguien leyendo el correo, tocando
+    // el enlace) — o de la URL cuando lo manda el propio cliente de correo (Gmail, Outlook) con el
+    // botón "Cancelar suscripción" que pone junto al remitente.
     const datos = leerTokenBaja(req.params?.token || req.body?.token);
     if (!datos) {
       return res.status(400).json({
@@ -497,13 +432,7 @@ clientController.bajaNotificacion = async (req, res) => {
       });
     }
 
-    /*
-     * Solo se apaga lo que traía ese correo, y solo POR CORREO. Quien se cansó
-     * de las promociones no está pidiendo que dejen de avisarle cuando su
-     * pedido va en camino, ni que su teléfono deje de avisarle de las ofertas
-     * (eso se apaga aparte, en `avisosApp`) — apagárselo todo de una sería
-     * decidir por él.
-     */
+    // Solo se apaga lo que traía ese correo, y solo POR CORREO.
     const clave = AVISOS_CORREO.includes(datos.clave) ? datos.clave : "promociones";
 
     const actualizado = await clientModel

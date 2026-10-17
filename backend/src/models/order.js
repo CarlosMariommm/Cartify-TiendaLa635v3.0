@@ -1,21 +1,6 @@
-/*
- Pedido / Venta de un CLIENTE.
-
- OJO: esto es distinto de "shoppings", que son las COMPRAS a proveedores
- (reabastecer inventario). Aquí modelamos la venta de salida: lo que un
- cliente compra en la tienda. De este modelo dependen "Mis Pedidos", la
- pantalla del empleado y los puntos de fidelidad.
-
- Campos:
-   clientId:      quién compró
-   items:         [{ productId, name, price, amount }] — foto del producto al comprar
-   total:         Number (se calcula en el backend, no se confía en el front)
-   status:        estado de preparación/entrega
-   paymentMethod: método de pago usado
-   paymentStatus: si ya está pagado
-   pointsEarned:  puntos de fidelidad generados por esta compra
-   channel:       'web' | 'kiosco'  (el kiosco será el Asistente de Voz futuro)
-*/
+// Pedido / Venta de un CLIENTE. Aquí modelamos la venta de salida: lo que un cliente compra en la
+// tienda. De este modelo dependen "Mis Pedidos", la pantalla del empleado y los puntos de
+// fidelidad.
 
 /**
  * @swagger
@@ -175,12 +160,9 @@ const orderItemSchema = new Schema({
 
 const orderSchema = new Schema({
     clientId: { type: Schema.Types.ObjectId, ref: 'clientModel', required: true },
-    /*
-     * La cuenta de quien compró se eliminó: el pedido se queda en la
-     * contabilidad, pero ya sin dirección ni nada que lleve a esa persona
-     * (ver utils/eliminarCliente.js). `clientId` apunta a una cuenta que ya
-     * no existe; las pantallas dicen "Cliente eliminado".
-     */
+    // La cuenta de quien compró se eliminó: el pedido se queda en la contabilidad, pero ya sin
+    // dirección ni nada que lleve a esa persona (ver utils/eliminarCliente.js). `clientId` apunta a
+    // una cuenta que ya no existe; las pantallas dicen "Cliente eliminado".
     clienteEliminado: { type: Boolean },
     items: { type: [orderItemSchema], required: true },
     subtotal: { type: Number },            // antes del descuento por puntos
@@ -193,37 +175,23 @@ const orderSchema = new Schema({
     // activa). Como el envío, sale de los ajustes al comprar, no del navegador.
     serviceFee: { type: Number, default: 0 },
     total: { type: Number, required: true },
-    /*
-     * 'en_camino' solo aplica a domicilio: es cuando el repartidor ya salió
-     * de la tienda con el pedido. Antes eso no era un estado — era nada más
-     * un interruptor de "compartir ubicación" separado del estado del
-     * pedido, así que era fácil que alguien empezara a repartir sin tocarlo
-     * y el cliente se quedara viendo "Preparando" sin mapa toda la entrega.
-     */
+    // 'en_camino' solo aplica a domicilio: es cuando el repartidor ya salió de la tienda con el
+    // pedido.
     status: {
         type: String,
-        /*
-         * 'listo': solo para retiro en la tienda. Antes un pedido para
-         * recoger pasaba de "preparando" a "entregado" sin ningún momento en
-         * que se le pudiera avisar al cliente que ya podía pasar por él.
-         */
+        // 'listo': solo para retiro en la tienda.
         enum: ['pagado', 'preparando', 'en_camino', 'listo', 'entregado', 'cancelado'],
         default: 'pagado',
     },
-    /*
-     * Cómo paga. 'saldo' descuenta del balance digital del cliente (cargado
-     * con gift cards); los demás se cobran en el local o al entregar, porque
-     * todavía no hay pasarela de pago conectada.
-     */
+    // Cómo paga. 'saldo' descuenta del balance digital del cliente (cargado con gift cards); los demás
+    // se cobran en el local o al entregar, porque todavía no hay pasarela de pago conectada.
     paymentMethod: {
         type: String,
         enum: ['efectivo', 'tarjeta', 'saldo'],
         default: 'efectivo',
     },
-    /*
-     * Si se lo llevan a la casa o lo pasa a traer.
-     * Con 'delivery' el pedido necesita dirección; con 'retiro' no.
-     */
+    // Si se lo llevan a la casa o lo pasa a traer. Con 'delivery' el pedido necesita dirección; con
+    // 'retiro' no.
     deliveryType: {
         type: String,
         enum: ['delivery', 'retiro'],
@@ -234,52 +202,23 @@ const orderSchema = new Schema({
     deliveryLat: { type: Number },       // punto marcado en el mapa
     deliveryLng: { type: Number },
 
-    /*
-     * EL CÓDIGO DE ENTREGA — cuatro dígitos que prueban quién recibe.
-     *
-     * Lo emite el servidor al crear el pedido y NUNCA lo manda el navegador:
-     * si el cliente pudiera elegirlo, no probaría nada. Va en todos los
-     * pedidos, sean de domicilio o de retiro en el local — el mostrador
-     * también entrega a quien se presente. Ver utils/codigoEntrega.js.
-     *
-     * `select: false` es la mitad importante: sin eso el código viajaría en
-     * CUALQUIER respuesta que devuelva pedidos, incluida la lista completa del
-     * panel y el seguimiento del repartidor. Solo lo entrega a mano quien
-     * comprobó que el pedido es de quien pregunta. Ver getOrdersByClient y
-     * getOrderById en el controlador.
-     */
+    // EL CÓDIGO DE ENTREGA — cuatro dígitos que prueban quién recibe.
+    // Lo emite el servidor al crear el pedido y NUNCA lo manda el navegador: si el cliente pudiera
+    // elegirlo, no probaría nada.
     deliveryCode: { type: String, select: false },
 
-    /*
-     * Cuándo se comprobó el código contra el cliente en la puerta. Vacío en un
-     * pedido ya entregado significa una cosa concreta: se entregó SIN
-     * comprobar, porque el personal usó la salida de emergencia. Ver
-     * deliveryCodeOmitido.
-     */
+    // Cuándo se comprobó el código contra el cliente en la puerta. Vacío en un pedido ya entregado
+    // significa una cosa concreta: se entregó SIN comprobar, porque el personal usó la salida de
+    // emergencia. Ver deliveryCodeOmitido.
     deliveryCodeVerifiedAt: { type: Date },
 
-    /*
-     * La salida de emergencia, y su rastro.
-     *
-     * El código no puede dejar a nadie sin su pedido: se queda sin batería, se
-     * lo recibe la vecina, el correo no llegó. Si no hubiera forma de entregar
-     * sin él, el personal terminaría marcando "entregado" desde la tienda
-     * antes de salir —y entonces el código no valdría nada—.
-     *
-     * Así que se puede omitir, pero queda escrito quién lo omitió y por qué.
-     * Un control que se puede saltar en silencio no es un control.
-     */
+    // La salida de emergencia, y su rastro. El código no puede dejar a nadie sin su pedido: se queda
+    // sin batería, se lo recibe la vecina, el correo no llegó.
     deliveryCodeOmitido: { type: Boolean, default: false },
     deliveryCodeMotivo: { type: String, maxlength: 200 },
 
-    /*
-     * Cuándo pasó cada cosa y quién la hizo.
-     *
-     * Antes solo existía `status` y el `updatedAt` de los timestamps, que se
-     * pisa con cualquier cambio: no quedaba constancia de a qué hora se
-     * preparó un pedido ni de quién lo entregó. Sin esto no se puede decir
-     * "este pedido tardó 40 minutos" ni reclamarle nada a nadie.
-     */
+    // Cuándo pasó cada cosa y quién la hizo. Sin esto no se puede decir "este pedido tardó 40 minutos"
+    // ni reclamarle nada a nadie.
     preparedAt: { type: Date },
     preparedBy: { type: String },        // nombre de quien lo preparó
     enCaminoAt: { type: Date },          // a qué hora salió el repartidor
@@ -289,57 +228,32 @@ const orderSchema = new Schema({
     deliveredAt: { type: Date },
     deliveredBy: { type: String },
 
-    /*
-     * La cancelación: cuándo, quién y POR QUÉ.
-     *
-     * El motivo no es una nota interna: lo lee el cliente en su pedido (web y
-     * app), en la notificación y en el correo. Se escribe para él. Sin motivo
-     * no se cancela: un "su pedido fue cancelado" a secas deja a la persona
-     * pensando que hizo algo mal. Ver utils/estadoPedido.js.
-     *
-     * `reembolso` es la constancia de lo que se le devolvió al cancelar: el
-     * saldo si pagó con él y los puntos que había canjeado. El stock vuelve
-     * a la tienda, pero eso no es del cliente y no se anota aquí.
-     */
+    // La cancelación: cuándo, quién y POR QUÉ. El motivo no es una nota interna: lo lee el cliente en
+    // su pedido (web y app), en la notificación y en el correo. Se escribe para él. Sin motivo no se
+    // cancela: un "su pedido fue cancelado" a secas deja a la persona pensando que hizo algo mal.
     cancelledAt: { type: Date },
     cancelledBy: { type: String },
     cancelReason: { type: String, maxlength: 300 },
-    /*
-     * Lo canceló el propio cliente (mientras estaba por preparar). Cambia
-     * cómo se le cuenta: no es "tuvimos que cancelarlo" sino "usted lo
-     * canceló", y no se le manda aviso de algo que acaba de hacer él.
-     */
+    // Lo canceló el propio cliente (mientras estaba por preparar). Cambia cómo se le cuenta: no es
+    // "tuvimos que cancelarlo" sino "usted lo canceló", y no se le manda aviso de algo que acaba de
+    // hacer él.
     cancelledByClient: { type: Boolean },
     reembolso: {
         saldo: { type: Number },
         puntos: { type: Number },
     },
 
-    /*
-     * Valoración del SERVICIO de entrega (no del producto).
-     *
-     * La deja el cliente cuando su pedido a DOMICILIO ya fue entregado: qué tal
-     * llegó, a tiempo, el trato del repartidor. Va embebida porque es 1:1 con el
-     * pedido —una entrega, una valoración— y así no hace falta otra colección.
-     */
+    // Valoración del SERVICIO de entrega (no del producto). La deja el cliente cuando su pedido a
+    // DOMICILIO ya fue entregado: qué tal llegó, a tiempo, el trato del repartidor. Va embebida porque
+    // es 1:1 con el pedido —una entrega, una valoración— y así no hace falta otra colección.
     serviceRating: {
         rating:  { type: Number, min: 1, max: 5 },
         comment: { type: String, maxlength: 500, default: '' },
         ratedAt: { type: Date },
     },
 
-    /*
-     * Dónde va el repartidor, en vivo.
-     *
-     * Solo se llena mientras alguien está llevando ESTE pedido, y se borra al
-     * entregarlo o cancelarlo. No es un historial: no queremos guardar por
-     * dónde anduvo un empleado después de que terminó su trabajo, y el cliente
-     * tampoco tiene por qué verlo una vez recibió su compra.
-     *
-     * `updatedAt` es lo que permite ser honestos: si el último punto tiene
-     * tres minutos, se le dice al cliente que la señal se enfrió en vez de
-     * dejarle un puntito quieto haciéndose el vivo.
-     */
+    // Dónde va el repartidor, en vivo. Solo se llena mientras alguien está llevando ESTE pedido, y se
+    // borra al entregarlo o cancelarlo.
     courier: {
         active: { type: Boolean, default: false },
         lat: { type: Number },

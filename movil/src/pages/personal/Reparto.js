@@ -1,22 +1,6 @@
-/*
- * ============================================================
- * REPARTO — los pedidos a domicilio, para quien los lleva (Reparto.js)
- * ============================================================
- * La pantalla del repartidor en la app del personal (la web ya no tiene
- * Reparto: se repartía desde Mi Cuenta y se quitó). Cada pedido con su dirección, la
- * referencia, el teléfono del cliente y un botón que abre la ruta en el mapa
- * del teléfono, y los pasos del pedido:
- *
- *   Por preparar → "Empezar a preparar"
- *   Preparando   → "Salí a repartir" (marca en camino y comparte la ubicación)
- *   En camino    → "Marcar entregado" (pide los 4 dígitos que dicta el cliente)
- *
- * Lo ven el administrador y el empleado. Sin recuadros: los pedidos van uno
- * debajo del otro, separados por una línea.
- *
- * Solo pinta. La lógica vive en useRepartoPersonal.
- * ============================================================
- */
+// REPARTO — los pedidos a domicilio, para quien los lleva (Reparto.js)
+// La pantalla del repartidor en la app del personal (la web ya no tiene Reparto: se repartía desde
+// Mi Cuenta y se quitó).
 
 import { useRef, useState } from 'react';
 import {
@@ -33,13 +17,9 @@ const dinero = (n) => `$${(Number(n) || 0).toFixed(2)}`;
 const hora = (iso) => (iso ? new Date(iso).toLocaleTimeString('es-SV', { hour: '2-digit', minute: '2-digit' }) : '');
 const PAGO = { efectivo: 'Paga en efectivo', tarjeta: 'Paga con tarjeta', saldo: 'Pagado con saldo' };
 
-/*
- * La ruta en la app de mapas del teléfono, desde donde está el repartidor.
- * En Android va un enlace geo: y el teléfono pregunta con cuál abrirlo
- * (Google Maps, Waze, el que tenga); en iPhone, Apple Maps. Ahí está la
- * navegación de verdad: voz, tráfico, recalcular. Si no hay ninguna app que
- * lo abra, queda Google Maps en el navegador.
- */
+// La ruta en la app de mapas del teléfono, desde donde está el repartidor. En Android va un enlace
+// geo: y el teléfono pregunta con cuál abrirlo (Google Maps, Waze, el que tenga); en iPhone, Apple
+// Maps. Ahí está la navegación de verdad: voz, tráfico, recalcular.
 const abrirRuta = async (pedido) => {
   const hayPunto = pedido.deliveryLat != null && pedido.deliveryLng != null;
   const punto = hayPunto ? `${pedido.deliveryLat},${pedido.deliveryLng}` : '';
@@ -55,12 +35,9 @@ const abrirRuta = async (pedido) => {
   }
 };
 
-/*
- * "¿Me dice su código?" — la pregunta de la puerta. Si no coincide, el
- * servidor lo dice y la ventana se queda abierta para volver a intentar. La
- * salida de emergencia (entregar sin código) cuesta escribir por qué, y ese
- * por qué queda guardado en el pedido, igual que en el panel.
- */
+// "¿Me dice su código?" — la pregunta de la puerta. Si no coincide, el servidor lo dice y la
+// ventana se queda abierta para volver a intentar. La salida de emergencia (entregar sin código)
+// cuesta escribir por qué, y ese por qué queda guardado en el pedido, igual que en el panel.
 const ModalEntrega = ({ pedido, alCerrar, alEntregar }) => {
   const estilos = useEstilos(crearEstilos);
   const COLORES = useColores();
@@ -72,11 +49,8 @@ const ModalEntrega = ({ pedido, alCerrar, alEntregar }) => {
   const [error, setError] = useState('');
   const [enfocado, setEnfocado] = useState(false);
   const campo = useRef(null);
-  /*
-   * La app va de borde a borde: la ventana se dibuja también detrás de la
-   * barra del sistema (en la tablet, la barra de tareas), y ahí quedaba
-   * escondido "Marcar entregado".
-   */
+  // La app va de borde a borde: la ventana se dibuja también detrás de la barra del sistema (en la
+  // tablet, la barra de tareas), y ahí quedaba escondido "Marcar entregado".
   const { bottom } = useSafeAreaInsets();
 
   const tieneCodigo = pedido?.tieneCodigoEntrega !== false;
@@ -109,14 +83,9 @@ const ModalEntrega = ({ pedido, alCerrar, alEntregar }) => {
         ) : !sinCodigo ? (
           <>
             <Text style={estilos.hojaTexto}>Pídale al cliente los 4 dígitos que ve en su pedido.</Text>
-            {/*
-              Cuatro casillas subrayadas, una por dígito, como el código que ve
-              el cliente. Antes era un campo con borde: en la tablet el borde se
-              dibujaba más alto que los números y se veía un recuadro vacío
-              encima del texto. El campo de verdad sigue ahí (lo que se escribe
-              y lo que lee el lector de pantalla), invisible encima de las
-              casillas: tocarlas abre el teclado.
-            */}
+            {/* Cuatro casillas subrayadas, una por dígito, como el código que ve el cliente. El campo de verdad
+               sigue ahí (lo que se escribe y lo que lee el lector de pantalla), invisible encima de las
+               casillas: tocarlas abre el teclado. */}
             <Pressable style={estilos.casillas} onPress={() => campo.current?.focus()} accessible={false}>
               {[0, 1, 2, 3].map((i) => (
                 <View
@@ -220,11 +189,8 @@ const Reparto = ({ reparto }) => {
         <Text style={estilos.titulo} accessibilityRole="header">Reparto</Text>
         <Text style={estilos.bajada}>Pedidos a domicilio que faltan por entregar.</Text>
 
-        {/*
-          Mientras se comparte la ubicación se dice grande y sin rodeos: es la
-          ubicación de una persona, y nadie debería enterarse por casualidad
-          de que su teléfono estuvo transmitiendo.
-        */}
+        {/* Mientras se comparte la ubicación se dice grande y sin rodeos: es la ubicación de una persona, y
+           nadie debería enterarse por casualidad de que su teléfono estuvo transmitiendo. */}
         {enViaje.length > 0 && (
           <View style={[estilos.aviso, { backgroundColor: COLORES.infoFondo, borderColor: COLORES.infoBorde }]} accessibilityLiveRegion="polite">
             <Radio size={20} color={COLORES.infoVivo} strokeWidth={2} />
@@ -341,10 +307,8 @@ const Reparto = ({ reparto }) => {
                   )}
                 </View>
 
-                {/*
-                  Compartir a mano queda de respaldo: para cuando el GPS falló
-                  al salir, o para pausarlo. Salir ya lo enciende solo.
-                */}
+                {/* Compartir a mano queda de respaldo: para cuando el GPS falló al salir, o para pausarlo. Salir ya
+                   lo enciende solo. */}
                 {hayPunto && p.status === 'en_camino' && (
                   <Pressable
                     onPress={() => (compartiendo ? quitarDelViaje(p._id) : empezarViaje(p._id))}

@@ -7,21 +7,9 @@ import MarcaTienda from './MarcaTienda';
 import { iconoDeModulo, flujoDeModulo } from '../../utils/modulos';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * ============================================================
- * MENÚ DE LA TIENDA — el nombre que abre los pasillos
- * ============================================================
- * Tocar el nombre de la tienda despliega sus módulos.
- *
- * Antes ese clic mandaba a la pantalla de Servicios: quien estaba comprando
- * perdía la tienda de vista para elegir un pasillo y tenía que volver. Ahora
- * los pasillos se abren ahí mismo, encima de los productos, y se elige sin
- * salir de ningún lado.
- *
- * La lógica de qué módulos hay y a dónde lleva cada uno no vive aquí: sale
- * de useModulos y de las reglas de utils/modulos.
- * ============================================================
- */
+// MENÚ DE LA TIENDA — el nombre que abre los pasillos
+// Tocar el nombre de la tienda despliega sus módulos. Ahora los pasillos se abren ahí mismo,
+// encima de los productos, y se elige sin salir de ningún lado.
 
 const BROWN = 'var(--marca-600)';
 
@@ -74,29 +62,13 @@ const Panel = styled.div`
   padding: 6px;
   z-index: 300;
 
-  /*
-   * El panel CRECE desde el botón que lo abrió, no aparece de la nada.
-   *
-   * Antes entraba con cardIn, que sube 8px y desvanece: la misma entrada que
-   * usan las tarjetas de producto. Servía para que no apareciera de golpe, pero
-   * no contaba de DÓNDE venía. Con el origen arriba a la izquierda —justo donde
-   * está el nombre de la tienda que se acaba de tocar— el menú queda atado a su
-   * botón y se entiende qué lo abrió.
-   *
-   * Los fotogramas viven en index.css con el resto del vocabulario de
-   * movimiento, y ahí mismo se apagan con prefers-reduced-motion.
-   *
-   * (Ojo para quien edite estos comentarios: van DENTRO de un template literal,
-   * así que no se pueden usar comillas invertidas — cierran la cadena y el
-   * archivo deja de compilar. Pasó.)
-   */
+  /* El panel CRECE desde el botón que lo abrió, no aparece de la nada. Servía para que no apareciera
+     de golpe, pero no contaba de DÓNDE venía. */
   transform-origin: top left;
   animation: panelIn var(--dur-popover, 180ms) var(--ease-out, ease);
 
-  /*
-   * Con muchos pasillos la lista pasaba de largo del teléfono y los últimos
-   * quedaban fuera de alcance. Que se desplace el panel, nunca la página.
-   */
+  /* Con muchos pasillos la lista pasaba de largo del teléfono y los últimos quedaban fuera de
+     alcance. Que se desplace el panel, nunca la página. */
   @media (max-width: 700px) {
     width: min(268px, calc(100vw - 32px));
     max-height: calc(100vh - 150px);
@@ -144,11 +116,9 @@ const MenuTienda = ({ moduloSeleccionado, onElegirModulo }) => {
   const { t } = useIdioma();
   // El nombre y el logo salen de la base, no del código. Ver AjustesContext.
 
-  /*
-   * A dónde lleva cada módulo. Los pasillos normales NO navegan: cambian el
-   * pasillo de esta misma pantalla, que es más rápido y no pierde el carrito
-   * de vista. Solo los de flujo propio (impresiones) abren otra pantalla.
-   */
+  // A dónde lleva cada módulo. Los pasillos normales NO navegan: cambian el pasillo de esta misma
+  // pantalla, que es más rápido y no pierde el carrito de vista. Solo los de flujo propio
+  // (impresiones) abren otra pantalla.
   const abrir = (modulo) => {
     close();
     if (flujoDeModulo(modulo) === 'impresiones') {
@@ -160,25 +130,15 @@ const MenuTienda = ({ moduloSeleccionado, onElegirModulo }) => {
 
   const verTodo = () => {
     close();
-    /*
-     * Desde Impresiones hay que VOLVER a la tienda: aquella es pantalla
-     * aparte, así que cambiarle el pasillo por props no la saca de ahí.
-     */
+    // Desde Impresiones hay que VOLVER a la tienda: aquella es pantalla aparte, así que cambiarle el
+    // pasillo por props no la saca de ahí.
     if (enPantallaPropia) { navigate('/'); return; }
     onElegirModulo?.(null);
   };
 
-  /*
-   * CUÁL PASILLO ESTÁ MARCADO.
-   *
-   * Los pasillos normales se saben por `moduloSeleccionado`, que es estado de
-   * la tienda. Pero Impresiones no es un pasillo de la tienda: es OTRA
-   * PANTALLA, y ahí ese estado no existe. El resultado era que al entrar a
-   * Impresiones el menú marcaba "Toda la tienda" y dejaba Impresiones sin
-   * palomita — justo lo contrario de donde estaba parada la persona.
-   *
-   * Así que cuando la ruta es la de un flujo propio, quien manda es la RUTA.
-   */
+  // CUÁL PASILLO ESTÁ MARCADO.
+  // Los pasillos normales se saben por `moduloSeleccionado`, que es estado de la tienda. Pero
+  // Impresiones no es un pasillo de la tienda: es OTRA PANTALLA, y ahí ese estado no existe.
   const enPantallaPropia = pathname.startsWith('/impresiones');
 
   const estaActiva = (modulo) =>
@@ -191,23 +151,16 @@ const MenuTienda = ({ moduloSeleccionado, onElegirModulo }) => {
 
   return (
     <Zona ref={ref}>
-      {/*
-        Sin aria-label: el nombre del botón sale de lo que se VE ("Tienda la
-        635") más un texto oculto que solo oyen los lectores de pantalla. Con
-        un aria-label propio el nombre no empezaba con lo escrito y quien
-        maneja el teléfono por voz, que dice lo que lee, no le atinaba.
-      */}
+      {/* Sin aria-label: el nombre del botón sale de lo que se VE ("Tienda la 635") más un texto oculto
+         que solo oyen los lectores de pantalla. Con un aria-label propio el nombre no empezaba con lo
+         escrito y quien maneja el teléfono por voz, que dice lo que lee, no le atinaba. */}
       <Boton
         onClick={toggle}
         aria-expanded={isOpen}
         aria-haspopup="menu"
       >
         <Hamburguesa><Menu size={20} strokeWidth={2.2} /></Hamburguesa>
-        {/*
-          La marca salió de aquí a MarcaTienda.jsx. Este bloque era el único
-          que pintaba el logo, así que las demás barras enseñaban otra cosa;
-          ahora todas piden lo mismo. Este es el tamaño de referencia.
-        */}
+        {/* El logo de la tienda (MarcaTienda.jsx), en el tamaño de referencia que usan todas las barras. */}
         <MarcaTienda tamano={19} alto={38} />
         <span className="sr-only">{' — '}{t('Pasillos de la tienda')}</span>
       </Boton>

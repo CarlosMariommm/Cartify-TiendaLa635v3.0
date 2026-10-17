@@ -3,33 +3,9 @@ import { CUERPO, AGUJERO, CORDON } from '../UI/mascotaFormas';
 import DisfrazTiqui from '../UI/DisfrazTiqui';
 import { useDisfrazTiqui } from '../../hooks/useDisfrazTiqui';
 
-/*
- * MascotaAsistente — la etiqueta del logo con cara. En el asistente de voz es
- * A QUIEN se le habla: reemplaza al orbe del micrófono.
- *
- * Estilo plano: la etiqueta blanca, los rasgos en el navy de la casa y el
- * cordón en el azul de acento. Van FIJOS y no con --marca-600, por lo mismo
- * que el orbe de antes: en diciembre esa variable es verde y en Halloween
- * naranja, y la mascota tiene que ser siempre la misma. La temporada sí le
- * cambia la ropa: ver DisfrazTiqui.
- *
- * Solo pinta. Recibe qué está haciendo (`estado`) y cómo le fue (`animo`), y
- * de ahí saca qué cara poner. La cara se arma con atributos data-* en el
- * <svg>; lo que se ve y cómo se mueve está en index.css (sección ASISTENTE DE
- * VOZ). Lo único que corre en JavaScript es la mirada, porque sigue al puntero.
- *
- *   estado: 'reposo' | 'escuchando' | 'pensando' | 'hablando'
- *   animo:  'normal' | 'contento' | 'feliz' | 'confundido'
- *   latido: cualquier valor que cambia cuando llegan palabras nuevas; con cada
- *           cambio, mientras escucha, asiente.
- *   compacta: la versión chiquita de la píldora de segundo plano, sin confeti
- *           ni signo de pregunta.
- *   sobreClaro: para un fondo claro (el panel): cuerpo navy y rasgos blancos,
- *           como la Tiqui del modo claro. Sin él, la de siempre: blanca.
- *   vozReal: suena la voz de Tiqui (utils/vozTiqui.js). La boca deja la
- *           animación en bucle y se abre con el volumen del audio, que llega
- *           en la variable CSS --voz-tiqui: se cierra en las pausas de verdad.
- */
+// MascotaAsistente — la etiqueta del logo con cara. En el asistente de voz es A QUIEN se le habla:
+// reemplaza al orbe del micrófono. Estilo plano: la etiqueta blanca, los rasgos en el navy de la
+// casa y el cordón en el azul de acento.
 
 const BLANCO = '#FFFFFF';
 const NAVY = '#003049';
@@ -93,10 +69,8 @@ const MascotaAsistente = ({ estado = 'reposo', animo = 'normal', latido, compact
     if (fija) mirar(fija[0], fija[1]);
   }, [estado, animo]);
 
-  /*
-   * Esperando, sigue al puntero con los ojos. Es lo que hace que se sienta que
-   * hay alguien ahí y no un botón con cara.
-   */
+  // Esperando, sigue al puntero con los ojos. Es lo que hace que se sienta que hay alguien ahí y no
+  // un botón con cara.
   useEffect(() => {
     if (compacta || estado !== 'reposo' || animo === 'confundido') return undefined;
     let ultimo = 0;

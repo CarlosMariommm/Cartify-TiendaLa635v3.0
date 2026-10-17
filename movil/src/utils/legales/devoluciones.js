@@ -1,29 +1,5 @@
-/*
- * COPIA de frontend/src/utils/legales/ — la app y la web no comparten código.
- * Si se cambia allá, se cambia aquí (y al revés), con la misma versión.
- */
-/*
- * ============================================================
- * CAMBIOS Y DEVOLUCIONES — legales/devoluciones.js
- * ============================================================
- * La decisión de la tienda: NO hay devoluciones por cambio de opinión de lo
- * que ya se abrió, se usó o se consumió. Lo que se vende son productos de
- * marcas que ya controlan su calidad, perecederos y de consumo diario, y no
- * hay electrónicos.
- *
- * Lo que NO se puede quitar, porque lo da la Ley de Protección al Consumidor
- * de El Salvador y una cláusula en contra sería nula:
- *   - Art. 13-A: en las compras a distancia (web, app) hay 8 días de retracto
- *     desde la entrega, siempre que el producto no se haya empezado a usar.
- *   - Art. 13-D: el pago se devuelve en máximo 15 días si se ejerce el
- *     retracto, si el producto no llegó, si no es lo que se pidió o si vino
- *     defectuoso, o si hubo un error de cobro.
- *
- * Por eso este documento no dice "sin reembolsos": dice cuándo sí y cuándo
- * no, dentro de la ley. Conviene que un abogado lo revise antes de publicarlo
- * como definitivo, sobre todo la exclusión de perecederos (sección no-aplica).
- * ============================================================
- */
+// CAMBIOS Y DEVOLUCIONES — copia de frontend/src/utils/legales/ (si se cambia allá, se cambia
+// aquí, con la misma versión). No hay devoluciones por cambio de opinión de lo ya abierto o usado.
 
 export const DEVOLUCIONES = {
   clave: 'devoluciones',

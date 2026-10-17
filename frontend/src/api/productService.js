@@ -1,20 +1,8 @@
 import api from './api';
 
-/*
- * ============================================================
- * SERVICIO DE PRODUCTOS — productService.js
- * ============================================================
- * Centraliza todas las peticiones HTTP relacionadas con productos.
- * Usa la instancia de Axios (api) que ya tiene el baseURL y
- * los interceptores de errores configurados.
- *
- * Nota sobre FormData:
- *  Los métodos de creación y actualización usan FormData (en vez
- *  de JSON) porque el producto puede llevar una imagen adjunta.
- *  En ese caso, el Content-Type debe ser 'multipart/form-data'
- *  para que el servidor reciba el archivo correctamente.
- * ============================================================
- */
+// SERVICIO DE PRODUCTOS — productService.js
+// Centraliza todas las peticiones HTTP relacionadas con productos. Usa la instancia de Axios (api)
+// que ya tiene el baseURL y los interceptores de errores configurados.
 export const productService = {
   // 1- Obtener el catálogo de la tienda (SELECT). Público: viene sin costo,
   //    proveedor ni código de barras. El panel usa getInventario.

@@ -21,11 +21,9 @@ import { esFamiliaValida, LISTA_PARA_IA } from "../utils/familias.js";
 
 const aiController = {};
 
-/*
- * Esquema de lo que le pedimos a Gemini. Con responseSchema la respuesta SIEMPRE
- * llega como JSON válido con estos campos — nada de andar parseando texto suelto
- * ni rezando para que no salga con un "¡Claro! Aquí tienes:".
- */
+// Esquema de lo que le pedimos a Gemini. Con responseSchema la respuesta SIEMPRE llega como JSON
+// válido con estos campos — nada de andar parseando texto suelto ni rezando para que no salga con
+// un "¡Claro! Aquí tienes:".
 const ESQUEMA_COPY = {
   type: Type.OBJECT,
   properties: {
@@ -38,14 +36,9 @@ const ESQUEMA_COPY = {
   required: ["title", "promoDescription", "bannerHeadline", "bannerSubtitle", "badge"],
 };
 
-/*
- * La "voz" de la tienda. Va como systemInstruction (aparte del pedido) para que
- * el modelo la trate como su forma de ser, no como parte del encargo del día.
- *
- * Los ejemplos son la parte que más pesa: mostrarle 4 promos bien escritas le
- * enseña el tono mucho mejor que cualquier lista de reglas. Si algún texto sale
- * feo, lo más efectivo es agregar aquí un ejemplo del estilo que sí se quiere.
- */
+// La "voz" de la tienda. Va como systemInstruction (aparte del pedido) para que el modelo la trate
+// como su forma de ser, no como parte del encargo del día. Los ejemplos son la parte que más pesa:
+// mostrarle 4 promos bien escritas le enseña el tono mucho mejor que cualquier lista de reglas.
 const VOZ_DE_LA_TIENDA = [
   "Eres el encargado de marketing de Tienda La 635, una tienda de abarrotes de barrio en El Salvador.",
   "Escribes los anuncios de las promociones de la tienda en línea. Tu trabajo es que a la gente",
@@ -106,11 +99,8 @@ const describirProducto = (it) => {
 
 // Arma la frase que describe el gancho según el tipo de promoción.
 const describirOferta = (tipo, items, buyQty, payQty) => {
-  /*
-   * Un anuncio no tiene ahorro que contar: el gancho es el producto mismo.
-   * Sin este caso, la IA recibía "0% de descuento" y escribía sobre una
-   * rebaja que no existe.
-   */
+  // Un anuncio no tiene ahorro que contar: el gancho es el producto mismo. Sin este caso, la IA
+  // recibía "0% de descuento" y escribía sobre una rebaja que no existe.
   if (tipo === "anuncio") {
     return items.map((it) => `${describirProducto(it)}, precio $${it.salePrice}`).join(" | ");
   }
@@ -132,14 +122,8 @@ const armarPrompt = (type, items, buyQty, payQty) =>
     ? `Anuncio sin descuento: ${describirOferta(type, items, buyQty, payQty)}`
     : `Oferta: ${describirOferta(type, items, buyQty, payQty)}`;
 
-/*
- * POST /api/ai/promo-copy
- * Recibe el tipo de promo y los productos seleccionados del inventario, y
- * devuelve el texto listo para el formulario y para pintar el banner.
- *
- * Si la IA no está configurada o se cae, responde igual con las plantillas
- * locales y avisa de dónde salió el texto (campo `origen`).
- */
+// POST /api/ai/promo-copy Recibe el tipo de promo y los productos seleccionados del inventario, y
+// devuelve el texto listo para el formulario y para pintar el banner.
 aiController.generarCopyPromo = async (req, res) => {
   try {
     const { type = "descuento", buyQty = 2, payQty = 1 } = req.body;
@@ -191,11 +175,8 @@ aiController.generarCopyPromo = async (req, res) => {
     }
 
     try {
-      /*
-       * Tres intentos por modelo: aquí hay alguien mirando un círculo girar y
-       * esperando un texto. Un par de segundos de más valen la pena si a
-       * cambio sale escrito por la IA y no por una plantilla.
-       */
+      // Tres intentos por modelo: aquí hay alguien mirando un círculo girar y esperando un texto. Un par
+      // de segundos de más valen la pena si a cambio sale escrito por la IA y no por una plantilla.
       const respuesta = await generarConIA({
         contents: armarPrompt(type, items, buyQty, payQty),
         config: {
@@ -223,30 +204,9 @@ aiController.generarCopyPromo = async (req, res) => {
   }
 };
 
-/*
- * ============================================================
- * EL CATÁLOGO QUE VE EL ASISTENTE — lo arma el servidor
- * ============================================================
- * Antes lo mandaba el navegador o el teléfono: la lista entera de productos,
- * en el orden en que llega de GET /product. Ese orden es el de la base
- * (productModel.find() no ordena nada), o sea más o menos el de creación, y
- * aquí se cortaba en 120. Resultado: entraban los 120 MÁS VIEJOS y los
- * productos nuevos —justo los que la tienda más quiere vender— nunca le
- * llegaban a la IA. Y los agotados ocupaban lugar igual, porque del otro lado
- * solo se quitaban los inactivos.
- *
- * Ahora se arma aquí, con lo que de verdad hay:
- *   - Solo activos y CON existencias. Lo agotado no se puede agregar, así que
- *     no se le ofrece a la IA como si se pudiera.
- *   - Los más nuevos primero (el _id de Mongo lleva la fecha de creación).
- *   - Y ANTES que todo, los que tienen que ver con lo que se está hablando:
- *     la frase y lo último de la conversación. Si alguien pregunta por
- *     leche, la leche entra aunque la tienda tenga mil productos.
- *
- * La lista se guarda 30 segundos en memoria: el asistente pregunta varias
- * veces seguidas en una misma charla, y no hace falta ir a la base cada vez.
- * ============================================================
- */
+// EL CATÁLOGO QUE VE EL ASISTENTE — lo arma el servidor
+// El servidor arma la lista de productos que ve Tiqui, con los más relevantes para la charla
+// primero.
 const TOPE_CATALOGO = 150;
 const VIGENCIA_CATALOGO_MS = 30 * 1000;
 let catalogoEnMemoria = { en: 0, lista: null };
@@ -298,11 +258,9 @@ const leerCatalogo = async () => {
   return lista;
 };
 
-/*
- * Lo disponible, con lo relacionado a la charla arriba y los nuevos después,
- * y aparte los agotados que tienen que ver con lo que pidió: para que la IA
- * pueda decir "se nos acabó" en vez de "no tenemos eso".
- */
+// Lo disponible, con lo relacionado a la charla arriba y los nuevos después, y aparte los agotados
+// que tienen que ver con lo que pidió: para que la IA pueda decir "se nos acabó" en vez de "no
+// tenemos eso".
 const catalogoParaAsistente = async (textoDeLaCharla) => {
   const todos = await leerCatalogo();
   const palabras = palabrasClave(textoDeLaCharla);
@@ -324,20 +282,9 @@ const catalogoParaAsistente = async (textoDeLaCharla) => {
   return { disponibles: disponibles.slice(0, TOPE_CATALOGO), agotados };
 };
 
-/*
- * ============================================================
- * LA CONVERSACIÓN — lo último que se dijo
- * ============================================================
- * Antes la IA recibía solo la frase de ahora. Si el asistente preguntaba
- * "¿Se la agrego?" y la persona decía "sí", la IA no tenía idea de qué era
- * "la": cada frase le llegaba como si fuera la primera de la charla. Ahora
- * viajan los últimos mensajes (de los dos lados), y con eso entiende las
- * respuestas cortas que dependen de lo anterior: "sí", "mejor dos", "la
- * otra", "y también una leche".
- *
- * Tres intercambios alcanzan para eso y mantienen la pregunta liviana.
- * ============================================================
- */
+// LA CONVERSACIÓN — lo último que se dijo
+// Junto con la frase viajan los últimos mensajes de la charla, para que la IA entienda respuestas
+// cortas como "sí", "mejor dos" o "la otra".
 const MENSAJES_DE_MEMORIA = 6;
 
 const conversacionReciente = (historial) =>
@@ -381,45 +328,23 @@ const REGLAS_DE_CHARLA = [
   "  lista hay algo parecido, ofrecéselo por su nombre (sin agregarlo todavía).",
 ].join("\n");
 
-/*
- * GET /api/ai/listo
- * El asistente lo toca apenas se abre. El servidor de Render se duerme si no
- * hay tráfico y la primera pregunta tardaba medio minuto en contestar; así se
- * despierta (y deja el catálogo en memoria) mientras la persona todavía está
- * leyendo la pantalla, antes de que hable.
- */
+// GET /api/ai/listo El asistente lo toca apenas se abre. El servidor de Render se duerme si no hay
+// tráfico y la primera pregunta tardaba medio minuto en contestar; así se despierta (y deja el
+// catálogo en memoria) mientras la persona todavía está leyendo la pantalla, antes de que hable.
 aiController.listo = async (req, res) => {
   try {
     await Promise.all([leerCatalogo(), leerOfertas(), leerTienda()]);
   } catch {
     // Si la base tarda, igual se contesta: el objetivo era despertar el servidor.
   }
-  // `voz`: si hay llave de ElevenLabs. Sin ella, los clientes hablan con la
-  // voz del sistema y ni intentan pedir el audio.
-  // `voz` comprobada de verdad (ver comprobarVoz): sin ella los clientes hablan
-  // con la voz del dispositivo de una vez, sin probar y esperar el error.
+  // `voz`: si hay llave de ElevenLabs. Sin ella, los clientes hablan con la voz del sistema y ni
+  // intentan pedir el audio. `voz` comprobada de verdad (ver comprobarVoz): sin ella los clientes
+  // hablan con la voz del dispositivo de una vez, sin probar y esperar el error.
   return res.status(200).json({ listo: true, voz: await comprobarVoz() });
 };
 
-/*
- * ============================================================
- * ENTENDER LO QUE PIDIÓ EL CLIENTE (asistente de voz)
- * ============================================================
- * El asistente entiende por reglas: normaliza la frase, expande sinónimos y
- * busca el producto. Eso responde al instante, es gratis y funciona sin
- * internet — pero se rompe con "¿tiene algo para la fiebre?" o "deme lo de
- * siempre para el desayuno".
- *
- * Esta ruta es el PLAN B, no el plan A: solo se llama cuando las reglas ya
- * se dieron por vencidas. Así el caso común ("quiero dos manzanas") sigue
- * siendo instantáneo y la IA se gasta únicamente en lo que hoy no funciona.
- *
- * Reglas de la casa para el modelo:
- *   - Solo puede elegir productos de la lista que se le manda. Nada de
- *     inventar un jarabe que la tienda no vende.
- *   - Si no hay nada parecido, lo dice; no ofrece otra cosa por rellenar.
- *   - Frases cortas: esto se lee EN VOZ ALTA, no se lee en pantalla.
- */
+// ENTENDER LO QUE PIDIÓ EL CLIENTE (asistente de voz)
+// El asistente entiende por reglas: normaliza la frase, expande sinónimos y busca el producto.
 const ESQUEMA_INTENCION = {
   type: Type.OBJECT,
   properties: {
@@ -478,11 +403,9 @@ const MODO_ASISTENTE = [
   REGLAS_DE_CHARLA,
 ].join("\n");
 
-/*
- * Cuánto se le aguanta a Google en el asistente: hasta 3,5 s por llamada y 7 s
- * en total, con dos intentos por modelo (el rápido suele contestar al segundo
- * cuando el primero choca con un 503). Ver CON PLAZO en utils/iaClient.js.
- */
+// Cuánto se le aguanta a Google en el asistente: hasta 3,5 s por llamada y 7 s en total, con dos
+// intentos por modelo (el rápido suele contestar al segundo cuando el primero choca con un 503).
+// Ver CON PLAZO en utils/iaClient.js.
 const PLAZO_ASISTENTE = { intentos: 2, tiempoMaximo: 3500, plazoTotal: 7000 };
 
 aiController.entenderPedido = async (req, res) => {
@@ -511,10 +434,8 @@ aiController.entenderPedido = async (req, res) => {
     const contents = armarPreguntaDelAsistente({ frase, carrito, charla, disponibles, agotados });
 
     try {
-      /*
-       * Con plazo: acá hay alguien hablándole a la pantalla y esperando
-       * respuesta. Ver CON PLAZO en utils/iaClient.js.
-       */
+      // Con plazo: acá hay alguien hablándole a la pantalla y esperando respuesta. Ver CON PLAZO en
+      // utils/iaClient.js.
       const respuesta = await generarConIA({
         contents,
         config: {
@@ -532,23 +453,16 @@ aiController.entenderPedido = async (req, res) => {
 
       const idea = JSON.parse(texto);
 
-      /*
-       * No se confía en que el modelo copió bien el nombre: se verifica
-       * contra la lista real (la de disponibles: un agotado tampoco pasa).
-       * Si se lo inventó, se ignora el producto y queda solo la respuesta
-       * hablada.
-       */
+      // No se confía en que el modelo copió bien el nombre: se verifica contra la lista real (la de
+      // disponibles: un agotado tampoco pasa). Si se lo inventó, se ignora el producto y queda solo la
+      // respuesta hablada.
       const nombreReal = disponibles.find(
         (p) => p.nombre.toLowerCase() === String(idea.producto || "").toLowerCase()
       )?.nombre || "";
 
-      /*
-       * Sin frase que decir, no hay respuesta que dar.
-       *
-       * Pasa de vez en cuando: el modelo devuelve el JSON con la respuesta
-       * vacía. Si eso se dejara pasar, el asistente contestaría "Listo, ¿algo
-       * más?" sin haber hecho nada — peor que admitir que no entendió.
-       */
+      // Sin frase que decir, no hay respuesta que dar. Pasa de vez en cuando: el modelo devuelve el JSON
+      // con la respuesta vacía. Si eso se dejara pasar, el asistente contestaría "Listo, ¿algo más?" sin
+      // haber hecho nada — peor que admitir que no entendió.
       const dice = String(idea.respuesta || "").trim();
       if (!dice) {
         return res.status(200).json({ accion: "ninguna", entendido: false, origen: "vacia" });
@@ -574,41 +488,13 @@ aiController.entenderPedido = async (req, res) => {
   }
 };
 
-/*
- * ============================================================
- * TIQUI — el asistente de voz (web y app)
- * ============================================================
- * Un solo cerebro para los dos lados. Lo que el cliente dice le llega a
- * Gemini con TODO lo que hace falta para contestar en una sola vuelta:
- *
- *   - el catálogo con existencias, con categoría, marca y precio de oferta;
- *   - las promociones vigentes;
- *   - los datos de la tienda (dirección, envío);
- *   - lo que lleva en el carrito y lo último que se habló.
- *
- * Por qué uno solo y no "varios agentes": cada agente es otra consulta al
- * modelo, una detrás de otra. En una conversación por voz cada consulta se
- * nota (medio segundo a un segundo), y el asistente ya pecaba de lento. Lo
- * que lo hacía limitado no era tener una sola IA, sino que veía muy poco
- * (nombre, precio y existencias) y podía hacer muy poco.
- *
- * Cada "herramienta" es algo que el CLIENTE sabe ejecutar (el carrito vive en
- * el navegador o en el teléfono): el servidor solo valida lo que pidió el
- * modelo —que el producto o la categoría existan de verdad— y lo devuelve
- * como una lista de acciones. `responder` es una herramienta más, así que
- * todo lo que hace el modelo es una llamada a función (modo ANY).
- *
- * Reemplaza a /entender-herramientas, que queda apuntando aquí para las
- * versiones de la app que ya están instaladas (las acciones nuevas que no
- * conocen, simplemente no las ejecutan).
- * ============================================================
- */
+// TIQUI — el asistente de voz (web y app)
+// Un solo cerebro para los dos lados: la frase llega a Gemini con el catálogo, las ofertas y los
+// datos de la tienda, y vuelve con las acciones y lo que Tiqui dice.
 
-/*
- * Las promociones vigentes, ya traducidas a lo que se dice: "oferta $0.40
- * (20% menos)". El precio de oferta se calcula igual que en avisoPromo.js,
- * que es el que se cobra. Se guardan 30 s, como el catálogo.
- */
+// Las promociones vigentes, ya traducidas a lo que se dice: "oferta $0.40 (20% menos)". El precio
+// de oferta se calcula igual que en avisoPromo.js, que es el que se cobra. Se guardan 30 s, como
+// el catálogo.
 let ofertasEnMemoria = { en: 0, datos: null };
 
 const plata = (n) => `$${Number(n).toFixed(2)}`;
@@ -670,13 +556,9 @@ const leerOfertas = async () => {
   return datos;
 };
 
-/*
- * Los datos de la tienda que Tiqui puede decir. El horario, el WhatsApp y el
- * teléfono salen de los datos del negocio (Personalización → Mi negocio, los
- * mismos del pie de la tienda). Antes no se leían y Tiqui decía que no los
- * sabía aunque estuvieran guardados. Si están vacíos no se mencionan, y ella
- * no se los inventa (ver MODO_TIQUI).
- */
+// Los datos de la tienda que Tiqui puede decir. El horario, el WhatsApp y el teléfono salen de los
+// datos del negocio (Personalización → Mi negocio, los mismos del pie de la tienda). Si están
+// vacíos no se mencionan, y ella no se los inventa (ver MODO_TIQUI).
 let tiendaEnMemoria = { en: 0, texto: "", datos: {} };
 
 const leerTienda = async () => {
@@ -718,19 +600,9 @@ const leerDatosDeTienda = async () => {
   return tiendaEnMemoria.datos;
 };
 
-/*
- * ¿Con quién habla Tiqui?
- *
- * La ruta es pública a propósito (la usa el kiosco, que no tiene sesión), así
- * que nadie le decía al modelo quién preguntaba: a "¿cómo me llamo?" Tiqui
- * contestaba que no sabía, aunque el cliente estuviera con su cuenta abierta.
- * Ahora, si la petición trae la sesión de un CLIENTE —la cookie en la web, el
- * Bearer en la app, como en validarSesion—, se busca su primer nombre. Sin
- * sesión, o con una vencida, se habla igual, solo que sin nombre.
- *
- * Sin caché a propósito: el cliente puede cambiar su nombre en Mis datos, y
- * buscarlo por _id cuesta lo mismo que el resto de la pregunta.
- */
+// ¿Con quién habla Tiqui? La ruta es pública a propósito (la usa el kiosco, que no tiene sesión),
+// así que nadie le decía al modelo quién preguntaba: a "¿cómo me llamo?" Tiqui contestaba que no
+// sabía, aunque el cliente estuviera con su cuenta abierta.
 const nombreDelCliente = async (req) => {
   const deCabecera = req.headers.authorization?.startsWith("Bearer ")
     ? req.headers.authorization.slice(7)
@@ -785,11 +657,8 @@ const armarPreguntaDeTiqui = ({ frase, carrito, charla, disponibles, agotados, c
     ? carrito.map((i) => `${i.cantidad} ${i.nombre}`).join(", ")
     : "vacío";
 
-  /*
-   * Con cuántos quedan. Sin el número, la IA prometía lo que le pidieran ("te
-   * agregué 74 manzanas") y el carrito, que sí sabe, lo rechazaba: Tiqui decía
-   * una cosa y el carrito mostraba otra.
-   */
+  // Con cuántos quedan. Sin el número, la IA prometía lo que le pidieran ("te agregué 74 manzanas")
+  // y el carrito, que sí sabe, lo rechazaba: Tiqui decía una cosa y el carrito mostraba otra.
   const linea = (p) =>
     [
       p.nombre,
@@ -925,10 +794,8 @@ const HERRAMIENTAS_TIQUI = [
   },
 ];
 
-/*
- * Cómo es Tiqui. Va escrito tuteando a propósito: si las instrucciones van
- * de "vos" o de "usted", al modelo se le pega y contesta igual.
- */
+// Cómo es Tiqui. Va escrito tuteando a propósito: si las instrucciones van de "vos" o de "usted",
+// al modelo se le pega y contesta igual.
 const MODO_TIQUI = [
   "Eres Tiqui, la mascota de Tienda la 635: la etiqueta de precio del logo, con cara.",
   "Atiendes por voz a los clientes de esta tienda de barrio en El Salvador.",
@@ -999,31 +866,9 @@ const MODO_TIQUI = [
   "- No repitas lo que dijiste en el turno anterior; sigue la charla como una persona.",
 ].join("\n");
 
-/*
- * ============================================================
- * ¿DE VERDAD PIDIÓ ESTE PRODUCTO?
- * ============================================================
- * Le pedían "dos galletas" —que la tienda no tiene— y el modelo agregaba dos
- * Churritos Diana por su cuenta, diciendo "te agregué", como si fuera lo
- * mismo. Las instrucciones ya le pedían OFRECER lo parecido sin agregarlo,
- * pero a veces no hace caso, y un carrito con algo que nadie pidió es peor
- * que no entender.
- *
- * Así que no se le cree: para agregar un producto, la persona tiene que
- * haberlo NOMBRADO en esta frase (alguna palabra de su nombre o su marca, o
- * un pariente cercano: "refresco" y "soda").
- *
- * La única excepción es la respuesta corta —"sí", "dale", "otra más"— a lo
- * último que dijo Tiqui: ahí vale lo que Tiqui acababa de ofrecer o agregar.
- * Pero solo si la frase no pide nada nuevo. Con "quiero unas galletas", el
- * modelo llegó a agregar una manzana porque se había hablado de manzanas
- * antes; si la frase trae una palabra que no es ningún producto de la tienda,
- * la charla anterior ya no justifica nada.
- *
- * Lo que no pasa se convierte en lo que debió ser: "No tengo galletas. Lo
- * más parecido es Churritos Diana, ¿te lo agrego?".
- * ============================================================
- */
+// ¿DE VERDAD PIDIÓ ESTE PRODUCTO?
+// Le pedían "dos galletas" —que la tienda no tiene— y el modelo agregaba dos Churritos Diana por
+// su cuenta, diciendo "te agregué", como si fuera lo mismo.
 const PARIENTES = [
   ["refresco", "gaseosa", "soda", "cola", "coca"],
   ["platano", "banano", "guineo"],
@@ -1031,18 +876,9 @@ const PARIENTES = [
   ["yogurt", "yogur"],
 ];
 
-/*
- * ── Cómo SUENA, no cómo se escribe ──
- * El reconocimiento de voz se equivoca como se equivoca un oído: confunde s,
- * z y c; b y v; y y ll; se come la h, y pega palabras. "Es queso fresco" llegó
- * como "esquizofrezco": ninguna palabra dice "queso", pero suena igual. Tiqui
- * lo entendía (el modelo agregaba el Queso Fresco) y esta revisión lo tiraba
- * por no encontrar la palabra escrita.
- *
- * Así que además de comparar palabras, se compara el sonido: el nombre del
- * producto, todo junto y en su versión "fonética", tiene que aparecer dentro
- * de lo dicho con muy pocas letras de diferencia (una cada cinco).
- */
+// ── Cómo SUENA, no cómo se escribe ── El reconocimiento de voz se equivoca como se equivoca un
+// oído: confunde s, z y c; b y v; y y ll; se come la h, y pega palabras. "Es queso fresco" llegó
+// como "esquizofrezco": ninguna palabra dice "queso", pero suena igual.
 const sonido = (texto) =>
   aTextoPlano(texto)
     .replace(/[^a-z0-9]/g, "")
@@ -1096,18 +932,8 @@ const SIN_PRODUCTO = new Set([
   "quieres", "quiere", "probar", "pruebo", "esos", "esas", "ella", "ello", "vez", "veces",
 ]);
 
-/*
- * Qué palabras de la frase no son ningún producto de la tienda: lo que se
- * pidió y no hay. Se devuelven como las dijo la persona ("galletas", con su
- * plural y sus tildes), que es como Tiqui tiene que repetirlas.
- */
-/*
- * Solo cuenta como "lo que pidió" la palabra que está donde va un producto:
- * después de un artículo, una cantidad, "de", "por" o un verbo de pedir
- * ("unas galletas", "dos cocas", "cámbialo por queso"). Antes era cualquier
- * palabra que no fuera de un producto, y Tiqui decía "No tengo cambiáramos"
- * de un verbo.
- */
+// Las palabras de la frase que no son ningún producto de la tienda (lo que se pidió y no hay), tal
+// como las dijo la persona. Solo cuentan las que van donde va un producto ("unas galletas").
 const ANTES_DE_PRODUCTO = new Set([
   "un", "una", "unos", "unas", "el", "la", "los", "las", "de", "del", "por", "otra", "otro", "mas",
   "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez", "media", "medio", "libra", "libras",
@@ -1141,18 +967,9 @@ const loQueNoHay = (frase, catalogo) => {
 const enLista = (cosas, conector) =>
   cosas.length <= 1 ? cosas.join("") : `${cosas.slice(0, -1).join(", ")} ${conector} ${cosas[cosas.length - 1]}`;
 
-/*
- * "¿Algo más?" solo cuando se está armando un pedido.
- *
- * Tiqui cerraba TODO con "¿algo más?" o "¿qué más te gustaría pedir?": le
- * preguntaban por las ofertas o lo saludaban y contestaba como cajero
- * apurado. Esa pregunta tiene sentido justo después de tocar el carrito; en
- * una charla suena a que solo le interesa vender.
- *
- * Las instrucciones ya se lo piden, pero el modelo tiene la costumbre muy
- * pegada. Así que si en esta respuesta no se tocó el carrito, el cierre de
- * venta se quita de la frase. Si la frase fuera solo eso, se deja como está.
- */
+// "¿Algo más?" solo cuando se está armando un pedido. Tiqui cerraba TODO con "¿algo más?" o "¿qué
+// más te gustaría pedir?": le preguntaban por las ofertas o lo saludaban y contestaba como cajero
+// apurado.
 const TOCA_EL_CARRITO = new Set(["agregar", "quitar", "cambiar", "vaciar"]);
 const CIERRE_DE_VENTA =
   /\s*¿\s*(?:y\s+)?(?:algo\s+más|te\s+llevo\s+algo\s+más|(?:deseas|necesitas|quieres|te\s+gustaría)\s+(?:algo|agregar\s+algo|llevar\s+algo|pedir\s+algo)\s+más|qué\s+más\s+(?:te\s+gustaría|quieres|necesitas|deseas|vas\s+a)\s*(?:pedir|llevar|agregar|comprar)?|te\s+(?:ayudo|puedo\s+ayudar)\s+con\s+algo\s+más|se\s+te\s+ofrece\s+algo\s+más)[^?¿]*\?\s*$/i;
@@ -1187,29 +1004,9 @@ const fraseDeRespaldo = (acciones) => {
   return agregados.length ? `${partes.join(" ")} ¿Algo más?` : partes.join(" ");
 };
 
-/*
- * ============================================================
- * CONTESTAR SIN GEMINI — la IA propia de Tiqui
- * ============================================================
- * Antes de preguntarle a Gemini (4 segundos, y a veces saturado en la capa
- * gratis), la IA propia (utils/intencionesTiqui.js, entrenada en
- * analitica/intenciones) dice qué se quiere. Si es algo sencillo —saludar,
- * el total, pagar, abrir los pedidos, las ofertas, el horario…— y lo
- * reconoce con confianza, Tiqui contesta sola (utils/respuestasTiqui.js).
- *
- * Se le deja a Gemini, aunque la IA propia esté segura:
- *   - lo que nombra un producto ("¿hay ofertas de Coca-Cola?"): eso se
- *     contesta con el catálogo;
- *   - la respuesta corta a una pregunta de Tiqui ("sí", "no, gracias"):
- *     depende de lo que se venía hablando.
- *
- * Con `umbral` UMBRAL_DIRECTO va antes de Gemini; con UMBRAL_RESPALDO, cuando
- * Gemini no contestó. Devuelve la respuesta lista, o null.
- *
- * APAGADA de entrada (config.tiqui.iaPropia, TIQUI_IA_PROPIA=1 la enciende):
- * se quedaba con frases de agregar o de recomendar que eran de Gemini.
- * ============================================================
- */
+// CONTESTAR SIN GEMINI — la IA propia de Tiqui
+// La IA propia reconoce lo sencillo (saludar, el total, pagar, las ofertas…) y contesta sin
+// Gemini. Está apagada: se enciende con TIQUI_IA_PROPIA=1.
 const contestarSinGemini = async ({ frase, charla, req, umbral }) => {
   // Apagada (como viene): no contesta nada y todo va a Gemini. Ver config.tiqui.
   if (!config.tiqui?.iaPropia) return null;
@@ -1295,22 +1092,16 @@ aiController.asistente = async (req, res) => {
       const acciones = [];
       let dice = "";
       let animo = "normal";
-      /*
-       * Lo que el modelo quiso agregar sin que nadie lo pidiera. Ver ¿DE
-       * VERDAD PIDIÓ ESTE PRODUCTO? Los que parecen un reemplazo se ofrecen;
-       * los que ya se habían nombrado antes (la manzana de hace dos frases) no
-       * son un "parecido", son una confusión, y solo se descartan.
-       */
+      // Lo que el modelo quiso agregar sin que nadie lo pidiera. Ver ¿DE VERDAD PIDIÓ ESTE PRODUCTO? Los
+      // que parecen un reemplazo se ofrecen; los que ya se habían nombrado antes (la manzana de hace dos
+      // frases) no son un "parecido", son una confusión, y solo se descartan.
       const catalogo = await leerCatalogo();
       const faltan = loQueNoHay(frase, catalogo);
       const ultimoDeTiqui = [...charla].reverse().find((m) => m.quien === "Asistente")?.texto || "";
       const loDicho = [frase, ...charla.slice(-4).map((m) => m.texto)];
-      /*
-       * Lo que Tiqui acaba de ofrecer vale si la frase no pide nada nuevo, o si
-       * empieza diciendo que sí ("sí, me gustaría ese"): ahí la persona está
-       * contestando la oferta, aunque el reconocimiento le haya metido otras
-       * palabras.
-       */
+      // Lo que Tiqui acaba de ofrecer vale si la frase no pide nada nuevo, o si empieza diciendo que sí
+      // ("sí, me gustaría ese"): ahí la persona está contestando la oferta, aunque el reconocimiento le
+      // haya metido otras palabras.
       const diceQueSi = /^(si|claro|dale|ok|okay|bueno|va|sale|perfecto|de acuerdo|esta bien|me gustaria|porfa|por favor)\b/.test(aTextoPlano(frase));
       const pidioEsto = (real) =>
         fueNombrado(real, [frase]) || ((!faltan.length || diceQueSi) && fueNombrado(real, [ultimoDeTiqui]));
@@ -1372,11 +1163,9 @@ aiController.asistente = async (req, res) => {
         }
       }
 
-      /*
-       * Si quiso colar un sustituto, lo que había dicho el modelo ("te agregué
-       * dos Churritos Diana") ya no es verdad: la frase se arma aquí con lo que
-       * sí se hizo, lo que no hay y el parecido como pregunta.
-       */
+      // Si quiso colar un sustituto, lo que había dicho el modelo ("te agregué dos Churritos Diana") ya
+      // no es verdad: la frase se arma aquí con lo que sí se hizo, lo que no hay y el parecido como
+      // pregunta.
       if (descartados) {
         const hecho = fraseDeRespaldo(acciones).replace(/\s*¿Algo más\?$/, "");
         const noHay = faltan.length ? `No tengo ${enLista(faltan, "ni")}.` : "No tengo exactamente eso.";
@@ -1387,11 +1176,8 @@ aiController.asistente = async (req, res) => {
         animo = "apenada";
       }
 
-      /*
-       * A veces el modelo HACE (agrega la leche) pero se olvida de 'responder'.
-       * Antes eso tiraba todo, acción incluida. Ahora se dice lo que se hizo
-       * con una frase armada aquí. Sin acciones ni frase, sí: no se entendió.
-       */
+      // A veces el modelo HACE (agrega la leche) pero se olvida de 'responder'. Ahora se dice lo que se
+      // hizo con una frase armada aquí. Sin acciones ni frase, sí: no se entendió.
       if (!dice) {
         dice = fraseDeRespaldo(acciones);
         animo = acciones.length ? "alegre" : "normal";
@@ -1416,13 +1202,8 @@ aiController.asistente = async (req, res) => {
   }
 };
 
-/*
- * GET /api/ai/voz?t=<texto>&a=<ánimo>
- * La voz de Tiqui (ver utils/vozTiqui.js). `a` es el ánimo de la frase
- * (alegre, asombrada…); sin él, o con uno que no existe, suena normal. Va por GET a propósito: así el
- * navegador la pone directo en un <audio> y empieza a sonar con los primeros
- * pedazos, sin esperar el archivo entero. Lo mismo la app.
- */
+// GET /api/ai/voz?t=<texto>&a=<ánimo> La voz de Tiqui (ver utils/vozTiqui.js). `a` es el ánimo de
+// la frase (alegre, asombrada…); sin él, o con uno que no existe, suena normal.
 aiController.voz = async (req, res) => {
   const texto = paraDecir(String(req.query.t || "")).slice(0, 400);
   if (!texto) return res.status(400).json({ message: "Hace falta el texto" });
@@ -1465,28 +1246,9 @@ aiController.voz = async (req, res) => {
   }
 };
 
-/*
- * ============================================================
- * ACOMODAR EL PRODUCTO EN SU ESTANTE (clasificador de familias)
- * ============================================================
- * La portada de la tienda arma sus filas temáticas por FAMILIA. El 90% del
- * catálogo lo resuelve el frontend con puras reglas ("queso" -> quesos), gratis
- * y al instante. Esta ruta atiende solo lo que las reglas no supieron: nombres
- * de marca que no dicen qué son ("Volt", "Ricitos"), productos nuevos, cosas
- * que a nadie se le ocurrió meter en el léxico.
- *
- * Igual que el asistente de voz, esta es la ayuda de última hora, no el plan
- * principal. Y con dos candados que son lo importante de todo esto:
- *
- *   1. Lo que se resuelve SE GUARDA en el producto (familia + familiaOrigen).
- *      Cada producto se clasifica una vez en la vida, no en cada visita. Sin
- *      esto la cuota gratis se acaba en dos días.
- *   2. Antes de molestar al modelo se revisa la base: si el producto ya tiene
- *      familia guardada, se devuelve esa y la IA ni se entera. Hace falta
- *      porque el navegador no siempre sabe lo que ya está guardado, y sin esta
- *      revisión se estaría preguntando lo mismo en cada carga de la página.
- * ============================================================
- */
+// ACOMODAR EL PRODUCTO EN SU ESTANTE (clasificador de familias) La portada de la tienda arma sus
+// filas temáticas por FAMILIA. El 90% del catálogo lo resuelve el frontend con puras reglas
+// ("queso" -> quesos), gratis y al instante.
 const ESQUEMA_CLASIFICACION = {
   type: Type.ARRAY,
   items: {
@@ -1519,15 +1281,9 @@ const MODO_ESTANTES = [
   "- Devolvés TODOS los ids que te mandaron, ninguno de más, ninguno de menos.",
 ].join("\n");
 
-/*
- * POST /api/ai/clasificar
- * Recibe { productos: [{ id, nombre }] } y devuelve { familias: [{ id, familia }] }.
- *
- * Nunca responde 500 por culpa de la IA: sin llave, sin cuota o sin internet
- * contesta 200 con la lista vacía. Del otro lado hay un cliente mirando la
- * tienda, y que la portada tenga una fila menos no es un error que valga la
- * pena contarle a nadie.
- */
+// POST /api/ai/clasificar Recibe { productos: [{ id, nombre }] } y devuelve { familias: [{ id,
+// familia }] }. Nunca responde 500 por culpa de la IA: sin llave, sin cuota o sin internet
+// contesta 200 con la lista vacía.
 aiController.clasificarProductos = async (req, res) => {
   try {
     const enviados = Array.isArray(req.body.productos) ? req.body.productos : [];
@@ -1535,12 +1291,9 @@ aiController.clasificarProductos = async (req, res) => {
       return res.status(200).json({ familias: [], origen: "sin-productos" });
     }
 
-    /*
-     * Máximo 60 por tanda: es lo que cabe en una petición sin volverla lenta ni
-     * arriesgar que el modelo se coma la mitad de la lista. Los ids se filtran
-     * con la forma de un ObjectId — un id mal formado haría que la consulta
-     * reventara y devolviera un 500 por una tontería.
-     */
+    // Máximo 60 por tanda: es lo que cabe en una petición sin volverla lenta ni arriesgar que el
+    // modelo se coma la mitad de la lista. Los ids se filtran con la forma de un ObjectId — un id mal
+    // formado haría que la consulta reventara y devolviera un 500 por una tontería.
     const pedidos = enviados
       .filter((p) => /^[a-f\d]{24}$/i.test(String(p?.id || "")))
       .slice(0, 60);
@@ -1560,12 +1313,9 @@ aiController.clasificarProductos = async (req, res) => {
         yaSabidas.push({ id: idProducto, familia: p.familia });
         return;
       }
-      /*
-       * Ya se preguntó por este y la IA dijo que no encaja en ningún estante.
-       * "No sé" también es una respuesta y también se guarda: si no, cada
-       * visita se volvería a gastar cuota preguntando por el mismo servicio de
-       * impresión que nunca va a ser un abarrote.
-       */
+      // Ya se preguntó por este y la IA dijo que no encaja en ningún estante. "No sé" también es una
+      // respuesta y también se guarda: si no, cada visita se volvería a gastar cuota preguntando por el
+      // mismo servicio de impresión que nunca va a ser un abarrote.
       if (p.familiaOrigen === SIN_FAMILIA) return;
 
       // El nombre sale de la base, no de lo que mandó el navegador: es el mismo
@@ -1594,11 +1344,8 @@ aiController.clasificarProductos = async (req, res) => {
     ].join("\n");
 
     try {
-      /*
-       * Tres intentos: esto corre de fondo mientras el dueño mira su tienda,
-       * así que puede tomarse su tiempo. Lo que resuelve queda guardado en el
-       * producto, y lo que no se reintenta la próxima vez.
-       */
+      // Tres intentos: esto corre de fondo mientras el dueño mira su tienda, así que puede tomarse su
+      // tiempo. Lo que resuelve queda guardado en el producto, y lo que no se reintenta la próxima vez.
       const respuesta = await generarConIA({
         contents,
         config: {
@@ -1617,14 +1364,9 @@ aiController.clasificarProductos = async (req, res) => {
       const clasificadas = JSON.parse(texto);
       if (!Array.isArray(clasificadas)) throw new Error("La IA no devolvió una lista");
 
-      /*
-       * Desconfianza sana, la misma que con los nombres del asistente de voz:
-       *   - el id tiene que ser uno de los que preguntamos (no uno que se sacó
-       *     de la manga ni uno que ya estaba resuelto),
-       *   - la familia tiene que estar en la lista cerrada.
-       * Lo que no cumpla se descarta sin decir nada: ese producto simplemente
-       * se queda sin estante, que es un resultado válido.
-       */
+      // Desconfianza sana, la misma que con los nombres del asistente de voz: - el id tiene que ser uno
+      // de los que preguntamos (no uno que se sacó de la manga ni uno que ya estaba resuelto), - la
+      // familia tiene que estar en la lista cerrada.
       const preguntados = new Set(porResolver.map((p) => p.id));
       const aceptadas = [];
       const vistos = new Set();
@@ -1638,13 +1380,8 @@ aiController.clasificarProductos = async (req, res) => {
         aceptadas.push({ id: idProducto, familia });
       });
 
-      /*
-       * Se guarda para no volver a preguntar nunca por estos productos.
-       * `familiaOrigen` deja el rastro de quién lo decidió: si algún día hay
-       * que revisar o borrar lo que puso la IA, se sabe cuál fue.
-       * El modelo usa strict:false, así que estos dos campos entran sin tocar
-       * el schema (están documentados arriba del modelo).
-       */
+      // Se guarda para no volver a preguntar nunca por estos productos. `familiaOrigen` deja el rastro
+      // de quién lo decidió: si algún día hay que revisar o borrar lo que puso la IA, se sabe cuál fue.
       const escrituras = aceptadas.map((f) => ({
         updateOne: {
           filter: { _id: f.id },
