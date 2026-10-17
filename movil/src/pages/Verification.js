@@ -1,17 +1,6 @@
-/*
- * ============================================================
- * VERIFICACIÓN — el código que llega al correo
- * ============================================================
- * La versión móvil de `Verification.jsx`, recortada al único flujo que la app
- * tiene hoy: terminar un registro. La web usa esta misma pantalla para el 2FA
- * del personal y para recuperar contraseña, y decide cuál con una bandera en
- * localStorage; aquí no hay nada que decidir todavía.
- *
- * Sin esta pantalla el registro no sirve de nada: el backend NO crea la cuenta
- * al enviar el formulario, solo guarda los datos 15 minutos y manda un código
- * de 6 caracteres. La cuenta nace cuando ese código vuelve.
- * ============================================================
- */
+// VERIFICACIÓN — el código que llega al correo
+// La versión móvil de `Verification.jsx`, recortada al único flujo que la app tiene hoy: terminar
+// un registro.
 
 import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -25,22 +14,8 @@ import { contenidoCentrado } from '../theme/pantalla';
 
 const LARGO = 6;
 
-/*
- * ── Por qué UN input y no seis ──
- *
- * Lo natural es poner seis campos de un caracter y mover el foco solo. Se
- * probó y se rompe: los caracteres entran más rápido de lo que React redibuja
- * y de lo que el foco alcanza a moverse, así que escribir "abc123" dejaba
- * "ab2". Pasa al pegar el código del correo, con el autocompletado del
- * teclado, y escribiendo rápido a secas — y el síntoma engaña, porque el
- * servidor contesta "código inválido" mientras en pantalla se ve bien lo poco
- * que quedó.
- *
- * La cura no es afinar la carrera sino no tenerla: un solo TextInput
- * invisible guarda el código entero, y las seis casillas son dibujo. El
- * teclado, el pegado y el retroceso funcionan como en cualquier campo normal
- * porque son un campo normal.
- */
+// ── Por qué UN input y no seis ──
+// Lo natural es poner seis campos de un caracter y mover el foco solo.
 const Verification = ({ correo, alVerificar, alVolver }) => {
   const { t } = useIdioma();
   // La paleta de la temporada, para que las casillas del código y el botón
@@ -93,12 +68,9 @@ const Verification = ({ correo, alVerificar, alVolver }) => {
             <Text style={estilos.correo}>{correo || t('tu correo')}</Text>
           </Text>
 
-          {/*
-            Tocar cualquier casilla abre el teclado sobre el campo de verdad.
-            Para el lector de pantalla las casillas no existen (son dibujo):
-            el que se anuncia es el campo escondido, con su nombre y lo que va
-            escrito. Por eso el Pressable no se agrupa como un solo elemento.
-          */}
+          {/* Tocar cualquier casilla abre el teclado sobre el campo de verdad. Para el lector de pantalla las
+             casillas no existen (son dibujo): el que se anuncia es el campo escondido, con su nombre y lo
+             que va escrito. Por eso el Pressable no se agrupa como un solo elemento. */}
           <Pressable style={estilos.casillas} onPress={() => campo.current?.focus()} accessible={false}>
             {Array.from({ length: LARGO }, (_, indice) => (
               <View
@@ -223,11 +195,9 @@ const crearEstilos = (COLORES) => StyleSheet.create({
     fontWeight: '700',
     color: COLORES.texto,
   },
-  /*
-   * El campo de verdad: cubre la fila de casillas para que el toque caiga en
-   * él, pero no se ve. No se usa `display: none` ni `width: 0` porque un campo
-   * sin tamaño no siempre recibe el foco en Android.
-   */
+  // El campo de verdad: cubre la fila de casillas para que el toque caiga en él, pero no se ve. No
+  // se usa `display: none` ni `width: 0` porque un campo sin tamaño no siempre recibe el foco en
+  // Android.
   campoOculto: {
     position: 'absolute',
     top: 0,

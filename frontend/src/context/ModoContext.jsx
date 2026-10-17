@@ -6,20 +6,9 @@ import {
   LLAVE_MODO, CONSULTA_OSCURO, leerModoGuardado, guardarModo, sistemaEnOscuro, esOscuro, aplicarModo, MODOS,
 } from '../utils/modo';
 
-/*
- * ModoContext — claro u oscuro, para toda la tienda y Mi Cuenta.
- *
- * Lo elige la persona en Mi Cuenta → Preferencias; lo leen (con useModo)
- * el mapa, que cambia de calles claras a oscuras, y la pintura de la
- * temporada, que recalcula sus colores para el fondo oscuro. Todo lo demás no necesita
- * preguntar: se pinta con los tokens de index.css, que cambian solos con
- * data-modo en el <html>.
- *
- * EL PANEL NO SE OSCURECE con esto. Tiene su propio "Modo Oscuro" entre las
- * paletas de accesibilidad, y quien trabaja ahí eligió esa paleta por algo.
- * Por eso `oscuro` es falso en las rutas del panel aunque la persona haya
- * elegido oscuro para la tienda.
- */
+// ModoContext — claro u oscuro, para toda la tienda y Mi Cuenta. Lo elige la persona en Mi Cuenta
+// → Preferencias; lo leen (con useModo) el mapa, que cambia de calles claras a oscuras, y la
+// pintura de la temporada, que recalcula sus colores para el fondo oscuro.
 const suscribirSistema = (avisar) => {
   const consulta = window.matchMedia?.(CONSULTA_OSCURO);
   consulta?.addEventListener?.('change', avisar);

@@ -2,10 +2,8 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import api from './api';
 import { dashboardService } from './dashboardService';
 
-/*
- * Pedir el pronóstico cuando el servidor todavía lo está calculando: se
- * vuelve a preguntar hasta que esté, sin forzar otro cálculo cada vez.
- */
+// Pedir el pronóstico cuando el servidor todavía lo está calculando: se vuelve a preguntar hasta
+// que esté, sin forzar otro cálculo cada vez.
 
 vi.mock('./api', () => ({ default: { get: vi.fn() } }));
 

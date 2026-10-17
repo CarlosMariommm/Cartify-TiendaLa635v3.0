@@ -6,26 +6,8 @@ import { useModalTerminos } from '../hooks/useModalTerminos';
 import { useCompletarGoogle } from '../hooks/useCompletarGoogle';
 import { useIdioma } from '../hooks/useIdioma';
 
-/*
- * ============================================================
- * TERMINAR DE ENTRAR CON GOOGLE — CompletarGoogle.jsx
- * ============================================================
- * El último paso de quien entra por primera vez con Google.
- *
- * Antes esto no existía: entrar con un correo sin cuenta mandaba a /register
- * EN BLANCO. La persona acababa de darle permiso a la tienda para leer su
- * nombre y su correo, y lo primero que veía era un formulario vacío
- * pidiéndoselos de nuevo. Se sentía como si el permiso no hubiera servido de
- * nada.
- *
- * Aquí se le muestra lo que Google ya confirmó —sin poder editarlo, porque no
- * es un campo, es un hecho— y se le pide SOLO lo que falta: el teléfono para
- * poder entregarle, la fecha de nacimiento para los productos de mayores, el
- * documento si quiere, y las dos decisiones que nadie puede tomar por ella.
- *
- * La lógica vive en useCompletarGoogle. Aquí solo se pinta.
- * ============================================================
- */
+// TERMINAR DE ENTRAR CON GOOGLE — CompletarGoogle.jsx
+// El último paso de quien entra por primera vez con Google.
 
 const Pantalla = styled.div`
   min-height: 100vh;
@@ -65,10 +47,8 @@ const Bajada = styled.p`
   text-align: center;
 `;
 
-/*
- * Lo que Google confirmó. Se enseña y no se pide: repetirle el correo a quien
- * acaba de autorizarlo es desconfiar de la puerta por la que entró.
- */
+// Lo que Google confirmó. Se enseña y no se pide: repetirle el correo a quien acaba de autorizarlo
+// es desconfiar de la puerta por la que entró.
 const Identidad = styled.div`
   display: flex;
   align-items: center;
@@ -285,12 +265,9 @@ const CompletarGoogle = () => {
   const { abierto, abrir: abrirTerminos, cerrar: cerrarTerminos, clave: documentoAbierto } = useModalTerminos();
   const { t } = useIdioma();
 
-  /*
-   * Sin token no hay nada que completar. Pasa si alguien recarga la página o
-   * pega la dirección a mano: el token vive en el estado de la navegación, no
-   * en la URL, y una recarga lo borra. Se devuelve al login en vez de enseñar
-   * un formulario que no podría enviarse.
-   */
+  // Sin token no hay nada que completar. Pasa si alguien recarga la página o pega la dirección a
+  // mano: el token vive en el estado de la navegación, no en la URL, y una recarga lo borra. Se
+  // devuelve al login en vez de enseñar un formulario que no podría enviarse.
   if (!hayToken) return <Navigate to="/iniciar-sesion" replace />;
 
   const inicial = (sugerido.fullName || sugerido.email || '?').trim().charAt(0).toUpperCase();
@@ -362,11 +339,8 @@ const CompletarGoogle = () => {
           </Campo>
 
           <BloqueConsentimiento>
-            {/*
-              Entrar con Google prueba quién es, no que haya aceptado nada. Sin
-              esta casilla el servidor NO crea la cuenta — no es una cortesía
-              del formulario, es la condición. Ver googleAuthClient.
-            */}
+            {/* Entrar con Google prueba quién es, no que haya aceptado nada. Sin esta casilla el servidor NO
+               crea la cuenta — no es una cortesía del formulario, es la condición. Ver googleAuthClient. */}
             <Casilla>
               <input
                 type="checkbox"
@@ -387,11 +361,8 @@ const CompletarGoogle = () => {
               </div>
             </Casilla>
 
-            {/*
-              Desmarcada, y sin `required`. Es opcional de verdad: la cuenta se
-              crea igual sin tocarla y no se pierde nada de la tienda por no
-              querer publicidad.
-            */}
+            {/* Desmarcada, y sin `required`. Es opcional de verdad: la cuenta se crea igual sin tocarla y no se
+               pierde nada de la tienda por no querer publicidad. */}
             <Casilla>
               <input type="checkbox" id="promociones" {...register('promociones')} />
               <label htmlFor="promociones">
@@ -403,11 +374,8 @@ const CompletarGoogle = () => {
             </Casilla>
           </BloqueConsentimiento>
 
-          {/*
-            El botón se apaga hasta que acepte. Es más honesto que dejarlo
-            encendido y contestar con un error rojo después de hacerle llenar
-            todo: la condición se ve desde el principio.
-          */}
+          {/* El botón se apaga hasta que acepte. Es más honesto que dejarlo encendido y contestar con un
+             error rojo después de hacerle llenar todo: la condición se ve desde el principio. */}
           <Boton type="submit" disabled={cargando || !aceptoTerminos}>
             {cargando
               ? <Loader2 size={18} className="animate-spin" />

@@ -2,15 +2,9 @@ import { useState, useEffect } from 'react';
 import { loyaltyService } from '../api/loyaltyService';
 import { useAuth } from './useAuth';
 
-/*
- * useLoyalty — datos de fidelidad del cliente logueado:
- *   - points:       saldo DISPONIBLE real (lotes no vencidos, del ledger)
- *   - nextExpiry:   próxima fecha en que vence un lote
- *   - expiringSoon: puntos que vencen dentro de 30 días
- *   - config:       tasa por dólar y meses de vencimiento (para textos)
- *
- * Toda la carga vive aquí; la página de Puntos solo pinta.
- */
+// useLoyalty — datos de fidelidad del cliente logueado: - points: saldo DISPONIBLE real (lotes no
+// vencidos, del ledger) - nextExpiry: próxima fecha en que vence un lote - expiringSoon: puntos
+// que vencen dentro de 30 días - config: tasa por dólar y meses de vencimiento (para textos)
 export const useLoyalty = () => {
   // Los puntos son de un CLIENTE; la config del programa la puede leer
   // cualquiera. Por eso solo el resumen va detrás de `esCliente`.

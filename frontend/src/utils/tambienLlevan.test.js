@@ -2,10 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { cargarTambienLlevan, elegirTambienLlevan, olvidarTambienLlevan } from './tambienLlevan';
 import { productService } from '../api/productService';
 
-/*
- * "Quien compra esto también lleva" en la ficha de la web: lo que manda el
- * servidor, cruzado con el catálogo que ya está cargado.
- */
+// "Quien compra esto también lleva" en la ficha de la web: lo que manda el servidor, cruzado con
+// el catálogo que ya está cargado.
 
 vi.mock('../api/productService', () => ({ productService: { getTambienLlevan: vi.fn() } }));
 

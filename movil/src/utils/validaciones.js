@@ -1,16 +1,6 @@
-/*
- * ============================================================
- * VALIDACIONES — validaciones.js
- * ============================================================
- * Las mismas reglas que `frontend/src/utils/validaciones.js`, pero con la
- * forma que pide un formulario sin react-hook-form: cada función recibe el
- * valor y devuelve el mensaje de error, o `null` si el campo está bien.
- *
- * Se validan solo los campos que existen en Iniciar sesión y Registrarse; las
- * reglas de precios y promociones son del panel de administración y no tienen
- * nada que hacer en la app del cliente.
- * ============================================================
- */
+// VALIDACIONES — validaciones.js
+// Las mismas reglas de la web para Iniciar sesión y Registrarse: cada función recibe el valor y
+// devuelve el mensaje de error, o `null` si está bien.
 
 import { tAhora } from './idioma';
 
@@ -34,17 +24,9 @@ export const validarContrasena = (valor) => {
 // Los dígitos del DUI, sin el guion.
 const digitosDelDui = (valor) => String(valor || '').replace(/\D/g, '');
 
-/*
- * ¿Cuadra el dígito verificador? Es la MISMA cuenta que la web
- * (frontend/src/utils/validaciones.js `duiEsValido`): los 8 primeros dígitos se
- * multiplican por 9, 8, 7...2, se suman, y el verificador tiene que ser
- * (10 - suma % 10) % 10. Ese último % 10 no es adorno: cuando la suma cierra en
- * 0 el verificador es 0, no 10, y sin él se rechazaría todo DUI terminado en 0.
- *
- * Esto solo descarta un número inventado al azar; NO confirma que la persona
- * exista ni que el documento sea suyo — ese registro vive en el RNPN y no tiene
- * una API pública para consultarlo.
- */
+// ¿Cuadra el dígito verificador? Es la MISMA cuenta que la web (frontend/src/utils/validaciones.js
+// `duiEsValido`): los 8 primeros dígitos se multiplican por 9, 8, 7...2, se suman, y el
+// verificador tiene que ser (10 - suma % 10) % 10.
 export const duiEsValido = (valor) => {
   const d = digitosDelDui(valor);
   if (d.length !== 9) return false;
@@ -56,12 +38,9 @@ export const duiEsValido = (valor) => {
   return (10 - (suma % 10)) % 10 === Number(d[8]);
 };
 
-/*
- * DUI del cliente: OPCIONAL, igual que en la web (`reglaDuiOpcional`). Mucha
- * gente del barrio no lo anda a mano y perder un registro por eso no vale la
- * pena. Vacío pasa; si escribió algo, tiene que estar completo (9 dígitos) y
- * cuadrar el verificador.
- */
+// DUI del cliente: OPCIONAL, igual que en la web (`reglaDuiOpcional`). Mucha gente del barrio no
+// lo anda a mano y perder un registro por eso no vale la pena. Vacío pasa; si escribió algo, tiene
+// que estar completo (9 dígitos) y cuadrar el verificador.
 export const validarDui = (valor) => {
   const d = digitosDelDui(valor);
   if (!d.length) return null; // no lo puso: perfecto, seguimos
@@ -76,12 +55,9 @@ export const validarTelefono = (valor) => {
   return null;
 };
 
-/*
- * Corre un objeto de reglas contra un objeto de valores y devuelve los errores
- * encontrados. Existe para que las pantallas no repitan ocho `if` seguidos:
- *
- *   const errores = validarFormulario(valores, { email: validarCorreo });
- */
+// Corre un objeto de reglas contra un objeto de valores y devuelve los errores encontrados. Existe
+// para que las pantallas no repitan ocho `if` seguidos: const errores = validarFormulario(valores,
+// { email: validarCorreo });
 export const validarFormulario = (valores, reglas) => {
   const errores = {};
   Object.entries(reglas).forEach(([campo, regla]) => {

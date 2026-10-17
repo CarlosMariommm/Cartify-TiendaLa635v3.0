@@ -8,11 +8,9 @@ logoutController.logout = async (req, res) => {
   //de quien inició sesión
   res.clearCookie("authCookie");
 
-  /*
-   * La app manda el token de avisos de su teléfono: al salir, ahí dejan de
-   * sonar los pedidos nuevos. No pide sesión a propósito (si ya venció, la
-   * baja igual tiene que pasar). Ver utils/avisosPersonal.js.
-   */
+  // La app manda el token de avisos de su teléfono: al salir, ahí dejan de sonar los pedidos nuevos.
+  // No pide sesión a propósito (si ya venció, la baja igual tiene que pasar). Ver
+  // utils/avisosPersonal.js.
   const pushToken = req.body?.pushToken;
   if (esTokenExpo(pushToken)) {
     try {

@@ -2,32 +2,9 @@ import { useMemo } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { Snowflake, Heart, Star, Leaf } from 'lucide-react';
 
-/*
- * ============================================================
- * DECORACIÓN DE TEMPORADA — DecoracionTemporada.jsx
- * ============================================================
- * Las figuras que caen de fondo: copos en Navidad, corazones en San Valentín,
- * confeti para la Independencia y murciélagos en Halloween.
- *
- * Repintar los colores solos hacía que la tienda pareciera haber cambiado de
- * marca, no que fuera diciembre. Esto es lo que le pone la fecha encima.
- *
- * TRES REGLAS QUE NO SE NEGOCIAN, porque una tienda no es una tarjeta de
- * felicitación y aquí la gente viene a leer precios:
- *
- *   1. VA DETRÁS. z-index bajo y `pointer-events: none`: la capa no recibe un
- *      solo clic. Un copo de nieve que se traga el toque al botón "+" de un
- *      producto no es un adorno, es un producto que no se vendió.
- *   2. SE VE POCO. Opacidad baja y figuras chicas. Si compite con la foto del
- *      producto, ganó la decoración y perdió la tienda.
- *   3. SE APAGA SOLA para quien pidió menos movimiento en su sistema —tercera
- *      edad, migrañas, mareo—. Ahí quedan los colores de temporada, que se
- *      entienden igual sin nada moviéndose.
- *
- * Las figuras se dibujan con CSS y con los iconos que ya usa la app: ni una
- * imagen que descargar, ni una dependencia nueva.
- * ============================================================
- */
+// DECORACIÓN DE TEMPORADA — DecoracionTemporada.jsx
+// Las figuras que caen de fondo: copos en Navidad, corazones en San Valentín, confeti para la
+// Independencia y murciélagos en Halloween.
 
 /* Cae recto: la nieve. */
 const caerRecto = keyframes`
@@ -43,20 +20,16 @@ const caerMeciendo = keyframes`
   to     { transform: translate3d(10px, 110vh, 0) rotate(320deg); }
 `;
 
-/*
- * La capa. `fixed` para que las figuras caigan sobre toda la pantalla y no se
- * corten al hacer scroll, y `overflow: hidden` para que ninguna se salga de
- * lado y saque una barra de desplazamiento horizontal.
- */
+// La capa. `fixed` para que las figuras caigan sobre toda la pantalla y no se corten al hacer
+// scroll, y `overflow: hidden` para que ninguna se salga de lado y saque una barra de
+// desplazamiento horizontal.
 const Capa = styled.div`
   position: fixed;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
-  /*
-   * Debajo del encabezado (200) y de los modales, encima del fondo. Las
-   * figuras pasan por detrás de las tarjetas de producto, no por delante.
-   */
+  /* Debajo del encabezado (200) y de los modales, encima del fondo. Las figuras pasan por detrás de
+     las tarjetas de producto, no por delante. */
   z-index: 1;
 
   /* Quien pidió menos movimiento no ve nada de esto. */
@@ -78,10 +51,8 @@ const Figura = styled.span`
     ${(p) => p.$duracion}s linear infinite;
   animation-delay: -${(p) => p.$retraso}s;
 
-  /*
-   * En teléfono caen menos y más chicas: la pantalla es una cuarta parte de
-   * ancho, así que la misma cantidad se siente como una tormenta.
-   */
+  /* En teléfono caen menos y más chicas: la pantalla es una cuarta parte de ancho, así que la misma
+     cantidad se siente como una tormenta. */
   @media (max-width: 700px) {
     transform: scale(0.75);
     ${(p) => p.$indice % 2 === 1 && css`display: none;`}
@@ -96,12 +67,9 @@ const Papelito = styled(Figura)`
   border-radius: 1px;
 `;
 
-/*
- * El murciélago, dibujado con CSS. No hay icono de murciélago en la librería
- * y no vale la pena traer una dependencia entera por Halloween: dos alas
- * hechas con border-radius y un cuerpo en medio se leen igual de lejos, que
- * es a la distancia que se ve esto.
- */
+// El murciélago, dibujado con CSS. No hay icono de murciélago en la librería y no vale la pena
+// traer una dependencia entera por Halloween: dos alas hechas con border-radius y un cuerpo en
+// medio se leen igual de lejos, que es a la distancia que se ve esto.
 const Murcielago = styled(Figura)`
   width: 16px;
   height: 9px;
@@ -110,14 +78,9 @@ const Murcielago = styled(Figura)`
   clip-path: polygon(0% 30%, 18% 0%, 34% 42%, 50% 18%, 66% 42%, 82% 0%, 100% 30%, 82% 100%, 50% 72%, 18% 100%);
 `;
 
-/*
- * Las posiciones, tamaños y tiempos de cada figura.
- *
- * Se calculan UNA vez y con una fórmula, no con Math.random(): así la nieve no
- * salta a otro sitio cada vez que React vuelve a dibujar la pantalla —que es
- * en cada clic al carrito—. Los números primos de por medio son para que las
- * figuras no caigan en fila india ni caigan todas al mismo compás.
- */
+// Las posiciones, tamaños y tiempos de cada figura. Se calculan UNA vez y con una fórmula, no con
+// Math.random(): así la nieve no salta a otro sitio cada vez que React vuelve a dibujar la
+// pantalla —que es en cada clic al carrito—.
 const repartir = (cantidad) =>
   Array.from({ length: cantidad }, (_, i) => ({
     indice: i,
@@ -128,10 +91,8 @@ const repartir = (cantidad) =>
     opacidad: 0.16 + ((i % 4) * 0.05), // entre 0.16 y 0.31
   }));
 
-/*
- * Las figuras que son iconos. Corazones y estrellas van rellenos (de contorno
- * se ven como un dibujo a medio hacer); copos y hojas, de línea.
- */
+// Las figuras que son iconos. Corazones y estrellas van rellenos (de contorno se ven como un
+// dibujo a medio hacer); copos y hojas, de línea.
 const ICONOS = { corazon: Heart, estrella: Star, hoja: Leaf, copo: Snowflake };
 
 const DecoracionTemporada = ({ tema }) => {
@@ -145,11 +106,9 @@ const DecoracionTemporada = ({ tema }) => {
 
   if (!decoracion || decoracion.figura === 'ninguna' || !figuras.length) return null;
 
-  /*
-   * Los colores salen del propio tema, no de una lista aparte: así el copo de
-   * Navidad es del mismo verde que los botones, y si algún día se cambia la
-   * paleta del tema la decoración lo sigue sin que nadie venga a ajustarla.
-   */
+  // Los colores salen del propio tema, no de una lista aparte: así el copo de Navidad es del mismo
+  // verde que los botones, y si algún día se cambia la paleta del tema la decoración lo sigue sin
+  // que nadie venga a ajustarla.
   const colores = [tema.colores['--marca-600'], tema.colores['--acento'], tema.colores['--marca-400']];
 
   return (

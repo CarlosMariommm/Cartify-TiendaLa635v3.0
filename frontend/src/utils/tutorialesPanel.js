@@ -1,17 +1,6 @@
-/*
- * ============================================================
- * LOS TUTORIALES DEL PANEL — tutorialesPanel.js
- * ============================================================
- * La primera vez que el administrador entra a un apartado, le sale un
- * tutorial corto (components/Admin/TutorialApartado.jsx). El contenido es el
- * MISMO de la ayuda del panel (utils/ayudaPanel.js): para qué sirve, los
- * pasos y un consejo. Así no hay dos textos que se desincronicen: si cambia
- * una pantalla, se corrige su tema de ayuda y el tutorial cambia solo.
- *
- * Qué apartados ya vio se guarda en este equipo y por persona: dos
- * administradores en la misma computadora ven cada uno los suyos.
- * ============================================================
- */
+// LOS TUTORIALES DEL PANEL — tutorialesPanel.js
+// La primera vez que el administrador entra a un apartado, le sale un tutorial corto
+// (components/Admin/TutorialApartado.jsx).
 
 const llaveDe = (quien) => `cartify:tutoriales:${quien || 'admin'}`;
 
@@ -46,10 +35,8 @@ export const marcarVisto = (quien, temaId) => {
 // "No mostrar más tutoriales": ninguno vuelve a salir solo (la ayuda sigue en el "?").
 export const apagarTutoriales = (quien) => guardarEstado(quien, { ...leerEstado(quien), apagados: true });
 
-/*
- * Las diapositivas del tutorial: primero para qué sirve el apartado, después
- * cada paso, y al final un consejo (el primero de su tema, si tiene).
- */
+// Las diapositivas del tutorial: primero para qué sirve el apartado, después cada paso, y al final
+// un consejo (el primero de su tema, si tiene).
 export const diapositivasDe = (tema) => {
   if (!tema) return [];
   const pasos = tema.pasos || [];

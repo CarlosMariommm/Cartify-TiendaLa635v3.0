@@ -12,32 +12,18 @@ import { foto, ANCHO } from '../../utils/fotos';
 import { useIdioma } from '../../hooks/useIdioma';
 import { animoDeFrase, caraDeAnimo } from '../../utils/animoTiqui';
 
-/*
- * AsistenteVoz — pantalla grande (kiosco) del asistente por voz.
- * Solo pinta; la lógica vive en useVoiceAssistant. Animaciones con la vara de
- * Emil (ease-out fuerte, <300ms, respeta prefers-reduced-motion).
- *
- * SE LE HABLA A LA MASCOTA. En vez de un orbe con un micrófono, al centro está
- * la etiqueta del logo con cara (MascotaAsistente): mira a quien tiene
- * enfrente, asiente mientras le hablan, piensa, contesta moviendo la boca y
- * pone cara según cómo le fue. Es una conversación cara a cara, así que solo
- * se ve el último intercambio: lo que dijo la mascota en su globo y lo que
- * dijo la persona debajo. El resultado de todo lo dicho queda en el carrito.
- *
- * El fondo sigue siendo el de la landing: negro con una luz azul detrás.
- */
+// AsistenteVoz — pantalla grande (kiosco) del asistente por voz. Solo pinta; la lógica vive en
+// useVoiceAssistant. Animaciones con la vara de Emil (ease-out fuerte, <300ms, respeta
+// prefers-reduced-motion). SE LE HABLA A LA MASCOTA.
 const EASE_OUT = [0.23, 1, 0.32, 1];
 
 // La luz azul detrás de la mascota y el negro del resto, como en la landing.
 const FONDO =
   'radial-gradient(900px 620px at 50% 26%, rgba(0, 92, 138, 0.38), transparent 62%), #000';
 
-/*
- * El botón del micrófono va SIEMPRE en el azul de la casa, no en
- * --marca-600: en diciembre esa variable es verde y en Halloween naranja, y
- * un botón naranja encima de esta luz azul se ve como un error. La temporada
- * ya se nota en la tienda.
- */
+// El botón del micrófono va SIEMPRE en el azul de la casa, no en --marca-600: en diciembre esa
+// variable es verde y en Halloween naranja, y un botón naranja encima de esta luz azul se ve como
+// un error. La temporada ya se nota en la tienda.
 const ORBE = 'radial-gradient(circle at 34% 28%, #29a3e6, #003049 68%)';
 
 // Botones de vidrio de las esquinas.
@@ -52,11 +38,8 @@ const AsistenteVoz = ({
   onClose, productos, carrito, totalCarrito,
   agregarAlCarrito, eliminarDelCarrito, actualizarCantidad, limpiarCarrito,
   categorias, irAProducto, irACategoria, irARuta, irAPromociones,
-  /*
-   * Abrir el pago cuando la persona confirma la compra. Lo pone la tienda en
-   * línea; sin él (o con una cuenta vinculada por QR en el kiosco) se sigue
-   * pagando en caja. Ver cerrarCompra.
-   */
+  // Abrir el pago cuando la persona confirma la compra. Lo pone la tienda en línea; sin él (o con
+  // una cuenta vinculada por QR en el kiosco) se sigue pagando en caja. Ver cerrarCompra.
   irAPagar,
 }) => {
   const reduce = useReducedMotion();
@@ -64,44 +47,27 @@ const AsistenteVoz = ({
   const { esCliente, user } = useAuth();
   const { t } = useIdioma();
 
-  /*
-   * El nombre, para que Tiqui lo use de vez en cuando (ver nombreTiqui.js).
-   * El saludo escrito lo lleva más o menos la mitad de las veces que se abre
-   * el asistente: siempre igual se vuelve fórmula.
-   */
+  // El nombre, para que Tiqui lo use de vez en cuando (ver nombreTiqui.js). El saludo escrito lo
+  // lleva más o menos la mitad de las veces que se abre el asistente: siempre igual se vuelve
+  // fórmula.
   const nombreCliente = esCliente ? primerNombre(user?.fullName) : '';
   const [saludaConNombre] = useState(() => Math.random() < 0.5);
-  /*
-   * Lo que dice la mascota antes de que le hablen. Va escrito y NO hablado: al
-   * abrir, el asistente espera a que la persona toque (ver más abajo). En
-   * inglés avisa que por ahora entiende y habla español, y deja los ejemplos
-   * en español: son justo lo que hay que decirle.
-   */
+  // Lo que dice la mascota antes de que le hablen. Va escrito y NO hablado: al abrir, el asistente
+  // espera a que la persona toque (ver más abajo). En inglés avisa que por ahora entiende y habla
+  // español, y deja los ejemplos en español: son justo lo que hay que decirle.
   const saludo = saludaConNombre && nombreCliente
     ? t('¡Hola, {nombre}! Soy Tiqui. Toca el botón y dime qué necesitas. Por ejemplo: “quiero dos manzanas y una leche” o “¿qué ofertas hay?”.', { nombre: nombreCliente })
     : t('¡Hola! Soy Tiqui. Toca el botón y dime qué necesitas. Por ejemplo: “quiero dos manzanas y una leche” o “¿qué ofertas hay?”.');
 
-  /*
-   * "Ya confirmó, falta abrir el pago". Se espera a que Tiqui termine la
-   * frase: abrir el pago cierra el asistente, y cerrarlo a media frase la
-   * cortaba en seco.
-   */
+  // "Ya confirmó, falta abrir el pago". Se espera a que Tiqui termine la frase: abrir el pago cierra
+  // el asistente, y cerrarlo a media frase la cortaba en seco.
   const [yendoAPagar, setYendoAPagar] = useState(false);
   const irAPagarRef = useRef(irAPagar);
   useEffect(() => { irAPagarRef.current = irAPagar; });
 
-  /*
-   * Hablar por referencia: cerrarCompra necesita hablar, pero se define ANTES
-   * de que exista el hook, porque el hook la recibe como parámetro. El ref
-   * rompe ese huevo y gallina sin tener que partir el componente en dos.
-   *
-   * Y va declarado ACÁ ARRIBA, antes del hook, no después. Estaba declarado
-   * más abajo y la línea que lo llena (`hablarRef.current = hablar`) quedaba
-   * por encima de su propio `const`: al abrir el asistente reventaba con
-   * "Cannot access 'hablarRef' before initialization" y no se abría nunca.
-   * Un `const` no se puede tocar antes de su declaración aunque estén en la
-   * misma función — eso es lo que atrapa a cualquiera aquí.
-   */
+  // Hablar por referencia: cerrarCompra necesita hablar, pero se define ANTES de que exista el hook,
+  // porque el hook la recibe como parámetro. El ref rompe ese huevo y gallina sin tener que partir
+  // el componente en dos. Y va declarado ACÁ ARRIBA, antes del hook, no después.
   const hablarRef = useRef(null);
 
   const {
@@ -113,12 +79,8 @@ const AsistenteVoz = ({
     agregarAlCarrito, eliminarDelCarrito, actualizarCantidad, limpiarCarrito,
     categorias,
     nombreCliente,
-    /*
-     * Antes de llevar a la persona a algún lado, el asistente se hace a un
-     * lado: mostrar un producto y dejar la pantalla negra encima sería
-     * enseñarle algo tapado. Sigue vivo y escuchando en segundo plano, que
-     * es justo la gracia — se sigue navegando con la voz.
-     */
+    // Antes de llevar a la persona a otra pantalla, el asistente se hace a un lado (sin el fondo
+    // oscuro encima), pero sigue escuchando en segundo plano.
     irAProducto: (p) => { setMinimizado(true); irAProducto?.(p); },
     irACategoria: (c) => { setMinimizado(true); irACategoria?.(c); },
     irARuta: (r) => { setMinimizado(true); irARuta?.(r); },
@@ -128,11 +90,9 @@ const AsistenteVoz = ({
 
   useLayoutEffect(() => { hablarRef.current = hablar; });
 
-  /*
-   * Abre el pago apenas Tiqui termina de decir que lo va a abrir (o de una, si
-   * la voz está silenciada). Con tope de 8 s: si el audio se trabara, el pago
-   * se abre igual y la persona no queda esperando algo que no llega.
-   */
+  // Abre el pago apenas Tiqui termina de decir que lo va a abrir (o de una, si la voz está
+  // silenciada). Con tope de 8 s: si el audio se trabara, el pago se abre igual y la persona no
+  // queda esperando algo que no llega.
   useEffect(() => {
     if (!yendoAPagar) return undefined;
     const reloj = setTimeout(() => irAPagarRef.current?.(), hablando ? 8000 : 0);
@@ -142,26 +102,15 @@ const AsistenteVoz = ({
   // La cuenta del cliente, si escaneó el QR con su teléfono.
   const kiosco = useKiosco();
 
-  /*
-   * Cerrar la compra del kiosco.
-   *
-   * Con cuenta vinculada, el pedido se crea A SU NOMBRE: es lo que hace que
-   * los puntos le caigan solos, porque el backend los calcula al crear el
-   * pedido. El pago sigue siendo en caja, con efectivo o tarjeta — el kiosco
-   * no cobra, solo deja el pedido listo.
-   *
-   * Y pase lo que pase, el código se quema. Si no, el siguiente que se para
-   * en el kiosco encontraría la sesión abierta y le seguiría cargando
-   * compras y puntos a la cuenta de quien ya se fue.
-   */
+  // Cerrar la compra del kiosco. Con cuenta vinculada, el pedido se crea A SU NOMBRE: es lo que hace
+  // que los puntos le caigan solos, porque el backend los calcula al crear el pedido. El pago sigue
+  // siendo en caja, con efectivo o tarjeta — el kiosco no cobra, solo deja el pedido listo.
   const cerrarCompra = async () => {
     const cliente = kiosco.cliente;
 
-    /*
-     * En la tienda en línea, confirmar es ir a pagar: Tiqui abre el pago con
-     * la dirección y la forma de pago por elegir. Sin sesión, primero lo lleva
-     * a iniciar sesión y de ahí vuelve directo al pago (ver irAPagar en Store).
-     */
+    // En la tienda en línea, confirmar es ir a pagar: Tiqui abre el pago con la dirección y la forma
+    // de pago por elegir. Sin sesión, primero lo lleva a iniciar sesión y de ahí vuelve directo al
+    // pago (ver irAPagar en Store).
     if (!cliente && irAPagar) {
       setYendoAPagar(true);
       hablarRef.current?.(esCliente
@@ -177,18 +126,9 @@ const AsistenteVoz = ({
 
     try {
       await orderService.createOrder({
-        /*
-         * El código es lo que le PRUEBA al servidor de quién es este pedido.
-         *
-         * El kiosco no tiene sesión —ni debe tenerla: esa es toda la gracia de
-         * que el cliente escanee con su teléfono y la contraseña nunca pase
-         * por la pantalla pública—. Antes bastaba con mandar un clientId y el
-         * servidor le creía, así que se le podía cargar una compra a
-         * cualquiera. Ahora el servidor busca el código, mira que siga
-         * vinculada y sin usar, y saca el cliente de ahí.
-         *
-         * Va antes de `kiosco.cerrar()`, que quema el código en el `finally`.
-         */
+        // El código es lo que le PRUEBA al servidor de quién es este pedido. El kiosco no tiene sesión —ni
+        // debe tenerla: esa es toda la gracia de que el cliente escanee con su teléfono y la contraseña
+        // nunca pase por la pantalla pública—.
         codigoKiosco: kiosco.codigo,
         items: carrito.map((i) => ({
           productId: i.id,
@@ -218,12 +158,8 @@ const AsistenteVoz = ({
 
   const carritoRef = useRef(null);
 
-  /*
-   * Al abrir, el asistente NO habla solo: espera a que la persona toque el
-   * micrófono. Antes soltaba un saludo hablado apenas se abría, que sorprendía
-   * y a veces hablaba encima de quien ya sabía qué pedir. La instrucción de qué
-   * hacer ya está escrita grande en la pantalla.
-   */
+  // Al abrir, el asistente NO habla solo: espera a que la persona toque el micrófono. La instrucción
+  // de qué hacer ya está escrita grande en la pantalla.
   // Despertar el servidor (y preguntar si hay voz de Tiqui) lo hace el hook al abrir.
   useEffect(() => {
     toast.dismiss();
@@ -236,13 +172,8 @@ const AsistenteVoz = ({
 
   const items = carrito.reduce((a, i) => a + i.cantidad, 0);
 
-  /*
-   * "Pensando" va primero: cuando la IA está descifrando la frase pasa cerca
-   * de un segundo en silencio, y sin avisar eso se lee como que el asistente
-   * se colgó. Decirlo convierte la espera en algo que está pasando.
-   */
-  // Con la respuesta lista pero su voz en camino, todavía "piensa": así el
-  // texto y la boca arrancan junto con el sonido.
+  // "Pensando" mientras la IA descifra la frase y mientras llega su voz, así el texto y la boca
+  // arrancan junto con el sonido.
   const piensa = pensando || esperandoVoz;
 
   const estadoTexto = piensa
@@ -260,22 +191,17 @@ const AsistenteVoz = ({
   const ultimoBot = [...historial].reverse().find((m) => m.tipo !== 'user');
   const ultimoUser = [...historial].reverse().find((m) => m.tipo === 'user');
 
-  /*
-   * La cara va con el ánimo con que habló (el mismo de su voz, ver
-   * utils/animoTiqui.js). Mientras la escucha o piensa, neutra: la de antes
-   * era de otra frase.
-   */
+  // La cara va con el ánimo con que habló (el mismo de su voz, ver utils/animoTiqui.js). Mientras la
+  // escucha o piensa, neutra: la de antes era de otra frase.
   const animo = escuchando || piensa ? 'normal' : caraDeAnimo(ultimoBot?.animo || animoDeFrase(ultimoBot?.texto));
 
   // Lo de la persona: en vivo mientras habla, y si no, lo último que dijo.
   const enVivo = escuchando && !!transcripcion;
   const textoPersona = enVivo ? transcripcion : ultimoUser?.texto;
 
-  /*
-   * Tocar a la mascota o al botón hace lo mismo que el orbe de antes. Si está
-   * hablando, el toque la INTERRUMPE y se pone a escuchar: ya no hay que
-   * aguantarse la frase completa aunque uno ya sepa qué decir.
-   */
+  // Tocar a la mascota o al botón hace lo mismo que el orbe de antes. Si está hablando, el toque la
+  // INTERRUMPE y se pone a escuchar: ya no hay que aguantarse la frase completa aunque uno ya sepa
+  // qué decir.
   const alTocar = hablando ? interrumpir : activo ? detener : iniciar;
   const etiquetaToque = hablando ? t('Interrumpir y hablar') : activo ? t('Detener') : t('Empezar a hablar');
 
@@ -367,19 +293,13 @@ const AsistenteVoz = ({
             {t('Asistente de voz')}
           </p>
 
-          {/*
-            Todo va directo sobre el fondo, sin un recuadro que lo encierre:
-            la mascota, lo que se dicen y el carrito se separan con aire y una
-            línea fina, no con cajas.
-          */}
+          {/* Todo va directo sobre el fondo, sin un recuadro que lo encierre: la mascota, lo que se dicen y
+             el carrito se separan con aire y una línea fina, no con cajas. */}
           <div className="relative w-full mt-6 flex flex-col items-center">
             {/* ── La mascota y lo que dice ── */}
             <div className="w-full flex flex-col md:flex-row items-center justify-center gap-5 md:gap-6">
-              {/*
-                La mascota también se toca, como el orbe de antes. Para el
-                teclado queda solo el botón del micrófono: dos controles que
-                hacen lo mismo serían un tab de más.
-              */}
+              {/* La mascota también se toca, como el orbe de antes. Para el teclado queda solo el botón del
+                 micrófono: dos controles que hacen lo mismo serían un tab de más. */}
               <button
                 type="button"
                 onClick={alTocar}
@@ -452,15 +372,9 @@ const AsistenteVoz = ({
               {estadoTexto}
             </p>
 
-            {/*
-              Quién habla cuando NO está la voz de Tiqui (el servidor no la
-              tiene o falló): la del sistema. Solo aparece si hay más de una
-              voz en español: con una sola, un selector de un elemento es un
-              botón que no hace nada.
-
-              Al elegir se escucha de una vez — los nombres ("Sabina", "Jorge")
-              no le dicen nada a nadie hasta que la oye.
-            */}
+            {/* Quién habla cuando NO está la voz de Tiqui (el servidor no la tiene o falló): la del sistema.
+               Solo aparece si hay más de una voz en español: con una sola, un selector de un elemento es un
+               botón que no hace nada. */}
             {!vozTiqui && voces.length > 1 && (
               <label className="mt-3 flex items-center gap-2 px-4 py-2 rounded-full text-sm cursor-pointer" style={VIDRIO}>
                 <Volume2 className="w-4 h-4" style={{ color: '#6fb3d9' }} />
@@ -542,16 +456,8 @@ const AsistenteVoz = ({
         </motion.div>
       </div>
 
-      {/*
-        ── Vincular la compra con su cuenta ──
-        El kiosco no sabe quién está enfrente, así que sin esto ninguna compra
-        de aquí suma puntos. En vez de pedirle a la gente que escriba su
-        contraseña en una pantalla pública —que es regalar contraseñas—, se
-        escanea un QR con su propio teléfono, donde ya tiene sesión.
-
-        No sale en pantallas de teléfono: ahí quien usa el asistente ya está en
-        SU teléfono (con su sesión), y el botón flotante tapaba el carrito.
-      */}
+      {/* ── Vincular la compra con su cuenta ── El kiosco no sabe quién está enfrente, así que sin esto
+         ninguna compra de aquí suma puntos. */}
       <div className="absolute bottom-5 left-5 z-[60] hidden sm:block">
         {kiosco.cliente ? (
           <div

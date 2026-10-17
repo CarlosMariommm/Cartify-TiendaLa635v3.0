@@ -3,12 +3,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-/*
- * El diccionario de inglés usa la frase en español como CLAVE. Si alguien
- * cambia un texto en el código y no su clave en en.js, la tienda en inglés
- * vuelve a salir en español sin que nadie lo note (pasó al pasar todo a "tú").
- * Esta prueba lo detecta antes de publicar. (Es la misma de la web: frontend/src/i18n.)
- */
+// El diccionario de inglés usa la frase en español como CLAVE. Si alguien cambia un texto en el
+// código y no su clave en en.js, la tienda en inglés vuelve a salir en español sin que nadie lo
+// note (pasó al pasar todo a "tú"). Esta prueba lo detecta antes de publicar.
 
 const SRC = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const DICCIONARIO = path.join(SRC, 'i18n', 'en.js');

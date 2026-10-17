@@ -4,28 +4,9 @@ import { Store as StoreIcon } from 'lucide-react';
 import MarcaTienda from './MarcaTienda';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * ============================================================
- * ENCABEZADO DE LAS PANTALLAS DE ACCESO — EncabezadoAcceso.jsx
- * ============================================================
- * La barra de arriba del login, el registro, la verificación y las
- * contraseñas: SOLO el nombre y la salida a la tienda.
- *
- * No es el HeaderTienda completo a propósito —aquí no hacen falta el buscador
- * ni los pasillos— pero se viste igual que él: mismo alto de 64px, misma línea
- * de abajo y el mismo relleno lateral, para que pasar de la tienda al login no
- * se sienta como cambiar de sitio.
- *
- * Vivía dentro de LoginClient, y el resto de pantallas de acceso se había
- * quedado con la barra vieja: "Tienda / la 635" escrito a mano y centrado,
- * sin logo y sin salida. Entrar por el login y seguir al registro era pasar
- * de una tienda a otra. Ahora es una sola pieza para todas.
- *
- * El nombre sale de los ajustes (MarcaTienda): si el dueño le cambia el nombre
- * al negocio, la primera pantalla que ve quien va a entregar su correo no
- * sigue diciendo el viejo.
- * ============================================================
- */
+// ENCABEZADO DE LAS PANTALLAS DE ACCESO — EncabezadoAcceso.jsx
+// La barra de arriba del login, el registro, la verificación y las contraseñas: SOLO el nombre y
+// la salida a la tienda.
 
 const Barra = styled.header`
   background: var(--papel);

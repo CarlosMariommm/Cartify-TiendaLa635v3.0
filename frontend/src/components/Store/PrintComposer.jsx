@@ -3,24 +3,9 @@ import { ImagePlus, Copy, Trash2, Plus, X } from 'lucide-react';
 import { pxDesdeCm } from '../../utils/pxImpresion';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * PrintComposer — el editor visual de la hoja de impresión.
- * Solo pinta: toda la lógica vive en usePrintComposer.
- *
- * La hoja es una CUADRÍCULA de celdas del tamaño real del formato elegido
- * (columnas × filas calculadas en el hook). Cada foto llena su celda por
- * completo — no hay arrastre ni zoom: eso era lo que dejaba una foto chica
- * flotando en una hoja enorme. Se sube, cae en la siguiente celda vacía, y
- * listo.
- *
- * SOLO SE DIBUJAN LAS CELDAS QUE HACEN FALTA: las ya llenas, más UNA vacía
- * para agregar la próxima — no las N que caben en la hoja completa. Con un
- * formato chico (una estampa de 2×2 cm en una carta son más de cien celdas)
- * pintar el cuadro entero desde el principio se sentía lento y mostraba un
- * tablero vacío gigante. Así crece de a una, como el selector de fotos de
- * Instagram: se ve lo que hay y un "+" para lo próximo, no la cuadrícula
- * completa de una vez.
- */
+// PrintComposer — el editor visual de la hoja de impresión. Solo pinta: toda la lógica vive en
+// usePrintComposer. La hoja es una CUADRÍCULA de celdas del tamaño real del formato elegido
+// (columnas × filas calculadas en el hook).
 const BROWN = 'var(--marca-600)';
 
 const PrintComposer = ({ composer }) => {
@@ -85,25 +70,17 @@ const PrintComposer = ({ composer }) => {
         </button>
       </div>
 
-      {/*
-        La hoja, en cuadrícula. Las columnas y filas van en `fr` con el
-        tamaño REAL de la celda (no 1fr parejo) — si no, una celda de 10×10
-        en una hoja de 21.6×27.9 se estira pareja entre las columnas y filas
-        que quepan, y una celda cuadrada sale rectangular. Lo que sobra de la
-        hoja (columnas/filas no completas) se deja como una pista más, en
-        blanco: el margen de una hoja de verdad.
-      */}
+      {/* La hoja, en cuadrícula. Las columnas y filas van en `fr` con el tamaño REAL de la celda (no 1fr
+         parejo) — si no, una celda de 10×10 en una hoja de 21.6×27.9 se estira pareja entre las columnas
+         y filas que quepan, y una celda cuadrada sale rectangular. */}
       {(() => {
         const sobranteAncho = Math.max(0, widthCm - columnas * celdaAnchoCm);
         const sobranteAlto = Math.max(0, heightCm - filas * celdaAltoCm);
         const colsTemplate = `repeat(${columnas}, ${celdaAnchoCm}fr)` + (sobranteAncho > 0.05 ? ` ${sobranteAncho}fr` : '');
         const rowsTemplate = `repeat(${filas}, ${celdaAltoCm}fr)` + (sobranteAlto > 0.05 ? ` ${sobranteAlto}fr` : '');
 
-        /*
-         * Hasta dónde dibujar: la última celda llena, más una vacía para la
-         * próxima foto. Ni una casilla más — el resto de la hoja no se pinta
-         * hasta que haga falta.
-         */
+        // Hasta dónde dibujar: la última celda llena, más una vacía para la próxima foto. Ni una casilla
+        // más — el resto de la hoja no se pinta hasta que haga falta.
         const totalCeldas = pagina.celdas.length;
         const ultimaLlena = pagina.celdas.reduce((max, c, i) => (c ? i : max), -1);
         const hastaIndice = Math.min(ultimaLlena + 1, totalCeldas - 1);

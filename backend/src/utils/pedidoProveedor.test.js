@@ -1,10 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { limpiarPedidos } from "./pedidoProveedor.js";
 
-/*
- * Lo que se guarda de "Cómo se le hacen los pedidos" de cada proveedor: lo
- * que sirve se guarda limpio, lo que no se dice con palabras.
- */
+// Lo que se guarda de "Cómo se le hacen los pedidos" de cada proveedor: lo que sirve se guarda
+// limpio, lo que no se dice con palabras.
 
 describe("por dónde se le pide a un proveedor", () => {
   it("si el formulario no lo manda, no se toca lo guardado", () => {

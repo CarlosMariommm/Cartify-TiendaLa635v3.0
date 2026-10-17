@@ -1,25 +1,6 @@
-/*
- * ============================================================
- * CONTEXTO DE AUTENTICACIÓN — AuthContext.js
- * ============================================================
- * El mismo contrato que `frontend/src/context/AuthContext.jsx`: expone
- * `user`, `token`, `login()`, `logout()` e `isAuthenticated`, para que quien
- * venga de la web encuentre lo que espera.
- *
- * La sesión ya no vive solo en memoria. La web la guarda en localStorage, que
- * en React Native no existe; aquí se guarda con expo-secure-store, que en
- * Android va al KeyStore y en iOS al Keychain — que es donde va un token, no
- * en un archivo de texto al lado de la app. Ver utils/almacen.js.
- *
- * ── El `cargando` no es un detalle ──
- *
- * Leer del almacén es asíncrono, así que en el primer render todavía no se
- * sabe si hay sesión. Sin ese estado, la app pintaba el login durante un
- * parpadeo y saltaba a la tienda: quien ya había entrado veía la pantalla de
- * entrar durante un instante en cada arranque, que es justo lo que guardar la
- * sesión venía a evitar.
- * ============================================================
- */
+// CONTEXTO DE AUTENTICACIÓN — AuthContext.js
+// El mismo contrato que `frontend/src/context/AuthContext.jsx`: expone `user`, `token`, `login()`,
+// `logout()` e `isAuthenticated`, para que quien venga de la web encuentre lo que espera.
 
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import { borrar, guardar, leer, llave } from '../utils/almacen';
@@ -53,11 +34,9 @@ export const AuthProvider = ({ children }) => {
           establecerToken(datos.token);
         }
       } catch {
-        /*
-         * Guardado ilegible (una versión vieja de la app, un valor a medio
-         * escribir). Se entra sin sesión, que es la salida segura: lo peor
-         * sería arrancar con media sesión y fallar en la primera petición.
-         */
+        // Guardado ilegible (una versión vieja de la app, un valor a medio escribir). Se entra sin sesión,
+        // que es la salida segura: lo peor sería arrancar con media sesión y fallar en la primera
+        // petición.
       }
 
       setCargando(false);
@@ -74,12 +53,9 @@ export const AuthProvider = ({ children }) => {
     setToken(nuevoToken);
     setUser(nuevoUsuario);
     establecerToken(nuevoToken);
-    /*
-     * Sin await: la pantalla no tiene por qué esperar al disco para dejar
-     * entrar. Si la escritura falla —almacén lleno, dispositivo sin caja
-     * fuerte— la sesión igual funciona toda esta corrida; lo único que se
-     * pierde es no tener que volver a entrar mañana.
-     */
+    // Sin await: la pantalla no tiene por qué esperar al disco para dejar entrar. Si la escritura
+    // falla —almacén lleno, dispositivo sin caja fuerte— la sesión igual funciona toda esta corrida;
+    // lo único que se pierde es no tener que volver a entrar mañana.
     guardar(LLAVE_SESION, JSON.stringify({ token: nuevoToken, user: nuevoUsuario }));
   }, []);
 
@@ -90,12 +66,9 @@ export const AuthProvider = ({ children }) => {
     borrar(LLAVE_SESION);
   }, []);
 
-  /*
-   * Mete campos sueltos al usuario de la sesión sin pedirlo de nuevo al
-   * servidor — por ahora lo usa solo el candado +18 (EdadContext), para que
-   * el DUI que se acaba de guardar en la cuenta cuente YA MISMO y no haga
-   * falta cerrar sesión y volver a entrar para que dejen de preguntarle.
-   */
+  // Mete campos sueltos al usuario de la sesión sin pedirlo de nuevo al servidor — por ahora lo usa
+  // solo el candado +18 (EdadContext), para que el DUI que se acaba de guardar en la cuenta cuente
+  // YA MISMO y no haga falta cerrar sesión y volver a entrar para que dejen de preguntarle.
   const actualizarUsuario = useCallback((campos) => {
     setUser((actual) => {
       if (!actual) return actual;

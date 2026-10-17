@@ -19,13 +19,9 @@ const parseItems = (raw) => {
 
 const parseActivo = (v) => !(v === 'false' || v === false);
 
-/*
- * La fecha llega como "2026-08-03" desde un <input type="date">. Se guarda al
- * FINAL de ese día: si el gerente escribe "vence el 3", la promo tiene que
- * servir todo el 3 y no apagarse a la medianoche en que empieza.
- * Vacío significa "sin vencimiento", y hay que guardarlo como null explícito
- * para poder quitarle la fecha a una promo que ya la tenía.
- */
+// La fecha llega como "2026-08-03" desde un <input type="date">. Se guarda al FINAL de ese día: si
+// el gerente escribe "vence el 3", la promo tiene que servir todo el 3 y no apagarse a la
+// medianoche en que empieza.
 const parseVencimiento = (valor) => {
   if (!valor || valor === 'null' || valor === 'undefined') return null;
   const soloFecha = /^\d{4}-\d{2}-\d{2}$/.test(valor);
@@ -33,17 +29,7 @@ const parseVencimiento = (valor) => {
   return isNaN(fecha.getTime()) ? null : fecha;
 };
 
-/*
- * Apaga las promociones que ya vencieron. Corre cuando alguien pide la lista
- * (vencimiento perezoso, igual que los puntos de fidelidad) en vez de con una
- * tarea programada: no hace falta un servidor despierto a medianoche, y la
- * tienda nunca alcanza a mostrar una promo vencida porque el filtro del
- * frontend ya la descarta por fecha.
- *
- * El $type es obligatorio, no adorno: en Mongo el null ordena ANTES que
- * cualquier fecha, así que un $lt suelto también agarraría las promos sin
- * vencimiento y las apagaría a todas.
- */
+// Apaga las promociones que ya vencieron.
 const desactivarVencidas = async () => {
   try {
     await promotionModel.updateMany(
@@ -59,11 +45,9 @@ const desactivarVencidas = async () => {
 promotionController.getPromotions = async (req, res) => {
   try {
     await desactivarVencidas();
-    /*
-     * Esta lista es pública (la pide la portada), así que el producto de cada
-     * promo va con lo que ve un cliente. Poblado entero dejaba ver el costo
-     * de todo lo que estuviera en oferta. Ver utils/productoPublico.js.
-     */
+    // Esta lista es pública (la pide la portada), así que el producto de cada promo va con lo que ve
+    // un cliente. Poblado entero dejaba ver el costo de todo lo que estuviera en oferta. Ver
+    // utils/productoPublico.js.
     const promotions = await promotionModel.find().populate("items.productId", CAMPOS_PUBLICOS_PRODUCTO);
     return res.status(200).json(promotions);
   } catch (error) {
@@ -107,16 +91,8 @@ promotionController.insertPromotion = async (req, res) => {
 
     await newPromotion.save();
 
-    /*
-     * El volante por correo a quien pidió enterarse de las promociones.
-     *
-     * SIN await, y no por descuido: escribirle a toda la lista tarda, y la
-     * promoción YA está guardada. Esperar aquí dejaría al gerente mirando una
-     * rueda girando, y —peor— un correo que rebota devolvería un 500 sobre una
-     * promo que sí se creó. El propio aviso decide si toca mandarlo (apagada,
-     * sin banner o ya vencida no se anuncia) y se traga sus propios errores.
-     * Ver utils/avisoPromo.js.
-     */
+    // El volante por correo a quien pidió enterarse de las promociones. SIN await, y no por descuido:
+    // escribirle a toda la lista tarda, y la promoción YA está guardada.
     avisarPromoNuevaEnSegundoPlano(newPromotion._id);
 
     return res.status(201).json({ message: "Promoción creada" });
@@ -169,11 +145,9 @@ promotionController.updatePromotion = async (req, res) => {
       updatedData.image = req.file.path;
       updatedData.public_id = req.file.filename;
     } else if (removeImage === 'true' || removeImage === true) {
-      /*
-       * Quitó la imagen sin subir otra: se borra de Cloudinary y se limpian los
-       * campos para que el banner vuelva a dibujarse con el tema y los colores.
-       * Sin este brazo, un update sin archivo dejaba la foto vieja intacta.
-       */
+      // Quitó la imagen sin subir otra: se borra de Cloudinary y se limpian los campos para que el
+      // banner vuelva a dibujarse con el tema y los colores. Sin este brazo, un update sin archivo
+      // dejaba la foto vieja intacta.
       if (found.public_id) {
         try { await cloudinary.uploader.destroy(found.public_id); } catch (e) { /* ignore */ }
       }
@@ -186,15 +160,9 @@ promotionController.updatePromotion = async (req, res) => {
 
     await promotionModel.findByIdAndUpdate(req.params.id, updatedData, { new: true });
 
-    /*
-     * La promo que se armó apagada —o sin banner— y se publica hoy.
-     *
-     * Es un camino normal: se deja lista el jueves y se enciende el viernes a
-     * primera hora. Sin esto, esa promo no se anunciaba nunca, porque el aviso
-     * solo salía al crearla. Se dispara únicamente si NUNCA se avisó de ella
-     * (avisoEnviadoEn vacío); el propio aviso vuelve a comprobar el estado y no
-     * manda nada dos veces.
-     */
+    // La promo que se armó apagada —o sin banner— y se publica hoy. Es un camino normal: se deja lista
+    // el jueves y se enciende el viernes a primera hora. Sin esto, esa promo no se anunciaba nunca,
+    // porque el aviso solo salía al crearla.
     if (!found.avisoEnviadoEn) {
       avisarPromoNuevaEnSegundoPlano(req.params.id);
     }

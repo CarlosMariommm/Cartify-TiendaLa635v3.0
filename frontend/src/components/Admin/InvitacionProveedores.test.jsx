@@ -5,11 +5,8 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import InvitacionProveedores, { CLAVE_AHORA_NO, CLAVE_NO_MOSTRAR } from './InvitacionProveedores';
 import { supplierService } from '../../api/supplierService';
 
-/*
- * El aviso de decir por dónde se le pide a cada proveedor: solo al
- * administrador, solo en Proveedores, solo si falta alguno, y respetando
- * "Entendido" y "No volver a mostrar".
- */
+// El aviso de decir por dónde se le pide a cada proveedor: solo al administrador, solo en
+// Proveedores, solo si falta alguno, y respetando "Entendido" y "No volver a mostrar".
 
 vi.mock('../../api/supplierService', () => ({ supplierService: { getSuppliers: vi.fn() } }));
 const sesion = { user: { type: 'admin' } };

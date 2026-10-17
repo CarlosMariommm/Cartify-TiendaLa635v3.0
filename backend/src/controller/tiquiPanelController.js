@@ -10,46 +10,14 @@ import {
   CAMBIOS_ADMIN, CAMBIOS_EMPLEADO, ESTADOS_DESTINO, aplicarCambio, firmarPropuesta, leerPropuesta, proponerCambio,
 } from "../utils/cambiosTiqui.js";
 
-/*
- * ============================================================
- * TIQUI DEL PANEL — la asistente del equipo
- * ============================================================
- * Es OTRA asistente, aparte de la de la tienda (aiController.asistente), y a
- * propósito no comparten nada más que la cara y la voz:
- *
- *   - Otra ruta (/api/tiqui-panel), que solo abre una sesión de personal. Un
- *     cliente no puede preguntarle a esta cuánto vendió la tienda, y la de la
- *     tienda nunca ve un número del negocio.
- *   - Otras instrucciones: aquí Tiqui no vende ni arma carritos. Es la que se
- *     sabe todos los números, como un Jarvis de la tienda: cuenta cómo va el
- *     día, qué pedidos esperan, qué se está acabando, a quién se le debe.
- *   - Otras herramientas: llevar a una pantalla del panel, abrir los pedidos
- *     filtrados, buscar en el inventario.
- *   - Otra memoria: su charla vive en el panel y no se mezcla con la de nadie.
- *
- * Contesta en UNA vuelta al modelo, con el panorama del negocio ya armado
- * (utils/panoramaNegocio.js): en voz, cada consulta de más se nota.
- *
- * Lo que ve depende de quién pregunta. El empleado ve lo del dashboard y los
- * pedidos; clientes, proveedores, promociones y costos son del administrador,
- * igual que sus pantallas (ver ProtectedRoute soloAdmin en el frontend).
- *
- * También CAMBIA cosas cuando se lo piden (mover pedidos; y el administrador,
- * además, existencias, precios, productos, promociones y temporada), pero
- * nunca de una: propone, la persona confirma y recién ahí se aplica, con la
- * misma lógica que las pantallas. Ver utils/cambiosTiqui.js.
- *
- * La usan el panel web y, para el administrador, la app del teléfono.
- * ============================================================
- */
+// TIQUI DEL PANEL — la asistente del equipo
+// Otra asistente, aparte de la de la tienda: solo para el personal, contesta sobre el negocio y
+// cambia datos solo con confirmación (ver utils/cambiosTiqui.js).
 
 const tiquiPanelController = {};
 
-/*
- * Las pantallas a las que puede llevar. La ruta la arma el servidor: el
- * navegador solo navega a lo que le llega, y lo que no es de su rol ni se le
- * ofrece al modelo.
- */
+// Las pantallas a las que puede llevar. La ruta la arma el servidor: el navegador solo navega a lo
+// que le llega, y lo que no es de su rol ni se le ofrece al modelo.
 const SECCIONES = {
   dashboard: { ruta: "/dashboard", nombre: "el dashboard" },
   pedidos: { ruta: "/pedidos", nombre: "los pedidos" },
@@ -70,11 +38,8 @@ const SECCIONES = {
   proveedores: { ruta: "/proveedores", nombre: "los proveedores", soloAdmin: true },
 };
 
-/*
- * Los temas de la ayuda del panel (frontend/src/utils/ayudaPanel.js, mismas
- * claves): "¿cómo se usa el inventario?" abre /ayuda?tema=inventario. Si allá
- * se agrega un tema, se agrega aquí.
- */
+// Los temas de la ayuda del panel (frontend/src/utils/ayudaPanel.js, mismas claves): "¿cómo se usa
+// el inventario?" abre /ayuda?tema=inventario. Si allá se agrega un tema, se agrega aquí.
 const TEMAS_AYUDA = [
   "primeros-pasos", "tiqui", "dashboard", "pedidos", "inventario", "categorias", "marcas", "modulos",
   "impresiones", "promociones", "pronostico", "fidelidad", "tarjetas", "personalizacion", "clientes", "empleados",
@@ -95,13 +60,7 @@ const NOMBRE_FILTRO = {
   listo: "los pedidos listos para recoger", entregado: "los pedidos entregados", todos: "todos los pedidos",
 };
 
-/*
- * UNA sola herramienta, `responder`, con la pantalla a abrir como parte de la
- * respuesta. Con una herramienta por cosa (ir_a, ver_pedidos… y responder
- * aparte), el modelo a veces llamaba solo la de abrir y se olvidaba de hablar:
- * a "¿cómo vamos hoy?" contestaba abriendo los pedidos, sin decir nada del
- * día. Así, lo que dice es obligatorio y abrir algo es opcional.
- */
+// UNA sola herramienta, `responder`, con la pantalla a abrir como parte de la respuesta.
 const herramientasDe = (esAdmin) => [
   {
     functionDeclarations: [
@@ -196,10 +155,8 @@ const accionDe = ({ abrir, estado_pedidos: estadoPedidos, buscar }, esAdmin) => 
   return { tipo: "ir", ruta: s.ruta, que: s.nombre };
 };
 
-/*
- * Cómo es Tiqui en el panel. Tuteando a propósito, como la de la tienda: si
- * las instrucciones van de "usted", al modelo se le pega.
- */
+// Cómo es Tiqui en el panel. Tuteando a propósito, como la de la tienda: si las instrucciones van
+// de "usted", al modelo se le pega.
 const instrucciones = ({ esAdmin, nombre }) => [
   "Eres Tiqui, la mascota de Tienda la 635 (la etiqueta de precio del logo, con cara).",
   "Aquí no atiendes clientes: eres la asistente del equipo en el panel de administración,",
@@ -369,11 +326,8 @@ const estadoDeLaFrase = (frase) => {
 // Lo que dice Tiqui si el modelo abrió algo pero se olvidó de hablar.
 const fraseDeRespaldo = (accion) => (accion ? `Te abro ${accion.que}.` : "");
 
-/*
- * POST /api/tiqui-panel
- * Body: { frase, historial: [{ quien: 'tiqui'|'persona', texto }], pantalla }
- * Devuelve: { acciones: [{ tipo: 'ir', ruta, que }], respuesta, entendido, origen }
- */
+// POST /api/tiqui-panel Body: { frase, historial: [{ quien: 'tiqui'|'persona', texto }], pantalla
+// } Devuelve: { acciones: [{ tipo: 'ir', ruta, que }], respuesta, entendido, origen }
 tiquiPanelController.conversar = async (req, res) => {
   try {
     const frase = String(req.body?.frase || "").trim().slice(0, 400);
@@ -410,27 +364,18 @@ tiquiPanelController.conversar = async (req, res) => {
       const llamada = (respuesta.functionCalls || []).find((l) => l.name === "responder");
       if (!llamada) throw new Error("La IA no llamó 'responder'");
 
-      /*
-       * La pantalla sale validada contra su rol: el modelo solo vio las que le
-       * tocan, pero no se le cree a ciegas.
-       */
+      // La pantalla sale validada contra su rol: el modelo solo vio las que le tocan, pero no se le cree
+      // a ciegas.
       const args = llamada.args || {};
       const accion = pantalla === "app" ? null : accionDe(args, esAdmin);
       let dice = String(args.texto || "").trim();
 
-      /*
-       * Pidió cambiar algo: lo que se dice lo arma el servidor, no el modelo.
-       * Si la propuesta vale, es la frase exacta de lo que se va a hacer más
-       * "¿Lo hago?" (y viaja firmada para confirmarla); si no, por qué no se
-       * puede o qué falta saber. Así el modelo nunca dice "listo, ya lo hice"
-       * por algo que todavía nadie confirmó.
-       */
+      // Pidió cambiar algo: lo que se dice lo arma el servidor, no el modelo. Si la propuesta vale, es
+      // la frase exacta de lo que se va a hacer más "¿Lo hago?" (y viaja firmada para confirmarla); si
+      // no, por qué no se puede o qué falta saber.
       if (args.cambio && args.cambio !== "nada") {
-        /*
-         * A veces el modelo entiende "pasa el 88D230 a listo" pero deja el
-         * estado vacío (o lo pone en el filtro de pedidos). Se completa con
-         * la frase: pedirle a la persona que lo repita sería absurdo.
-         */
+        // A veces el modelo entiende "pasa el 88D230 a listo" pero deja el estado vacío (o lo pone en el
+        // filtro de pedidos). Se completa con la frase: pedirle a la persona que lo repita sería absurdo.
         if (args.cambio === "estado_pedido" && !ESTADOS_DESTINO.includes(args.estado_nuevo)) {
           args.estado_nuevo = ESTADOS_DESTINO.includes(args.estado_pedidos) ? args.estado_pedidos : estadoDeLaFrase(frase);
         }
@@ -463,12 +408,9 @@ tiquiPanelController.conversar = async (req, res) => {
   }
 };
 
-/*
- * POST /api/tiqui-panel/confirmar
- * Body: { token } — la propuesta firmada que devolvió /api/tiqui-panel.
- * La persona dijo que sí: se aplica (ver utils/cambiosTiqui.js). La firma dice
- * qué y para quién; si venció o es de otra sesión, no se aplica nada.
- */
+// POST /api/tiqui-panel/confirmar Body: { token } — la propuesta firmada que devolvió
+// /api/tiqui-panel. La persona dijo que sí: se aplica (ver utils/cambiosTiqui.js). La firma dice
+// qué y para quién; si venció o es de otra sesión, no se aplica nada.
 tiquiPanelController.confirmar = async (req, res) => {
   try {
     const cambio = leerPropuesta(req.body?.token, req.usuario);
@@ -486,20 +428,8 @@ tiquiPanelController.confirmar = async (req, res) => {
   }
 };
 
-/*
- * GET /api/tiqui-panel/listo
- * Se toca al despertarla: despierta el servidor (Render lo duerme), deja el
- * panorama armado para la primera pregunta y dice si hay voz de Tiqui.
- *
- * Al administrador, además, `consejo`: lo más importante que Tiqui ve para
- * vender mejor (una promo que deja pérdida, algo que caduca). Lo muestra en
- * vez del saludo: una ayudante de ventas no espera a que le pregunten si se
- * está perdiendo plata. Vacío si no hay nada que lo amerite.
- *
- * Y se manda a calcular el pronóstico, sin esperarlo: el servicio de análisis
- * duerme y tarda en despertar, así que para cuando le pregunten "¿qué tengo
- * que pedir?" ya debería estar listo.
- */
+// GET /api/tiqui-panel/listo Se toca al despertarla: despierta el servidor (Render lo duerme),
+// deja el panorama armado para la primera pregunta y dice si hay voz de Tiqui.
 tiquiPanelController.listo = async (req, res) => {
   const esAdmin = req.usuario.tipo === "Admin";
   if (esAdmin) calentarPronostico();

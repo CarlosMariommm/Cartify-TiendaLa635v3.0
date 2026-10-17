@@ -1,17 +1,8 @@
 import { useId, useState } from 'react';
 
-/*
- * ============================================================
- * DATOS DEL NEGOCIO — DatosNegocio.jsx
- * ============================================================
- * Quién es el responsable de la tienda y cómo se le contacta: lo que citan
- * las páginas legales (privacidad, términos, devoluciones) y el pie de
- * página. Vive en Personalización → Identidad.
- *
- * Ningún campo es obligatorio. Lo que quede vacío no se muestra en ningún
- * lado: un aviso de privacidad sin NIT es mejor que uno con un NIT inventado.
- * ============================================================
- */
+// DATOS DEL NEGOCIO — DatosNegocio.jsx
+// Quién es el responsable de la tienda y cómo se le contacta: lo que citan las páginas legales
+// (privacidad, términos, devoluciones) y el pie de página. Vive en Personalización → Identidad.
 
 const CAMPOS = [
   {
@@ -31,11 +22,9 @@ const CAMPOS = [
 
 const VACIO = Object.fromEntries(CAMPOS.map((c) => [c.clave, '']));
 
-/*
- * El formulario arranca con lo guardado. Quien lo monta le pone como `key`
- * los datos guardados, así que cuando llegan del servidor (o se guardan) se
- * vuelve a montar con los valores nuevos, sin copiarlos en un efecto.
- */
+// El formulario arranca con lo guardado. Quien lo monta le pone como `key` los datos guardados,
+// así que cuando llegan del servidor (o se guardan) se vuelve a montar con los valores nuevos, sin
+// copiarlos en un efecto.
 const DatosNegocio = ({ negocio = {}, guardar, guardando, estiloTarjeta, estiloCampo }) => {
   const id = useId();
   const [form, setForm] = useState(() => ({

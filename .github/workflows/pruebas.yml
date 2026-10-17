@@ -1,12 +1,6 @@
-# Revisión automática de cada cambio.
-#
-# En cada pull request (y al llegar a develop o main) corre, por separado y
-# a la vez, lo de la web, el servidor, el servicio de analítica (Python) y la
-# app: el linter, las pruebas y la construcción. Si algo falla, el PR lo muestra en rojo antes de juntarlo;
-# hasta ahora cada cambio se probaba a mano y lo roto se descubría publicado.
-#
-# Las pruebas no tocan la base de datos ni mandan correos: lo que necesita
-# servidor o base se reemplaza dentro de cada prueba.
+# Revisión automática de cada cambio. En cada pull request (y al llegar a develop o main) corre,
+# por separado y a la vez, lo de la web, el servidor, el servicio de analítica (Python) y la app:
+# el linter, las pruebas y la construcción.
 name: Pruebas
 
 on:

@@ -8,18 +8,8 @@ import { useBotonAtras } from '../../hooks/useBotonAtras';
 import { crearHtmlSeguimiento } from './mapaSeguimientoHtml';
 import { useIdioma } from '../../context/IdiomaContext';
 
-/*
- * ============================================================
- * MAPA DE SEGUIMIENTO EN GRANDE — ModalMapaSeguimiento.js
- * ============================================================
- * Lo que se abre al tocar la miniatura de `MapaSeguimiento.js`: el mismo
- * mapa, pero de pantalla completa y de VERDAD interactivo — zoom, arrastre,
- * doble toque — igual que el mapa de marcar dirección
- * (`ModalMapaDireccion.js`). Antes la miniatura era la única forma de ver
- * al repartidor y ni siquiera dejaba acercar el zoom: una inconsistencia
- * frente al otro mapa de la app, que sí se puede tocar y mover libremente.
- * ============================================================
- */
+// MAPA DE SEGUIMIENTO EN GRANDE — ModalMapaSeguimiento.js
+// El mismo mapa de la miniatura, a pantalla completa y con zoom y arrastre.
 
 // `origen` (la tienda) llega solo sin GPS del repartidor: ahí el título no dice "en vivo".
 const ModalMapaSeguimiento = ({ punto, destino, ruta, origen, colorMarca, alCerrar }) => {

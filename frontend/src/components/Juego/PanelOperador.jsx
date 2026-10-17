@@ -1,20 +1,8 @@
 import { Minus, Plus, X, Maximize, RotateCcw, Play } from 'lucide-react';
 
-/*
- * ============================================================
- * EL PANEL DEL OPERADOR — PanelOperador.jsx
- * ============================================================
- * Lo que maneja quien atiende el stand, escondido de los visitantes: se abre
- * tocando 5 veces seguidas el nombre de arriba a la izquierda.
- *
- * Cuántos premios mayores y dulces quedan (al llegar a 0 los secretos, la
- * ruleta ya no cae ahí), la probabilidad del secreto —que puede salir sola de
- * esos números—, el tiempo por pregunta, la voz, la música y los efectos, y
- * cómo va el día. Todo queda guardado en la laptop (ver useJuegoTiqui).
- *
- * Sin recuadros: filas sobre el fondo, separadas por una línea fina.
- * ============================================================
- */
+// EL PANEL DEL OPERADOR — PanelOperador.jsx
+// Lo que maneja quien atiende el stand, escondido de los visitantes: se abre tocando 5 veces
+// seguidas el nombre de arriba a la izquierda.
 
 const TIEMPOS = [
   { valor: 20, texto: '20 s' },
@@ -46,11 +34,8 @@ const Boton = ({ children, activo, ...props }) => (
   </button>
 );
 
-/*
- * Un número con − y +, que también se puede escribir: con 60 dulces, llegar
- * a punta de "+" sería eterno. Borrarlo todo cuenta como 0 mientras se
- * escribe el nuevo.
- */
+// Un número con − y +, que también se puede escribir: con 60 dulces, llegar a punta de "+" sería
+// eterno. Borrarlo todo cuenta como 0 mientras se escribe el nuevo.
 const Contador = ({ valor, alCambiar, min, max, paso = 1, sufijo = '', etiqueta }) => {
   const poner = (v) => alCambiar(Math.min(max, Math.max(min, v)));
   return (
@@ -84,12 +69,9 @@ const enPalabras = (pct) => {
   return { porcentaje: `${redondo} %`, cadaCuantos: Math.max(1, Math.round(100 / pct)) };
 };
 
-/*
- * La parte de los premios: cuántos quedan de cada uno y, de ahí, cada cuánto
- * sale el secreto. En automático la probabilidad es la de sacar un secreto
- * de la bolsa de premios que quedan (utils/juegoTiqui.js → probabilidadSecreta),
- * así que se mueve sola con cada premio entregado.
- */
+// La parte de los premios: cuántos quedan de cada uno y, de ahí, cada cuánto sale el secreto. En
+// automático la probabilidad es la de sacar un secreto de la bolsa de premios que quedan
+// (utils/juegoTiqui.js → probabilidadSecreta), así que se mueve sola con cada premio entregado.
 const Premios = ({ ajustes, probabilidad, cambiarAjuste }) => {
   const { secretos, dulces, modo } = ajustes;
   const total = secretos + dulces;

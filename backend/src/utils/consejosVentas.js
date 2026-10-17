@@ -3,34 +3,9 @@ import productModel from "../models/product.js";
 import promotionModel from "../models/promotion.js";
 import { DIAS_CADUCA, numero } from "../controller/dashboardController.js";
 
-/*
- * ============================================================
- * CONSEJOS DE VENTAS — Tiqui del panel como ayudante de ventas
- * ============================================================
- * Tiqui contaba los números del negocio, pero de las promociones solo sabía el
- * nombre: no podía decir que un 2x1 estaba dejando pérdida. Aquí se cruzan el
- * precio, el COSTO de cada producto (priceCost) y las ventas reales, y salen
- * dos cosas para el administrador:
- *
- *   - resumenPromos: cómo va cada promoción vigente, con el precio al que sale
- *     cada producto, lo que cuesta y cuánto se vendió desde que empezó.
- *   - consejos: lo que conviene hacer, ordenado de lo más urgente a lo menos,
- *     con la cuenta ya hecha ("con 20% todavía deja 10% de ganancia"):
- *       · una promoción que deja pérdida o casi nada por unidad;
- *       · una promoción que no vende;
- *       · un producto que se vende por debajo de lo que cuesta;
- *       · algo que caduca pronto sin descuento;
- *       · existencias paradas, sin ventas en 30 días.
- *
- * Las cuentas se hacen AQUÍ y no las hace el modelo: pedirle aritmética de
- * dinero a una IA es invitarla a equivocarse, y un consejo de precios con un
- * número mal sacado es peor que ningún consejo. Tiqui solo los cuenta.
- *
- * El precio en promoción se calcula igual que en la tienda
- * (movil/src/utils/catalogo.js y el carrito): descuento sobre el precio,
- * precio fijo, o en un NxM se paga M de cada N.
- * ============================================================
- */
+// CONSEJOS DE VENTAS — Tiqui del panel como ayudante de ventas
+// Tiqui contaba los números del negocio, pero de las promociones solo sabía el nombre: no podía
+// decir que un 2x1 estaba dejando pérdida.
 
 const DIA = 24 * 60 * 60 * 1000;
 // Lo mínimo que se le pide a una promo para darla por sana: 10% de ganancia.
@@ -89,10 +64,8 @@ const ventasPorProducto = async (ids, desde, hasta) => {
   return new Map(filas.map((f) => [String(f._id), f]));
 };
 
-/*
- * Qué cambiar para que la promo deje al menos MARGEN_PROMO en TODOS los
- * productos que hoy quedan cortos. Devuelve la frase o "" si no hay arreglo.
- */
+// Qué cambiar para que la promo deje al menos MARGEN_PROMO en TODOS los productos que hoy quedan
+// cortos. Devuelve la frase o "" si no hay arreglo.
 const arregloDePromo = (promo, cortos) => {
   const conMargen = (costo) => costo / (1 - MARGEN_PROMO);
   if (promo.type === "descuento") {
@@ -154,13 +127,9 @@ export const analizarVentas = async () => {
   const consejos = [];
   const resumenPromos = [];
 
-  /*
-   * ── Promociones huérfanas ──
-   * Encendidas, pero su producto ya no existe (se borró y se volvió a crear
-   * con otro id, por ejemplo). En la tienda siguen anunciando "a $4.50" y no
-   * le rebajan nada a nadie, y el aviso a los clientes ni sale. Nadie lo nota
-   * hasta que un cliente reclama el precio del banner.
-   */
+  // ── Promociones huérfanas ── Encendidas, pero su producto ya no existe (se borró y se volvió a
+  // crear con otro id, por ejemplo). En la tienda siguen anunciando "a $4.50" y no le rebajan nada a
+  // nadie, y el aviso a los clientes ni sale.
   for (const promo of promos.filter((p) => vigente(p, ahora) && (p.items || []).length)) {
     if ((promo.items || []).some((i) => i.productId?._id)) continue;
     consejos.push({
@@ -306,12 +275,9 @@ export const analizarVentas = async () => {
   return { consejos: consejos.slice(0, 6), resumenPromos, margenTipico };
 };
 
-/*
- * El consejo que Tiqui dice al abrirla, si hay algo que de verdad lo amerite
- * (una pérdida o algo que caduca): no se le salta encima a nadie por una
- * existencia parada. Se guarda un minuto para no rehacer las cuentas en cada
- * apertura.
- */
+// El consejo que Tiqui dice al abrirla, si hay algo que de verdad lo amerite (una pérdida o algo
+// que caduca): no se le salta encima a nadie por una existencia parada. Se guarda un minuto para
+// no rehacer las cuentas en cada apertura.
 let principal = { en: 0, texto: "" };
 export const consejoPrincipal = async () => {
   if (Date.now() - principal.en < 60 * 1000) return principal.texto;

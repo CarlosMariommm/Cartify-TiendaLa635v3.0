@@ -8,21 +8,9 @@ import { enlaceWhatsApp } from '../utils/tienda';
 import { DOCUMENTOS_LEGALES } from '../utils/legales';
 import { useIdioma } from './useIdioma';
 
-/*
- * usePieTienda — qué se puede ofrecer en el pie de página, y a dónde lleva cada
- * cosa.
- *
- * El pie es donde la gente busca lo que no encontró arriba: cómo contactar,
- * qué más vende la tienda, dónde quedó su pedido. Por eso la lista NO está
- * escrita a mano: los pasillos salen de la base igual que en el menú del
- * nombre, así que el día que abran la panadería aparece sola aquí abajo
- * también, sin que nadie se acuerde de venir a agregarla.
- *
- * La regla que gobierna todo este archivo: solo se ofrece lo que existe. Si no
- * hay WhatsApp configurado, no hay enlace de WhatsApp. Si no hay sesión, no se
- * ofrecen "Mis pedidos" —que llevaría a un login y de vuelta—, se ofrece
- * entrar. Un pie lleno de enlaces muertos es peor que un pie corto.
- */
+// usePieTienda — qué se puede ofrecer en el pie de página, y a dónde lleva cada cosa. El pie es
+// donde la gente busca lo que no encontró arriba: cómo contactar, qué más vende la tienda, dónde
+// quedó su pedido.
 
 // Lo de "Mi Cuenta" que de verdad se usa desde el pie. No están las nueve
 // pantallas: el pie no es el mapa del sitio, es un atajo a lo que la gente
@@ -40,13 +28,9 @@ const ENLACES_SIN_SESION = [
   { texto: 'Crear una cuenta', ruta: '/register' },
 ];
 
-/*
- * Lo legal va en el renglón de cierre, junto al copyright, y no como una
- * columna propia: una columna entera titulada "Legal" con un solo enlace pesa
- * en la página lo mismo que los pasillos, y no es ni de lejos igual de
- * importante para quien vino a comprar. Abajo del todo es donde la gente lo
- * busca cuando lo busca.
- */
+// Lo legal va en el renglón de cierre, junto al copyright, y no como una columna propia: una
+// columna entera titulada "Legal" con un solo enlace pesa en la página lo mismo que los pasillos,
+// y no es ni de lejos igual de importante para quien vino a comprar.
 const ENLACES_LEGALES = DOCUMENTOS_LEGALES.map((d) => ({ texto: d.titulo, ruta: d.ruta }));
 
 const SALUDO_WHATSAPP =
@@ -56,22 +40,14 @@ export const usePieTienda = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { modulos } = useModulos();
-  /*
-   * El nombre, el lema y la dirección salen de los ajustes de la tienda. Si el
-   * servidor no contestó, el hook de ajustes ya devuelve los mismos valores
-   * que antes estaban escritos en utils/tienda.js, así que el pie se pinta
-   * igual y nadie se entera.
-   */
+  // El nombre, el lema y la dirección salen de los ajustes de la tienda. Si el servidor no contestó,
+  // el hook de ajustes ya devuelve los mismos valores que antes estaban escritos en utils/tienda.js,
+  // así que el pie se pinta igual y nadie se entera.
   const { ajustes } = useAjustesCtx();
   const { t } = useIdioma();
 
-  /*
-   * Los pasillos que se recorren dentro de la tienda llevan a la portada con
-   * ese pasillo puesto (?modulo=...). Impresiones tiene pantalla propia, así
-   * que lleva a la suya. Es la misma regla del menú del nombre de la tienda:
-   * si aquí dijera otra cosa, el mismo pasillo se comportaría distinto según
-   * desde dónde se toque.
-   */
+  // Los pasillos que se recorren dentro de la tienda llevan a la portada con ese pasillo puesto
+  // (?modulo=...). Impresiones tiene pantalla propia, así que lleva a la suya.
   const pasillos = useMemo(
     () =>
       (modulos || []).map((m) => ({
@@ -87,13 +63,9 @@ export const usePieTienda = () => {
 
   const enlacesCuenta = isAuthenticated ? ENLACES_CUENTA : ENLACES_SIN_SESION;
 
-  /*
-   * Navegar Y subir hasta arriba.
-   *
-   * Sin el scroll, tocar un enlace del pie deja al cliente en la pantalla nueva
-   * pero a la altura donde venía —o sea, mirando el pie otra vez—. Parece que
-   * el enlace no hizo nada.
-   */
+  // Navegar Y subir hasta arriba. Sin el scroll, tocar un enlace del pie deja al cliente en la
+  // pantalla nueva pero a la altura donde venía —o sea, mirando el pie otra vez—. Parece que el
+  // enlace no hizo nada.
   const ir = (ruta) => {
     navigate(ruta);
     window.scrollTo({ top: 0, behavior: 'smooth' });

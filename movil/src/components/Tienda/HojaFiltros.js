@@ -1,15 +1,6 @@
-/*
- * ============================================================
- * LOS FILTROS DE LA TIENDA — HojaFiltros.js
- * ============================================================
- * La hoja que sube desde abajo al tocar "Filtros" en Inicio: ordenar, precio,
- * solo ofertas, solo lo disponible y marca, en pastillas que se tocan. Lo
- * elegido se aplica al momento (se ve en el "Ver N productos" de abajo); la
- * hoja se cierra con ese botón, tocando afuera o con el atrás de Android.
- *
- * Filtra igual que la web: la lógica está en utils/filtrosTienda.js.
- * ============================================================
- */
+// LOS FILTROS DE LA TIENDA — HojaFiltros.js
+// La hoja que sube desde abajo al tocar "Filtros" en Inicio: ordenar, precio, solo ofertas, solo
+// lo disponible y marca, en pastillas que se tocan.
 
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';

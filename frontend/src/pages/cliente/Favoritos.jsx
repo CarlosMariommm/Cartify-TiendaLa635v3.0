@@ -6,13 +6,8 @@ import Mascota, { CargandoMascota } from '../../components/UI/Mascota';
 import { useIdioma } from '../../hooks/useIdioma';
 import { foto, ANCHO } from '../../utils/fotos';
 
-/*
- * Favoritos — los productos que el cliente marcó con el corazón.
- *
- * Antes el corazón no guardaba nada: se pintaba de rojo y se olvidaba al
- * recargar la página. Ahora vive en su cuenta y esta es la pantalla donde los
- * vuelve a encontrar.
- */
+// Favoritos — los productos que el cliente marcó con el corazón. Ahora vive en su cuenta y esta es
+// la pantalla donde los vuelve a encontrar.
 
 const dinero = (n) => `$${(Number(n) || 0).toFixed(2)}`;
 

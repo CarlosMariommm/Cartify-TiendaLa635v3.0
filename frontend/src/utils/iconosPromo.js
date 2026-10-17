@@ -4,20 +4,8 @@ import {
   Croissant, IceCream, ShoppingBasket, Heart,
 } from 'lucide-react';
 
-/*
- * ============================================================
- * ICONOS DE PROMOCIÓN — iconosPromo.js
- * ============================================================
- * Un puñado de iconos para que el banner diga de qué va sin leerlo.
- *
- * Por qué una lista cerrada y no un buscador de iconos: quien arma la promo
- * es el tendero. Con 1500 iconos se pierde diez minutos y termina eligiendo
- * cualquiera; con dieciséis encuentra "llama" o "bebida" de un vistazo.
- *
- * Están ordenados por lo que más se usa: primero los de gancho (trending,
- * nuevo, estrella), después los de producto.
- * ============================================================
- */
+// ICONOS DE PROMOCIÓN — iconosPromo.js
+// Un puñado de iconos para que el banner diga de qué va sin leerlo.
 export const ICONOS_PROMO = [
   { id: 'llama', nombre: 'Trending', Icono: Flame },
   { id: 'chispa', nombre: 'Nuevo', Icono: Sparkles },

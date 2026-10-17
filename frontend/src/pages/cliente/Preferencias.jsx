@@ -4,21 +4,12 @@ import { useModo } from '../../hooks/useModo';
 import { useIdioma } from '../../hooks/useIdioma';
 import { IDIOMAS } from '../../utils/idioma';
 
-/*
- * Preferencias — cómo se ve la tienda para esta persona (área "Mi Cuenta").
- *
- * Por ahora: claro, oscuro o igual que el aparato. Se guarda en este
- * navegador y no en la cuenta —ver utils/modo.js— así que cambiarlo aquí se
- * ve al instante en la tienda y en Mi Cuenta, sin guardar ni recargar.
- *
- * Cada opción lleva un dibujito de la tienda en ese modo: "oscuro" dicho en
- * palabras no dice cuánto cambia; viéndolo se elige en un segundo.
- */
+// Preferencias — cómo se ve la tienda para esta persona (área "Mi Cuenta"). Por ahora: claro,
+// oscuro o igual que el aparato. Se guarda en este navegador y no en la cuenta —ver utils/modo.js—
+// así que cambiarlo aquí se ve al instante en la tienda y en Mi Cuenta, sin guardar ni recargar.
 
-/*
- * Los colores de los dibujitos van FIJOS a propósito: la miniatura de "Claro"
- * tiene que verse clara aunque la página ya esté en oscuro, y al revés.
- */
+// Los colores de los dibujitos van FIJOS a propósito: la miniatura de "Claro" tiene que verse
+// clara aunque la página ya esté en oscuro, y al revés.
 const CLARO = { fondo: '#FFFFFF', barra: '#F5F5F5', tarjeta: '#EFEFEF', texto: '#1C1614', marca: '#003049' };
 const OSCURO = { fondo: '#121417', barra: '#1F2328', tarjeta: '#23272C', texto: '#ECEEF0', marca: '#0F80BA' };
 
@@ -123,10 +114,8 @@ const Preferencias = () => {
         </div>
       </section>
 
-      {/*
-        El idioma. Cada opción se escribe en SU idioma ("English", no "Inglés"):
-        quien no lee español tiene que poder encontrar la suya.
-      */}
+      {/* El idioma. Cada opción se escribe en SU idioma ("English", no "Inglés"): quien no lee español
+         tiene que poder encontrar la suya. */}
       <section className="mt-10">
         <h2 className="text-lg font-bold" style={{ color: c.textPrimary }}>{t('Idioma')}</h2>
         <p className="text-sm mt-1" style={{ color: c.textSecondary }}>

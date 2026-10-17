@@ -1,26 +1,13 @@
-/*
- * ============================================================
- * TIQUI — el asistente con IA
- * ============================================================
- * El mismo cerebro que la web: `/ai/asistente` (tool calling de Gemini en el
- * backend) entiende lo que se dijo con el catálogo, las promociones y los
- * datos de la tienda, y devuelve una LISTA de acciones y la frase que hay que
- * decir. Ver el comentario grande de TIQUI en
- * `backend/src/controller/aiController.js`.
- *
- * Se llama cuando las reglas rápidas del asistente no alcanzan (ver
- * useAsistenteVoz.js).
- * ============================================================
- */
+// TIQUI — el asistente con IA
+// Le manda la frase a `/ai/asistente` (el mismo cerebro que la web) cuando las reglas rápidas no
+// alcanzan, y recibe las acciones y la frase que hay que decir.
 
 import { peticion, URL_API } from './api';
 
 export const asistenteApi = {
-  /*
-   * Nunca lanza error: sin internet devuelve origen 'sin-red' y el asistente
-   * lo dice tal cual. El catálogo lo pone el servidor; aquí solo viaja lo
-   * que sabe el teléfono: el carrito y lo último que se habló.
-   */
+  // Nunca lanza error: sin internet devuelve origen 'sin-red' y el asistente lo dice tal cual. El
+  // catálogo lo pone el servidor; aquí solo viaja lo que sabe el teléfono: el carrito y lo último
+  // que se habló.
   asistente: async ({ frase, carrito, historial, productos = [] }) => {
     try {
       return await peticion('/ai/asistente', {
@@ -29,11 +16,9 @@ export const asistenteApi = {
         tiempoMaximo: 15000,
       });
     } catch (error) {
-      /*
-       * El servidor todavía no tiene Tiqui (404): pasa si la app se actualiza
-       * antes que Render. Se usa la ruta de antes, que devuelve lo mismo
-       * (acciones + respuesta) pero necesita que le mandemos los productos.
-       */
+      // El servidor todavía no tiene Tiqui (404): pasa si la app se actualiza antes que Render. Se usa
+      // la ruta de antes, que devuelve lo mismo (acciones + respuesta) pero necesita que le mandemos los
+      // productos.
       if (error?.estado === 404) {
         try {
           return await peticion('/ai/entender-herramientas', {
@@ -49,11 +34,9 @@ export const asistenteApi = {
     }
   },
 
-  /*
-   * Despierta el servidor al abrir el asistente (Render lo duerme si no hay
-   * tráfico) y pregunta si tiene la voz de Tiqui. Nunca falla: sin respuesta,
-   * `voz` es false y se habla con la voz del teléfono.
-   */
+  // Despierta el servidor al abrir el asistente (Render lo duerme si no hay tráfico) y pregunta si
+  // tiene la voz de Tiqui. Nunca falla: sin respuesta, `voz` es false y se habla con la voz del
+  // teléfono.
   despertar: async () => {
     try {
       const datos = await peticion('/ai/listo', { tiempoMaximo: 45000 });

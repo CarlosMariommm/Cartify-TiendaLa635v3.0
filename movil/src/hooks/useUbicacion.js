@@ -1,29 +1,6 @@
-/*
- * ============================================================
- * UBICACIÓN — useUbicacion.js
- * ============================================================
- * Puerto de `frontend/src/hooks/useUbicacion.js`: coordenadas -> dirección
- * escrita, con Nominatim (el buscador de OpenStreetMap). Gratis y sin llave
- * — la razón está en el original: la llave de Google del proyecto responde
- * REQUEST_DENIED desde que venció el trial, y Maps exige facturación.
- *
- * `localizarme` ("Dirección actual") pide el GPS del teléfono con
- * `expo-location`. Si lo niegan o falla, el pin se puede seguir marcando a
- * mano tocando el mapa — no es el único camino, es un atajo.
- *
- * Nominatim pide no bombardearlo: por eso solo se consulta cuando se suelta
- * el pin (el mensaje que manda el mapa embebido en `ModalMapaDireccion`),
- * nunca en cada fotograma de un arrastre.
- *
- * ── El User-Agent, que la web no necesita y aquí sí ──
- * La política de uso de Nominatim exige que la petición se identifique con
- * un Referer o un User-Agent — en el navegador el Referer lo pone el
- * navegador solo, así que la web nunca tuvo que pensar en esto. `fetch` en
- * React Native no manda ninguno de los dos por su cuenta, y Nominatim
- * contesta 403 sin uno: se comprobó en el emulador antes de escribir esto,
- * no es una precaución de sobra.
- * ============================================================
- */
+// UBICACIÓN — useUbicacion.js
+// Puerto de `frontend/src/hooks/useUbicacion.js`: coordenadas -> dirección escrita, con Nominatim
+// (el buscador de OpenStreetMap).
 
 import { useState } from 'react';
 import * as Location from 'expo-location';
@@ -32,11 +9,9 @@ import { tAhora } from '../utils/idioma';
 // San Salvador: dónde abre el mapa si todavía no hay un pin puesto.
 export const CENTRO_POR_DEFECTO = { lat: 13.6929, lng: -89.2182 };
 
-/*
- * Coordenadas → dirección escrita. Se arma con las partes que le sirven a un
- * repartidor (calle, número, colonia, ciudad) y se descartan el país y el
- * código postal, que en una entrega de barrio no aportan nada.
- */
+// Coordenadas → dirección escrita. Se arma con las partes que le sirven a un repartidor (calle,
+// número, colonia, ciudad) y se descartan el país y el código postal, que en una entrega de barrio
+// no aportan nada.
 const direccionDesdeCoords = async (lat, lng) => {
   const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=es`;
   const r = await fetch(url, {
@@ -71,22 +46,16 @@ export const useUbicacion = () => {
       const texto = await direccionDesdeCoords(lat, lng);
       if (texto) setDireccion(texto);
     } catch {
-      /*
-       * Sin internet o con Nominatim caído, el pin igual queda puesto y la
-       * persona puede escribir la dirección a mano. Quedarse sin poder
-       * continuar por un servicio ajeno sería peor.
-       */
+      // Sin internet o con Nominatim caído, el pin igual queda puesto y la persona puede escribir la
+      // dirección a mano. Quedarse sin poder continuar por un servicio ajeno sería peor.
       setAvisoGeocod(tAhora('No se pudo leer la dirección; puedes escribirla tú'));
     } finally {
       setBuscando(false);
     }
   };
 
-  /*
-   * "Dirección actual". A diferencia del navegador (que ya pregunta el
-   * permiso solo), acá hay que pedirlo a mano con expo-location antes de
-   * poder leer el GPS.
-   */
+  // "Dirección actual". A diferencia del navegador (que ya pregunta el permiso solo), acá hay que
+  // pedirlo a mano con expo-location antes de poder leer el GPS.
   const localizarme = async () => {
     setLocalizando(true);
     setAvisoGeocod('');

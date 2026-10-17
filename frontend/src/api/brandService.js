@@ -1,13 +1,8 @@
 import api from './api';
 
-/*
- * ============================================================
- * SERVICIO DE MARCAS — brandService.js
- * ============================================================
- * Centraliza las peticiones HTTP del módulo de marcas (brands).
- * Las marcas se envían como JSON simple.
- * ============================================================
- */
+// SERVICIO DE MARCAS — brandService.js
+// Centraliza las peticiones HTTP del módulo de marcas (brands). Las marcas se envían como JSON
+// simple.
 export const brandService = {
   // 1- Obtener todas las marcas disponibles (SELECT)
   getBrands: async () => {

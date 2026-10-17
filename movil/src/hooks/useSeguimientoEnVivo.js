@@ -5,34 +5,16 @@ import { useAviso } from '../context/AvisoContext';
 import { distanciaMetros, minutosDeViaje, textoDeEspera, formatoDistancia } from '../utils/geo';
 import { tAhora } from '../utils/idioma';
 
-/*
- * ============================================================
- * SEGUIMIENTO EN VIVO — useSeguimientoEnVivo.js
- * ============================================================
- * Copia de `frontend/src/hooks/useSeguimientoEnVivo.js`: preguntar cada
- * pocos segundos dónde va el repartidor y traducirlo a algo que se entienda
- * ("llega en 10 min aprox."). Mismo por qué preguntar y no un socket: el
- * backend es Express pelado, y una consulta cada 10 segundos a una ruta que
- * devuelve cuatro números sale más barato que sumar un servidor de sockets.
- *
- * Dos diferencias con la web, las dos porque el navegador y el teléfono no
- * tienen las mismas herramientas:
- *   - El aviso de "ya casi llega" usa useAviso (ver AvisoContext) en vez de
- *     react-hot-toast.
- *   - El tirón en el bolsillo usa `Vibration` de react-native en vez de
- *     `navigator.vibrate`.
- * ============================================================
- */
+// SEGUIMIENTO EN VIVO — useSeguimientoEnVivo.js
+// Copia de `frontend/src/hooks/useSeguimientoEnVivo.js`: preguntar cada pocos segundos dónde va el
+// repartidor y traducirlo a algo que se entienda ("llega en 10 min aprox.").
 
 const CADA_CUANTO_MS = 10000;      // se pregunta cada 10 segundos
 const SENAL_FRIA_MS = 90000;       // sin noticias en minuto y medio: se avisa
 const YA_CASI_M = 250;             // dos cuadras: el punto de levantarse
 
-/*
- * `conAviso`: si este seguimiento da el aviso de "ya casi toca tu puerta". Lo
- * da la burbuja; el detalle del pedido sigue el mismo pedido sin avisar, para
- * que no salga dos veces.
- */
+// `conAviso`: si este seguimiento da el aviso de "ya casi toca tu puerta". Lo da la burbuja; el
+// detalle del pedido sigue el mismo pedido sin avisar, para que no salga dos veces.
 export const useSeguimientoEnVivo = (pedidoId, activo = true, { conAviso = true } = {}) => {
   const { avisar } = useAviso();
   const [datos, setDatos] = useState(null);
@@ -125,11 +107,9 @@ export const useSeguimientoEnVivo = (pedidoId, activo = true, { conAviso = true 
   // Sin eso, lo aproximado desde la tienda (si el servidor lo mandó).
   const estimado = enVivo ? null : actual?.estimado || null;
 
-  /*
-   * Con la ruta por las calles, lo que falta es lo que mide esa línea y la
-   * espera sale de su tiempo; sin ella, la línea recta de siempre. Con la
-   * señal fría no se muestra: sería un camino desde donde ya no está.
-   */
+  // Con la ruta por las calles, lo que falta es lo que mide esa línea y la espera sale de su tiempo;
+  // sin ella, la línea recta de siempre. Con la señal fría no se muestra: sería un camino desde
+  // donde ya no está.
   const ruta = enVivo ? actual?.ruta : null;
   const puntosDeLinea = ruta?.puntos || estimado?.puntos || null;
   // La misma línea llega como objeto nuevo en cada consulta: se compara por

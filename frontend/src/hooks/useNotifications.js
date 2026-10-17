@@ -2,13 +2,9 @@ import { useState, useEffect } from 'react';
 import { clientService } from '../api/clientService';
 import { useAuth } from './useAuth';
 
-/*
- * useNotifications — preferencias de notificación del cliente, por canal:
- *   `correo` → notificationPrefs (los correos)
- *   `app`    → avisosApp (los avisos del teléfono)
- * Apagar uno no toca al otro (ver backend/src/utils/preferenciasAvisos.js).
- * La lógica vive aquí; la página Notificaciones solo pinta los interruptores.
- */
+// useNotifications — preferencias de notificación del cliente, por canal: `correo` →
+// notificationPrefs (los correos) `app` → avisosApp (los avisos del teléfono) Apagar uno no toca
+// al otro (ver backend/src/utils/preferenciasAvisos.js).
 const DEFAULTS = {
   correo: { promociones: true, nuevosProductos: true, pedidoCerca: false },
   app: {

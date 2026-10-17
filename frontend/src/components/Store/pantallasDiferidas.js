@@ -1,24 +1,8 @@
 import { lazy } from 'react';
 
-/*
- * ============================================================
- * LO QUE SE ABRE ENCIMA DE LA TIENDA — pantallasDiferidas.js
- * ============================================================
- * El carrito, Tiqui, la ficha de un producto y el detalle de una promo solo
- * se ven cuando alguien los abre, pero venían en el mismo archivo que la
- * portada: había que bajarlos (con el generador de QR del kiosco incluido)
- * antes de ver el primer producto.
- *
- * Ahora se descargan aparte. Para que abrirlos siga siendo instantáneo, la
- * tienda los pide en cuanto termina de pintarse, en un rato libre del
- * navegador (precargarPantallas): cuando la persona toca el carrito, ya
- * están. Si lo toca antes, se espera un instante sin que se mueva nada.
- *
- * Quien los use los pinta dentro de <Suspense fallback={null}>: sin un
- * Suspense propio, el que atrapa la espera es el de App.jsx, que tapa la
- * tienda entera con la pantalla de carga.
- * ============================================================
- */
+// LO QUE SE ABRE ENCIMA DE LA TIENDA — pantallasDiferidas.js
+// El carrito, Tiqui, la ficha de un producto y el detalle de una promo se descargan aparte de la
+// portada, y se piden apenas ella termina de cargar para que abran al instante.
 const cargar = {
   carrito: () => import('./ShoppingCart'),
   asistente: () => import('./AsistenteVoz'),

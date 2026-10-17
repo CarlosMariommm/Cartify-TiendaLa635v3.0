@@ -2,30 +2,16 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { tAhora } from '../utils/idioma';
 
-/*
- * ============================================================
- * UBICACIÓN — useUbicacion.js
- * ============================================================
- * El GPS del navegador y la traducción de coordenadas a una dirección en
- * palabras, con OpenStreetMap.
- *
- * Por qué OSM y no Google Maps: la llave de Google del proyecto responde
- * REQUEST_DENIED desde que venció el trial, y Maps exige facturación con
- * tarjeta. Nominatim (el buscador de OSM) es gratis y sin llave.
- *
- * Nominatim pide no bombardearlo: por eso solo se consulta cuando la persona
- * suelta el pin o pide su ubicación, nunca mientras arrastra el mapa.
- * ============================================================
- */
+// UBICACIÓN — useUbicacion.js
+// El GPS del navegador y la traducción de coordenadas a una dirección en palabras, con
+// OpenStreetMap. Nominatim (el buscador de OSM) es gratis y sin llave.
 
 // San Salvador: dónde abre el mapa si todavía no sabemos dónde está la persona.
 export const CENTRO_POR_DEFECTO = { lat: 13.6929, lng: -89.2182 };
 
-/*
- * Coordenadas → dirección escrita. Se arma con las partes que le sirven a un
- * repartidor (calle, número, colonia, ciudad) y se descartan el país y el
- * código postal, que en una entrega de barrio no aportan nada.
- */
+// Coordenadas → dirección escrita. Se arma con las partes que le sirven a un repartidor (calle,
+// número, colonia, ciudad) y se descartan el país y el código postal, que en una entrega de barrio
+// no aportan nada.
 const direccionDesdeCoords = async (lat, lng) => {
   const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=es`;
   const r = await fetch(url, { headers: { Accept: 'application/json' } });
@@ -56,21 +42,16 @@ export const useUbicacion = () => {
       const texto = await direccionDesdeCoords(lat, lng);
       if (texto) setDireccion(texto);
     } catch {
-      /*
-       * Sin internet o con Nominatim caído, el pin igual queda puesto y la
-       * persona puede escribir la dirección a mano. Quedarse sin poder
-       * continuar por un servicio ajeno sería peor.
-       */
+      // Sin internet o con Nominatim caído, el pin igual queda puesto y la persona puede escribir la
+      // dirección a mano. Quedarse sin poder continuar por un servicio ajeno sería peor.
       toast(tAhora('No se pudo leer la dirección; puedes escribirla tú'));
     } finally {
       setBuscando(false);
     }
   };
 
-  /*
-   * "Usar mi ubicación". El navegador pide permiso; si lo niegan, se explica
-   * qué hacer en vez de dejar el botón sin respuesta.
-   */
+  // "Usar mi ubicación". El navegador pide permiso; si lo niegan, se explica qué hacer en vez de
+  // dejar el botón sin respuesta.
   const localizarme = () => {
     if (!navigator.geolocation) {
       toast.error(tAhora('Tu navegador no permite ubicarte automáticamente'));

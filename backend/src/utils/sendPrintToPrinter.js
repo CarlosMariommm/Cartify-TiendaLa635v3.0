@@ -1,11 +1,6 @@
 import { sendEmail } from "./sendMailMailjet.js";
 
-/*
- * Envía el archivo del cliente al correo enlazado a la impresora (email-to-print).
- * Si no hay PRINTER_EMAIL configurado en el .env, no hace nada y devuelve
- * emailed:false — en ese caso el archivo igual quedó guardado en Cloudinary y
- * el empleado lo abre/imprime desde su pantalla (las 2 opciones que pediste).
- */
+// Envía el archivo del cliente al correo enlazado a la impresora (email-to-print).
 
 // Los únicos formatos que printUpload.js deja subir (ver allowed_formats).
 const CONTENT_TYPES = {
@@ -23,12 +18,9 @@ export const sendPrintToPrinter = async ({ fileUrl, fileName, options }) => {
   const extension = nombreArchivo.split(".").pop()?.toLowerCase();
   const contentType = CONTENT_TYPES[extension] || "application/octet-stream";
 
-  /*
-   * Mailjet pide el adjunto ya en base64 dentro del cuerpo del request, no
-   * una URL — a diferencia del "path" que aceptaba Nodemailer. El archivo ya
-   * quedó guardado en Cloudinary (fileUrl), así que se descarga de ahí y se
-   * recodifica antes de mandarlo.
-   */
+  // Mailjet pide el adjunto ya en base64 dentro del cuerpo del request, no una URL — a diferencia
+  // del "path" que aceptaba Nodemailer. El archivo ya quedó guardado en Cloudinary (fileUrl), así
+  // que se descarga de ahí y se recodifica antes de mandarlo.
   const archivo = await fetch(fileUrl);
   if (!archivo.ok) {
     throw new Error(`No se pudo descargar el archivo a imprimir (status ${archivo.status})`);

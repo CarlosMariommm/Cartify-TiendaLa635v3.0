@@ -74,10 +74,8 @@ const ModuleFormModal = ({ isOpen, onClose, moduleData, onSave }) => {
               />
             </div>
 
-            {/*
-              El icono es la cara del módulo en la pantalla de servicios del
-              cliente: es lo primero que se ve al entrar.
-            */}
+            {/* El icono es la cara del módulo en la pantalla de servicios del cliente: es lo primero que se ve
+               al entrar. */}
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">Icono</label>
               <input type="hidden" {...register('icono')} />
@@ -105,30 +103,9 @@ const ModuleFormModal = ({ isOpen, onClose, moduleData, onSave }) => {
               </div>
             </div>
 
-            {/*
-              AQUÍ HABÍA UN SELECTOR DE "¿CÓMO SE COMPRA?" con dos opciones:
-              pasillo normal o pantalla propia tipo Impresiones. Se quitó.
-
-              El motivo: elegir "pide datos antes de comprar" prometía una
-              pantalla que NO existe. Impresiones tiene la suya porque alguien
-              la programó entera —subir archivo, elegir tamaño, calcular hojas—;
-              un pasillo nuevo marcado con ese flujo salía del formulario sin
-              ninguna pantalla detrás y dejaba al cliente en el vacío.
-
-              Así que todo pasillo nuevo es un pasillo de la tienda, que es
-              justamente lo que hace fuerte a este diseño: panadería, pupusería
-              o farmacia funcionan sin una línea de código nueva.
-
-              El campo `flujo` SIGUE EXISTIENDO en el modelo y no se toca: el
-              módulo de Impresiones que ya está creado lo necesita para seguir
-              abriendo su pantalla. Lo que se quitó es la posibilidad de crear
-              otros. El formulario manda 'estandar' siempre (ver el reset de
-              arriba) y al editar respeta el flujo que el módulo ya tenía.
-
-              Va como campo oculto y no confiando en el reset: así el valor
-              viaja seguro en el envío, y editar Impresiones no lo convierte
-              en un pasillo normal sin que nadie lo pidiera.
-            */}
+            {/* AQUÍ HABÍA UN SELECTOR DE "¿CÓMO SE COMPRA?" con dos opciones: pasillo normal o pantalla propia
+               tipo Impresiones. Se quitó. El motivo: elegir "pide datos antes de comprar" prometía una
+               pantalla que NO existe. */}
             <input type="hidden" {...register('flujo')} />
 
             <div>

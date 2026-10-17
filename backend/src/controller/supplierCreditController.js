@@ -4,18 +4,9 @@ import { estadoCuenta, creditoDisponible } from "../utils/cuentaProveedor.js";
 
 const supplierCreditController = {};
 
-/*
- * ── El número de la factura, solo ──
- * Se escribía a mano y muchas veces quedaba vacío: en el estado de cuenta
- * salía "Sin número" y no había cómo cotejar con el papel ni decirle al
- * proveedor de cuál se hablaba. Ahora se numera en orden, por proveedor:
- * F-0001, F-0002… las compras y R-0001… los pagos.
- *
- * Se toma el MAYOR número que ya tenga ese formato, no la cantidad de
- * movimientos: si se borra uno, contarlos repetiría un número. Y lo que el
- * dueño escribió a mano (el número que trae el papel del proveedor) no
- * estorba: no calza con el formato y se deja tal cual.
- */
+// ── El número de la factura, solo ── Se escribía a mano y muchas veces quedaba vacío: en el
+// estado de cuenta salía "Sin número" y no había cómo cotejar con el papel ni decirle al proveedor
+// de cuál se hablaba.
 const PREFIJO = { compra: "F", pago: "R" };
 
 const siguienteNumero = (movimientos, type) => {
@@ -141,11 +132,9 @@ supplierCreditController.insertMovement = async (req, res) => {
 
     const fecha = date ? new Date(date) : new Date();
 
-    /*
-     * Si es compra al crédito y no dijeron cuándo vence, lo calculamos con el
-     * plazo del proveedor. Es lo que el tendero espera: registra la factura y
-     * el sistema ya sabe que "a 30 días" vence tal fecha.
-     */
+    // Si es compra al crédito y no dijeron cuándo vence, lo calculamos con el plazo del proveedor. Es
+    // lo que el tendero espera: registra la factura y el sistema ya sabe que "a 30 días" vence tal
+    // fecha.
     let vence = dueDate ? new Date(dueDate) : null;
     if (type === "compra" && !vence) {
       const dias = Number(proveedor.creditDays) || 0;

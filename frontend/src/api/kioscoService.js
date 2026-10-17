@@ -1,12 +1,8 @@
 import api from './api';
 
-/*
- * SERVICIO DEL KIOSCO — kioscoService.js
- *
- * El puente entre la pantalla del kiosco y el teléfono del cliente. La
- * contraseña nunca pasa por aquí: el kiosco solo maneja un código de seis
- * caracteres que muere en diez minutos.
- */
+// SERVICIO DEL KIOSCO — kioscoService.js
+// El puente entre la pantalla del kiosco y el teléfono del cliente. La contraseña nunca pasa por
+// aquí: el kiosco solo maneja un código de seis caracteres que muere en diez minutos.
 export const kioscoService = {
   // El kiosco abre una sesión y recibe el código que va dentro del QR.
   crearSesion: async () => {

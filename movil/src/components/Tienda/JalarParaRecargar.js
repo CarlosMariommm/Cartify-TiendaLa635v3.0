@@ -1,35 +1,5 @@
-/*
- * ============================================================
- * JALAR PARA RECARGAR — con Tiqui colgando
- * ============================================================
- * Jalar la lista hacia abajo desde arriba la recarga. En vez del círculo
- * que gira, baja Tiqui colgada de su cordón:
- *
- *   · mientras se jala, baja con el dedo y pone cara de sorpresa (la están
- *     jalando). Cuelga de un broche FIJO en el borde de arriba: lo que se
- *     estira es el cordón, como una etiqueta de verdad;
- *   · la lista NO se mueve: Tiqui baja por encima de la tienda. Antes la
- *     lista bajaba con el dedo y dejaba un hueco blanco arriba, y no gustó.
- *     Y mientras se jala, la lista tampoco se desplaza: si el dedo subía un
- *     poco a medio jalón, la tienda se iba para arriba con Tiqui colgando
- *     encima y todo brincaba (se vio en la tablet);
- *   · al soltar pasado el punto, pone cara de contenta, sube y desaparece,
- *     y la lista se recarga detrás;
- *   · si se suelta antes, vuelve a subir y no pasa nada.
- *
- * Por qué no el RefreshControl de siempre: en Android no le avisa a nadie
- * cuánto se va jalando, solo cuando ya se soltó, y la cara tiene que
- * cambiar con el dedo. Por eso un gesto de react-native-gesture-handler que
- * corre A LA PAR del desplazamiento de la lista: la lista sigue
- * desplazándose como siempre y el gesto solo cuenta cuando se empezó arriba
- * del todo y hacia abajo.
- *
- * Uso: envuelve la lista y le pasa lo que necesita.
- *   <JalarParaRecargar alRecargar={refrescar}>
- *     {({ alDesplazar }) => <FlatList onScroll={alDesplazar} scrollEventThrottle={16} … />}
- *   </JalarParaRecargar>
- * ============================================================
- */
+// JALAR PARA RECARGAR — con Tiqui colgando
+// Jalar la lista hacia abajo desde arriba la recarga.
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Platform, View } from 'react-native';
@@ -48,18 +18,9 @@ const TOPE = 160;
 // para que al llegar al punto ya se vea entera, sombrero incluido.
 const LARGO_CORDON = 40;
 
-/*
- * Las medidas de Tiqui, según el aparato. En la tablet la del teléfono se veía
- * diminuta (quedaba a la altura de las pastillas de categoría): ahí es un 45 %
- * más grande (ver hooks/useDisposicion.js).
- *
- *   alto       Tiqui colgada, en píxeles
- *   velocidad  Tiqui baja más rápido que el dedo: al llegar al punto ya se ve
- *              entera y colgando con un poco de cordón; desde ahí lo que crece
- *              es el cordón. En el teléfono da 1,5, como antes.
- *   cordonMax  el cordón que se estira, en píxeles: un tope holgado
- *   grosor     el del cordón dibujado (7 unidades del dibujo)
- */
+// Las medidas de Tiqui, según el aparato. En la tablet la del teléfono se veía diminuta (quedaba a
+// la altura de las pastillas de categoría): ahí es un 45 % más grande (ver
+// hooks/useDisposicion.js).
 const medidasPara = (escala) => {
   const alto = Math.round(112 * escala);
   const velocidad = (alto + 32 * escala) / PUNTO;
@@ -81,11 +42,9 @@ const JalarParaRecargar = ({ alRecargar, children }) => {
   );
   // Dónde va Tiqui (la lista se queda quieta).
   const tiquiY = useRef(new Animated.Value(-ALTO_TIQUI)).current;
-  /*
-   * El cordón tenso, del broche a donde empieza Tiqui: crece con ella al
-   * bajar y se recoge al subir. Mientras Tiqui todavía está arriba del borde
-   * no hay cordón que mostrar. (+3: tapa la juntura con su propio cordón.)
-   */
+  // El cordón tenso, del broche a donde empieza Tiqui: crece con ella al bajar y se recoge al subir.
+  // Mientras Tiqui todavía está arriba del borde no hay cordón que mostrar. (+3: tapa la juntura con
+  // su propio cordón.)
   const estirado = useMemo(
     () => Animated.add(tiquiY, 3).interpolate({
       inputRange: [0, CORDON_MAX],

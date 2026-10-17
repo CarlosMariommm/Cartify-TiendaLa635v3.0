@@ -1,14 +1,8 @@
 import api from './api';
 
-/*
- * ============================================================
- * SERVICIO DE LOYALTY — loyaltyService.js
- * ============================================================
- * Lee y edita la configuración del programa de puntos
- * (tasa de puntos por dólar y meses de vencimiento). La lectura
- * la usa el cliente para su tarjeta; la edición, el admin.
- * ============================================================
- */
+// SERVICIO DE LOYALTY — loyaltyService.js
+// Lee y edita la configuración del programa de puntos (tasa de puntos por dólar y meses de
+// vencimiento). La lectura la usa el cliente para su tarjeta; la edición, el admin.
 export const loyaltyService = {
   // Config actual (tasa + vencimiento).
   getConfig: async () => {

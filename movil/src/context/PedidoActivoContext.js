@@ -3,48 +3,9 @@ import { useAuth } from '../hooks/useAuth';
 import { getPedidosDeCliente } from '../api/pedidosApi';
 import { suscribirseASimulacion } from '../utils/simulacionPedido';
 
-/*
- * ============================================================
- * PEDIDO ACTIVO — PedidoActivoContext.js
- * ============================================================
- * Copia de `frontend/src/context/PedidoActivoContext.jsx`: los pedidos del
- * cliente, en un solo lugar para toda la sesión.
- *
- * BurbujaPedido vive montada desde que arranca la app hasta que se cierra
- * —fuera del stack de pantallas, para no desaparecer al navegar—, así que
- * la lista de pedidos se pide al montarse Y de ahí en adelante cada rato:
- * el checkout ya llama a `refrescar` apenas se confirma un pago (para que
- * la burbuja se entere sin esperar), pero el estado de un pedido también
- * cambia desde el panel del personal —"Preparando", "Salió a reparto"— y
- * de ESO el teléfono no tiene forma de enterarse solo. Sin este refresco
- * periódico, la burbuja se quedaba mostrando "Recibido" mientras el
- * repartidor ya iba en camino, hasta que alguien cerrara y abriera la app.
- *
- * useSeguimientoEnVivo (más rápido, cada 10s) ya trae el estado fresco del
- * pedido QUE SE ESTÁ SIGUIENDO; esto es lo que hacía falta además: que la
- * LISTA se mantenga al día, para el caso en que cambie CUÁL es el pedido en
- * curso (por ejemplo, si el anterior se entregó y hay uno más nuevo).
- *
- * ── `pedidoAbierto`: el detalle de UN pedido, para toda la app ──
- * El modal de detalle (ModalPedido) lo abren dos lugares distintos: la
- * tarjeta de "Mis pedidos" (Pedidos.js) y el botón "Ver el pedido" de la
- * propia burbuja (BurbujaPedido.js). Antes cada uno tenía su propio
- * `useState` y su propio `<ModalPedido>` — y el de Pedidos.js vivía metido
- * DENTRO del stack de pantallas, varios niveles abajo de `BurbujaPedido`
- * (que cuelga directo de App.js, afuera del navegador). En Android el
- * `elevation` de una pantalla del stack (react-native-screens monta cada
- * una en su propio contenedor nativo) no se compara de forma confiable
- * contra el de un hermano de OTRO árbol — se veía la burbuja asomando a
- * medias por encima del fondo oscuro del modal, partida por la mitad.
- *
- * La solución no es subirle el número a nadie: es que el modal se pinte en
- * un solo lugar, hermano de `BurbujaPedido` en App.js, para que a quién
- * gana el de arriba lo decida el orden normal de pintado (el último hijo
- * gana) y no una comparación de elevation entre dos árboles nativos
- * distintos. `pedidoAbierto` es SOLO ese: qué pedido se está mirando en
- * detalle ahora mismo, sin que importe desde dónde se abrió.
- * ============================================================
- */
+// PEDIDO ACTIVO — PedidoActivoContext.js
+// Copia de `frontend/src/context/PedidoActivoContext.jsx`: los pedidos del cliente, en un solo
+// lugar para toda la sesión.
 
 const CADA_CUANTO_REFRESCAR_MS = 20000;
 
@@ -88,13 +49,7 @@ export const PedidoActivoProvider = ({ children }) => {
 
   const cerrarPedidoAbierto = useCallback(() => setPedidoAbierto(null), []);
 
-  /*
-   * Un pedido cambió desde la app (hoy: el cliente lo canceló). Se mezcla lo
-   * nuevo sobre lo que ya había —la respuesta del servidor viene sin los
-   * productos poblados— en la lista de aquí y en el detalle abierto, y queda
-   * anotado en `ultimoCambio` para que Mis pedidos, que tiene su propia
-   * lista, se ponga al día sin volver a cargar.
-   */
+  // Un pedido cambió desde la app (hoy: el cliente lo canceló).
   const [ultimoCambio, setUltimoCambio] = useState(null);
   const actualizarPedido = useCallback((cambio) => {
     if (!cambio?._id) return;
@@ -104,11 +59,9 @@ export const PedidoActivoProvider = ({ children }) => {
     setUltimoCambio(cambio);
   }, []);
 
-  /*
-   * El pedido cuya burbuja hay que desplegar (con el mapa). Lo pide el aviso
-   * de "va en camino" al tocarlo: ahí lo que se quiere ver es al repartidor,
-   * no la lista. BurbujaPedido lo lee y lo suelta en cuanto se abre.
-   */
+  // El pedido cuya burbuja hay que desplegar (con el mapa). Lo pide el aviso de "va en camino" al
+  // tocarlo: ahí lo que se quiere ver es al repartidor, no la lista. BurbujaPedido lo lee y lo
+  // suelta en cuanto se abre.
   const [pedidoASeguir, setPedidoASeguir] = useState(null);
   const seguirPedido = useCallback((id) => setPedidoASeguir(id ? String(id) : null), []);
   const dejarDeSeguir = useCallback(() => setPedidoASeguir(null), []);

@@ -3,27 +3,9 @@ import { CircleX, CircleAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { modalTransition } from '../../utils/motion';
 
-/*
- * ============================================================
- * CANCELAR UN PEDIDO — ModalCancelarPedido.jsx
- * ============================================================
- * Cancelar pide el PORQUÉ, y ese porqué es para el cliente: le llega en la
- * notificación, en el correo y en su pedido (web y app). Por eso el campo
- * dice "para el cliente" y los motivos rápidos le hablan de usted: se leen
- * tal cual del otro lado.
- *
- * Los motivos rápidos solo llenan la caja; se pueden corregir antes de
- * mandar. Sin motivo el botón no se enciende (el servidor tampoco cancela
- * sin uno).
- *
- * Arriba se dice qué va a pasar con lo cobrado, para que nadie cancele
- * creyendo que el saldo del cliente se pierde: vuelve solo. Ver
- * backend/src/utils/devolverPedido.js.
- *
- * Igual que ModalCodigoEntrega, cada pedido empieza de cero gracias al `key`
- * que le pone Orders.jsx.
- * ============================================================
- */
+// CANCELAR UN PEDIDO — ModalCancelarPedido.jsx
+// Cancelar pide el PORQUÉ, y ese porqué es para el cliente: le llega en la notificación, en el
+// correo y en su pedido (web y app).
 
 const MOTIVOS_RAPIDOS = [
   'Nos quedamos sin uno de los productos de su pedido.',

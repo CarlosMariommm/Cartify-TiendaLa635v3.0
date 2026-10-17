@@ -1,10 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { comoPedir, listaDelPedido, mensajeDePedido, nombreDelCanal, numeroDeWhatsApp } from './pedidoProveedor';
 
-/*
- * El botón "Pedir" de la compra sugerida: qué abre y qué deja copiado,
- * según por dónde se le pide a cada proveedor.
- */
+// El botón "Pedir" de la compra sugerida: qué abre y qué deja copiado, según por dónde se le pide
+// a cada proveedor.
 
 const PRODUCTOS = [
   { nombre: 'Leche Entera', unidad: 'unidad', pedir: 7 },

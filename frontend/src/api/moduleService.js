@@ -1,13 +1,8 @@
 import api from './api';
 
-/*
- * ============================================================
- * SERVICIO DE MÓDULOS / PASILLOS — moduleService.js
- * ============================================================
- * Centraliza las peticiones HTTP del módulo de pasillos o
- * secciones de la tienda (modules). Se envían como JSON.
- * ============================================================
- */
+// SERVICIO DE MÓDULOS / PASILLOS — moduleService.js
+// Centraliza las peticiones HTTP del módulo de pasillos o secciones de la tienda (modules). Se
+// envían como JSON.
 export const moduleService = {
   // 1- Obtener todos los módulos/pasillos (SELECT)
   getModules: async () => {

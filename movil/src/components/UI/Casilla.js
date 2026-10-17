@@ -1,13 +1,6 @@
-/*
- * CASILLA — el "Recordarme 30 días".
- *
- * React Native no trae checkbox (el de core se sacó hace varias versiones y el
- * de Expo es otro paquete). Son dieciocho píxeles con un borde y un check: no
- * vale traer una dependencia por eso.
- *
- * Toda la fila es presionable, no solo el cuadrito, que es lo que uno intenta
- * tocar con el pulgar.
- */
+// CASILLA — el "Recordarme 30 días".
+// React Native no trae checkbox (el de core se sacó hace varias versiones y el de Expo es otro
+// paquete). Son dieciocho píxeles con un borde y un check: no vale traer una dependencia por eso.
 
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useEstilos } from '../../context/ModoContext';

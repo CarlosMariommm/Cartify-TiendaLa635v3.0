@@ -1,9 +1,7 @@
 import api from './api';
 
-/*
- * SERVICIO DE PROMOCIONES — promotionService.js
- * Crear/editar usan FormData porque la promo lleva una imagen (banner).
- */
+// SERVICIO DE PROMOCIONES — promotionService.js Crear/editar usan FormData porque la promo lleva
+// una imagen (banner).
 export const promotionService = {
   getPromotions: async () => {
     const response = await api.get('/promotion');

@@ -4,10 +4,8 @@ import { render, screen, fireEvent, waitFor, cleanup, within } from '@testing-li
 import ImportarExcel from './ImportarExcel';
 import { productService } from '../../api/productService';
 
-/*
- * La ventana "Importar desde Excel" de punta a punta: el archivo, las
- * columnas, la revisión y el guardado. El servidor es de mentira.
- */
+// La ventana "Importar desde Excel" de punta a punta: el archivo, las columnas, la revisión y el
+// guardado. El servidor es de mentira.
 
 vi.mock('../../api/productService', () => ({
   productService: { importarColumnas: vi.fn(), analizarImportacion: vi.fn(), importarProductos: vi.fn() },

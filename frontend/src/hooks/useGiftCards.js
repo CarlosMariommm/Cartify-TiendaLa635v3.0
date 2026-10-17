@@ -3,10 +3,8 @@ import toast from 'react-hot-toast';
 import { giftCardService } from '../api/giftCardService';
 import { numeroEnRango } from '../utils/validaciones';
 
-/*
- * useGiftCards — el manejo de tarjetas de saldo desde el admin.
- * Crear, listar, anular y el resumen de cuánto dinero hay en circulación.
- */
+// useGiftCards — el manejo de tarjetas de saldo desde el admin. Crear, listar, anular y el resumen
+// de cuánto dinero hay en circulación.
 export const useGiftCards = () => {
   const [tarjetas, setTarjetas] = useState([]);
   const [cargando, setCargando] = useState(false);
@@ -31,10 +29,8 @@ export const useGiftCards = () => {
 
   useEffect(() => { cargar(); }, []);
 
-  /*
-   * Resumen para que el gerente sepa de un vistazo cuánta plata comprometió.
-   * "Sin canjear" es deuda: son dólares que la tienda ya prometió entregar.
-   */
+  // Resumen para que el gerente sepa de un vistazo cuánta plata comprometió. "Sin canjear" es deuda:
+  // son dólares que la tienda ya prometió entregar.
   const resumen = useMemo(() => {
     const sinCanjear = tarjetas.filter((t) => !t.isRedeemed);
     const canjeadas = tarjetas.filter((t) => t.isRedeemed);
@@ -48,14 +44,8 @@ export const useGiftCards = () => {
     };
   }, [tarjetas]);
 
-  /*
-   * Lo que se ve en la lista: primero el estado (canjeada o no), después la
-   * búsqueda por código, cliente o nota, y al final el orden.
-   *
-   * El código se busca sin guiones ni mayúsculas: nadie lo teclea igual que
-   * como está guardado, y una tarjeta que existe pero "no aparece" hace que
-   * el empleado la dé por perdida.
-   */
+  // Lo que se ve en la lista: primero el estado (canjeada o no), después la búsqueda por código,
+  // cliente o nota, y al final el orden.
   const visibles = useMemo(() => {
     const texto = busqueda.trim().toLowerCase();
     const limpio = (v) => String(v || '').toLowerCase().replace(/[\s-]/g, '');

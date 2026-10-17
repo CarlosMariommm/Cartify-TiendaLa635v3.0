@@ -1,19 +1,6 @@
-/*
- * ============================================================
- * BARRA DE UNA PANTALLA DE LA CUENTA
- * ============================================================
- * La flecha de volver y el título. La usan las cinco pantallas que cuelgan del
- * perfil (mis datos, puntos, favoritos, direcciones, avisos).
- *
- * Existe por una razón concreta: las cinco vuelven al MISMO sitio y tienen que
- * volver IGUAL. Copiada cinco veces, la quinta sale con la flecha tres píxeles
- * más adentro y el título medio punto más chico, y el conjunto se siente hecho
- * por dos personas distintas.
- *
- * El botón mide 40x40 aunque la flecha mida 18: lo que se toca no es el dibujo
- * sino el botón, y una flecha de 18 píxeles se falla una de cada tres veces.
- * ============================================================
- */
+// BARRA DE UNA PANTALLA DE LA CUENTA
+// La flecha de volver y el título. La usan las cinco pantallas que cuelgan del perfil (mis datos,
+// puntos, favoritos, direcciones, avisos).
 
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useEstilos } from '../../context/ModoContext';

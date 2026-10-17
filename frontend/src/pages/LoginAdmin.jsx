@@ -13,38 +13,26 @@ const LoginAdmin = () => {
   const { login, logout } = useAuth();
   const { ajustes } = useAjustesCtx();
   const [loading, setLoading] = useState(false);
-  /*
-   * El color de marca real, inyectado localmente — /admin también está en la
-   * lista de rutas del panel, así que useTemporada() apaga --marca-* ahí a
-   * propósito (ver SinPermiso.jsx). Con esto puesto en el envoltorio, el
-   * login sigue el color de marca de verdad y no el café de fábrica.
-   */
+  // El color de marca real, inyectado localmente — /admin también está en la lista de rutas del
+  // panel, así que useTemporada() apaga --marca-* ahí a propósito (ver SinPermiso.jsx). Con esto
+  // puesto en el envoltorio, el login sigue el color de marca de verdad y no el café de fábrica.
 
-  /*
-   * El login es de DOS pasos por el 2FA:
-   *   'credenciales' → correo + contraseña.
-   *   'codigo'       → el código que llegó al correo.
-   */
+  // El login es de DOS pasos por el 2FA: 'credenciales' → correo + contraseña. 'codigo' → el código
+  // que llegó al correo.
   const [paso, setPaso] = useState('credenciales');
   const [correoEnm, setCorreoEnm] = useState(''); // correo enmascarado, para el aviso
   const [codigo, setCodigo] = useState('');
 
-  /*
-   * 1- Limpiar la sesión previa DEL PERSONAL al entrar a su login.
-   *
-   * El área va dicha a la letra y no se deduce de la ruta: así queda claro
-   * que entrar por esta puerta no roza la sesión de cliente que la misma
-   * persona tenga abierta en la tienda. Ver AuthContext.
-   */
+  // 1- Limpiar la sesión previa DEL PERSONAL al entrar a su login. El área va dicha a la letra y no
+  // se deduce de la ruta: así queda claro que entrar por esta puerta no roza la sesión de cliente
+  // que la misma persona tenga abierta en la tienda. Ver AuthContext.
   useEffect(() => {
     logout('personal');
   }, [logout]);
 
-  /*
-   * El correo que ya escribió en el login de la TIENDA, si llegó rebotado de
-   * ahí por ser del personal (ver LoginClient). Viaja en el estado de la
-   * navegación, no en la URL, y se escribe solo: le falta la contraseña.
-   */
+  // El correo que ya escribió en el login de la TIENDA, si llegó rebotado de ahí por ser del
+  // personal (ver LoginClient). Viaja en el estado de la navegación, no en la URL, y se escribe
+  // solo: le falta la contraseña.
   const { state } = useLocation();
   const correoTraido = typeof state?.correo === 'string' ? state.correo : '';
 
@@ -60,12 +48,9 @@ const LoginAdmin = () => {
     }
   });
 
-  /*
-   * Lo que pasa una vez que la sesión SÍ se abrió (tras verificar el código).
-   * De vuelta a donde iba, no siempre al Dashboard: ProtectedRoute manda aquí
-   * con ?volver=/inventario. `replace` para que el login no quede en el
-   * historial y el "atrás" no regrese a esta pantalla.
-   */
+  // Lo que pasa una vez que la sesión SÍ se abrió (tras verificar el código). De vuelta a donde iba,
+  // no siempre al Dashboard: ProtectedRoute manda aquí con ?volver=/inventario. `replace` para que
+  // el login no quede en el historial y el "atrás" no regrese a esta pantalla.
   const entrar = (res) => {
     // El rol lo decide el backend (en cuál de las dos cuentas encontró el
     // correo), no esta pantalla: por eso res.tipo y no 'admin' fijo. Con esto
@@ -120,11 +105,7 @@ const LoginAdmin = () => {
     <div className="min-h-screen flex bg-white">
       {/* Columna izquierda - Imagen */}
       <div className="hidden lg:block lg:w-1/2 relative bg-gray-100">
-        {/*
-          Tiqui sobre el fondo de la marca. Antes era una foto de Unsplash cargada
-          desde sus servidores: cada visita le avisaba a un tercero, y si la foto
-          cambiaba de dirección la columna quedaba vacía.
-        */}
+        {/* Tiqui sobre el fondo de la marca. */}
         <div className="absolute inset-0 flex items-center justify-center bg-[var(--marca-50)]" aria-hidden="true">
           <Mascota pose="saludo" alto={260} />
         </div>
@@ -136,15 +117,8 @@ const LoginAdmin = () => {
 
           {/* Logo / Header */}
           <div className="text-center mb-10">
-            {/*
-              El nombre sale de los ajustes, no del codigo: estaba escrito a
-              mano y se quedaba con el viejo cada vez que se renombraba la
-              tienda en Personalizacion.
-
-              Se mantiene el titulo grande centrado en vez de MarcaTienda
-              porque esto no es una barra superior: es el encabezado de una
-              pantalla de entrada, y ahi la marca manda.
-            */}
+            {/* El nombre sale de los ajustes, no del codigo: estaba escrito a mano y se quedaba con el viejo
+               cada vez que se renombraba la tienda en Personalizacion. */}
             <h1 className="text-4xl font-extrabold text-black leading-tight mb-4 tracking-tight">
               {ajustes.nombreLinea1}
               {ajustes.nombreLinea2 && <><br />{ajustes.nombreLinea2}</>}

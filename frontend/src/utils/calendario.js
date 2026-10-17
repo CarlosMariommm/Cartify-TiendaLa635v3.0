@@ -1,19 +1,5 @@
-/*
- * ============================================================
- * AGREGAR AL CALENDARIO — calendario.js
- * ============================================================
- * Genera un archivo .ics (iCalendar) y lo entrega para descargar. Al abrirlo,
- * el teléfono lo pasa a su app de calendario (iPhone o Android) y crea el
- * evento CON recordatorio — y ahí el propio calendario es el que avisa.
- *
- * Por qué .ics y no "Agregar a Google Calendar": el .ics es universal (sirve
- * en cualquier teléfono, sin cuenta de Google), funciona sin internet y no
- * depende de ningún servicio de pago. Es el estándar para esto.
- *
- * Una web NO puede escribir directo en el calendario del sistema (el navegador
- * no lo permite por seguridad); este es el camino que sí funciona en todos lados.
- * ============================================================
- */
+// AGREGAR AL CALENDARIO — calendario.js
+// Genera un archivo .ics (iCalendar) y lo entrega para descargar.
 
 import { descargarArchivo } from './descargar';
 
@@ -49,13 +35,9 @@ const aFechaUTC = (fecha, horaLocal = 9, minutoLocal = 0) => {
   return `${d.getUTCFullYear()}${p(d.getUTCMonth() + 1)}${p(d.getUTCDate())}T${p(d.getUTCHours())}${p(d.getUTCMinutes())}${p(d.getUTCSeconds())}Z`;
 };
 
-/*
- * Enlace "agregar al calendario": abre la página de crear evento con los datos
- * ya puestos, para que en el teléfono solo se toque Guardar. Sirve para poner
- * DENTRO de un QR: el dueño lo escanea desde la compu y el evento cae en el
- * calendario de su teléfono. Es un enlace normal (no depende de ninguna API de
- * pago); el .ics de abajo sigue siendo la opción universal y sin conexión.
- */
+// Enlace "agregar al calendario": abre la página de crear evento con los datos ya puestos, para
+// que en el teléfono solo se toque Guardar. Sirve para poner DENTRO de un QR: el dueño lo escanea
+// desde la compu y el evento cae en el calendario de su teléfono.
 export const urlAgregarCalendario = ({ titulo, descripcion = '', fecha }) => {
   const inicio = aFechaUTC(fecha, 9, 0);
   const fin = aFechaUTC(fecha, 9, 30);
@@ -68,13 +50,9 @@ export const urlAgregarCalendario = ({ titulo, descripcion = '', fecha }) => {
   return `https://calendar.google.com/calendar/render?${q.toString()}`;
 };
 
-/*
- * Arma y descarga un evento.
- *   titulo, descripcion: texto del evento.
- *   fecha: cuándo (Date o ISO). Se pone a las 9:00 de ese día.
- *   diasAntes: cuántos días antes recuerda (por defecto 1).
- *   uid, ahora: se pasan desde afuera para no usar Date.now()/random aquí.
- */
+// Arma y descarga un evento. titulo, descripcion: texto del evento. fecha: cuándo (Date o ISO). Se
+// pone a las 9:00 de ese día. diasAntes: cuántos días antes recuerda (por defecto 1). uid, ahora:
+// se pasan desde afuera para no usar Date.now()/random aquí.
 export const descargarEventoIcs = ({ titulo, descripcion = '', fecha, diasAntes = 1, uid, ahora }) => {
   const inicio = aFechaLocal(fecha, 9, 0);
   // Fin media hora después (mismo día, 9:30). Un evento con duración se ve mejor

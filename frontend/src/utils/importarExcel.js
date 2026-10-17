@@ -1,25 +1,6 @@
-/*
- * ============================================================
- * LEER EL EXCEL DEL INVENTARIO — importarExcel.js
- * ============================================================
- * Panel › Inventario › "Importar desde Excel". El archivo se lee aquí, en el
- * navegador (no se sube entero a ningún lado):
- *
- *   leerArchivo        .xlsx con read-excel-file, o .csv (con coma o punto y
- *                      coma, como lo guarda Excel en español);
- *   buscarEncabezado   la fila de títulos: no siempre es la primera, muchos
- *                      Excel traen el nombre de la tienda arriba;
- *   mapearColumnas     qué columna es cuál, por los títulos ("Precio de
- *                      venta", "P. compra", "Existencia"…). Si no se reconoce
- *                      el nombre o el precio, se le pregunta a la IA, y el
- *                      encargado siempre puede corregirlo;
- *   aProductos         cada fila como un producto, con los números leídos
- *                      como se escriben aquí ("$1.25", "1,250.50", "1,25").
- *
- * Después, el servidor completa y busca las fotos (ver
- * backend/src/utils/importarProductos.js).
- * ============================================================
- */
+// LEER EL EXCEL DEL INVENTARIO — importarExcel.js
+// Lee el .xlsx o .csv en el navegador, encuentra la fila de títulos, reconoce qué columna es cuál
+// y convierte cada fila en un producto.
 
 export const MAXIMO_DE_FILAS = 500;
 
@@ -43,11 +24,9 @@ export const normalizar = (t) => String(t ?? '')
   .normalize('NFD').replace(/[̀-ͯ]/g, '')
   .toLowerCase().replace(/[^a-z0-9/ ]+/g, ' ').replace(/\s+/g, ' ').trim();
 
-/*
- * Cómo suele llamarse cada columna. El ORDEN importa: "Precio de compra"
- * tiene "precio", pero es el costo; "Descripción del producto" tiene
- * "producto", pero si hay otra columna "Producto", esa es el nombre.
- */
+// Cómo suele llamarse cada columna. El ORDEN importa: "Precio de compra" tiene "precio", pero es
+// el costo; "Descripción del producto" tiene "producto", pero si hay otra columna "Producto", esa
+// es el nombre.
 const TITULOS = [
   ['costo', /\b(costo|costos|compra|cost)\b/],
   ['precio', /\b(precio|pvp|venta|valor|price)\b/],
@@ -83,10 +62,8 @@ export const faltaLoEsencial = (mapa) => mapa.nombre === undefined || mapa.preci
 
 const vacia = (fila) => !fila || fila.every((v) => v === null || v === undefined || String(v).trim() === '');
 
-/*
- * La fila de títulos: la primera (de las 10 de arriba) donde se reconoce el
- * nombre o el precio. Si ninguna, la primera con al menos dos textos.
- */
+// La fila de títulos: la primera (de las 10 de arriba) donde se reconoce el nombre o el precio. Si
+// ninguna, la primera con al menos dos textos.
 export const buscarEncabezado = (filas) => {
   const arriba = filas.slice(0, 10);
   const conTitulos = arriba.findIndex((f) => {
@@ -98,10 +75,8 @@ export const buscarEncabezado = (filas) => {
   return Math.max(conTextos, 0);
 };
 
-/*
- * "$1.25" → 1.25 · "1,250.50" → 1250.5 · "1,25" → 1.25 · "Q 3" → 3.
- * Con punto y coma a la vez, el que va último es el decimal.
- */
+// "$1.25" → 1.25 · "1,250.50" → 1250.5 · "1,25" → 1.25 · "Q 3" → 3. Con punto y coma a la vez, el
+// que va último es el decimal.
 export const leerNumero = (valor) => {
   if (typeof valor === 'number') return Number.isFinite(valor) ? valor : null;
   let t = String(valor ?? '').replace(/[^\d.,-]/g, '');

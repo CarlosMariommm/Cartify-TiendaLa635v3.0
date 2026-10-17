@@ -4,18 +4,9 @@ import { MessageCircle, X } from 'lucide-react';
 import { RUTAS_DEL_PANEL } from '../../utils/sesion';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * BotonWhatsApp — el botón flotante para escribirle a la tienda.
- *
- * Detalles que copiamos de los e-commerce que lo hacen bien:
- *   - Aparece después de bajar un poco, no de entrada. Saltar encima del
- *     cliente apenas abre la página es la forma más rápida de que lo ignore.
- *   - Lleva un globito con el mensaje, que se puede cerrar y no vuelve en esa
- *     visita (queda anotado en sessionStorage).
- *   - El mensaje ya va escrito: el cliente solo aprieta enviar.
- *   - Se corre para arriba si hay una barra fija abajo, y respeta el área
- *     segura del iPhone.
- */
+// BotonWhatsApp — el botón flotante para escribirle a la tienda. Detalles que copiamos de los
+// e-commerce que lo hacen bien: - Aparece después de bajar un poco, no de entrada. Saltar encima
+// del cliente apenas abre la página es la forma más rápida de que lo ignore.
 
 // El número va en el .env (VITE_WHATSAPP). Formato internacional sin signos:
 // El Salvador es 503 + los 8 dígitos.
@@ -23,16 +14,8 @@ const NUMERO = (import.meta.env.VITE_WHATSAPP || '').replace(/\D/g, '');
 const SALUDO = 'Hola, vengo de la tienda en linea y quisiera consultar sobre un producto.';
 const CLAVE_GLOBO = 'la635_globo_whatsapp';
 
-/*
- * Dónde NO va: el panel del empleado y los logins. Es una lista de lo que se
- * excluye (y no de lo que se incluye) para que cualquier pantalla nueva del
- * cliente lo herede sola, sin tener que acordarse de agregarla aquí.
- */
-/*
- * Las del panel salen de la lista oficial (utils/sesion.js): escritas a mano
- * aquí, se habían quedado atrás Tarjetas y Personalización, y el botón verde
- * de los clientes salía encima del panel.
- */
+// Dónde NO va el botón de WhatsApp: el panel y los logins. Las rutas del panel salen de la lista
+// oficial (utils/sesion.js), así cualquier pantalla nueva del cliente lo tiene sola.
 const RUTAS_SIN_BOTON = [
   ...RUTAS_DEL_PANEL,
   '/register', '/forgot-password', '/verification', '/create-password', '/login-password',

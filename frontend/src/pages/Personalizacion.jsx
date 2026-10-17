@@ -11,15 +11,9 @@ import { TEMAS_DE_TEMPORADA, temaDeLaFecha, temaActivo, todosLosTemas } from '..
 import Mascota from '../components/UI/Mascota';
 import { disfrazDeTema, describirDisfraz } from '../utils/disfracesTiqui';
 
-/*
- * Los apartados de la izquierda. Antes todo era un scroll largo de tarjetas que
- * dejaba media pantalla vacía; ahora cada cosa vive en su pestaña.
- */
-/*
- * Los tres colores que se enseñan cuando NO hay temporada pintando: son la
- * marca de la casa, la misma que declara index.css. Antes salían del color
- * que el dueño hubiera elegido; ese selector ya no existe.
- */
+// Los apartados de la izquierda.
+// Los tres colores que se enseñan cuando NO hay temporada pintando: son la marca de la casa, la
+// misma que declara index.css.
 const MUESTRAS_DE_MARCA = ['#003049', '#066494', '#DDECF3'];
 
 const SECCIONES = [
@@ -29,29 +23,8 @@ const SECCIONES = [
   { id: 'portada', label: 'Portada', Icono: LayoutGrid },
 ];
 
-/*
- * ============================================================
- * PERSONALIZACIÓN (Admin) — Personalizacion.jsx
- * ============================================================
- * Cómo se ve la tienda de cara al cliente: su nombre, su logo y el orden de
- * su portada.
- *
- * Por qué existe: el nombre estaba escrito a mano en el código, en tres
- * archivos distintos. Una tienda que no puede ponerse su propio nombre sin
- * llamar a un programador no es un producto, es un encargo.
- *
- * LA REGLA DE LA PORTADA: se elige CUÁLES filas se muestran y EN QUÉ ORDEN,
- * pero no qué producto va en cada una — eso lo sigue armando el sistema con
- * el inventario. Ver utils/portada.js para el porqué.
- *
- * Toda la lógica vive en useAjustesTienda; aquí solo está la pantalla.
- *
- * Se lee del CONTEXTO y no del hook directo: es la misma copia que usa la
- * tienda, así que al guardar el nombre nuevo aparece de una vez en el
- * encabezado y en el pie. Con una copia aparte, el panel guardaba y la tienda
- * seguía mostrando lo viejo hasta recargar la página entera.
- * ============================================================
- */
+// PERSONALIZACIÓN (Admin) — Personalizacion.jsx
+// Cómo se ve la tienda de cara al cliente: su nombre, su logo y el orden de su portada.
 const Personalizacion = () => {
   const {
     ajustes, portada, cargando, guardando,
@@ -94,11 +67,8 @@ const Personalizacion = () => {
   // que nadie deje la portada en blanco sin querer.
   const encendidas = portada.filter((b) => b.visible).length;
 
-  /*
-   * Temporada. Se guardan los dos campos por separado porque el backend los
-   * mezcla campo a campo: elegir un tema NO tiene por qué cambiar el modo, y
-   * al revés. Ver storeSettingsController.
-   */
+  // Temporada. Se guardan los dos campos por separado porque el backend los mezcla campo a campo:
+  // elegir un tema NO tiene por qué cambiar el modo, y al revés. Ver storeSettingsController.
   const temporada = ajustes.temporada || { modo: 'automatico', tema: '' };
   // Las de fábrica más las que creó el dueño: las dos se eligen igual.
   const temas = todosLosTemas(temporada);
@@ -111,11 +81,9 @@ const Personalizacion = () => {
     { clave: 'ninguno', nombre: 'Ninguno', ayuda: 'Los colores de siempre, todo el año.' },
   ];
 
-  /*
-   * El saludo de la cinta, por tema. Se edita aparte del resto de la
-   * temporada (modo/tema/decoración) porque es texto largo que se escribe con
-   * calma, no un botón que se toca y guarda de una vez.
-   */
+  // El saludo de la cinta, por tema. Se edita aparte del resto de la temporada
+  // (modo/tema/decoración) porque es texto largo que se escribe con calma, no un botón que se toca y
+  // guarda de una vez.
   const [saludos, setSaludos] = useState({});
   const [saludoNormal, setSaludoNormal] = useState('');
   useEffect(() => {
@@ -196,10 +164,8 @@ const Personalizacion = () => {
                 etiquetaAria="Subir el logo de la tienda"
               />
 
-              {/*
-                Quitar el logo es distinto de subir otro: se vuelve al nombre
-                escrito, que es un resultado legítimo y no un paso intermedio.
-              */}
+              {/* Quitar el logo es distinto de subir otro: se vuelve al nombre escrito, que es un resultado
+                 legítimo y no un paso intermedio. */}
               {ajustes.logoUrl && (
                 <button
                   type="button"
@@ -497,11 +463,9 @@ const Personalizacion = () => {
               {MODOS.find((m) => m.clave === temporada.modo)?.ayuda}
             </p>
 
-            {/*
-              Los temas se muestran SIEMPRE, no solo en modo manual: sirven para
-              ver de qué color se va a poner la tienda en diciembre sin esperar a
-              diciembre. En automático no se pueden tocar, pero se ven.
-            */}
+            {/* Los temas se muestran SIEMPRE, no solo en modo manual: sirven para ver de qué color se va a
+               poner la tienda en diciembre sin esperar a diciembre. En automático no se pueden tocar, pero se
+               ven. */}
             <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
               {temas.map((tema) => {
                 const elegido = temporada.modo === 'manual' && temporada.tema === tema.clave;
@@ -634,10 +598,8 @@ const Personalizacion = () => {
             </div>
 
             <form onSubmit={guardarSaludos} className="flex flex-col gap-4">
-              {/*
-                Los días sin temporada: la mayor parte del año. En blanco no
-                sale cinta, que es como se veía la tienda antes.
-              */}
+              {/* Los días sin temporada: la mayor parte del año. En blanco no sale cinta, que es como se veía la
+                 tienda antes. */}
               <div
                 className="space-y-1.5 rounded-xl p-4"
                 style={{ backgroundColor: 'var(--theme-primary-light)' }}

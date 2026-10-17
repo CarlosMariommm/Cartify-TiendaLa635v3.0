@@ -8,10 +8,8 @@ import { Plus, Loader2 } from 'lucide-react';
 import { modalTransition } from '../../utils/motion';
 import { brandService } from '../../api/brandService';
 
-/*
- * Por dónde se le hacen los pedidos a este proveedor: el botón "Pedir" de la
- * compra sugerida (pantalla Pronóstico) sale por aquí. Ver utils/pedidoProveedor.js.
- */
+// Por dónde se le hacen los pedidos a este proveedor: el botón "Pedir" de la compra sugerida
+// (pantalla Pronóstico) sale por aquí. Ver utils/pedidoProveedor.js.
 const CANALES_DE_PEDIDO = [
   ['', 'Sin definir'],
   ['whatsapp', 'WhatsApp'],
@@ -23,18 +21,9 @@ const SIN_CANAL = { canal: '', whatsapp: '', app: '', enlace: '' };
 const SupplierFormModal = ({ isOpen, onClose, supplier, onSave, brands = [], onMarcaCreada }) => {
   const { register, handleSubmit, reset, watch, setValue, getValues } = useForm();
 
-  /*
-   * ── DAR DE ALTA UNA MARCA SIN SALIRSE DE AQUÍ ──
-   *
-   * El caso es de todos los días: se está registrando un proveedor nuevo y una
-   * de las marcas que distribuye todavía no existe en el sistema. Antes había
-   * que cancelar este formulario —perdiendo lo escrito—, ir a Marcas, crearla,
-   * volver a Proveedores y empezar de nuevo.
-   *
-   * `nombreMarca` vacío con `creandoMarca` en falso significa que la cajita
-   * ni siquiera está abierta: no se le muestra un campo de más a quien solo
-   * viene a marcar las marcas que ya existen.
-   */
+  // ── DAR DE ALTA UNA MARCA SIN SALIRSE DE AQUÍ ──
+  // El caso es de todos los días: se está registrando un proveedor nuevo y una de las marcas que
+  // distribuye todavía no existe en el sistema.
   const [creandoMarca, setCreandoMarca] = useState(false);
   const [nombreMarca, setNombreMarca] = useState('');
   const [guardandoMarca, setGuardandoMarca] = useState(false);
@@ -84,11 +73,8 @@ const SupplierFormModal = ({ isOpen, onClose, supplier, onSave, brands = [], onM
       // que la nueva aparezca entre las casillas sin recargar nada.
       onMarcaCreada?.(nueva);
 
-      /*
-       * Y queda MARCADA. Nadie crea una marca aquí adentro para después no
-       * asociarla: obligar a buscarla y tildarla sería pedir un paso que ya
-       * se dijo con el simple hecho de haberla creado.
-       */
+      // Y queda MARCADA. Nadie crea una marca aquí adentro para después no asociarla: obligar a buscarla
+      // y tildarla sería pedir un paso que ya se dijo con el simple hecho de haberla creado.
       setValue('brandIds', [...(getValues('brandIds') || []), nueva._id]);
 
       toast.success(`Marca "${nueva.name}" creada y asociada`);
@@ -153,12 +139,9 @@ const SupplierFormModal = ({ isOpen, onClose, supplier, onSave, brands = [], onM
                 />
               </div>
 
-              {/*
-                Los días de crédito se movieron al estado de cuenta del
-                proveedor, donde van junto al límite: son las dos mitades de la
-                misma condición ("$1000 a 30 días") y tenerlas en pantallas
-                distintas obligaba a acordarse de cambiar las dos.
-              */}
+              {/* Los días de crédito se movieron al estado de cuenta del proveedor, donde van junto al límite:
+                 son las dos mitades de la misma condición ("$1000 a 30 días") y tenerlas en pantallas distintas
+                 obligaba a acordarse de cambiar las dos. */}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -274,11 +257,8 @@ const SupplierFormModal = ({ isOpen, onClose, supplier, onSave, brands = [], onM
                     autoFocus
                     value={nombreMarca}
                     onChange={(e) => setNombreMarca(e.target.value)}
-                    /*
-                      Enter crea la marca y NO envía el formulario del proveedor.
-                      Sin el preventDefault, escribir el nombre y darle Enter
-                      guardaba el proveedor a medio llenar.
-                    */
+                    // Enter crea la marca y NO envía el formulario del proveedor. Sin el preventDefault, escribir el
+                    // nombre y darle Enter guardaba el proveedor a medio llenar.
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') { e.preventDefault(); crearMarca(); }
                       if (e.key === 'Escape') { setCreandoMarca(false); setNombreMarca(''); }

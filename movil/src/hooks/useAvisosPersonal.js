@@ -1,25 +1,6 @@
-/*
- * ============================================================
- * LOS PEDIDOS NUEVOS SUENAN EN EL TELÉFONO — useAvisosPersonal.js
- * ============================================================
- * Al entrar al modo personal (administrador o empleado), este teléfono queda
- * apuntado para recibir un aviso por cada pedido que entra a la tienda
- * (backend/src/utils/avisosPersonal.js). Al cerrar sesión se da de baja
- * (PersonalContext.salir): desde ahí ya no le llega ninguno.
- *
- * Se apunta cada vez que se abre la app y no una sola vez: si el teléfono
- * cambió de token (reinstalar, borrar datos) o el servidor estaba dormido, la
- * siguiente apertura lo arregla sola.
- *
- * `estado` dice si quedó funcionando:
- *   'activos'      apuntado; los pedidos nuevos suenan aquí.
- *   'sin-permiso'  el teléfono tiene los avisos de la app apagados. Se le
- *                  ofrece abrir los ajustes, y al volver se intenta de nuevo.
- *   'error'        no se pudo hablar con el servidor; se reintenta al volver
- *                  a la app.
- *   'emulador' / 'sin-proyecto' / 'pendiente'   no hay nada que mostrar.
- * ============================================================
- */
+// LOS PEDIDOS NUEVOS SUENAN EN EL TELÉFONO — useAvisosPersonal.js
+// Al entrar al modo personal (administrador o empleado), este teléfono queda apuntado para recibir
+// un aviso por cada pedido que entra a la tienda (backend/src/utils/avisosPersonal.js).
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, Linking } from 'react-native';

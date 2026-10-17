@@ -2,38 +2,15 @@ import { CUERPO, AGUJERO, CORDON } from './mascotaFormas';
 import DisfrazTiqui from './DisfrazTiqui';
 import { useDisfrazTiqui } from '../../hooks/useDisfrazTiqui';
 
-/*
- * ============================================================
- * MASCOTA — Mascota.jsx
- * ============================================================
- * La etiqueta del logo con cara, en estilo plano: dos colores y el cordón
- * azul. Acompaña los momentos en que la tienda no tiene nada que mostrar
- * todavía (cargando), no encontró algo, se quedó sin conexión o salió algo
- * mal — y también los buenos (pedido confirmado, saludo al entrar).
- *
- * Los colores salen de tokens (--mascota-cuerpo, --mascota-rasgo,
- * --mascota-cordon en index.css), así que en modo oscuro se voltea sola:
- * etiqueta blanca con rasgos navy, como el logo. NO usa --marca-600: esa
- * cambia con la temporada, y la mascota es siempre la misma. Lo que la
- * temporada le cambia es la ropa (gorro, corbatín...): ver DisfrazTiqui.
- *
- * Es de adorno: el texto de al lado dice lo que pasa, así que por defecto va
- * aria-hidden. Si alguna vez va sola, `titulo` la vuelve una imagen con nombre.
- *
- * Los movimientos (péndulo, balanceo, salto…) viven en index.css, sección
- * MASCOTA. Aquí solo se dibuja.
- * ============================================================
- */
+// MASCOTA — Mascota.jsx
+// La etiqueta del logo con cara, en estilo plano: dos colores y el cordón azul.
 
 const CORDON_COLOR = 'var(--mascota-cordon)';
 const RASGO = 'var(--mascota-rasgo)';
 const CUERPO_COLOR = 'var(--mascota-cuerpo)';
 
-/*
- * Cada pose: qué cara pone, qué hace el cordón, cómo se mueve y qué la
- * acompaña. `vista` es el encuadre (viewBox): cada una deja el aire justo
- * para lo que tiene alrededor.
- */
+// Cada pose: qué cara pone, qué hace el cordón, cómo se mueve y qué la acompaña. `vista` es el
+// encuadre (viewBox): cada una deja el aire justo para lo que tiene alrededor.
 const POSES = {
   // Colgando de su cordón y balanceándose, como una etiqueta en el estante.
   cargando: { vista: '0 0 400 400', cordon: 'colgado', mov: 'mascota-pendulo' },
@@ -52,11 +29,8 @@ const POSES = {
     vista: '96 26 304 364', mira: [6, -3], cejas: 'preocupado', boca: 'o',
     cordon: 'enchufe', aparte: 'toma',
   },
-  /*
-   * Se le cortó el cordón y se cayó. Queda APOYADA en el piso: la esquina de
-   * más abajo toca justo el borde de arriba de la línea (y 443.5). Antes iba
-   * 16 más abajo y la etiqueta atravesaba el piso y rozaba el borde del dibujo.
-   */
+  // Se le cortó el cordón y se cayó. Queda APOYADA en el piso: la esquina de más abajo toca justo el
+  // borde de arriba de la línea (y 443.5).
   error: {
     vista: '40 0 320 460', correr: 'translate(210 340) rotate(-66) scale(.88) translate(-200 -246)',
     ojos: 'x', boca: 'o', cordon: 'cortado', aparte: 'caida',
@@ -71,10 +45,8 @@ const POSES = {
   // panel, donde varias juntas moviéndose serían un mareo.
   posando: { vista: '84 30 232 400' },
 
-  /*
-   * Los estados de un pedido (ver utils/pasosPedido.js). Cada uno cuenta lo
-   * que está pasando sin tener que leer la etiqueta de texto.
-   */
+  // Los estados de un pedido (ver utils/pasosPedido.js). Cada uno cuenta lo que está pasando sin
+  // tener que leer la etiqueta de texto.
   // Le llegó el pedido: mira el recibo con su ✓.
   recibido: { vista: '100 26 290 380', mira: [7, 1], mov: 'mascota-respira', aparte: 'recibo' },
   // Lo están armando: van cayendo productos a la bolsa y ella mira, concentrada.
@@ -89,11 +61,8 @@ const POSES = {
   // Se canceló: triste, con el cordón caído.
   cancelado: { vista: '104 30 200 360', mira: [0, 5], cejas: 'preocupado', boca: 'triste', cordon: 'caido' },
 
-  /*
-   * Las secciones de Mi Cuenta que todavía no tienen nada. Ella se corre a la
-   * izquierda y mira lo que falta, que flota a su lado: no es un error, es
-   * una invitación a llenarlo.
-   */
+  // Las secciones de Mi Cuenta que todavía no tienen nada. Ella se corre a la izquierda y mira lo
+  // que falta, que flota a su lado: no es un error, es una invitación a llenarlo.
   // Mirando hacia arriba un corazón vacío: todavía no guardaste favoritos.
   'sin-favoritos': {
     vista: '56 26 344 370', correr: 'translate(-46 0)', mira: [7, -5],
@@ -119,11 +88,8 @@ const POSES = {
 // En los botones va solo la etiqueta colgando, sin aire alrededor.
 const VISTA_MINI = '110 0 180 392';
 
-/*
- * Sobre qué va pintada. En la página toma los tokens; dentro de un botón del
- * color de la marca o sobre un velo oscuro, la etiqueta tiene que ser blanca
- * para verse.
- */
+// Sobre qué va pintada. En la página toma los tokens; dentro de un botón del color de la marca o
+// sobre un velo oscuro, la etiqueta tiene que ser blanca para verse.
 const SOBRE = {
   color: { '--mascota-cuerpo': '#FFFFFF', '--mascota-rasgo': 'var(--marca-600)' },
   oscuro: { '--mascota-cuerpo': '#FFFFFF', '--mascota-rasgo': '#003049' },
@@ -357,11 +323,9 @@ const DETRAS = {
   ),
 };
 
-/*
- * `disfraz`: lo que lleva puesto. Si no se pasa, el de la temporada de la
- * tienda (ver useDisfrazTiqui); `null` lo deja sin nada. El panel lo pasa a
- * mano para mostrar cómo se verá en cada temporada.
- */
+// `disfraz`: lo que lleva puesto. Si no se pasa, el de la temporada de la tienda (ver
+// useDisfrazTiqui); `null` lo deja sin nada. El panel lo pasa a mano para mostrar cómo se verá en
+// cada temporada.
 const Mascota = ({ pose = 'cargando', alto, mini = false, sobre, titulo, className = '', style, disfraz }) => {
   const p = POSES[pose] || POSES.cargando;
   const vista = mini ? VISTA_MINI : p.vista;
@@ -369,10 +333,8 @@ const Mascota = ({ pose = 'cargando', alto, mini = false, sobre, titulo, classNa
   const mov = mini && p.mov === 'mascota-pendulo' ? 'mascota-pendulo-corto' : p.mov;
 
   const deTemporada = useDisfrazTiqui();
-  /*
-   * En los botones va sin disfraz: a la altura de una línea de texto el gorro
-   * se vuelve una mancha roja al lado de "Iniciar sesión".
-   */
+  // En los botones va sin disfraz: a la altura de una línea de texto el gorro se vuelve una mancha
+  // roja al lado de "Iniciar sesión".
   const puesto = mini ? null : disfraz === undefined ? deTemporada : disfraz;
 
   return (
@@ -403,20 +365,13 @@ const Mascota = ({ pose = 'cargando', alto, mini = false, sobre, titulo, classNa
   );
 };
 
-/*
- * Para las esperas cortas dentro de un botón ("Procesando…", "Iniciar
- * sesión"): la etiqueta colgando, del alto de una línea de texto.
- */
+// Para las esperas cortas dentro de un botón ("Procesando…", "Iniciar sesión"): la etiqueta
+// colgando, del alto de una línea de texto.
 export const EsperaMascota = ({ alto = 22, sobre }) => <Mascota pose="cargando" mini alto={alto} sobre={sobre} />;
 
-/*
- * Para cuando una pantalla entera está cargando: la etiqueta balanceándose y
- * el texto de lo que se está trayendo.
- *
- * Aparece con un poquito de retraso (ver .mascota-aparece en index.css): si
- * los datos llegan rápido, no alcanza a verse y no queda un parpadeo de
- * mascota que sale y se va.
- */
+// Para cuando una pantalla entera está cargando: la etiqueta balanceándose y el texto de lo que se
+// está trayendo. Aparece con un poquito de retraso (ver .mascota-aparece en index.css): si los
+// datos llegan rápido, no alcanza a verse y no queda un parpadeo de mascota que sale y se va.
 export const CargandoMascota = ({ texto, alto = 92 }) => (
   <div className="mascota-aparece flex flex-col items-center justify-center py-14 text-center" role="status">
     <Mascota pose="cargando" alto={alto} />

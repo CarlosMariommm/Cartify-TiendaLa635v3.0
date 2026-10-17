@@ -1,17 +1,6 @@
-/*
- * ============================================================
- * SECCIÓN — el "Ver todos" de una fila de la portada
- * ============================================================
- * La misma cuadrícula de la portada (2 columnas en el teléfono, más en la tablet), con los productos de una
- * sola sección. Existe porque una fila deslizable muestra 12 y las secciones
- * suelen tener más: sin esta pantalla, "Ver todos (24)" no llevaría a ningún
- * lado y los otros 12 serían inalcanzables.
- *
- * No recalcula nada: recibe la sección ya armada. Rearmarla aquí con el
- * catálogo abriría la puerta a que esta pantalla y la fila que la abrió
- * mostraran cosas distintas si el criterio cambiara en uno de los dos lados.
- * ============================================================
- */
+// SECCIÓN — el "Ver todos" de una fila de la portada
+// La misma cuadrícula de la portada (2 columnas en el teléfono, más en la tablet), con los
+// productos de una sola sección.
 
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useEstilos } from '../context/ModoContext';

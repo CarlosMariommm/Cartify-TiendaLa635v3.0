@@ -2,22 +2,9 @@ import { Package, ChefHat, Bike, Check, Store } from 'lucide-react-native';
 import { COLORES_OSCURO } from '../theme/colores';
 import { tAhora } from './idioma';
 
-/*
- * ============================================================
- * LOS PASOS DE UN PEDIDO — pasosPedido.js
- * ============================================================
- * Por dónde va un pedido, escrito UNA sola vez. Copia de
- * `frontend/src/utils/pasosPedido.js`, con lucide-react-native en vez de
- * lucide-react — mismos iconos, mismo trazo.
- *
- * El problema que resuelve del lado de la web era tener esta lista copiada
- * en tres pantallas, con una copia que se había quedado sin "En camino". Del
- * lado del teléfono la app ya tenía el mismo problema por su cuenta:
- * Confirmacion.js traía sus propios tres pasos («Recibida, En camino,
- * Entregada») sin «Preparando», y Pedidos.js no sabía pintar 'en_camino' en
- * la lista de pedidos. Una sola lista es la manera de que no se repita.
- * ============================================================
- */
+// LOS PASOS DE UN PEDIDO — pasosPedido.js
+// Por dónde va un pedido, escrito UNA sola vez. Copia de `frontend/src/utils/pasosPedido.js`, con
+// lucide-react-native en vez de lucide-react — mismos iconos, mismo trazo.
 
 export const PASOS_TODOS = [
   // `pose`: cómo sale Tiqui en ese paso (components/Tiqui/Mascota.js), igual que en la web.
@@ -29,19 +16,15 @@ export const PASOS_TODOS = [
   { id: 'entregado', label: 'Entregado', detalle: '¡Que lo disfrutes!', Icono: Check, pose: 'entregado' },
 ];
 
-/*
- * La pose de Tiqui para un estado cualquiera, incluido "cancelado", que no
- * es un paso de la lista (un pedido cancelado no avanza a ningún lado).
- */
+// La pose de Tiqui para un estado cualquiera, incluido "cancelado", que no es un paso de la lista
+// (un pedido cancelado no avanza a ningún lado).
 export const poseDeEstado = (estado) =>
   estado === 'cancelado'
     ? 'cancelado'
     : (PASOS_TODOS.find((p) => p.id === estado) || PASOS_TODOS[0]).pose;
 
-/*
- * Los pasos que le tocan a ESTE pedido. "En camino" solo existe para
- * domicilio: un retiro en el local no tiene a quién seguirle el mapa.
- */
+// Los pasos que le tocan a ESTE pedido. "En camino" solo existe para domicilio: un retiro en el
+// local no tiene a quién seguirle el mapa.
 // Ya en el idioma de la tienda (ver utils/idioma.js): quien los pinta solo pone p.label.
 export const pasosDe = (deliveryType) =>
   (deliveryType === 'delivery'
@@ -49,24 +32,15 @@ export const pasosDe = (deliveryType) =>
     : PASOS_TODOS.filter((p) => p.id !== 'en_camino')
   ).map((p) => ({ ...p, label: tAhora(p.label), detalle: tAhora(p.detalle) }));
 
-/*
- * En qué paso está, como índice dentro de la lista que le toca. Devuelve 0
- * cuando el estado no está en la lista (un pedido recién creado) — eso es un
- * respaldo, NO la forma de resolver un estado que falta: para eso está
- * pasosDe.
- */
+// En qué paso está, como índice dentro de la lista que le toca. Devuelve 0 cuando el estado no
+// está en la lista (un pedido recién creado) — eso es un respaldo, NO la forma de resolver un
+// estado que falta: para eso está pasosDe.
 export const indiceDePaso = (pasos, estado) => {
   const i = pasos.findIndex((p) => p.id === estado);
   return i === -1 ? 0 : i;
 };
 
-/*
- * La etiqueta y el color de cada estado, para las chapas de "Pagado",
- * "Cancelado", etc. Vivían copiados dentro de Pedidos.js nada más; se centran
- * aquí por la misma razón que PASOS_TODOS: ModalPedido.js los necesita
- * también, y una lista que se edita en dos lugares es una que un día se edita
- * solo en uno.
- */
+// La etiqueta y el color de cada estado, para las chapas de "Pagado", "Cancelado", etc.
 export const ESTADOS_PEDIDO = {
   pagado: { texto: 'Pagado', color: '#2563EB', fondo: '#E8EFFD' },
   preparando: { texto: 'Preparando', color: '#D97706', fondo: '#FBF0DF' },
@@ -76,11 +50,8 @@ export const ESTADOS_PEDIDO = {
   cancelado: { texto: 'Cancelado', color: '#DC2626', fondo: '#FBE7E7' },
 };
 
-/*
- * En modo oscuro las chapas salen de los colores de estado de la paleta
- * oscura: un fondo pastel sobre negro deslumbra, y un azul oscuro sobre fondo
- * oscuro no se lee.
- */
+// En modo oscuro las chapas salen de los colores de estado de la paleta oscura: un fondo pastel
+// sobre negro deslumbra, y un azul oscuro sobre fondo oscuro no se lee.
 const ESTADOS_PEDIDO_OSCURO = {
   pagado: { texto: 'Pagado', color: COLORES_OSCURO.infoVivo, fondo: COLORES_OSCURO.infoFondo },
   preparando: { texto: 'Preparando', color: COLORES_OSCURO.avisoVivo, fondo: COLORES_OSCURO.avisoFondo },
@@ -96,18 +67,8 @@ export const estadosPedido = (oscuro) => {
   return Object.fromEntries(Object.entries(base).map(([k, e]) => [k, { ...e, texto: tAhora(e.texto) }]));
 };
 
-/*
- * Lo que se le devolvió al cliente al cancelar su pedido, en una frase:
- * "Le devolvimos $4.50 a su saldo y 200 puntos." Vacío si no hubo nada que
- * devolver. Lo anota el servidor en `reembolso` al cancelar (ver
- * backend/src/utils/devolverPedido.js). La web tiene la misma función en
- * frontend/src/utils/pasosPedido.js: si cambia una, cambia la otra.
- */
-/*
- * De un pedido que devolvió el servidor al cancelarlo, solo el id, el estado
- * y los sellos de la cancelación. El de la respuesta viene sin los productos
- * poblados: mezclarlo entero dejaría el detalle sin fotos. Igual que en la web.
- */
+// sellosDeCancelacion: del pedido que devolvió el servidor al cancelar, solo el id, el estado y los
+// sellos, igual que en la web. El texto de lo devuelto lo arma textoDevuelto, con `reembolso`.
 export const sellosDeCancelacion = (pedido) => {
   const sellos = {};
   ['_id', 'status', 'cancelReason', 'cancelledAt', 'cancelledBy', 'cancelledByClient', 'reembolso'].forEach((k) => {

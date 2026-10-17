@@ -1,38 +1,6 @@
-/*
- * ============================================================
- * DECORACIÓN DE TEMPORADA — las figuras que caen
- * ============================================================
- * Copos en diciembre, murciélagos la semana de Halloween, confeti en
- * septiembre, corazones en febrero. Caen despacio de fondo, detrás de todo.
- *
- * ── Las tres reglas que hacen que esto no estorbe ──
- *
- *   1. `pointerEvents="none"` en la capa. Es lo único que separa "decoración"
- *      de "una lámina invisible encima de la tienda que se come los toques".
- *      Sin esto, un copo sobre el botón de agregar se traga la venta.
- *
- *   2. Muy tenues y detrás del contenido. Un copo que tapa un precio no es
- *      simpático, es un error. Van al 30% y con `zIndex: 0`.
- *
- *   3. Pocas. Las cantidades salen del tema (14 copos, 10 murciélagos) y están
- *      medidas: veinte figuras ya no son "está nevando", son un protector de
- *      pantalla encima de la tienda.
- *
- * ── Y una cuarta: se apagan para quien pidió menos movimiento ──
- *
- * La web mira `prefers-reduced-motion`. El equivalente aquí es
- * `AccessibilityInfo.isReduceMotionEnabled()`, que lee el ajuste del sistema.
- * Quien activó eso lo hizo por una razón —mareos, migrañas, vértigo— y una
- * tienda de barrio no es el lugar para ignorarlo.
- *
- * ── Por qué Animated y no una librería ──
- *
- * `Animated` viene con React Native y con `useNativeDriver: true` la animación
- * corre en el hilo de la interfaz: aunque el JavaScript esté ocupado cargando
- * el catálogo, las figuras siguen bajando parejo. Solo se pueden animar así
- * `transform` y `opacity`, que es exactamente lo que se necesita.
- * ============================================================
- */
+// DECORACIÓN DE TEMPORADA — las figuras que caen
+// Copos en diciembre, murciélagos la semana de Halloween, confeti en septiembre, corazones en
+// febrero. Caen despacio de fondo, detrás de todo.
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Dimensions, Easing, StyleSheet, View } from 'react-native';
@@ -43,10 +11,8 @@ import { Confeti, Copo, Corazon, Estrella, Murcielago } from '../UI/Iconos';
 // La hoja no tiene dibujo a mano: se usa la de lucide, la misma que la web.
 const Hoja = ({ size = 16, color = '#FFFFFF' }) => <Leaf size={size} color={color} strokeWidth={1.8} />;
 
-/*
- * 'ninguna' no está a propósito: una temporada propia sin figuras se nota
- * solo en los colores y la cinta, y sin figura esta capa no se pinta.
- */
+// 'ninguna' no está a propósito: una temporada propia sin figuras se nota solo en los colores y la
+// cinta, y sin figura esta capa no se pinta.
 const FIGURAS = {
   copo: Copo,
   murcielago: Murcielago,
@@ -56,21 +22,16 @@ const FIGURAS = {
   hoja: Hoja,
 };
 
-/*
- * Cuánto tarda una figura en cruzar la pantalla. "lenta" es la nieve —cae
- * recta y sin prisa—; "meciendo" va algo más rápido y se bambolea, porque una
- * hoja de confeti que baja como plomada se ve mal.
- */
+// Cuánto tarda una figura en cruzar la pantalla. "lenta" es la nieve —cae recta y sin prisa—;
+// "meciendo" va algo más rápido y se bambolea, porque una hoja de confeti que baja como plomada se
+// ve mal.
 const DURACION = { lenta: [11000, 17000], meciendo: [8000, 13000] };
 
 const alAzar = (min, max) => min + Math.random() * (max - min);
 
-/*
- * Una figura. Cada una tiene su propio Animated.Value y su propio bucle, con
- * duración y retraso distintos: con un solo valor compartido caerían las
- * catorce en fila india, perfectamente alineadas, que es lo contrario de lo
- * que hace la nieve.
- */
+// Una figura. Cada una tiene su propio Animated.Value y su propio bucle, con duración y retraso
+// distintos: con un solo valor compartido caerían las catorce en fila india, perfectamente
+// alineadas, que es lo contrario de lo que hace la nieve.
 const FiguraQueCae = ({ Figura, color, alto, config }) => {
   const progreso = useRef(new Animated.Value(0)).current;
 
@@ -154,11 +115,9 @@ const DecoracionTemporada = () => {
     };
   }, []);
 
-  /*
-   * Las posiciones y los tiempos se sortean UNA vez y se recuerdan. Calculados
-   * en el render, cada vez que la tienda se repintara —y se repinta con cada
-   * toque al carrito— las figuras saltarían de sitio.
-   */
+  // Las posiciones y los tiempos se sortean UNA vez y se recuerdan. Calculados en el render, cada
+  // vez que la tienda se repintara —y se repinta con cada toque al carrito— las figuras saltarían de
+  // sitio.
   const figuras = useMemo(() => {
     if (!decoracion) return [];
     const [minimo, maximo] = DURACION[decoracion.caida] || DURACION.lenta;

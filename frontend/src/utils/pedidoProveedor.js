@@ -1,22 +1,6 @@
-/*
- * ============================================================
- * PEDIRLE AL PROVEEDOR CON UN TOQUE — pedidoProveedor.js
- * ============================================================
- * Desde la compra sugerida del pronóstico, el pedido sale por donde se le
- * pide a cada proveedor (Proveedores › Editar › "Cómo se le hacen los
- * pedidos"):
- *
- *   WhatsApp  abre WhatsApp con el mensaje ya escrito. Al número que se
- *             guardó; si no hay, al teléfono del proveedor si es uno de El
- *             Salvador (8 dígitos); si tampoco, deja elegir el contacto.
- *   App       abre su app o sitio (BEES, por ejemplo) y deja la lista copiada
- *             para pegarla. BEES no tiene una API pública: no se puede mandar
- *             el pedido solo.
- *   Llamada   marca su teléfono, con la lista copiada para tenerla a mano.
- *
- * El mensaje va de usted: es la tienda escribiéndole a un proveedor.
- * ============================================================
- */
+// PEDIRLE AL PROVEEDOR CON UN TOQUE — pedidoProveedor.js
+// Desde la compra sugerida del pronóstico, arma el pedido y lo manda por donde se le pide a cada
+// proveedor: WhatsApp con el mensaje escrito, su app o sitio, o una llamada.
 
 import { cantidad } from './reportePredictivo';
 
@@ -29,10 +13,8 @@ export const listaDelPedido = (productos) =>
 export const mensajeDePedido = ({ tienda, productos }) =>
   `Buenos días. Le escribimos de ${tienda || 'la tienda'}. Quisiéramos hacerle este pedido:\n${listaDelPedido(productos)}\nMuchas gracias.`;
 
-/*
- * El número para wa.me: con el 503 de El Salvador si son 8 dígitos. Vacío si
- * no hay uno que sirva (entonces WhatsApp deja elegir el contacto).
- */
+// El número para wa.me: con el 503 de El Salvador si son 8 dígitos. Vacío si no hay uno que sirva
+// (entonces WhatsApp deja elegir el contacto).
 export const numeroDeWhatsApp = (numero) => {
   const d = digitos(numero);
   if (d.length === 8) return `503${d}`;
@@ -45,10 +27,8 @@ export const enlaceDeWhatsApp = (numero, texto) => {
   return `https://wa.me/${n}?text=${encodeURIComponent(texto)}`;
 };
 
-/*
- * Qué botón lleva cada proveedor, o null si todavía no se dijo por dónde se
- * le pide. `pedido` es lo que manda el servidor con la compra sugerida.
- */
+// Qué botón lleva cada proveedor, o null si todavía no se dijo por dónde se le pide. `pedido` es
+// lo que manda el servidor con la compra sugerida.
 export const comoPedir = (pedido, { tienda, productos }) => {
   if (!pedido?.canal) return null;
   const mensaje = mensajeDePedido({ tienda, productos });
@@ -65,10 +45,8 @@ export const comoPedir = (pedido, { tienda, productos }) => {
   return null;
 };
 
-/*
- * Deja la lista en el portapapeles. Con el portapapeles del navegador y, si no
- * deja (algunos WebView), con el truco del cuadro de texto. Dice si se copió.
- */
+// Deja la lista en el portapapeles. Con el portapapeles del navegador y, si no deja (algunos
+// WebView), con el truco del cuadro de texto. Dice si se copió.
 export const copiarTexto = async (texto) => {
   try {
     await navigator.clipboard.writeText(texto);

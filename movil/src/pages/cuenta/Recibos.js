@@ -1,25 +1,5 @@
-/*
- * ============================================================
- * RECIBOS — los pedidos ya entregados
- * ============================================================
- * El equivalente de `frontend/src/pages/cliente/Recibidos.jsx`: los MISMOS
- * pedidos que ya trae Pedidos.js (mismo `getPedidosDeCliente`, mismo
- * endpoint), filtrados aquí a `status === 'entregado'` — igual que la web,
- * que filtra en el propio hook y no en el servidor.
- *
- * ── Por qué esto no vive dentro de Pedidos.js ──
- *
- * La web los separa en dos rutas y dos pestañas del menú de la cuenta, así
- * que esto respeta esa misma separación en vez de sumarle un filtro a la
- * pantalla que ya existe. Pedidos.js sigue mostrando TODO, con su chapa de
- * estado dinámica; este solo agrega qué se pagó, que la web sí muestra aquí
- * y Pedidos.js no necesita (el estado ya lo dice todo en ese otro lugar).
- *
- * No hay número de factura, ni desglose de impuestos, ni PDF: "Recibo #" es
- * el mismo número corto (los 6 últimos del id) que "Pedido #" en la otra
- * pantalla. La web tampoco trae más que eso.
- * ============================================================
- */
+// RECIBOS — los pedidos ya entregados
+// Los mismos pedidos de Pedidos.js, filtrados a los entregados, igual que la web.
 
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';

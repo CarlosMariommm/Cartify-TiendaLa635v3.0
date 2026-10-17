@@ -1,7 +1,5 @@
-/*
- * Correo con el código de acceso al panel (segundo factor del login de admin).
- * En español, sobrio y sin emojis, como el resto de los avisos de la tienda.
- */
+// Correo con el código de acceso al panel (segundo factor del login de admin). En español, sobrio
+// y sin emojis, como el resto de los avisos de la tienda.
 const HTML2FAEmail = (code) => {
   return `
     <div style="font-family: Arial, sans-serif; text-align: center; background-color: #F1F6F9; padding: 24px; border: 1px solid #ECE7E1; border-radius: 12px; max-width: 600px; margin: 0 auto;">

@@ -5,36 +5,9 @@ import reviewModel from "../models/review.js";
 import loyaltyLedgerModel from "../models/loyaltyLedger.js";
 import kioskSessionModel from "../models/kioskSession.js";
 
-/*
- * ============================================================
- * ELIMINAR UN CLIENTE — eliminarCliente.js
- * ============================================================
- * Lo que promete la política de privacidad, hecho de verdad: al borrar una
- * cuenta "se van su nombre, su correo, su teléfono, sus direcciones y su
- * foto", y "los pedidos quedan en la contabilidad aunque cierre su cuenta,
- * pero sin su nombre".
- *
- * Antes la ruta borraba el documento del cliente y nada más. Los pedidos
- * quedaban con la dirección y el punto exacto de su casa, sus puntos y sus
- * reseñas seguían en la base sin dueño, y los archivos que mandó a imprimir
- * (documentos personales, muchas veces) seguían en Cloudinary.
- *
- * QUÉ SE VA
- *   - La cuenta entera: nombre, correo, teléfono, DUI, fecha de nacimiento,
- *     direcciones, tarjetas guardadas, favoritos, avisos del teléfono.
- *   - Su foto y los archivos de sus impresiones, en Cloudinary.
- *   - Sus reseñas de productos (los promedios se calculan al momento, así
- *     que no queda ningún número viejo).
- *   - Sus puntos y sus sesiones del kiosco.
- *
- * QUÉ SE QUEDA
- *   - Sus pedidos, para la contabilidad, sin dirección, referencia ni punto
- *     en el mapa, y marcados como de un cliente eliminado.
- *
- * NO SE PUEDE con un pedido en curso: alguien está juntando esa bolsa o va
- * en camino a esa casa. Primero se entrega o se cancela.
- * ============================================================
- */
+// ELIMINAR UN CLIENTE — eliminarCliente.js
+// Borra su nombre, correo, teléfono, direcciones y foto; sus pedidos quedan en la contabilidad,
+// pero sin su nombre (lo que promete la política de privacidad).
 
 const EN_CURSO = ["pagado", "preparando", "en_camino", "listo"];
 

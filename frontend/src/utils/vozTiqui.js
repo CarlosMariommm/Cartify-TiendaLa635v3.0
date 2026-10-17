@@ -1,33 +1,10 @@
-/*
- * ============================================================
- * LA VOZ DE TIQUI EN EL NAVEGADOR — vozTiqui.js
- * ============================================================
- * Reproduce lo que dice Tiqui con su voz (la del video), pedida al servidor
- * en /api/ai/voz. El <audio> empieza a sonar con los primeros pedazos: no
- * espera a que llegue la frase entera.
- *
- * Y mueve la boca con el audio de verdad: mientras suena, un analizador mide
- * el volumen y lo deja en la variable CSS --voz-tiqui (0 a 1) del documento;
- * la mascota la usa para abrir más o menos la boca (index.css, ASISTENTE DE
- * VOZ). Así la boca se cierra en las pausas en vez de moverse en bucle.
- *
- * Si algo falla —sin red, sin llave en el servidor, el audio no arranca en
- * unos segundos— avisa con `alFallar` y quien llamó habla con la voz del
- * sistema. Nunca se queda callado.
- * ============================================================
- */
+// LA VOZ DE TIQUI EN EL NAVEGADOR — vozTiqui.js
+// Reproduce lo que dice Tiqui con su voz (la del video), pedida al servidor en /api/ai/voz. El
+// <audio> empieza a sonar con los primeros pedazos: no espera a que llegue la frase entera.
 
-/*
- * Lo que se escribe no siempre es lo que se dice, también con la voz del
- * navegador. Sin esto, las voces en español de México o Estados Unidos leían
- * "$12.50" como "doce PESOS cincuenta": la tienda cobra en dólares.
- *
- *   "$12.50" → "12 dólares con 50 centavos"   "$0.41" → "41 centavos"
- *   "635"    → "seis tres cinco"              "2x1"   → "2 por 1"
- *
- * Es la misma regla que aplica el servidor antes de pedir la voz de Tiqui
- * (backend/src/utils/vozTiqui.js). La pantalla sigue mostrando "$12.50".
- */
+// Lo que se escribe no siempre es lo que se dice, también con la voz del navegador. Sin esto, las
+// voces en español de México o Estados Unidos leían "$12.50" como "doce PESOS cincuenta": la
+// tienda cobra en dólares.
 const dineroParaDecir = (_, enteros, decimales = '') => {
   const d = Number(enteros);
   const c = decimales ? Number(decimales.padEnd(2, '0')) : 0;
@@ -59,11 +36,8 @@ const raiz = () => document.documentElement;
 
 const ponerBoca = (nivel) => raiz().style.setProperty('--voz-tiqui', nivel.toFixed(3));
 
-/*
- * El analizador se arma una sola vez y recién al primer uso: el navegador no
- * deja crear audio antes de que la persona toque algo, y para cuando Tiqui
- * habla ya tocó el micrófono.
- */
+// El analizador se arma una sola vez y recién al primer uso: el navegador no deja crear audio
+// antes de que la persona toque algo, y para cuando Tiqui habla ya tocó el micrófono.
 const prepararAnalizador = () => {
   if (analizador || !audio) return;
   try {
@@ -100,11 +74,9 @@ const pararBoca = () => {
   ponerBoca(0);
 };
 
-/*
- * Dice `url` (de aiService.urlVoz). Devuelve una función para callarla.
- *   velocidad: 1 es normal (el audio conserva el tono al acelerar).
- *   alEmpezar: ya se oye.   alTerminar: terminó bien.   alFallar: no se pudo.
- */
+// Dice `url` (de aiService.urlVoz). Devuelve una función para callarla. velocidad: 1 es normal (el
+// audio conserva el tono al acelerar). alEmpezar: ya se oye. alTerminar: terminó bien. alFallar:
+// no se pudo.
 export const decirConTiqui = (url, { velocidad = 1, alEmpezar, alTerminar, alFallar } = {}) => {
   const miTurno = ++turno;
   const vigente = () => miTurno === turno;

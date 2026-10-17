@@ -6,26 +6,9 @@ import { useTiquiPanel } from '../../hooks/useTiquiPanel';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/ThemeContext';
 
-/*
- * ============================================================
- * TIQUI DEL PANEL — la que flota en la esquina (TiquiPanel.jsx)
- * ============================================================
- * La asistente del equipo, como un Jarvis de la tienda: se le pregunta cómo
- * va el día, qué pedidos esperan o qué se está acabando, y contesta hablando
- * (y si hace falta, abre la pantalla). Es otra asistente que la de la tienda:
- * ver useTiquiPanel y backend/src/controller/tiquiPanelController.js.
- *
- * Vive en AdminLayout, en la esquina de abajo a la derecha, en todas las
- * pantallas del panel. Tocarla la despierta y se pone a escuchar; lo que
- * contesta sale en su globo, arriba de ella. Nada de ventana ni recuadro: es
- * ella y lo que dice, como en el asistente de la tienda.
- *
- * Va en z-[25]: por encima de la página, pero debajo del velo del menú en el
- * teléfono (z-30) y de los modales (z-50), que tienen que taparla.
- *
- * Solo pinta. La conversación vive en useTiquiPanel.
- * ============================================================
- */
+// TIQUI DEL PANEL — la que flota en la esquina (TiquiPanel.jsx)
+// La asistente del equipo, como un Jarvis de la tienda: se le pregunta cómo va el día, qué pedidos
+// esperan o qué se está acabando, y contesta hablando (y si hace falta, abre la pantalla).
 
 const EASE_OUT = [0.23, 1, 0.32, 1];
 
@@ -167,10 +150,8 @@ const TiquiPanel = () => {
               </p>
             )}
 
-            {/*
-              Tiqui propuso un cambio ("¿Lo hago?"): se contesta con un toque o
-              diciendo "sí" / "no". Nada se cambia sin esto.
-            */}
+            {/* Tiqui propuso un cambio ("¿Lo hago?"): se contesta con un toque o diciendo "sí" / "no". Nada se
+               cambia sin esto. */}
             {t.pendiente && !t.pensando && (
               <div className="flex gap-2" role="group" aria-label="Confirmar el cambio">
                 <button

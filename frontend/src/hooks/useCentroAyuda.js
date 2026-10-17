@@ -2,19 +2,8 @@ import { useMemo } from 'react';
 import { enlaceWhatsApp, DIRECCION_EN_UNA_LINEA, WHATSAPP } from '../utils/tienda';
 import { useIdioma } from './useIdioma';
 
-/*
- * useCentroAyuda — qué se le puede ofrecer al cliente que llegó buscando ayuda.
- *
- * La página nació con un teléfono "2222-2222", un correo "ayuda@la635.com" y un
- * WhatsApp "7777-7777" escritos a mano. Ninguno de los tres existe: eran relleno
- * de maqueta que se quedó. Y un canal de ayuda inventado no es un detalle
- * cosmético — es alguien marcando desde la parada del bus porque no le llegó el
- * pedido, escuchando un tono que no lleva a nadie.
- *
- * La regla es la misma del pie de página: solo se ofrece lo que existe. El único
- * contacto real de la tienda es el WhatsApp del .env, así que si ese número no
- * está configurado, no hay bloque de contacto que pintar.
- */
+// useCentroAyuda — qué se le puede ofrecer al cliente que llegó buscando ayuda.
+// Muestra solo los canales que de verdad tiene la tienda (los de Personalización).
 
 // El mensaje ya escrito le ahorra al cliente tener que explicar de dónde viene.
 // Va en español aunque la tienda esté en inglés: lo lee el personal.
@@ -39,11 +28,8 @@ export const useCentroAyuda = () => {
     },
   ];
 
-  /*
-   * Los canales se arman, no se listan: cada uno entra solo si tiene a dónde
-   * llevar. El tipo viaja en lugar del icono porque elegir el dibujito es cosa
-   * de la pantalla, no de aquí.
-   */
+  // Los canales se arman, no se listan: cada uno entra solo si tiene a dónde llevar. El tipo viaja
+  // en lugar del icono porque elegir el dibujito es cosa de la pantalla, no de aquí.
   const canales = useMemo(() => {
     const lista = [];
 

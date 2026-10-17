@@ -15,22 +15,9 @@ import {
 } from '../../utils/disfracesTiqui';
 import { temaActivo, temaDeLaFecha, todosLosTemas } from '../../utils/temporadas';
 
-/*
- * ============================================================
- * EL DISFRAZ DE TIQUI (Admin) — EditorDisfrazTiqui.jsx
- * ============================================================
- * El dueño viste a Tiqui para cada temporada: una pieza en la cabeza (gorros,
- * corona, birrete...), otra en la cara (lentes, antifaz) y otra en el cuello
- * (corbatín, bufanda, medalla...), cada una con sus colores, y los cachetes
- * colorados si quiere. La vista previa cambia mientras elige.
- *
- * Lo que arma se ve en la tienda y en la app mientras dure esa temporada.
- * Si no arma nada, Tiqui lleva el disfraz de fábrica de la temporada.
- *
- * Los cambios se van guardando como borrador por temporada: puede vestir a
- * la de Navidad, pasar a la de Halloween y guardar todo junto al final.
- * ============================================================
- */
+// EL DISFRAZ DE TIQUI (Admin) — EditorDisfrazTiqui.jsx
+// El dueño viste a Tiqui para cada temporada: una pieza en la cabeza, otra en la cara y otra en
+// el cuello, con sus colores; la vista previa cambia mientras elige.
 
 // Los colores que se ofrecen de un toque. Cualquier otro sale del selector.
 const MUESTRAS = [
@@ -45,11 +32,8 @@ const POSES = [
   { clave: 'cancelado', nombre: 'Triste' },
 ];
 
-/*
- * Cómo se ve Tiqui en la tienda, en claro o en oscuro. Se fija a mano y no
- * con los tokens: el panel tiene sus propias paletas y la vista previa tiene
- * que enseñar la tienda, no el panel.
- */
+// Cómo se ve Tiqui en la tienda, en claro o en oscuro. Se fija a mano y no con los tokens: el
+// panel tiene sus propias paletas y la vista previa tiene que enseñar la tienda, no el panel.
 const ESCENARIO = {
   claro: { '--mascota-cuerpo': '#003049', '--mascota-rasgo': '#FFFFFF', '--mascota-cordon': '#009AEB', fondo: '#FFFFFF' },
   oscuro: { '--mascota-cuerpo': '#FFFFFF', '--mascota-rasgo': '#003049', '--mascota-cordon': '#009AEB', fondo: '#121417' },
@@ -143,11 +127,8 @@ const EditorDisfrazTiqui = ({ temporada, guardar, guardando }) => {
   const pintar = (ranura, cual, color) =>
     cambiar({ ...actual, [ranura]: { ...actual[ranura], [cual]: color } });
 
-  /*
-   * Al guardar, el disfraz que quedó igual al de fábrica no se guarda: así esa
-   * temporada sigue al de fábrica (y a lo que cambie en él) en vez de quedar
-   * con una copia congelada.
-   */
+  // Al guardar, el disfraz que quedó igual al de fábrica no se guarda: así esa temporada sigue al de
+  // fábrica (y a lo que cambie en él) en vez de quedar con una copia congelada.
   const onGuardar = async () => {
     // Los de temporadas propias que ya se borraron no viajan más.
     const nuevos = Object.fromEntries(

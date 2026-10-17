@@ -1,20 +1,6 @@
-/*
- * ============================================================
- * LA IA PROPIA DE TIQUI — intencionesTiqui.js
- * ============================================================
- * Un clasificador de intenciones entrenado en Python (analitica/intenciones,
- * TF-IDF + regresión logística con scikit-learn) y exportado a
- * datos/intencionesTiqui.json. Aquí se usa sin Python: dice en menos de un
- * milisegundo qué quiere la persona ("total", "pagar", "pedidos", "ofertas"…)
- * y con cuánta confianza.
- *
- * ⚠️  `normalizar` y `rasgos` están ESPEJADOS de analitica/intenciones/rasgos.py.
- *     Si cambia uno, cambia el otro y se vuelve a entrenar. La prueba de
- *     paridad (intencionesTiqui.test.js) compara contra lo que calculó Python.
- *
- * Para volver a entrenar:  cd analitica && .venv/Scripts/python.exe -m intenciones.entrenar
- * ============================================================
- */
+// LA IA PROPIA DE TIQUI — intencionesTiqui.js
+// Un clasificador de intenciones entrenado en Python (analitica/intenciones, TF-IDF + regresión
+// logística con scikit-learn) y exportado a datos/intencionesTiqui.json.
 
 import { readFileSync } from "node:fs";
 
@@ -47,11 +33,9 @@ export const rasgos = (texto) => {
   return salida;
 };
 
-/*
- * { intencion, confianza, probabilidades } de una frase. La cuenta es la de
- * scikit-learn: frecuencia amortiguada (1 + log) por idf, largo 1, pesos de
- * cada intención más su sesgo, y softmax.
- */
+// { intencion, confianza, probabilidades } de una frase. La cuenta es la de scikit-learn:
+// frecuencia amortiguada (1 + log) por idf, largo 1, pesos de cada intención más su sesgo, y
+// softmax.
 export const clasificarIntencion = (frase) => {
   const conteo = new Map();
   for (const r of rasgos(frase)) {

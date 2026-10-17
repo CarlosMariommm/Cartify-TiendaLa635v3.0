@@ -1,16 +1,8 @@
 import { createContext, useContext } from 'react';
 import { useDireccionActiva } from '../hooks/useDireccionActiva';
 
-/*
- * DireccionContext — una sola dirección de entrega para toda la tienda.
- *
- * El encabezado la muestra y el carrito la usa al pagar. Si cada uno llamara
- * al hook por su cuenta, serían dos peticiones de lo mismo y —peor— dos
- * ideas distintas de a dónde va el pedido: cambiarla arriba no se reflejaría
- * al momento de cobrar, que es justo donde importa.
- *
- * Mismo patrón que FavoritosContext: se pide una vez, la usa quien quiera.
- */
+// DireccionContext — una sola dirección de entrega para toda la tienda. El encabezado la muestra y
+// el carrito la usa al pagar.
 const DireccionContext = createContext(null);
 
 export const DireccionProvider = ({ children }) => {

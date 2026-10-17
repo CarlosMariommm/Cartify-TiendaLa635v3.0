@@ -4,12 +4,9 @@ import { describe, it, expect } from 'vitest';
 import { disfrazDeTema, sinSombrero } from './disfracesTiqui';
 import { TEMAS_DE_TEMPORADA } from './temporadas';
 
-/*
- * Tiqui se viste igual en la app y en la web: las piezas y la lógica del
- * disfraz son los MISMOS archivos copiados (las pruebas de fondo están en
- * frontend/src/utils/disfracesTiqui.test.js). Si alguien cambia uno y no el
- * otro, esta prueba lo dice.
- */
+// Tiqui se viste igual en la app y en la web: las piezas y la lógica del disfraz son los MISMOS
+// archivos copiados (las pruebas de fondo están en frontend/src/utils/disfracesTiqui.test.js). Si
+// alguien cambia uno y no el otro, esta prueba lo dice.
 const leer = (ruta) => readFileSync(fileURLToPath(new URL(ruta, import.meta.url)), 'utf8').replace(/\r\n/g, '\n');
 
 describe('los disfraces de Tiqui en la app', () => {

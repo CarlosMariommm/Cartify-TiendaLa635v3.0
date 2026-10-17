@@ -5,11 +5,9 @@ import { useLoyalty } from '../../hooks/useLoyalty';
 import { useAjustesCtx } from '../../context/AjustesContext';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * PuntosFidelidad — tarjeta de fidelidad del cliente (área "Mi Cuenta").
- * Muestra el saldo DISPONIBLE real (lotes no vencidos) y la próxima fecha de
- * vencimiento, ambos del ledger. La lógica vive en useLoyalty; aquí solo pintamos.
- */
+// PuntosFidelidad — tarjeta de fidelidad del cliente (área "Mi Cuenta"). Muestra el saldo
+// DISPONIBLE real (lotes no vencidos) y la próxima fecha de vencimiento, ambos del ledger. La
+// lógica vive en useLoyalty; aquí solo pintamos.
 const PuntosFidelidad = () => {
   // El nombre de la tienda sale de los ajustes, no escrito a mano.
   const { ajustes } = useAjustesCtx();

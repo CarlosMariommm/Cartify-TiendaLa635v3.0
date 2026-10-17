@@ -4,10 +4,8 @@ import { calcularEnvio as envioDelServidor } from '../../../backend/src/utils/en
 import { calcularServicio } from './servicio';
 import { ajustarCantidad, cantidadConUnidad, esPorLibra, pasoDe, precioConUnidad } from './unidades';
 
-/*
- * Lo que toca plata. Un error aquí no se ve como un botón chueco: se ve en
- * la cuenta del cliente o en la caja de la tienda.
- */
+// Lo que toca plata. Un error aquí no se ve como un botón chueco: se ve en la cuenta del cliente o
+// en la caja de la tienda.
 
 // La tienda: Calle Sevilla, Col. Providencia, San Salvador.
 const TIENDA = { lat: 13.7063, lng: -89.2183 };

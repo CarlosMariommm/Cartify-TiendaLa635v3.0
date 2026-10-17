@@ -155,14 +155,8 @@ const LoginPassword = () => {
         return;
       }
 
-      /*
-       * Guardar la sesión y saludar con el mapa de bienvenida.
-       *
-       * Va por el contexto y marcada como CLIENTE. Escribiendo la llave
-       * 'token' a mano —como estaba— la sesión caía en el cajón del personal
-       * al arrancar la app, así que quien entrara por aquí terminaba con
-       * permisos del panel sin haber pasado por su puerta. Ver AuthContext.
-       */
+      // Guardar la sesión y saludar con el mapa de bienvenida. Va por el contexto y marcada como
+      // CLIENTE.
       login('authenticated', 'client', user);
       localStorage.setItem('currentUser', JSON.stringify(user));
       // `replace`: el login queda fuera del historial, para que el "atrás" del

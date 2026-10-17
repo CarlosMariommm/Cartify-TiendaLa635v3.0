@@ -1,30 +1,9 @@
 import { resolveValue } from 'react-hot-toast';
 import { ICONOS, iconoConEmoji } from '../../utils/iconosAviso';
 
-/*
- * ============================================================
- * LA PÍLDORA DE LOS AVISOS — PildoraAviso.jsx
- * ============================================================
- * Todos los avisos de la web salen con la misma cara: la píldora oscura con
- * un círculo de color a la izquierda, abajo al centro, la de la landing page.
- * Antes solo "agregado al carrito" se veía así; quitar algo del carrito,
- * guardar un favorito o un error salían como una tarjeta blanca arriba a la
- * derecha, y parecían avisos de dos aplicaciones distintas.
- *
- * El <Toaster> de App.jsx dibuja con esto cada aviso que llega por
- * `toast()`, `toast.success()` o `toast.error()`: nadie tiene que acordarse
- * de pedir la píldora, basta con avisar como siempre. El icono de cada tipo y
- * los que se pasan a mano están en utils/iconosAviso.jsx.
- *
- * El COLOR de la píldora no está aquí: sale de --aviso-fondo y --aviso-texto,
- * que el Toaster pone según dónde está la persona (ver useEstiloAvisos). En
- * la tienda es la tinta de la marca; en el panel, la paleta de accesibilidad
- * al revés, para que en Alto Contraste siga leyéndose.
- *
- * La entrada y la salida (rebote desde abajo, hundirse al irse) están en
- * index.css: .aviso-entra / .aviso-sale.
- * ============================================================
- */
+// LA PÍLDORA DE LOS AVISOS — PildoraAviso.jsx
+// Todos los avisos de la web salen con la misma cara: la píldora oscura con un círculo de color a
+// la izquierda, abajo al centro, la de la landing page.
 
 const iconoDe = (t) => {
   if (typeof t.icon === 'string') return iconoConEmoji(t.icon);

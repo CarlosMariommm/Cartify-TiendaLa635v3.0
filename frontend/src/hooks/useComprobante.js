@@ -4,19 +4,8 @@ import { datosDeLaTienda } from '../utils/reportesPdf';
 import { construirComprobante, nombreDelComprobante } from '../utils/comprobantePedido';
 import { descargarArchivo } from '../utils/descargar';
 
-/*
- * ============================================================
- * BAJAR EL COMPROBANTE DE UN PEDIDO — useComprobante.js
- * ============================================================
- * Solo en el panel (Pedidos). El PDF se arma aquí, con el pedido que ya está
- * en pantalla y los datos de la tienda de Personalización (ver
- * utils/comprobantePedido.js). descargarArchivo se encarga de que también
- * funcione con el panel abierto dentro de la app del teléfono.
- *
- * `descargando` es el id del pedido que se está bajando, para apagar solo su
- * botón. `descargar` devuelve true o false; el aviso lo da la pantalla.
- * ============================================================
- */
+// BAJAR EL COMPROBANTE DE UN PEDIDO — useComprobante.js
+// Solo en el panel (Pedidos).
 
 export const useComprobante = () => {
   const { ajustes } = useAjustesCtx();

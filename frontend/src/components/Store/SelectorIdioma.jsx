@@ -2,11 +2,9 @@ import { Globe } from 'lucide-react';
 import { useIdioma } from '../../hooks/useIdioma';
 import { IDIOMAS } from '../../utils/idioma';
 
-/*
- * El idioma, a la mano en el pie de la tienda: quien no lee español no va a
- * encontrar "Preferencias" dentro de Mi Cuenta (ni tiene cuenta todavía).
- * Cada opción se escribe en su propio idioma: "English", no "Inglés".
- */
+// El idioma, a la mano en el pie de la tienda: quien no lee español no va a encontrar
+// "Preferencias" dentro de Mi Cuenta (ni tiene cuenta todavía). Cada opción se escribe en su
+// propio idioma: "English", no "Inglés".
 const SelectorIdioma = () => {
   const { idioma, setIdioma, t } = useIdioma();
 

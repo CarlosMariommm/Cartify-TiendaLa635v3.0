@@ -1,12 +1,8 @@
 @import "tailwindcss";
 
-/*
-  ==========================================
-  TOKENS DE MOVIMIENTO (vara de Emil)
-  ==========================================
-  Las mismas curvas y duraciones que usa motion.js, para el CSS y los
-  styled-components. Si hay que ajustar el "feel" de la app, se toca aquí.
-*/
+/* TOKENS DE MOVIMIENTO (vara de Emil)
+   Las mismas curvas y duraciones que usa motion.js, para el CSS y los styled-components. Si hay
+   que ajustar el "feel" de la app, se toca aquí. */
 :root {
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
@@ -17,31 +13,12 @@
   --dur-drawer: 280ms;
 }
 
-/*
-  ==========================================
-  TOKENS DE MARCA — sacados del diseño (WEB.pdf)
-  ==========================================
-  Los colores salieron de medir los píxeles del diseño, no a ojo. Si algún día
-  cambia la identidad de la tienda, se toca AQUÍ y cambia toda la app.
-
-  Ojo: --marca-600 es el café anaranjado del diseño (#003049), más saturado que
-  el que traía la app antes (#00283D). El negro de --tinta es el de los botones
-  "+" de las tarjetas de producto: en el diseño el acento es café, pero la
-  acción principal de cada tarjeta es negra.
-*/
+/* TOKENS DE MARCA — sacados del diseño (WEB.pdf)
+   Los colores salieron de medir los píxeles del diseño, no a ojo. Si algún día cambia la identidad
+   de la tienda, se toca AQUÍ y cambia toda la app. */
 :root {
-  /*
-   * EL AZUL DE LA CASA. Fijo, no configurable.
-   *
-   * Antes esto era café y el dueño podía repintarlo desde Personalización con
-   * un selector de color. Se quitó: una tienda tiene UN color, no un ajuste
-   * que cambia de mes en mes, y ese selector era la puerta a que la tienda
-   * amaneciera de un color que nadie revisó contra el contraste del texto.
-   *
-   * La escala es la que calculaba derivarMarca() a partir de #003049, ya
-   * resuelta aquí: mismo tono, mismos saltos de luminosidad. Cambiar la marca
-   * hoy es cambiar estas seis líneas.
-   */
+  /* EL AZUL DE LA CASA.
+     El color principal de la tienda: fijo, no se cambia desde el panel. */
   --marca-700: #00283D;  /* presionado / textos sobre claro */
   --marca-600: #003049;  /* PRIMARIO: botones, pills activas, iconos */
   --marca-400: #066494;  /* hover suave, bordes, estados intermedios */
@@ -49,13 +26,9 @@
   --marca-50:  #F1F6F9;  /* fondos de sección tenues */
   --acento:    #009AEB;  /* enlaces de acción: "Editar", activos */
 
-  /*
-   * La marca cuando es LETRA (enlaces, precios, títulos en color) y no fondo.
-   * En claro es el mismo principal; en oscuro cambia al tono claro, porque el
-   * principal oscuro está afinado para llevar letra blanca encima y como
-   * letra sobre el fondo oscuro no se leía. Se resuelve contra lo que esté
-   * puesto en --marca-600/700/400, así que sigue a las temporadas solo.
-   */
+  /* La marca cuando es LETRA (enlaces, precios, títulos en color) y no fondo. En claro es el mismo
+     principal; en oscuro cambia al tono claro, porque el principal oscuro está afinado para llevar
+     letra blanca encima y como letra sobre el fondo oscuro no se leía. */
   --marca-texto:        var(--marca-600);
   --marca-texto-fuerte: var(--marca-700);
 
@@ -86,11 +59,9 @@
   --exito:  #2F8F4E;
   --deshabilitado: #C9D4DB; /* botón principal apagado */
 
-  /*
-    Colores de ESTADO: verde de listo, azul de en camino, ámbar de cuidado,
-    rojo de error. No son marca, así que no cambian con la temporada; sí
-    cambian con el modo oscuro, porque un fondo pastel sobre negro deslumbra.
-  */
+  /* Colores de ESTADO: verde de listo, azul de en camino, ámbar de cuidado, rojo de error. No son
+     marca, así que no cambian con la temporada; sí cambian con el modo oscuro, porque un fondo
+     pastel sobre negro deslumbra. */
   --exito-fondo:   #EFFAF1;
   --exito-borde:   #D3EEDA;
   --exito-texto:   #14663A;
@@ -109,12 +80,9 @@
   --peligro-borde: #FECACA;
   --peligro:       #DC2626;
 
-  /*
-    La mascota (Mascota.jsx): la etiqueta del logo con cara. Va en el azul de
-    la casa y NO en --marca-600, porque esa cambia con la temporada y la
-    mascota es siempre la misma. En modo oscuro se voltea: etiqueta blanca con
-    rasgos navy, igual que el logo.
-  */
+  /* La mascota (Mascota.jsx): la etiqueta del logo con cara. Va en el azul de la casa y NO en
+     --marca-600, porque esa cambia con la temporada y la mascota es siempre la misma. En modo oscuro
+     se voltea: etiqueta blanca con rasgos navy, igual que el logo. */
   --mascota-cuerpo: #003049;
   --mascota-rasgo:  #FFFFFF;
   --mascota-cordon: #009AEB;
@@ -131,22 +99,9 @@
   --fuente: 'Poppins', ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
 }
 
-/*
-  ==========================================
-  MODO OSCURO (tienda y Mi Cuenta)
-  ==========================================
-  Lo elige cada persona en Mi Cuenta → Preferencias (ver ModoContext). Se
-  enciende con data-modo="oscuro" en el <html>, que se pone SOLO fuera del
-  panel: el panel tiene sus propias paletas de accesibilidad.
-
-  Aquí solo se cambian los tokens; las pantallas usan var(--papel),
-  var(--tinta)... y se repintan solas. Un color fijo (#fff, #111) en una
-  pantalla de la tienda es un pedazo que se queda claro en modo oscuro.
-
-  La marca oscura sale de paletaOscura() en utils/temporadas.js a partir del
-  azul de la casa; si cambia la marca, se recalcula allá y se copia aquí. Las
-  temporadas no pasan por aquí: se calculan al pintarlas.
-*/
+/* MODO OSCURO (tienda y Mi Cuenta) Lo elige cada persona en Mi Cuenta → Preferencias (ver
+   ModoContext). Se enciende con data-modo="oscuro" en el <html>, que se pone SOLO fuera del panel:
+   el panel tiene sus propias paletas de accesibilidad. */
 :root[data-modo="oscuro"] {
   color-scheme: dark;
 
@@ -210,16 +165,11 @@
   --sombra-flotante: 0 8px 30px rgba(0, 0, 0, 0.55);
 }
 
-/*
-  Las clases dark: de Tailwind siguen al modo elegido en la tienda, no al del
-  sistema operativo (que en el panel no significa nada).
-*/
+/* Las clases dark: de Tailwind siguen al modo elegido en la tienda, no al del sistema operativo
+   (que en el panel no significa nada). */
 @custom-variant dark (&:where([data-modo="oscuro"], [data-modo="oscuro"] *));
 
-/*
-  Poppins en toda la app. Antes no había ninguna fuente declarada y cada
-  navegador ponía la suya, así que el diseño se veía distinto en cada máquina.
-*/
+/* Poppins en toda la app. */
 body {
   font-family: var(--fuente);
   color: var(--tinta);
@@ -234,25 +184,16 @@ h1, h2, h3, h4 {
   line-height: 1.15;
 }
 
-/*
-  ==========================================
-  UN SOLO OJO EN LOS CAMPOS DE CONTRASEÑA
-  ==========================================
-  Edge y otros navegadores de Windows dibujan SU PROPIO control de "revelar
-  contraseña" (::-ms-reveal) y una "X" para borrar (::-ms-clear) dentro de los
-  input. Como toda la app ya pone su propio ojo (BotonOjo / CampoContrasena),
-  en esos navegadores aparecían DOS ojos, uno pegado al otro. Se ocultan los
-  nativos para que quede solo el nuestro, igual en todas las máquinas.
-*/
+/* UN SOLO OJO EN LOS CAMPOS DE CONTRASEÑA
+   Edge y otros navegadores de Windows dibujan SU PROPIO control de "revelar contraseña"
+   (::-ms-reveal) y una "X" para borrar (::-ms-clear) dentro de los input. */
 input::-ms-reveal,
 input::-ms-clear {
   display: none;
 }
 
-/*
-  Hover con movimiento SOLO donde hay mouse de verdad. En pantallas táctiles
-  (el kiosco), un toque dispara un "hover" falso que deja la tarjeta pegada.
-*/
+/* Hover con movimiento SOLO donde hay mouse de verdad. En pantallas táctiles (el kiosco), un toque
+   dispara un "hover" falso que deja la tarjeta pegada. */
 .hover-scale,
 .hover-lift {
   transition: transform var(--dur-press) var(--ease-out),
@@ -269,14 +210,9 @@ input::-ms-clear {
 .press { transition: transform var(--dur-press) var(--ease-out); }
 .press:active { transform: scale(0.98); }
 
-/*
-  ==========================================
-  LO CLICKEABLE SE SIENTE CLICKEABLE
-  ==========================================
-  Media app estaba con el cursor de flecha sobre botones y filtros: no hay
-  forma de saber qué responde al click sin ir probando. Esto lo resuelve de
-  una vez para toda la app en lugar de ir clase por clase.
-*/
+/* LO CLICKEABLE SE SIENTE CLICKEABLE
+   Media app estaba con el cursor de flecha sobre botones y filtros: no hay forma de saber qué
+   responde al click sin ir probando. */
 button:not(:disabled),
 [role="button"],
 a[href],
@@ -299,21 +235,17 @@ input:disabled {
   cursor: not-allowed;
 }
 
-/*
-  Sombreado al pasar por encima. brightness sirve para los dos casos sin
-  saber de qué color es cada botón: oscurece los sólidos y apenas marca los
-  transparentes. Los botones que ya traen su propio :hover lo pisan.
-*/
+/* Sombreado al pasar por encima. brightness sirve para los dos casos sin saber de qué color es
+   cada botón: oscurece los sólidos y apenas marca los transparentes. Los botones que ya traen su
+   propio :hover lo pisan. */
 @media (hover: hover) and (pointer: fine) {
   button:not(:disabled):hover,
   [role="button"]:hover {
     filter: brightness(0.94);
   }
 
-  /*
-    Para secciones enteras que responden al click (tarjetas, filas, resúmenes)
-    que no son <button>: se les pone .clickable y ya traen cursor y sombra.
-  */
+  /* Para secciones enteras que responden al click (tarjetas, filas, resúmenes) que no son <button>:
+     se les pone .clickable y ya traen cursor y sombra. */
   .clickable:hover {
     background-color: var(--realce);
   }
@@ -335,23 +267,12 @@ input:disabled {
   animation-delay: calc(min(var(--i, 0), 8) * 45ms);
 }
 
-/*
-  El globo del carrito, cuando sube la cuenta.
-
-  Agregar algo ya avisa con un toast, pero el número del carrito cambiaba en
-  silencio en la esquina: el ojo no lo cazaba. Este rebote es la confirmación
-  de la acción central de la tienda.
-
-  Solo `transform`, y corto: se ve decenas de veces por compra, así que tiene
-  que registrarse sin hacerse notar. Se redispara remontando el elemento con
-  `key={cantidad}` — sin eso, la animación corre una sola vez en la vida.
-*/
-/*
-  El panel de pasillos, creciendo desde el botón que lo abrió.
-
-  Quien lo usa pone `transform-origin` en la esquina que corresponda; aquí solo
-  está el "de dónde a dónde". Ver MenuTienda.
-*/
+/* El globo del carrito, cuando sube la cuenta. Agregar algo ya avisa con un toast, pero el número
+   del carrito cambiaba en silencio en la esquina: el ojo no lo cazaba. Este rebote es la
+   confirmación de la acción central de la tienda. */
+/* El panel de pasillos, creciendo desde el botón que lo abrió. Quien lo usa pone
+   `transform-origin` en la esquina que corresponda; aquí solo está el "de dónde a dónde". Ver
+   MenuTienda. */
 @keyframes panelIn {
   from { opacity: 0; transform: scale(0.96); }
   to   { opacity: 1; transform: none; }
@@ -364,16 +285,9 @@ input:disabled {
 }
 .globo-pop { animation: globoPop 220ms var(--ease-out); }
 
-/*
-  Esqueletos de carga.
-
-  Reemplazan al "Cargando…" suelto y, sobre todo, al aviso de tienda vacía que
-  salía mientras el servidor todavía estaba contestando. Ocupan el MISMO lugar
-  que las tarjetas de verdad, así que al llegar los datos nada se recorre.
-
-  El brillo va en `transform` sobre un pseudo-elemento y no animando
-  `background-position`, que obliga al navegador a repintar en cada cuadro.
-*/
+/* Esqueletos de carga. Reemplazan al "Cargando…" suelto y, sobre todo, al aviso de tienda vacía
+   que salía mientras el servidor todavía estaba contestando. Ocupan el MISMO lugar que las
+   tarjetas de verdad, así que al llegar los datos nada se recorre. */
 @keyframes esqueletoBrillo {
   from { transform: translateX(-100%); }
   to   { transform: translateX(100%); }
@@ -397,20 +311,9 @@ input:disabled {
   animation: esqueletoBrillo 1200ms linear infinite;
 }
 
-/*
-  Texto de la tarjeta de promoción (PromoCard).
-
-  La tarjeta es su propio contenedor (container-type en PromoCard), así que
-  estas medidas siguen al ancho de la TARJETA y no al de la ventana: la misma
-  pieza se ve en el carrusel de la tienda y, chiquita, en el panel.
-
-  En una tarjeta angosta —el teléfono, donde mide unos 270 × 120 px— no cabía
-  todo: etiquetas, dos líneas de título y dos de descripción sumaban más que
-  el alto, y como el bloque va centrado se cortaba arriba y abajo a media
-  línea. Ahí se queda con lo que vende: las etiquetas y el título, un poco más
-  grande y sin meterse debajo de la flecha. La descripción completa se ve al
-  abrir la promoción.
-*/
+/* Texto de la tarjeta de promoción (PromoCard). La tarjeta es su propio contenedor (container-type
+   en PromoCard), así que estas medidas siguen al ancho de la TARJETA y no al de la ventana: la
+   misma pieza se ve en el carrusel de la tienda y, chiquita, en el panel. */
 .promo-etiquetas { margin-bottom: 10px; gap: 8px; flex-wrap: wrap; }
 .promo-titulo,
 .promo-descripcion {
@@ -423,12 +326,9 @@ input:disabled {
 .promo-descripcion { font-size: clamp(11px, 3cqw, 16px); }
 
 @container (max-width: 380px) {
-  /*
-    Las etiquetas, en UNA fila: si se partían en dos (pasaba con "Del día",
-    más ancha que "-10%") le quitaban un renglón al título. Sin el reloj
-    caben; y si una etiqueta fuera todavía más larga, la fecha se recorta
-    con "…" en vez de empujar al título.
-  */
+  /* Las etiquetas, en UNA fila: si se partían en dos (pasaba con "Del día", más ancha que "-10%") le
+     quitaban un renglón al título. Sin el reloj caben; y si una etiqueta fuera todavía más larga, la
+     fecha se recorta con "…" en vez de empujar al título. */
   .promo-etiquetas { margin-bottom: 8px; gap: 6px; flex-wrap: nowrap; }
   .promo-vence { min-width: 0; }
   .promo-vence svg { display: none; }
@@ -441,12 +341,9 @@ input:disabled {
   .promo-descripcion { display: none; }
 }
 
-/*
-  ACCESIBILIDAD — "menos movimiento".
-  Si la persona lo pidió en su sistema (tercera edad, migrañas, mareo),
-  quitamos los desplazamientos pero dejamos los cambios de color/opacidad,
-  que sí ayudan a entender qué pasó.
-*/
+/* ACCESIBILIDAD — "menos movimiento". Si la persona lo pidió en su sistema (tercera edad,
+   migrañas, mareo), quitamos los desplazamientos pero dejamos los cambios de color/opacidad, que
+   sí ayudan a entender qué pasó. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -455,26 +352,18 @@ input:disabled {
   }
   .card-in { animation: none; }
   .hover-scale:hover, .hover-lift:hover { transform: none !important; }
-  /*
-    El globo se queda quieto, pero el esqueleto NO se apaga: no es decoración,
-    es la única señal de que la tienda está cargando. Se le quita el brillo que
-    viaja y queda el bloque gris, que informa igual sin movimiento.
-  */
+  /* El globo se queda quieto, pero el esqueleto NO se apaga: no es decoración, es la única señal de
+     que la tienda está cargando. Se le quita el brillo que viaja y queda el bloque gris, que informa
+     igual sin movimiento. */
   .globo-pop { animation: none; }
   .esqueleto::after { animation: none; opacity: 0; }
-  /*
-    El panel de pasillos no necesita regla propia: la de arriba ya deja toda
-    animación en 0.01ms, así que aparece sin crecer y se lee igual.
-  */
+  /* El panel de pasillos no necesita regla propia: la de arriba ya deja toda animación en 0.01ms,
+     así que aparece sin crecer y se lee igual. */
 }
 
-/* 
-  ==========================================
-  GLOBAL THEME OVERRIDES FOR ADMIN LAYOUT
-  ==========================================
-  These overrides map hardcoded hex values (used originally) 
-  to the dynamic CSS variables generated by ThemeContext.jsx.
-*/
+/* GLOBAL THEME OVERRIDES FOR ADMIN LAYOUT
+   These overrides map hardcoded hex values (used originally) to the dynamic CSS variables
+   generated by ThemeContext.jsx. */
 
 .admin-theme {
   /* Page background */
@@ -495,11 +384,9 @@ input:disabled {
   & .text-gray-600, 
   & .text-gray-500 { color: var(--theme-text-secondary) !important; }
   
-  /*
-    Text Accents: el acento PARA TEXTO de la paleta, no el acento a secas. El
-    acento es de adorno (el celeste de Mi marca, el naranja de Deuteranopía) y
-    como letra sobre fondo claro no llegaba a 3. Ver ThemeContext.
-  */
+  /* Text Accents: el acento PARA TEXTO de la paleta, no el acento a secas. El acento es de adorno
+     (el celeste de Mi marca, el naranja de Deuteranopía) y como letra sobre fondo claro no llegaba a
+     3. Ver ThemeContext. */
   & .text-\[\#066494\],
   & .text-\[\#003049\],
   & .text-\[\#009AEB\] { color: var(--theme-accent-text) !important; }
@@ -527,14 +414,8 @@ input:disabled {
     color: var(--theme-button-text) !important;
   }
 
-  /*
-    Hover de TEXTO: el reposo (text-[#003049] o text-gray-500, etc.) ya
-    queda fijo con !important arriba, así que el :hover:text-[#00283D] de
-    Tailwind — sin !important — nunca ganaba la pelea y el botón se veía
-    "muerto" al pasar el mouse (Proveedores, Recuperar contraseña, login del
-    panel, estado de cuenta, Materiales de impresión). El pseudo-clase le da
-    más especificidad que el reposo, así que con !important esta sí gana.
-  */
+  /* Hover de TEXTO: como el color en reposo queda fijo con !important, el color al pasar el mouse
+     también va con !important para que el botón no se vea "muerto". */
   & .hover\:text-\[\#00283D\]:hover,
   & .hover\:text-\[\#003049\]:hover { color: var(--theme-primary-hover) !important; }
 
@@ -573,11 +454,9 @@ input:disabled {
   & .bg-red-500 h2 { color: #fff !important; }
   & .hover\:bg-red-600:hover { background-color: #dc2626 !important; }
 
-  /*
-    Los colores de estado ("Activo", "Sin verificar", "▲ 250%"), con el tono
-    de cada paleta. Estaban fijos en el verde y el naranja claros de Tailwind:
-    sobre blanco daban 2.3 y 2.8, y "Activo" casi no se leía.
-  */
+  /* Los colores de estado ("Activo", "Sin verificar", "▲ 250%"), con el tono de cada paleta. Estaban
+     fijos en el verde y el naranja claros de Tailwind: sobre blanco daban 2.3 y 2.8, y "Activo" casi
+     no se leía. */
   & .text-green-500 { color: var(--theme-exito) !important; }
   & .text-red-500   { color: var(--theme-peligro) !important; }
   & .text-orange-500 { color: var(--theme-aviso) !important; }
@@ -622,21 +501,17 @@ input:disabled {
   & .bg-gray-200 { background-color: var(--theme-card-border) !important; color: var(--theme-text-primary) !important; }
   & .bg-gray-300 { background-color: var(--theme-card-border) !important; color: var(--theme-text-primary) !important; }
 
-  /*
-    Detalles que antes se quedaban grises con cualquier paleta:
-    textos e iconos apagados, casillas, selects de archivo y bordes de tabla.
-  */
+  /* Detalles que antes se quedaban grises con cualquier paleta: textos e iconos apagados, casillas,
+     selects de archivo y bordes de tabla. */
   & .text-gray-400,
   & .text-gray-300 { color: var(--theme-text-muted) !important; }
 
   & input[type="checkbox"],
   & input[type="radio"] { accent-color: var(--theme-primary); }
 
-  /*
-    Cafés que se habían quedado fuera del mapeo y saltaban a la vista al
-    cambiar de paleta: el fondo crema de los bloques de ayuda, su borde, el
-    café oscuro de los iconos y el hover de los botones de acción.
-  */
+  /* Cafés que se habían quedado fuera del mapeo y saltaban a la vista al cambiar de paleta: el fondo
+     crema de los bloques de ayuda, su borde, el café oscuro de los iconos y el hover de los botones
+     de acción. */
   & .bg-\[\#F1F6F9\] { background-color: var(--theme-primary-light) !important; }
   & .border-\[\#E4D5C3\] { border-color: var(--theme-card-border) !important; }
   & .text-\[\#00283D\] { color: var(--theme-primary) !important; }
@@ -661,12 +536,9 @@ input:disabled {
   & .divide-gray-100 > * + * { border-color: var(--theme-card-border) !important; }
   & .border-gray-50 { border-color: var(--theme-card-border) !important; }
 
-  /*
-    ── Lo que se quedaba fuera del mapeo ──
-    En las paletas oscuras (Modo oscuro, Alto contraste) estas clases no se
-    veían: el texto del panel se vuelve claro y ellas seguían pintando fondos
-    o textos pensados para el blanco.
-  */
+  /* ── Lo que se quedaba fuera del mapeo ── En las paletas oscuras (Modo oscuro, Alto contraste)
+     estas clases no se veían: el texto del panel se vuelve claro y ellas seguían pintando fondos o
+     textos pensados para el blanco. */
 
   /* Superficies gris claro (chips, fondos de sección): blanco sobre gris claro. */
   & .bg-gray-100,
@@ -686,10 +558,8 @@ input:disabled {
   & .hover\:text-gray-800:hover,
   & .hover\:text-gray-900:hover { color: var(--theme-text-primary) !important; }
 
-  /*
-    El botón oscuro secundario ("Descargar inventario"): gris casi negro fijo,
-    en Modo oscuro se fundía con la tarjeta. Se pinta invertido a la paleta.
-  */
+  /* El botón oscuro secundario ("Descargar inventario"): gris casi negro fijo, en Modo oscuro se
+     fundía con la tarjeta. Se pinta invertido a la paleta. */
   & .bg-gray-800 {
     background-color: var(--theme-text-primary) !important;
     color: var(--theme-card-bg) !important;
@@ -702,12 +572,9 @@ input:disabled {
   & .focus\:ring-\[\#00283D\]:focus,
   & .focus\:ring-\[\#003049\]:focus { --tw-ring-color: var(--theme-primary) !important; }
 
-  /*
-    Los recuadros de estado (error, "ojo", "listo") y sus textos: cada paleta
-    trae su propio tono (ThemeContext, ESTADOS_*), oscuro sobre claro y claro
-    sobre oscuro. El fondo es ese tono apenas mezclado con la tarjeta: rosado
-    pálido en las claras, un vino oscuro en las oscuras.
-  */
+  /* Los recuadros de estado (error, "ojo", "listo") y sus textos: cada paleta trae su propio tono
+     (ThemeContext, ESTADOS_*), oscuro sobre claro y claro sobre oscuro. El fondo es ese tono apenas
+     mezclado con la tarjeta: rosado pálido en las claras, un vino oscuro en las oscuras. */
   & .text-red-600,
   & .text-red-700,
   & .hover\:text-red-600:hover { color: var(--theme-peligro) !important; }
@@ -727,11 +594,9 @@ input:disabled {
   & .border-red-200 { border-color: color-mix(in srgb, var(--theme-peligro) 35%, var(--theme-card-bg)) !important; }
   & .border-amber-200 { border-color: color-mix(in srgb, var(--theme-aviso) 35%, var(--theme-card-bg)) !important; }
 
-  /*
-    Los tamaños escritos en píxeles, pasados a rem (el mismo tamaño en
-    "Normal"): así también crecen con "Texto grande". En píxeles se quedaban
-    chicos justo los que más lo necesitan, como los encabezados de columna.
-  */
+  /* Los tamaños escritos en píxeles, pasados a rem (el mismo tamaño en "Normal"): así también crecen
+     con "Texto grande". En píxeles se quedaban chicos justo los que más lo necesitan, como los
+     encabezados de columna. */
   & .text-\[10px\] { font-size: 0.625rem !important; }
   & .text-\[11px\] { font-size: 0.6875rem !important; }
   & .text-\[11\.5px\] { font-size: 0.71875rem !important; }
@@ -742,21 +607,13 @@ input:disabled {
   & .text-\[19px\] { font-size: 1.1875rem !important; }
 }
 
-/*
-  ==========================================
-  OPCIONES DE LECTURA DEL PANEL (ThemeContext, LECTURA)
-  ==========================================
-  Atributos del <html> que pone ThemeContext. Todo va condicionado a que el
-  panel esté en pantalla (:has(.admin-theme)): la tienda tiene su propio
-  diseño y no se toca.
-*/
+/* OPCIONES DE LECTURA DEL PANEL (ThemeContext, LECTURA)
+   Atributos del <html> que pone ThemeContext. Todo va condicionado a que el panel esté en pantalla
+   (:has(.admin-theme)): la tienda tiene su propio diseño y no se toca. */
 
-/*
-  Texto más grande: se agranda la medida base (rem) mientras el panel está a
-  la vista. Todo lo del panel se mide en rem —letras, rellenos, el ancho del
-  menú—, así que crece en proporción, como el zoom del navegador, sin que
-  nada se monte encima de nada.
-*/
+/* Texto más grande: se agranda la medida base (rem) mientras el panel está a la vista. Todo lo del
+   panel se mide en rem —letras, rellenos, el ancho del menú—, así que crece en proporción, como el
+   zoom del navegador, sin que nada se monte encima de nada. */
 html[data-panel-texto="grande"]:has(.admin-theme) { font-size: 115%; }
 html[data-panel-texto="muy-grande"]:has(.admin-theme) { font-size: 130%; }
 
@@ -787,14 +644,9 @@ html[data-panel-foco] .admin-theme main a {
   text-underline-offset: 3px;
 }
 
-/*
-  ==========================================
-  AVISOS (components/UI/PildoraAviso.jsx)
-  ==========================================
-  Todos los avisos de la web, no solo "agregado al carrito": entran con un
-  rebote corto desde abajo y se van hundiéndose. El mismo gesto de la landing
-  page.
-*/
+/* AVISOS (components/UI/PildoraAviso.jsx) Todos los avisos de la web, no solo "agregado al
+   carrito": entran con un rebote corto desde abajo y se van hundiéndose. El mismo gesto de la
+   landing page. */
 @keyframes avisoEntra {
   from { opacity: 0; transform: translateY(18px) scale(0.9); }
   to   { opacity: 1; transform: none; }
@@ -806,15 +658,9 @@ html[data-panel-foco] .admin-theme main a {
 .aviso-entra { animation: avisoEntra 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 .aviso-sale  { animation: avisoSale 260ms ease-in both; }
 
-/*
-  ==========================================
-  MASCOTA (Mascota.jsx)
-  ==========================================
-  Cómo se mueve la etiqueta en cada ilustración. Las coordenadas de
-  transform-origin son del dibujo (lienzo de 400 × 470), no de la pantalla:
-  200px 0px es de donde cuelga el cordón, 200px 382px la base de la etiqueta
-  y 200px 110px su punta.
-*/
+/* MASCOTA (Mascota.jsx) Cómo se mueve la etiqueta en cada ilustración. Las coordenadas de
+   transform-origin son del dibujo (lienzo de 400 × 470), no de la pantalla: 200px 0px es de donde
+   cuelga el cordón, 200px 382px la base de la etiqueta y 200px 110px su punta. */
 .mascota-pendulo { transform-origin: 200px 0px; animation: mascotaPendulo 1.7s ease-in-out infinite alternate; }
 .mascota-pendulo-corto { transform-origin: 200px 0px; animation: mascotaPenduloCorto 1.2s ease-in-out infinite alternate; }
 .mascota-balanceo { transform-origin: 200px 382px; animation: mascotaBalanceo 2.6s ease-in-out infinite alternate; }
@@ -873,19 +719,13 @@ html[data-panel-foco] .admin-theme main a {
   100% { transform: translateY(-34px); opacity: 0; }
 }
 
-/*
-  Las cargas de pantalla entera aparecen con un poco de retraso: si los datos
-  llegan en un pestañeo, la mascota no alcanza a verse y no queda un parpadeo
-  de algo que sale y se va.
-*/
+/* Las cargas de pantalla entera aparecen con un poco de retraso: si los datos llegan en un
+   pestañeo, la mascota no alcanza a verse y no queda un parpadeo de algo que sale y se va. */
 .mascota-aparece { animation: mascotaAparece 220ms ease-out 280ms both; }
 @keyframes mascotaAparece { from { opacity: 0; } to { opacity: 1; } }
 
-/*
-  MASCOTA COLGADA (MascotaColgada.jsx, en el inicio de sesión). Cuelga del
-  broche en (200, 0), así que el vaivén gira desde ahí; el "no" con la cabeza
-  gira desde el agujero del cordón (200, 160).
-*/
+/* MASCOTA COLGADA (MascotaColgada.jsx, en el inicio de sesión). Cuelga del broche en (200, 0), así
+   que el vaivén gira desde ahí; el "no" con la cabeza gira desde el agujero del cordón (200, 160). */
 .mascota-colgada .colgada-vaiven { transform-origin: 200px 0px; animation: colgadaVaiven 3.4s ease-in-out infinite alternate; }
 .mascota-colgada[data-estado="entrando"] .colgada-vaiven { animation-duration: 0.8s; }
 @keyframes colgadaVaiven { from { transform: rotate(3deg); } to { transform: rotate(-3deg); } }
@@ -908,11 +748,9 @@ html[data-panel-foco] .admin-theme main a {
 .mascota-colgada[data-estado="error"] .colgada-b-ondulada { opacity: 1; }
 .mascota-colgada[data-mirada="espia"]:not([data-estado="error"]) .colgada-b-lado { opacity: 1; }
 
-/*
-  El aviso de sin conexión (AvisoSinConexion.jsx). Flota abajo al centro,
-  entre la burbuja del pedido y la de WhatsApp, y por encima de las dos:
-  quedarse sin internet es lo más importante que está pasando.
-*/
+/* El aviso de sin conexión (AvisoSinConexion.jsx). Flota abajo al centro, entre la burbuja del
+   pedido y la de WhatsApp, y por encima de las dos: quedarse sin internet es lo más importante que
+   está pasando. */
 .aviso-conexion {
   position: fixed;
   left: 50%;
@@ -943,18 +781,8 @@ html[data-panel-foco] .admin-theme main a {
   .mascota *, .mascota-aparece, .aviso-conexion { animation: none !important; }
 }
 
-/*
-  ==========================================
-  ASISTENTE DE VOZ — la mascota (MascotaAsistente.jsx, AsistenteVoz.jsx)
-  ==========================================
-  A quien se le habla es a la etiqueta del logo. MascotaAsistente pone en su
-  <svg> atributos data-* (boca, ojos, cejas, pose, mov, antena, animo) y aquí
-  se decide qué parte se ve y cómo se mueve. Los bucles van en CSS y no en
-  JavaScript: corren en la GPU sin tocar React.
-
-  Las coordenadas de transform-origin (200px 382px, etc.) son del dibujo, no
-  de la pantalla: 382 es la base de la etiqueta y 160 el agujero del cordón.
-*/
+/* ASISTENTE DE VOZ — la mascota (MascotaAsistente.jsx, AsistenteVoz.jsx)
+   A quien se le habla es a la etiqueta del logo. */
 
 /* La pose: se acerca a uno al escuchar y se ladea si no entendió. */
 .masc-pose { transform-origin: 200px 382px; transition: transform 400ms cubic-bezier(0.23, 1, 0.32, 1); }
@@ -1038,11 +866,9 @@ html[data-panel-foco] .admin-theme main a {
   62% { transform: scaleY(0.25); }
   80% { transform: scaleY(0.8); }
 }
-/*
- * Con la voz de Tiqui la boca sigue al audio de verdad: vozTiqui.js deja el
- * volumen (0 a 1) en --voz-tiqui y la boca se abre con él. Así se cierra en
- * las pausas en vez de moverse en bucle mientras no dice nada.
- */
+/* Con la voz de Tiqui la boca sigue al audio de verdad: vozTiqui.js deja el volumen (0 a 1) en
+   --voz-tiqui y la boca se abre con él. Así se cierra en las pausas en vez de moverse en bucle
+   mientras no dice nada. */
 .masc[data-voz-real="si"] .masc-habla {
   animation: none;
   transform: scaleY(calc(0.22 + var(--voz-tiqui, 0) * 0.85));
@@ -1103,15 +929,8 @@ html[data-panel-foco] .admin-theme main a {
   .masc *, .masc-puntos i, .masc-cursor, .masc-mic-onda { animation: none !important; transition: none !important; }
 }
 
-/*
-  ==========================================
-  TIQUI DEL PANEL (components/Admin/TiquiPanel.jsx)
-  ==========================================
-  La asistente del equipo, en la esquina del panel. Usa la misma cara que la
-  del asistente de la tienda (clases .masc de arriba); aquí solo lo suyo: el
-  globo con los colores de la paleta del panel, la sombra en el piso que la
-  hace flotar y el halo mientras escucha.
-*/
+/* TIQUI DEL PANEL (components/Admin/TiquiPanel.jsx) La asistente del equipo, en la esquina del
+   panel. */
 /* Los puntos de "pensando", del color del texto del globo (no navy fijo: en
    Modo Oscuro el globo es oscuro). */
 .tiqui-panel .masc-puntos i { background: currentColor; }
@@ -1139,16 +958,9 @@ html[data-panel-foco] .admin-theme main a {
   .tiqui-panel-escucha::before { animation: none; box-shadow: 0 0 0 3px rgba(0, 154, 235, 0.5); }
 }
 
-/*
-  ==========================================
-  MAPAS (mapcn / MapLibre)
-  ==========================================
-  El componente del mapa (src/components/mapcn/map.jsx) viene del ecosistema
-  shadcn y pinta sus controles con los nombres de color de shadcn
-  (bg-background, text-muted-foreground, border-border...). La tienda no usa
-  shadcn, así que aquí se le dan esos nombres apuntando a los colores de la
-  casa. Solo los usa el mapa.
-*/
+/* MAPAS (mapcn / MapLibre) El componente del mapa (src/components/mapcn/map.jsx) viene del
+   ecosistema shadcn y pinta sus controles con los nombres de color de shadcn (bg-background,
+   text-muted-foreground, border-border...). */
 :root {
   --background: var(--papel-alto);
   --foreground: var(--tinta);
@@ -1196,14 +1008,8 @@ html[data-panel-foco] .admin-theme main a {
   }
 }
 
-/*
-  ==========================================
-  EL RETO DE TIQUI — el juego del stand (pages/JuegoTiqui.jsx)
-  ==========================================
-  Todo con prefijo juego-. Las animaciones van con la misma vara que el
-  asistente (ease-out fuerte) y se apagan con movimiento reducido, salvo las
-  que dicen cuánto falta (el tiempo y el botón que se llena).
-*/
+/* EL RETO DE TIQUI — el juego del stand (pages/JuegoTiqui.jsx)
+   Todo con prefijo juego-. */
 
 /* El globo de Tiqui: la cola abajo, hacia ella; con .juego-globo-lado, a la izquierda. */
 .juego-globo { position: relative; background: #fff; color: #001a29; border-radius: 26px; }

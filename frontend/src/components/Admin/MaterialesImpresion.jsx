@@ -7,26 +7,8 @@ import { Plus, Trash2, Pencil, AlertTriangle } from 'lucide-react';
 import { useMaterialesImpresion, hayMaterial, vaQuedandoPoco } from '../../hooks/useMaterialesImpresion';
 import { DUR, EASE_OUT } from '../../utils/motion';
 
-/*
- * ============================================================
- * MATERIALES DE IMPRESIÓN — MaterialesImpresion.jsx
- * ============================================================
- * El apartado del panel donde se lleva la cuenta del papel y la tinta.
- *
- * Vive dentro de la pantalla de Impresiones y no en el inventario general
- * porque un pliego de papel bond no se vende, se gasta: no tiene precio de
- * venta, ni marca, ni promoción, y no puede aparecer en la tienda a la par de
- * los quesos.
- *
- * Lo que se hace acá todos los días es una sola cosa: corregir el número de
- * hojas que quedan. Por eso ese campo se edita EN LA TABLA, sin abrir nada.
- * Obligar a abrir un formulario de siete campos para cambiar un número es la
- * forma más segura de que nadie lo mantenga al día — y un dato desactualizado
- * es peor que no tenerlo, porque apaga formatos que sí se podían imprimir.
- *
- * La lógica vive toda en useMaterialesImpresion; acá solo se pinta.
- * ============================================================
- */
+// MATERIALES DE IMPRESIÓN — MaterialesImpresion.jsx
+// El apartado del panel donde se lleva la cuenta del papel y la tinta.
 
 const VACIO = { name: '', tipo: 'papel', esColor: false, existencia: 0, minimo: 0, unidad: '', isActive: true };
 
@@ -141,12 +123,9 @@ const MaterialesImpresion = () => {
                   </div>
                 </div>
 
-                {/*
-                  El número se corrige aquí mismo. Se guarda al salir del campo
-                  (onBlur) y no en cada tecla: escribir "120" dispararía tres
-                  guardados, y el de "1" dejaría el material casi en cero por un
-                  instante — suficiente para apagar un formato sin razón.
-                */}
+                {/* El número se corrige aquí mismo. Se guarda al salir del campo (onBlur) y no en cada tecla:
+                   escribir "120" dispararía tres guardados, y el de "1" dejaría el material casi en cero por un
+                   instante — suficiente para apagar un formato sin razón. */}
                 <div className="flex items-center gap-2">
                   <input
                     type="number"

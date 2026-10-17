@@ -4,19 +4,9 @@ import { canjearPaseApp } from '../api/authApi';
 import { useAuth } from '../hooks/useAuth';
 import Mascota, { CargandoMascota } from '../components/UI/Mascota';
 
-/*
- * ============================================================
- * EL PANEL ABIERTO DESDE LA APP — PanelDesdeApp.jsx  (/admin/desde-app)
- * ============================================================
- * La app del teléfono abre el panel en un navegador dentro de ella y llega
- * aquí con un pase de un solo uso (?pase=…). Se canjea, el backend abre la
- * sesión del administrador como en el login de siempre, y se sigue al panel.
- * Ver backend/src/utils/pasesPanel.js.
- *
- * `volver`: a qué pantalla iba, cuando la app vuelve a abrir el panel porque
- * la sesión venció a medio trabajo.
- * ============================================================
- */
+// EL PANEL ABIERTO DESDE LA APP — PanelDesdeApp.jsx (/admin/desde-app)
+// La app del teléfono abre el panel en un navegador dentro de ella y llega aquí con un pase de un
+// solo uso (?pase=…).
 
 const volverSeguro = (valor) =>
   valor && valor.startsWith('/') && !valor.startsWith('//') ? valor : '/dashboard';

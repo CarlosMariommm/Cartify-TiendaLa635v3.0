@@ -9,16 +9,7 @@ import { flujoDeModulo, iconoDeModulo, modulosVisibles } from '../../utils/modul
 import { UNIDADES, etiquetaPiezas } from '../../utils/unidades';
 import toast from 'react-hot-toast';
 
-/*
- * Lo que el producto YA tiene nunca se cae de su desplegable.
- *
- * Las listas van en cascada (proveedores de la categoría, marcas del
- * proveedor), y un producto viejo puede haber quedado fuera de esa
- * combinación: si su opción no está entre los <option>, el navegador deja el
- * campo vacío —un <select> no puede quedarse en un valor que no existe— y el
- * formulario termina diciendo que falta llenar algo que en realidad ya estaba.
- * Se agrega al final para que se vea que es la de antes, no una del filtro.
- */
+// Lo que el producto YA tiene nunca se cae de su desplegable.
 const conElActual = (lista, completa, valorActual) => {
   const id = valorActual?._id || valorActual;
   if (!id || lista.some((x) => x._id === id)) return lista;
@@ -26,25 +17,9 @@ const conElActual = (lista, completa, valorActual) => {
   return actual ? [...lista, actual] : lista;
 };
 
-/*
- * ============================================================
- * ALTA / EDICIÓN DE PRODUCTO — ahora como ASISTENTE por pasos.
- * ============================================================
- * Antes era un solo formulario con doce campos a la vez, y la cascada
- * —módulo → categoría → proveedor → marca— se resolvía saltando entre
- * desplegables sin un orden claro. El asistente convierte esa cadena en una
- * ruta: primero DÓNDE se vende (que es lo que decide todo lo demás), después
- * QUÉ es, luego CUÁNTO cuesta, y al final los detalles opcionales.
- *
- * Cada paso valida SOLO lo suyo antes de dejar avanzar (trigger de
- * react-hook-form), así el error se ve al lado del campo y no como una lista
- * al final. Al guardar se revalida todo y, si algo falla, el asistente salta
- * al paso donde está el campo en falta.
- *
- * La cascada, las reglas de negocio y el envío en FormData son EXACTAMENTE los
- * de antes: solo cambió cómo se presentan.
- * ============================================================
- */
+// ALTA / EDICIÓN DE PRODUCTO — asistente por pasos.
+// Primero DÓNDE se vende (módulo, categoría, proveedor y marca), después QUÉ es, luego CUÁNTO
+// cuesta y al final los detalles opcionales.
 
 // A qué paso pertenece cada campo, para que un error mande al paso correcto.
 const PASO_DE_CAMPO = {
@@ -74,12 +49,9 @@ const ProductFormModal = ({ isOpen, onClose, product, onSave, onDelete, brands =
   const watchSupplierId = watch('supplierId');
   const watchIsActive = watch('isActive');
 
-  /*
-   * Cómo se vende: por pieza o por peso. Es la respuesta que cambia el
-   * significado del precio y del stock, así que se observa para que las
-   * etiquetas de esos dos campos digan la verdad mientras se llena el
-   * formulario, y no después. Ver utils/unidades.js.
-   */
+  // Cómo se vende: por pieza o por peso. Es la respuesta que cambia el significado del precio y del
+  // stock, así que se observa para que las etiquetas de esos dos campos digan la verdad mientras se
+  // llena el formulario, y no después. Ver utils/unidades.js.
   const watchUnidad = watch('unidadVenta') || 'unidad';
   const unidad = UNIDADES.find((u) => u.clave === watchUnidad) || UNIDADES[0];
   const porLibra = unidad.clave === 'libra';
@@ -88,14 +60,9 @@ const ProductFormModal = ({ isOpen, onClose, product, onSave, onDelete, brands =
 
   const isEditing = !!product;
 
-  /*
-   * El pasillo del que cuelga todo lo demás, sin esperar al watch.
-   *
-   * Al editar, el reset() llena el formulario desde un efecto, pero el primer
-   * render pasa ANTES: ahí el watch todavía viene vacío y el desplegable de
-   * categorías se pintaba sin la opción del producto. Arrancando del producto,
-   * la opción ya está puesta cuando le toca el valor.
-   */
+  // El pasillo del que cuelga todo lo demás, sin esperar al watch. Al editar, el reset() llena el
+  // formulario desde un efecto, pero el primer render pasa ANTES: ahí el watch todavía viene vacío y
+  // el desplegable de categorías se pintaba sin la opción del producto.
   const idGuardado = (valor) => valor?._id || valor || '';
   const moduleOriginal = idGuardado(product?.moduleId);
   const typeOriginal = idGuardado(product?.typeId);
@@ -103,11 +70,9 @@ const ProductFormModal = ({ isOpen, onClose, product, onSave, onDelete, brands =
 
   const moduleIdActivo = watchModuleId || moduleOriginal;
 
-  /*
-   * Las reglas dependen del FLUJO del módulo, no de cómo se llame. El día que
-   * la tienda cree "Panadería", el proveedor sigue siendo obligatorio porque
-   * su flujo es 'estandar', no porque el nombre diga "tienda".
-   */
+  // Las reglas dependen del FLUJO del módulo, no de cómo se llame. El día que la tienda cree
+  // "Panadería", el proveedor sigue siendo obligatorio porque su flujo es 'estandar', no porque el
+  // nombre diga "tienda".
   const selectedModuleObj = modules.find(m => m._id === moduleIdActivo);
   const isPrintModule = selectedModuleObj ? flujoDeModulo(selectedModuleObj) === 'impresiones' : false;
   const isStoreModule = selectedModuleObj ? !isPrintModule : false;
@@ -119,11 +84,8 @@ const ProductFormModal = ({ isOpen, onClose, product, onSave, onDelete, brands =
     const catModuleId = typeof c.moduleId === 'object' ? c.moduleId?._id : c.moduleId;
     return catModuleId === moduleIdActivo;
   });
-  /*
-   * Lo que ya tenía se conserva SOLO mientras no cambie el de arriba: si el
-   * empleado mueve el producto a otro pasillo, la categoría vieja no tiene
-   * por qué seguir en la lista.
-   */
+  // Lo que ya tenía se conserva SOLO mientras no cambie el de arriba: si el empleado mueve el
+  // producto a otro pasillo, la categoría vieja no tiene por qué seguir en la lista.
   const filteredCategories = isEditing && moduleIdActivo === moduleOriginal
     ? conElActual(categoriasDelModulo, categories, product.typeId)
     : categoriasDelModulo;
@@ -146,12 +108,9 @@ const ProductFormModal = ({ isOpen, onClose, product, onSave, onDelete, brands =
     ? conElActual(marcasDelProveedor, brands, product.brandId)
     : marcasDelProveedor;
 
-  /*
-   * La imagen que ya tiene el producto, para que al editar se vea la actual.
-   * El Array.isArray no es paranoia: image llega como arreglo casi siempre,
-   * pero hay productos viejos con la URL suelta, y ahí image[0] devolvía la
-   * primera LETRA del enlace.
-   */
+  // La imagen que ya tiene el producto, para que al editar se vea la actual. El Array.isArray no es
+  // paranoia: image llega como arreglo casi siempre, pero hay productos viejos con la URL suelta, y
+  // ahí image[0] devolvía la primera LETRA del enlace.
   const imagenGuardada = Array.isArray(product?.image)
     ? (product.image[0] || null)
     : (product?.image || null);
@@ -207,11 +166,8 @@ const ProductFormModal = ({ isOpen, onClose, product, onSave, onDelete, brands =
     }
   }, [watchSupplierId, isOpen, isEditing, setValue]);
 
-  /*
-   * Con un solo pasillo no hay nada que elegir: se marca solo. Obligar a
-   * clickear la única opción posible es pedirle al empleado que confirme algo
-   * que no puede ser de otra manera.
-   */
+  // Con un solo pasillo no hay nada que elegir: se marca solo. Obligar a clickear la única opción
+  // posible es pedirle al empleado que confirme algo que no puede ser de otra manera.
   useEffect(() => {
     if (!isOpen || isEditing || watchModuleId) return;
     const activos = modulosVisibles(modules);
@@ -259,11 +215,9 @@ const ProductFormModal = ({ isOpen, onClose, product, onSave, onDelete, brands =
       return;
     }
 
-    /*
-     * Código de barras: si lo dejaron vacío, se genera. Media tienda no tiene
-     * código impreso —frutas, verduras, queso a granel— y obligar a inventarse
-     * uno a mano era una pared para justo esos productos.
-     */
+    // Código de barras: si lo dejaron vacío, se genera. Media tienda no tiene código impreso —frutas,
+    // verduras, queso a granel— y obligar a inventarse uno a mano era una pared para justo esos
+    // productos.
     if (!String(data.barCode || '').trim()) {
       data.barCode = Math.floor(1000000000000 + Math.random() * 9000000000000).toString();
     }
@@ -293,10 +247,8 @@ const ProductFormModal = ({ isOpen, onClose, product, onSave, onDelete, brands =
   };
 
   const onError = (errs) => {
-    /*
-     * Si lo que falló está en otro paso, el asistente salta a ese paso para
-     * que el aviso señale un campo que de verdad está en pantalla.
-     */
+    // Si lo que falló está en otro paso, el asistente salta a ese paso para que el aviso señale un
+    // campo que de verdad está en pantalla.
     const campoFallo = Object.keys(errs || {}).find((c) => c in PASO_DE_CAMPO);
     if (campoFallo) setPaso(PASO_DE_CAMPO[campoFallo]);
 

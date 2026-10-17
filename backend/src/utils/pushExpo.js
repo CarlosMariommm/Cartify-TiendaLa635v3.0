@@ -1,38 +1,5 @@
-/*
- * ============================================================
- * LOS AVISOS QUE SUENAN EN EL TELÉFONO — pushExpo.js
- * ============================================================
- * El hermano de sendMailMailjet.js: el mismo aviso que ya sale por correo,
- * empujado a la app. No decide NADA sobre a quién avisar ni cuándo — eso
- * sigue viviendo en avisosCliente.js y avisoPromo.js, que son los que leen
- * las preferencias del cliente. Aquí solo está el cómo se manda.
- *
- * ── Por qué no hay SDK ──
- *
- * `expo-server-sdk` es un POST con una lista de mensajes y un reintento. Node
- * 22 trae `fetch` de fábrica, así que la dependencia entera se ahorra por
- * cuarenta líneas — y de paso el backend no queda atado a las versiones de
- * Expo, que cambian con cada SDK.
- *
- * ── De a cien, no de a mil ──
- *
- * Expo acepta hasta 100 mensajes por petición y devuelve un "ticket" por
- * cada uno. Mandar la lista entera de golpe no es más rápido: es un 400.
- *
- * ── Los tokens se limpian solos ──
- *
- * Cuando alguien desinstala la app, su token sigue existiendo pero Expo
- * contesta `DeviceNotRegistered`. Ese token se borra de la cuenta en el acto.
- * Sin esto, la lista de destinos solo crece: al año, la mitad de los avisos
- * se estarían mandando a teléfonos que ya no existen.
- *
- * ── Nada de esto puede tumbar la tienda ──
- *
- * Mismo criterio que los correos: el push sale DESPUÉS de que la acción ya se
- * guardó, en segundo plano y con su propio catch. Si Expo está caído, el
- * pedido igual quedó marcado como "en camino".
- * ============================================================
- */
+// LOS AVISOS QUE SUENAN EN EL TELÉFONO — pushExpo.js
+// El hermano de sendMailMailjet.js: el mismo aviso que ya sale por correo, empujado a la app.
 
 import clientModel from "../models/client.js";
 import adminModel from "../models/admin.js";
@@ -43,25 +10,15 @@ const URL_EXPO = "https://exp.host/--/api/v2/push/send";
 // El tope que acepta Expo por petición.
 const TAMANO_LOTE = 100;
 
-/*
- * El formato que emite `getExpoPushTokenAsync()`. Se valida ANTES de guardar
- * y antes de mandar: un token con otra cara no es un token de Expo, y no vale
- * la pena gastarle una petición ni un renglón en la base.
- *
- * `ExponentPushToken[...]` es el de siempre; `ExpoPushToken[...]` también sale
- * en algunas versiones y es igual de válido.
- */
+// El formato que emite `getExpoPushTokenAsync()`. Se valida ANTES de guardar y antes de mandar: un
+// token con otra cara no es un token de Expo, y no vale la pena gastarle una petición ni un
+// renglón en la base.
 export const esTokenExpo = (token) =>
   typeof token === "string" && /^Expo(nent)?PushToken\[[^\]]+\]$/.test(token.trim());
 
-/*
- * Los teléfonos de quien tiene encendido ESTE aviso EN LA APP.
- *
- * Mira `avisosApp`, no `notificationPrefs` (que son los correos): apagar el
- * correo de las promociones no apaga su notificación, ni al revés. Ver
- * utils/preferenciasAvisos.js. `$ne: false` porque nacen encendidos y quien
- * no tiene el campo nunca lo apagó.
- */
+// Los teléfonos de quien tiene encendido ESTE aviso EN LA APP. Mira `avisosApp`, no
+// `notificationPrefs` (que son los correos): apagar el correo de las promociones no apaga su
+// notificación, ni al revés. Ver utils/preferenciasAvisos.js.
 export const dispositivosDe = async (preferencia) => {
   const clientes = await clientModel
     .find({
@@ -77,11 +34,9 @@ export const dispositivosDe = async (preferencia) => {
   return [...new Set(clientes.flatMap((c) => c.pushTokens || []).filter(esTokenExpo))];
 };
 
-/*
- * Saca de las cuentas los tokens que Expo ya dio por muertos. Va sin await
- * del lado de quien envía: limpiar es mantenimiento, no parte del aviso.
- * De las tres: el personal también apunta su teléfono (avisosPersonal.js).
- */
+// Saca de las cuentas los tokens que Expo ya dio por muertos. Va sin await del lado de quien
+// envía: limpiar es mantenimiento, no parte del aviso. De las tres: el personal también apunta su
+// teléfono (avisosPersonal.js).
 const olvidarTokens = async (tokens) => {
   if (!tokens.length) return;
   try {
@@ -97,22 +52,8 @@ const olvidarTokens = async (tokens) => {
   }
 };
 
-/*
- * Manda el MISMO aviso a una lista de teléfonos.
- *
- * `datos` viaja como carga útil y no se ve: es lo que lee la app para saber a
- * qué pantalla llevar cuando alguien toca la notificación (ver
- * movil/src/utils/notificaciones.js). Un aviso que al tocarlo abre la portada
- * y te deja buscando el pedido a mano está a medio hacer.
- */
-/*
- * `canal`: por dónde suena en Android. "pedidos" es el de prioridad alta (sale
- * como globo arriba de la pantalla: es lo que la persona está esperando);
- * "avisos", el de siempre, para promociones y productos nuevos, que no tienen
- * por qué interrumpir. Los dos los crea la app al arrancar. "tienda", también
- * de prioridad alta, es el de los pedidos nuevos que le llegan al personal, y
- * la app solo lo crea en el modo personal.
- */
+// Manda el mismo aviso a una lista de teléfonos. `datos` lo lee la app para saber a qué pantalla
+// llevar; `canal` decide cómo suena en Android ("pedidos" con prioridad alta, "avisos" normal).
 const CANALES_URGENTES = ["pedidos", "tienda"];
 
 export const enviarPush = async (tokens, { titulo, cuerpo, datos = {}, canal = "avisos" }) => {
@@ -154,13 +95,7 @@ export const enviarPush = async (tokens, { titulo, cuerpo, datos = {}, canal = "
       const respuesta = await r.json();
       const tickets = Array.isArray(respuesta?.data) ? respuesta.data : [];
 
-      /*
-       * Un ticket "ok" no quiere decir que el aviso ya sonó: quiere decir que
-       * Expo lo tomó. El resultado final se consulta después con el id del
-       * ticket, y eso no se hace aquí a propósito — para un aviso de tienda,
-       * saber que salió alcanza; montar el sondeo de recibos sería pedirle a
-       * este archivo que fuera un sistema de colas.
-       */
+      // Un ticket "ok" no quiere decir que el aviso ya sonó: quiere decir que Expo lo tomó.
       tickets.forEach((ticket, indice) => {
         if (ticket?.status === "ok") {
           enviados++;
@@ -189,11 +124,9 @@ export const enviarPush = async (tokens, { titulo, cuerpo, datos = {}, canal = "
   return { enviados, fallidos };
 };
 
-/*
- * La versión de disparar y olvidar, igual que `avisarPedidoEnCaminoEnSegundoPlano`.
- * El catch no es opcional: una promesa rechazada sin dueño se lleva el proceso
- * de Node por delante, o sea que la tienda se caería porque un aviso no salió.
- */
+// La versión de disparar y olvidar, igual que `avisarPedidoEnCaminoEnSegundoPlano`. El catch no es
+// opcional: una promesa rechazada sin dueño se lleva el proceso de Node por delante, o sea que la
+// tienda se caería porque un aviso no salió.
 export const enviarPushEnSegundoPlano = (tokens, contenido) => {
   enviarPush(tokens, contenido).catch((error) => {
     console.log("push: falló el envío: " + error.message);

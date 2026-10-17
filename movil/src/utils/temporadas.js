@@ -1,32 +1,6 @@
-/*
- * ============================================================
- * TEMPORADAS — temporadas.js
- * ============================================================
- * Pinta la tienda del color de la fecha. Copia de
- * `frontend/src/utils/temporadas.js`, con una traducción obligada.
- *
- * ── De variables CSS a nombres de paleta ──
- *
- * En la web los colores son variables CSS (`--marca-600`) y el tema se aplica
- * escribiéndolas en el <html>: una sola línea repinta la tienda entera porque
- * todo el CSS ya las está leyendo. Aquí no hay nada parecido — los estilos de
- * React Native son objetos y `StyleSheet.create` se evalúa UNA vez, al importar
- * el módulo, así que un color escrito ahí ya no se puede cambiar después.
- *
- * Por eso los temas traen los mismos colores con los nombres de la paleta del
- * proyecto, y quien los reparte es TemaContext. La equivalencia es directa:
- *
- *   --marca-700 → marcaOscuro    --marca-100 → marcaSuave
- *   --marca-600 → marca          --marca-50  → marcaTenue
- *   --marca-400 → marcaClaro     --acento    → acento
- *
- * ── El acento no es el primario ──
- *
- * Vale la pena repetir lo que dice el original sobre Navidad: el rojo va de
- * ACENTO y no de primario. En botón grande cansa la vista, y además se
- * confunde con el rojo de "quedan pocas", que es un aviso y no un adorno.
- * ============================================================
- */
+// TEMPORADAS — temporadas.js
+// Pinta la tienda del color de la fecha. Copia de `frontend/src/utils/temporadas.js`, con una
+// traducción obligada. ── De variables CSS a nombres de paleta ──
 
 export const TEMAS_DE_TEMPORADA = [
   {
@@ -46,10 +20,8 @@ export const TEMAS_DE_TEMPORADA = [
     decoracion: {
       saludo: 'Felices fiestas — pide con tiempo, que diciembre se llena',
       figura: 'copo',
-      /*
-       * Cuántas figuras caen a la vez. Pocas a propósito: veinte copos ya no
-       * son "está nevando", son un protector de pantalla encima de la tienda.
-       */
+      // Cuántas figuras caen a la vez. Pocas a propósito: veinte copos ya no son "está nevando", son un
+      // protector de pantalla encima de la tienda.
       cantidad: 14,
       // Cae recto y despacio, como la nieve de verdad.
       caida: 'lenta',
@@ -130,12 +102,9 @@ export const TEMAS_DE_TEMPORADA = [
   },
 ];
 
-/*
- * TEMPORADAS PROPIAS — las que crea el dueño desde el panel web
- * ("Regreso a clases", "Día de la madre"...). Del panel llegan solo dos
- * colores; los tonos claros y oscuros se derivan aquí mezclando el principal
- * con blanco o negro, igual que en frontend/src/utils/temporadas.js.
- */
+// TEMPORADAS PROPIAS — las que crea el dueño desde el panel web ("Regreso a clases", "Día de la
+// madre"...). Del panel llegan solo dos colores; los tonos claros y oscuros se derivan aquí
+// mezclando el principal con blanco o negro, igual que en frontend/src/utils/temporadas.js.
 const hexARgb = (hex) => {
   const limpio = String(hex || '').replace('#', '');
   const n = parseInt(limpio.length === 6 ? limpio : '003049', 16);
@@ -187,11 +156,8 @@ const hslAHex = ([h, s, l]) => {
   return rgbAHex([canal(h + 1 / 3) * 255, canal(h) * 255, canal(h - 1 / 3) * 255]);
 };
 
-/*
- * El mismo tono, con la luz justa para `objetivo` (luminancia WCAG). Se mueve
- * la luminosidad en HSL y no se mezcla con blanco: mezclar lava el color y el
- * azul de la casa quedaba gris.
- */
+// El mismo tono, con la luz justa para `objetivo` (luminancia WCAG). Se mueve la luminosidad en
+// HSL y no se mezcla con blanco: mezclar lava el color y el azul de la casa quedaba gris.
 const conLuminancia = (hex, objetivo) => {
   const [h, s0] = rgbAHsl(hexARgb(hex));
   const s = Math.min(s0, 0.85);
@@ -208,25 +174,9 @@ const conLuminancia = (hex, objetivo) => {
 // El fondo del modo oscuro. El mismo de `fondo` en COLORES_OSCURO (theme/colores.js).
 export const FONDO_OSCURO = '#121417';
 
-/*
- * LA MARCA EN MODO OSCURO. Copia de `paletaOscura()` de la web, con los
- * nombres de la paleta de aquí.
- *
- * El azul de la casa (#003049) es casi negro: sobre el fondo oscuro los
- * botones desaparecían. En oscuro el principal sube hasta donde el texto
- * blanco del botón se sigue leyendo, el tono de "presionado" pasa a ser MÁS
- * claro —en oscuro lo que se ilumina es lo que responde— y los fondos suaves
- * (marcaSuave/marcaTenue) dejan de ser pastel y pasan a ser el fondo teñido
- * del color.
- *
- * Un mismo color no llega a 4,5:1 con la letra blanca Y con el fondo oscuro
- * a la vez (el punto medio de antes daba 4,4 y 4,3: fallaba las dos). Se
- * reparte: el principal en 0,155 (5,1:1 con el blanco), el presionado en
- * 0,18 (4,6:1) y la marca como LETRA va aparte, en marcaTexto (8:1).
- *
- * Recibe la paleta clara ya armada, así sirve igual para la marca, las
- * temporadas de fábrica y las que crea el dueño.
- */
+// LA MARCA EN MODO OSCURO. Copia de `paletaOscura()` de la web, con los nombres de la paleta de
+// aquí. El azul de la casa (#003049) es casi negro: sobre el fondo oscuro los botones
+// desaparecían.
 export const paletaOscura = (colores) => {
   const principal = conLuminancia(colores.marca, 0.155);
   const acento =
@@ -273,16 +223,8 @@ export const todosLosTemas = (temporada) => [
 export const temaPorClave = (clave, lista = TEMAS_DE_TEMPORADA) =>
   lista.find((t) => t.clave === clave) || null;
 
-/*
- * ¿Cae esta fecha dentro del rango del tema?
- *
- * Se compara por mes y día, sin año, porque los rangos se repiten todos los
- * años. El `mes - 1` de JavaScript se corrige aquí y en ningún otro lado.
- *
- * Un rango que cruza el año (del 20 de diciembre al 6 de enero) tiene el
- * inicio DESPUÉS del fin: ahí cae dentro lo que esté pasado el inicio o antes
- * del fin. Las de fábrica no cruzan el año, pero una propia sí puede.
- */
+// ¿Cae esta fecha dentro del rango del tema? Se compara por mes y día, sin año, porque los rangos
+// se repiten todos los años. El `mes - 1` de JavaScript se corrige aquí y en ningún otro lado.
 const caeEnRango = (fecha, tema) => {
   const mes = fecha.getMonth() + 1;
   const dia = fecha.getDate();
@@ -296,18 +238,8 @@ const caeEnRango = (fecha, tema) => {
 export const temaDeLaFecha = (fecha = new Date(), lista = TEMAS_DE_TEMPORADA) =>
   lista.find((tema) => caeEnRango(fecha, tema)) || null;
 
-/*
- * Qué tema toca AHORA, según lo que diga la configuración de la tienda.
- *
- *   'automatico' → lo decide el calendario.
- *   'manual'     → manda el que eligieron, pase lo que pase en el calendario.
- *                  Sirve para adelantarse (poner Navidad el 20 de noviembre
- *                  porque ya llegó el producto navideño).
- *   'ninguno'    → los colores de siempre, todo el año.
- *
- * Devuelve el tema completo o null. Null es un resultado normal y esperado —la
- * mayor parte del año no hay temporada— y significa "no toques nada".
- */
+// Qué tema toca AHORA, según lo que diga la configuración de la tienda. 'automatico' → lo decide
+// el calendario. 'manual' → manda el que eligieron, pase lo que pase en el calendario.
 export const temaActivo = (temporada, fecha = new Date()) => {
   const modo = temporada?.modo || 'automatico';
   if (modo === 'ninguno') return null;

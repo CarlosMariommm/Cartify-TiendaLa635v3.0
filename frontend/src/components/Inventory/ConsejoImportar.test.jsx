@@ -3,10 +3,8 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import ConsejoImportar, { CLAVE_CONSEJO } from './ConsejoImportar';
 
-/*
- * El consejo de Inventario: invita a importar el Excel y, con la equis, no
- * vuelve a salir en este equipo.
- */
+// El consejo de Inventario: invita a importar el Excel y, con la equis, no vuelve a salir en este
+// equipo.
 
 describe('el consejo de importar desde Excel', () => {
   afterEach(() => { cleanup(); localStorage.clear(); });

@@ -14,11 +14,9 @@ const ActionBtn = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  /*
-   * Con los colores de la paleta del panel (ThemeContext), con los grises de
-   * siempre de respaldo. Fijos, en Modo oscuro el lápiz quedaba gris sobre
-   * gris y al pasar el mouse salía un parche blanco en medio de la tabla.
-   */
+  /* Con los colores de la paleta del panel (ThemeContext), con los grises de siempre de respaldo.
+     Fijos, en Modo oscuro el lápiz quedaba gris sobre gris y al pasar el mouse salía un parche
+     blanco en medio de la tabla. */
   color: ${({ $danger }) => ($danger ? 'var(--theme-peligro, #ef4444)' : 'var(--theme-text-secondary, #6b7280)')};
   transition: background-color var(--dur-press) var(--ease-out), border-color var(--dur-press) var(--ease-out), color var(--dur-press) var(--ease-out), transform var(--dur-press) var(--ease-out), box-shadow var(--dur-press) var(--ease-out);
   padding: 6px;

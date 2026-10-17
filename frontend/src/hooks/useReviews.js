@@ -4,17 +4,9 @@ import { tAhora } from '../utils/idioma';
 import { reviewService } from '../api/reviewService';
 import { useAuth } from './useAuth';
 
-/*
- * useReviews — las valoraciones reales de un producto.
- *
- * Sustituye al bloque de reseñas inventadas que traía la ficha: un 4.3 fijo,
- * "5,961 reseñas" y dos comentarios de gente que no existe, idénticos en cada
- * producto. Ahora, si nadie opinó, la ficha lo dice.
- *
- * Quién puede opinar lo decide el servidor (hay que haber comprado). Aquí solo
- * se guarda si el intento fue rechazado, para explicarlo en vez de dejar un
- * botón que falla sin motivo aparente.
- */
+// useReviews — las valoraciones reales de un producto. Sustituye al bloque de reseñas inventadas
+// que traía la ficha: un 4.3 fijo, "5,961 reseñas" y dos comentarios de gente que no existe,
+// idénticos en cada producto. Ahora, si nadie opinó, la ficha lo dice.
 export const useReviews = (productoId) => {
   const { user } = useAuth();
   const [resumen, setResumen] = useState({ total: 0, promedio: 0, reparto: {}, reviews: [] });

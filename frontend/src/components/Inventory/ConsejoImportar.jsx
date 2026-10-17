@@ -1,17 +1,9 @@
 import { useState } from 'react';
 import { FileSpreadsheet, Sparkles, X } from 'lucide-react';
 
-/*
- * ============================================================
- * EL CONSEJO DE INVENTARIO — ConsejoImportar.jsx
- * ============================================================
- * Al entrar a Inventario, un consejo: si ya lleva sus productos en un Excel,
- * que lo suba y la IA arme el inventario con fotos (ver ImportarExcel.jsx).
- * Sin recuadro: una línea con su icono sobre el fondo, como un aviso del
- * panel. La equis lo quita para siempre en este equipo; el botón "Importar
- * desde Excel" de arriba sigue ahí.
- * ============================================================
- */
+// EL CONSEJO DE INVENTARIO — ConsejoImportar.jsx
+// Al entrar a Inventario, un consejo: si ya lleva sus productos en un Excel, que lo suba y la IA
+// arme el inventario con fotos (ver ImportarExcel.jsx).
 
 export const CLAVE_CONSEJO = 'cartify:consejo-importar-excel';
 

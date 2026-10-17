@@ -10,25 +10,9 @@ import {
   alPedirConfigurar,
 } from '../../utils/consentimiento';
 
-/*
- * ============================================================
- * AVISO DE COOKIES — AvisoCookies.jsx
- * ============================================================
- * La franja de abajo que pregunta por las analíticas la primera vez, y que
- * se vuelve a abrir con "Configurar cookies" del pie.
- *
- * Reglas que la hacen honesta y no un obstáculo:
- *   - Rechazar es igual de fácil que aceptar: dos botones del mismo tamaño,
- *     uno al lado del otro. Nada de "Aceptar" enorme y "Más opciones"
- *     escondido.
- *   - No tapa la tienda ni atrapa el foco: es una franja, no un modal. Se
- *     puede seguir comprando sin contestar; mientras no conteste, no se
- *     mide nada.
- *   - Va pegada al borde de abajo y a todo el ancho, sin tarjeta flotando: el
- *     contenido va sobre el fondo, con una línea que lo separa.
- *   - Solo en la tienda y Mi Cuenta. El panel es del personal y no se mide.
- * ============================================================
- */
+// AVISO DE COOKIES — AvisoCookies.jsx
+// La franja de abajo que pregunta por las analíticas la primera vez, y que se vuelve a abrir con
+// "Configurar cookies" del pie.
 
 const Franja = styled.section`
   position: fixed;

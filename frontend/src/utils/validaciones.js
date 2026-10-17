@@ -1,17 +1,5 @@
-/*
- * ============================================================
- * VALIDACIONES — validaciones.js
- * ============================================================
- * Reglas reutilizables para los formularios del admin. La idea es que un
- * campo numérico no acepte letras, ni negativos donde no tiene sentido, ni
- * valores que rompan el negocio (vender por debajo del costo, un 2x1 que
- * cobra 2, una tasa de canje en 0 que causaría división entre cero...).
- *
- * Hay dos sabores porque los forms del proyecto usan dos estilos:
- *   - `regla*`  → objetos para react-hook-form (ProductFormModal, etc.)
- *   - funciones → para los forms con useState suelto (Promociones, Fidelidad)
- * ============================================================
- */
+// VALIDACIONES — validaciones.js
+// Reglas reutilizables para los formularios del admin.
 
 // ── Teclas ──────────────────────────────────────────────────
 // En un input number el navegador deja escribir "e", "+" y "-": los bloqueamos.
@@ -49,39 +37,18 @@ export const reglaEntero = (etiqueta, minimo = 0) => ({
   },
 });
 
-/*
- * ── DUI: hasta dónde llega esta validación ──────────────────
- *
- * NO se puede comprobar que un DUI exista de verdad: ese registro vive en el
- * RNPN y no hay una API pública y gratuita para consultarlo. Lo que SÍ se
- * puede verificar es el DÍGITO VERIFICADOR, que se calcula a partir de los 8
- * primeros dígitos. Eso descarta un número inventado al azar; NO confirma que
- * la persona exista, ni que el documento sea suyo, ni que esté vigente.
- *
- * Queda escrito para que nadie lea más adelante "DUI válido" como "identidad
- * verificada": son cosas distintas y la diferencia importa.
- *
- * El cálculo: los 8 dígitos se multiplican por 9, 8, 7, 6, 5, 4, 3 y 2; se
- * suman; el verificador es (10 - suma % 10) % 10. Ese último % 10 no es
- * adorno: cuando la suma cierra en 0 el verificador es 0, no 10, y ahí es
- * donde se equivocan las implementaciones que rechazan todo DUI terminado
- * en 0.
- */
+// ── DUI: hasta dónde llega esta validación ──────────────────
+// NO se puede comprobar que un DUI exista de verdad: ese registro vive en el RNPN y no hay una API
+// pública y gratuita para consultarlo.
 const digitosDelDui = (valor) => String(valor || '').replace(/\D/g, '');
 
 export const duiEsValido = (valor) => {
   const d = digitosDelDui(valor);
   if (d.length !== 9) return false;
 
-  /*
-   * Los nueve dígitos iguales se rechazan de entrada.
-   *
-   * "00000000-0" y "11111111-1" CUADRAN con el verificador —son correctos en
-   * la aritmética— pero nadie tiene ese DUI. Son lo que sale cuando alguien
-   * llena el campo por salir del paso, y el algoritmo solo no los detiene.
-   * Aceptarlos ensucia la base con datos que parecen buenos y no lo son, que
-   * es peor que no tener el dato: nadie sospecha de un número bien formado.
-   */
+  // Los nueve dígitos iguales se rechazan de entrada. "00000000-0" y "11111111-1" CUADRAN con el
+  // verificador —son correctos en la aritmética— pero nadie tiene ese DUI. Son lo que sale cuando
+  // alguien llena el campo por salir del paso, y el algoritmo solo no los detiene.
   if (/^(\d)\1{8}$/.test(d)) return false;
 
   let suma = 0;
@@ -94,25 +61,17 @@ export const duiEsValido = (valor) => {
 // lo que escribió, no enterarse de que existe un dígito verificador.
 export const MENSAJE_DUI_INVALIDO = 'Ese DUI no parece correcto, revisa los números';
 
-/*
- * DUI del personal: obligatorio y con formato 12345678-9.
- *
- * A propósito NO revisa el dígito verificador. En la base ya hay empleados
- * cargados con DUI de prueba, y si la regla los rechazara, cambiarle el
- * teléfono a uno de ellos se volvería imposible hasta corregir su DUI. La
- * comprobación fuerte va donde la persona escribe su propio número (el
- * registro de cliente), que es el caso que Mario pidió blindar.
- */
+// DUI del personal: obligatorio y con formato 12345678-9. A propósito NO revisa el dígito
+// verificador. En la base ya hay empleados cargados con DUI de prueba, y si la regla los
+// rechazara, cambiarle el teléfono a uno de ellos se volvería imposible hasta corregir su DUI.
 export const reglaDui = {
   required: 'El DUI es obligatorio',
   pattern: { value: /^\d{8}-\d$/, message: 'Formato de DUI: 12345678-9' },
 };
 
-/*
- * DUI del cliente: OPCIONAL. Mucha gente del barrio no lo anda a mano y perder
- * un registro por eso no vale la pena. Vacío pasa; si escribió algo, tiene que
- * estar completo y cuadrar el verificador.
- */
+// DUI del cliente: OPCIONAL. Mucha gente del barrio no lo anda a mano y perder un registro por eso
+// no vale la pena. Vacío pasa; si escribió algo, tiene que estar completo y cuadrar el
+// verificador.
 export const reglaDuiOpcional = {
   validate: (valor) => {
     const d = digitosDelDui(valor);
@@ -144,22 +103,11 @@ export const numeroEnRango = (valor, { min = -Infinity, max = Infinity, entero =
   return n;
 };
 
-/*
- * Avisa si una promoción deja productos vendiéndose POR DEBAJO DEL COSTO.
- *
- * No lo bloquea: una tienda puede querer un producto gancho a pérdida a
- * propósito. Pero debe ser una decisión, no un accidente — un 50% sobre algo
- * con 40% de margen pierde plata en cada venta, y eso no se nota hasta que
- * alguien mira el cierre del mes.
- *
- * Devuelve un aviso, o null si todo deja margen.
- */
+// Avisa si una promoción deja productos vendiéndose POR DEBAJO DEL COSTO. No lo bloquea: una
+// tienda puede querer un producto gancho a pérdida a propósito.
 export const avisoVentaBajoCosto = ({ tipo, items, buyQty, payQty, costos = {}, precios = {} }) => {
-  /*
-   * Un anuncio no cambia el precio, así que no puede hacer perder plata. Si el
-   * producto ya se vendía bajo costo, ese es un problema del producto y se
-   * avisa en su formulario, no aquí.
-   */
+  // Un anuncio no cambia el precio, así que no puede hacer perder plata. Si el producto ya se vendía
+  // bajo costo, ese es un problema del producto y se avisa en su formulario, no aquí.
   if (tipo === 'anuncio') return null;
 
   const bajoCosto = [];
@@ -194,10 +142,8 @@ export const avisoVentaBajoCosto = ({ tipo, items, buyQty, payQty, costos = {}, 
     (resto > 0 ? ` (y ${resto} producto${resto > 1 ? 's' : ''} más)` : '');
 };
 
-/*
- * Valida una promoción completa antes de guardarla.
- * Devuelve un mensaje de error, o null si todo está bien.
- */
+// Valida una promoción completa antes de guardarla. Devuelve un mensaje de error, o null si todo
+// está bien.
 export const validarPromocion = ({ tipo, items, buyQty, payQty, precios = {} }) => {
   if (!items.length) return 'Agrega al menos un producto';
 

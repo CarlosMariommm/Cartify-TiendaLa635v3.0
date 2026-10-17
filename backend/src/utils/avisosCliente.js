@@ -1,27 +1,6 @@
-/*
- * ============================================================
- * LOS AVISOS QUE FALTABAN — avisosCliente.js
- * ============================================================
- * Enciende los dos interruptores que la pantalla de Notificaciones ofrecía y
- * que no hacían nada: "Productos nuevos" y "Mi pedido va en camino". Se
- * guardaban en la cuenta y nadie los leía jamás, así que el cliente los
- * activaba y no le llegaba un solo correo.
- *
- * El de promociones vive aparte (avisoPromo.js) porque tiene su propia regla
- * de "una vez por promo" y su plantilla con precios de oferta.
- *
- * POR QUÉ EL CORREO SE ARMA POR PERSONA Y NO UNA VEZ PARA TODOS
- * Porque el enlace de "dejar de recibirlos" lleva un token firmado con el id
- * de quien lo recibe. Un enlace común para toda la lista daría de baja siempre
- * a la misma persona — o, peor, a quien tocara reenviar el correo. Ver
- * utils/tokenBaja.js.
- *
- * TODOS DISPARAN EN SEGUNDO PLANO: escribirle a la lista tarda, y quien acaba
- * de guardar un producto —o de marcar un pedido como "en camino"— no tiene por
- * qué mirar una rueda girando. Si el correo falla, la acción YA se guardó;
- * devolver un error sería mentir.
- * ============================================================
- */
+// LOS AVISOS QUE FALTABAN — avisosCliente.js
+// Enciende los dos interruptores que la pantalla de Notificaciones ofrecía y que no hacían nada:
+// "Productos nuevos" y "Mi pedido va en camino".
 
 import clientModel from "../models/client.js";
 import storeSettingsModel, { CLAVE_UNICA } from "../models/storeSettings.js";
@@ -31,10 +10,8 @@ import { dispositivosDe, enviarPushEnSegundoPlano } from "./pushExpo.js";
 import { AVISO_DEL_ESTADO, quiereEnLaApp } from "./preferenciasAvisos.js";
 import { enlaceDeBaja, enlaceDeBajaUnClic } from "./tokenBaja.js";
 
-/*
- * La identidad de la tienda para el encabezado del correo: su nombre en dos
- * renglones y su logo si el dueño cargó uno en Personalización.
- */
+// La identidad de la tienda para el encabezado del correo: su nombre en dos renglones y su logo si
+// el dueño cargó uno en Personalización.
 export const identidadDeLaTienda = async () => {
   const a = await storeSettingsModel.findOne({ clave: CLAVE_UNICA }).lean();
   const l1 = a?.nombreLinea1 || "Tienda";
@@ -47,14 +24,9 @@ export const identidadDeLaTienda = async () => {
   };
 };
 
-/*
- * Los clientes que pidieron ESTE aviso. Devuelve id y correo: el id hace falta
- * para firmarle su enlace de baja.
- *
- * El $ne: false y no un true a secas: los clientes de antes de que existieran
- * las preferencias no tienen el campo, y con `: true` habrían quedado fuera
- * todos ellos. Ver avisoPromo.js, que usa la misma regla.
- */
+// Los clientes que pidieron ESTE aviso. Devuelve id y correo: el id hace falta para firmarle su
+// enlace de baja. El $ne: false y no un true a secas: los clientes de antes de que existieran las
+// preferencias no tienen el campo, y con `: true` habrían quedado fuera todos ellos.
 const destinatariosDe = async (preferencia) => {
   const clientes = await clientModel
     .find({
@@ -77,21 +49,8 @@ const destinatariosDe = async (preferencia) => {
   });
 };
 
-/*
- * De uno en uno, no todos de golpe: un Promise.all sobre trescientos correos
- * le dispara trescientas peticiones simultáneas a Mailjet, que responde 429 y
- * tira a la basura media lista. Y un correo por destinatario, nunca todos en
- * el mismo "Para": la lista de clientes de la tienda no se le reparte a los
- * clientes.
- *
- * `armar` recibe al cliente y devuelve { asunto, html, texto }: así cada quien
- * recibe su propio enlace de baja.
- */
-/*
- * `headersDe`, si se pasa, arma el List-Unsubscribe de cada correo — igual
- * que hace avisoPromo.js. Es opcional porque no todos los avisos tienen un
- * enlace de baja propio todavía (el de "pedido en camino" no lo pide).
- */
+// Manda los correos de uno en uno, no todos de golpe (Mailjet responde 429 si se le dispara todo).
+// `headersDe`, opcional, arma el enlace para darse de baja de cada correo.
 const enviarEnFila = async (clientes, armar, etiqueta, headersDe) => {
   let enviados = 0;
   let fallidos = 0;
@@ -115,19 +74,8 @@ const enviarEnFila = async (clientes, armar, etiqueta, headersDe) => {
 
 /* ══════════ 1. Productos nuevos ══════════ */
 
-/*
- * EN LOTE, Y POR ESO ESPERA.
- *
- * Quien carga el inventario un lunes sube treinta productos de corrido. Con un
- * correo por producto, cada cliente recibiría treinta correos seguidos de la
- * misma tienda — que es la receta exacta para acabar en spam el mismo día.
- *
- * Así que los productos se van juntando y el aviso sale cuando pasan unos
- * minutos sin que se cargue nada más. La lista vive en memoria a propósito: si
- * el servidor se reinicia justo ahí, lo peor que pasa es que un aviso no sale.
- * Guardarlo en la base para no perderlo sería montar una cola de trabajos para
- * avisar de unas papas nuevas.
- */
+// EN LOTE, Y POR ESO ESPERA.
+// Quien carga el inventario un lunes sube treinta productos de corrido.
 const ESPERA_LOTE_MS = 5 * 60 * 1000;
 let loteProductos = [];
 let relojLote = null;
@@ -141,12 +89,9 @@ const soltarLoteDeProductos = async () => {
 
   const tienda = await identidadDeLaTienda();
 
-  /*
-   * El mismo aviso, empujado a los teléfonos. Va ANTES del corte de abajo a
-   * propósito: quien tiene la app instalada y ningún correo verificado sigue
-   * siendo alguien a quien avisarle. Cada canal con su interruptor: el del
-   * teléfono es `avisosApp.nuevosProductos` (ver dispositivosDe).
-   */
+  // El mismo aviso, empujado a los teléfonos. Va ANTES del corte de abajo a propósito: quien tiene
+  // la app instalada y ningún correo verificado sigue siendo alguien a quien avisarle. Cada canal
+  // con su interruptor: el del teléfono es `avisosApp.nuevosProductos` (ver dispositivosDe).
   const nombres = productos.map((p) => p.nombre).filter(Boolean);
   enviarPushEnSegundoPlano(await dispositivosDe("nuevosProductos"), {
     titulo: nombres.length > 1 ? `${nombres.length} productos nuevos` : "Llegó algo nuevo",
@@ -176,10 +121,8 @@ const soltarLoteDeProductos = async () => {
   );
 };
 
-/*
- * Lo llama el controlador al guardar un producto. No manda nada todavía: lo
- * apunta en el lote y reinicia el reloj.
- */
+// Lo llama el controlador al guardar un producto. No manda nada todavía: lo apunta en el lote y
+// reinicia el reloj.
 export const anotarProductoNuevo = (producto) => {
   if (!producto?.nombre) return;
   loteProductos.push(producto);
@@ -193,30 +136,17 @@ export const anotarProductoNuevo = (producto) => {
     });
   }, ESPERA_LOTE_MS);
 
-  /*
-   * Sin esto, un servidor que no tiene nada más que hacer se queda despierto
-   * cinco minutos esperando este reloj. Con unref() el proceso puede cerrarse
-   * igual; el aviso se pierde, que es exactamente lo que ya asumimos arriba.
-   */
+  // Sin esto, un servidor que no tiene nada más que hacer se queda despierto cinco minutos esperando
+  // este reloj. Con unref() el proceso puede cerrarse igual; el aviso se pierde, que es exactamente
+  // lo que ya asumimos arriba.
   relojLote.unref?.();
 };
 
 /* ══════════ 2. Los avisos del pedido ══════════ */
 
-/*
- * Lo que le dice el teléfono a la dueña del pedido en cada paso. Son avisos
- * DE SERVICIO, no de publicidad: nacen encendidos, y cada paso se puede
- * apagar aparte en Mi cuenta › Notificaciones (`avisosApp`: preparando;
- * en camino o listo; entregado; cancelado). Antes solo existía "va en
- * camino" y nacía apagado: casi nadie se enteraba de nada.
- *
- * Cada paso, una vez: el controlador solo llama en el SALTO de un estado a
- * otro. Los textos se repiten en movil/src/utils/simulacionPedido.js (el
- * simulador de la app): si se cambian aquí, se cambian allá.
- *
- * Retiro en la tienda: "entregado" no se avisa, porque se entrega en el
- * mostrador, con la persona enfrente.
- */
+// Lo que le dice el teléfono a la dueña del pedido en cada paso. Son avisos DE SERVICIO, no de
+// publicidad: nacen encendidos, y cada paso se puede apagar aparte en Mi cuenta › Notificaciones
+// (`avisosApp`: preparando; en camino o listo; entregado; cancelado).
 export const TEXTOS_PEDIDO = {
   preparando: {
     titulo: "Estamos preparando tu pedido",
@@ -240,11 +170,8 @@ export const TEXTOS_PEDIDO = {
   },
 };
 
-/*
- * La notificación de cancelado: el motivo y lo devuelto, en lo que cabe en
- * la barra del teléfono. Sin motivo (pedidos cancelados antes de que se
- * pidiera) queda el texto de siempre.
- */
+// La notificación de cancelado: el motivo y lo devuelto, en lo que cabe en la barra del teléfono.
+// Sin motivo (pedidos cancelados antes de que se pidiera) queda el texto de siempre.
 const cuerpoDeCancelado = (pedido) => {
   const motivo = String(pedido?.cancelReason || "").trim();
   const saldo = Number(pedido?.reembolso?.saldo) || 0;
@@ -270,14 +197,9 @@ const clienteDelPedido = async (pedido) => {
   return cliente && cliente.isActive !== false ? cliente : null;
 };
 
-/*
- * El push del paso al que acaba de llegar el pedido. Va por el canal
- * "pedidos" (prioridad alta: sale como globo arriba de la pantalla).
- *
- * `datos.pedidoId` es lo que lee la app para llevar a ESE pedido al tocar la
- * notificación. `tipo` sigue siendo "pedidoEnCamino" para "en camino": las
- * versiones de la app que ya están instaladas solo conocen ese.
- */
+// El push del paso al que acaba de llegar el pedido. Va por el canal "pedidos" (prioridad alta:
+// sale como globo arriba de la pantalla). `datos.pedidoId` es lo que lee la app para llevar a ESE
+// pedido al tocar la notificación.
 export const avisarPasoDelPedido = async (pedido, estado) => {
   const texto = TEXTOS_PEDIDO[estado];
   if (!texto) return { enviados: 0, motivo: "ese estado no se avisa" };
@@ -305,11 +227,9 @@ export const avisarPasoDelPedido = async (pedido, estado) => {
   return { enviados: tokens.length };
 };
 
-/*
- * El CORREO de "va en camino". Este sí sigue la preferencia `pedidoCerca`
- * (Mi cuenta › Avisos), que nace apagada: un correo por cada pedido es más de
- * lo que mucha gente quiere, y en la app ya le avisó el teléfono.
- */
+// El CORREO de "va en camino". Este sí sigue la preferencia `pedidoCerca` (Mi cuenta › Avisos),
+// que nace apagada: un correo por cada pedido es más de lo que mucha gente quiere, y en la app ya
+// le avisó el teléfono.
 export const avisarPedidoEnCamino = async (pedido) => {
   const cliente = await clienteDelPedido(pedido);
   if (!cliente) return { enviados: 0, motivo: "sin cliente activo" };
@@ -330,11 +250,8 @@ export const avisarPedidoEnCamino = async (pedido) => {
   );
 };
 
-/*
- * El CORREO de cancelado. Sale siempre, sin interruptor: quien compró en la
- * web y no tiene la app no tiene otra forma de enterarse de que su pedido no
- * va a llegar, ni de por qué.
- */
+// El CORREO de cancelado. Sale siempre, sin interruptor: quien compró en la web y no tiene la app
+// no tiene otra forma de enterarse de que su pedido no va a llegar, ni de por qué.
 export const avisarPedidoCancelado = async (pedido) => {
   const cliente = await clienteDelPedido(pedido);
   if (!cliente) return { enviados: 0, motivo: "sin cliente activo" };
@@ -348,14 +265,8 @@ export const avisarPedidoCancelado = async (pedido) => {
   );
 };
 
-/*
- * La versión que llama el controlador: dispara y se olvida. El push del paso
- * y, si va en camino o se canceló, el correo.
- *
- * El .catch no es opcional. Sin él, un tropiezo aquí adentro es una promesa
- * rechazada sin dueño, y Node se lleva el proceso entero por delante — o sea,
- * la tienda se cae porque un aviso no salió.
- */
+// La versión que llama el controlador: dispara y se olvida. El push del paso y, si va en camino o
+// se canceló, el correo. El .catch no es opcional.
 export const avisarCambioDePedidoEnSegundoPlano = (pedido, estado) => {
   avisarPasoDelPedido(pedido, estado).catch((error) => {
     console.log(`aviso del pedido (${estado}): falló el envío: ${error}`);

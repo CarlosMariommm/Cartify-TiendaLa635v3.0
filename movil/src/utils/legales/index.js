@@ -2,16 +2,8 @@ import { TERMINOS } from './terminos';
 import { PRIVACIDAD } from './privacidad';
 import { DEVOLUCIONES } from './devoluciones';
 
-/*
- * Los documentos legales en la app: los mismos textos que la web
- * (frontend/src/utils/legales), con la MISMA versión, porque se aceptan
- * igual en los dos lados. La política de cookies no viene: la app no usa
- * cookies, y lo que guarda en el teléfono lo explica la de privacidad.
- *
- * Si cambia lo que se promete, suba la versión aquí, en la web y en
- * backend/src/utils/terminos.js.
- */
-// 3.1: Tiqui dice el primer nombre de quien inició sesión (ver la web).
+// Los documentos legales de la app: los mismos textos y la misma versión que la web. La de cookies
+// no va: la app no usa cookies. 3.1: Tiqui dice el primer nombre de quien inició sesión.
 export const VERSION_LEGAL = '3.1';
 export const FECHA_LEGAL = '28 de septiembre de 2026';
 

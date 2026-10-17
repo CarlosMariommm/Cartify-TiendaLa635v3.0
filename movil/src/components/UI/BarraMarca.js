@@ -1,15 +1,6 @@
-/*
- * BARRA DE MARCA — "Tienda la 635" arriba de todo.
- *
- * Es la misma TopBar de la web y aparece igual en las dos pantallas, con una
- * diferencia que vale la pena conservar: en Iniciar sesión va a la izquierda
- * con la salida "Seguir viendo la tienda" al lado, y en Registrarse va sola y
- * centrada. Quien se está registrando ya decidió; a quien solo pasaba por ahí
- * hay que dejarle la puerta abierta.
- *
- * El `paddingTop` extra es la barra de estado de Android: sin eso el nombre de
- * la tienda queda debajo de la hora y la señal.
- */
+// BARRA DE MARCA — "Tienda la 635" arriba de todo.
+// La misma barra de la web: en Iniciar sesión va a la izquierda con "Seguir viendo la tienda" y
+// en Registrarse va sola y centrada.
 
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Store } from 'lucide-react-native';

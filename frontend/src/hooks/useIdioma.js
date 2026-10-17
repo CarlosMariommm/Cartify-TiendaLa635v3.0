@@ -1,14 +1,9 @@
 import { createContext, useContext } from 'react';
 import { traducir, localeDe } from '../utils/idioma';
 
-/*
- * useIdioma — { idioma, setIdioma, t, locale } en cualquier pantalla de la
- * tienda. El proveedor está en context/IdiomaContext.jsx; aquí solo el
- * contexto y el gancho (así el archivo del proveedor exporta solo componentes).
- *
- * Sin proveedor (una prueba suelta, una pantalla fuera del árbol) todo sale
- * en español en vez de reventar.
- */
+// useIdioma — { idioma, setIdioma, t, locale } en cualquier pantalla de la tienda. El proveedor
+// está en context/IdiomaContext.jsx; aquí solo el contexto y el gancho (así el archivo del
+// proveedor exporta solo componentes).
 export const IdiomaContexto = createContext(null);
 
 const SIN_PROVEEDOR = {

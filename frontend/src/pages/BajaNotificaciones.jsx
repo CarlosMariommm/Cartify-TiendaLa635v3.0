@@ -4,25 +4,8 @@ import { MailX, Loader2, Store as StoreIcon, Settings } from 'lucide-react';
 import { useBajaNotificaciones } from '../hooks/useBajaNotificaciones';
 import { useIdioma } from '../hooks/useIdioma';
 
-/*
- * ============================================================
- * DEJAR DE RECIBIRLOS — BajaNotificaciones.jsx
- * ============================================================
- * Donde cae el enlace del pie de los correos.
- *
- * Antes ese enlace llevaba a Mi Cuenta › Notificaciones, y ahí lo primero que
- * se encontraba quien no tuviera la sesión abierta era un formulario de login.
- * Pedirle a alguien que inicie sesión para dejar de recibir correos que no
- * pidió es la forma elegante de no dejarlo salir — y quien no puede salir por
- * la puerta se va por la ventana: marca el correo como spam, que le cuesta a
- * la tienda mucho más que perder un suscriptor.
- *
- * Aquí no se pregunta nada: se aplica al llegar y se avisa. Lo que sí se
- * ofrece, después, es volver a encenderlo por si alguien llegó por error.
- *
- * La lógica vive en useBajaNotificaciones. Aquí solo se pinta.
- * ============================================================
- */
+// DEJAR DE RECIBIRLOS — BajaNotificaciones.jsx
+// Donde cae el enlace del pie de los correos.
 
 const Pantalla = styled.div`
   min-height: 100vh;
@@ -144,11 +127,8 @@ const BajaNotificaciones = () => {
           <Boton type="button" $primario onClick={() => navigate('/')}>
             <StoreIcon size={16} strokeWidth={2.2} /> {t('Ir a la tienda')}
           </Boton>
-          {/*
-            La vuelta atrás, para quien llegó por error o cambió de opinión.
-            Va DESPUÉS de haberlo aplicado y no antes: preguntar primero es
-            cobrarle un peaje por irse.
-          */}
+          {/* La vuelta atrás, para quien llegó por error o cambió de opinión. Va DESPUÉS de haberlo aplicado
+             y no antes: preguntar primero es cobrarle un peaje por irse. */}
           <Boton type="button" onClick={() => navigate('/mi-cuenta/notificaciones')}>
             <Settings size={16} strokeWidth={2.2} /> {t('Volver a encenderlos')}
           </Boton>

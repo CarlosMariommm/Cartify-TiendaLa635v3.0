@@ -1,16 +1,6 @@
-/*
- * ============================================================
- * LÍMITE DE ERROR — lo que se ve si algo de la app se rompe
- * ============================================================
- * Como LimiteDeError.jsx de la web: si una pantalla revienta al dibujarse, en
- * vez de quedarse la app en blanco (o cerrarse), sale Tiqui caída con el
- * cordón cortado, un mensaje claro y un botón para intentarlo de nuevo.
- *
- * Tiene que ser una clase: React solo deja atrapar errores de dibujo con
- * componentDidCatch / getDerivedStateFromError. La pantalla que se muestra sí
- * es una función, para poder usar los colores del modo y del tema.
- * ============================================================
- */
+// LÍMITE DE ERROR — lo que se ve si algo de la app se rompe
+// Si una pantalla falla al dibujarse, sale Tiqui caída con un mensaje y un botón para intentarlo
+// de nuevo, en vez de dejar la app en blanco.
 
 import { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';

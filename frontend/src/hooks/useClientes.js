@@ -3,21 +3,9 @@ import { ordenarLista, ORDEN_INICIAL } from '../utils/listasPanel';
 import { customerService } from '../api/customerService';
 import { direccionesEnTexto, formatearDui, formatearTelefono } from '../utils/mascaras';
 
-/*
- * ============================================================
- * CLIENTES DEL PANEL — useClientes.js
- * ============================================================
- * Cargar la lista, buscarla, filtrarla y sacar el resumen de arriba.
- *
- * Todo esto vivía suelto dentro de la pantalla. Se saca aquí para que
- * Customers.jsx se dedique a pintar, que es la regla del proyecto, y de paso
- * para que las cuentas del resumen se puedan mirar en un solo lugar.
- *
- * Ojo con `loyaltyPoints`: hay documentos viejos con la llave escrita
- * `lolayitypoints` (así, con el typo). Se leen las dos y se normaliza aquí, en
- * la puerta de entrada, para que ninguna pantalla tenga que enterarse.
- * ============================================================
- */
+// CLIENTES DEL PANEL — useClientes.js
+// Cargar la lista, buscarla, filtrarla y sacar el resumen de arriba. Todo esto vivía suelto dentro
+// de la pantalla.
 
 export const ESTADOS = [
   { valor: 'Todos', etiqueta: 'Todos' },
@@ -37,11 +25,9 @@ const inicialesDe = (nombre = '') =>
     .join('')
     .toUpperCase() || '?';
 
-/*
- * Normaliza un cliente para la pantalla: aplica las máscaras una sola vez y
- * resuelve las llaves que vienen de varias formas. Lo que sale de aquí ya está
- * listo para pintar, sin `??` regados por el JSX.
- */
+// Normaliza un cliente para la pantalla: aplica las máscaras una sola vez y resuelve las llaves
+// que vienen de varias formas. Lo que sale de aquí ya está listo para pintar, sin `??` regados por
+// el JSX.
 const prepararCliente = (c) => {
   const direccion = direccionesEnTexto(c.clientAddress);
   return {
@@ -83,22 +69,17 @@ export const useClientes = () => {
 
   useEffect(() => { cargar(); }, [cargar]);
 
-  /*
-   * Eliminar un cliente. Si el servidor dice que no (un pedido en curso), el
-   * error sube a quien llamó para que el modal se quede abierto; el aviso ya
-   * lo pinta el interceptor de api.js.
-   */
+  // Eliminar un cliente. Si el servidor dice que no (un pedido en curso), el error sube a quien
+  // llamó para que el modal se quede abierto; el aviso ya lo pinta el interceptor de api.js.
   const eliminar = useCallback(async (id) => {
     const r = await customerService.deleteCustomer(id);
     setClientes((lista) => lista.filter((c) => (c._id || c.id) !== id));
     return r;
   }, []);
 
-  /*
-   * El resumen de arriba. Se calcula sobre TODOS los clientes, no sobre los
-   * filtrados: es el estado del negocio, y cambiaría de significado si se
-   * moviera cada vez que alguien escribe en el buscador.
-   */
+  // El resumen de arriba. Se calcula sobre TODOS los clientes, no sobre los filtrados: es el estado
+  // del negocio, y cambiaría de significado si se moviera cada vez que alguien escribe en el
+  // buscador.
   const resumen = useMemo(() => ({
     total: clientes.length,
     activos: clientes.filter((c) => c.activo).length,
@@ -110,13 +91,9 @@ export const useClientes = () => {
     const texto = busqueda.trim().toLowerCase();
 
     return clientes.filter((c) => {
-      /*
-       * Se busca también por teléfono y DUI, no solo por nombre. Es como se
-       * busca de verdad en el mostrador: la persona no siempre recuerda cómo
-       * escribió su nombre al registrarse, pero su número sí lo sabe. Se
-       * comparan los dígitos pelados para que dé igual si escriben "7979-9999"
-       * o "79799999".
-       */
+      // Se busca también por teléfono y DUI, no solo por nombre. Es como se busca de verdad en el
+      // mostrador: la persona no siempre recuerda cómo escribió su nombre al registrarse, pero su número
+      // sí lo sabe.
       const soloDigitos = texto.replace(/\D/g, '');
       const coincide =
         !texto ||

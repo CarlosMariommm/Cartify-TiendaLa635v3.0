@@ -1,26 +1,6 @@
-/*
- * ============================================================
- * VOLAR AL CARRITO — volarAlCarrito.js
- * ============================================================
- * Al tocar "+", una copia de la foto del producto sale volando en arco hasta
- * el botón del carrito del encabezado, se encoge al llegar y el carrito se
- * sacude. Es la misma animación de la landing page.
- *
- * No es adorno: el aviso de "agregado" sale en una esquina y el número del
- * carrito cambia arriba, lejos de donde está mirando la persona. La foto que
- * viaja une las dos cosas — se ve A DÓNDE fue a parar lo que tocó.
- *
- * Con Web Animations y no con una librería: son dos animaciones, y así corre
- * en la GPU sin cargar nada extra.
- *
- *   - La capa de afuera se mueve en X con una curva pareja.
- *   - La foto de adentro se mueve en Y con una curva que primero SUBE un poco
- *     y después cae (el "back-in"): juntas dibujan el arco.
- *
- * Quien pidió menos movimiento en su sistema no ve el vuelo; el carrito igual
- * se entera por el número.
- * ============================================================
- */
+// VOLAR AL CARRITO — volarAlCarrito.js
+// Al tocar "+", una copia de la foto del producto sale volando en arco hasta el botón del carrito
+// del encabezado, se encoge al llegar y el carrito se sacude.
 
 const DURACION = 800;
 

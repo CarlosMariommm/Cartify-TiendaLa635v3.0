@@ -1,9 +1,7 @@
 import api from './api';
 
-/*
- * SERVICIO DE CRÉDITO CON PROVEEDORES — creditoService.js
- * La deuda sale de los movimientos; acá solo se piden y se registran.
- */
+// SERVICIO DE CRÉDITO CON PROVEEDORES — creditoService.js La deuda sale de los movimientos; acá
+// solo se piden y se registran.
 export const creditoService = {
   // Resumen de todos (listado y aviso del dashboard).
   getResumen: async () => {

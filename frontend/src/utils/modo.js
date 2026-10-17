@@ -1,22 +1,5 @@
-/*
- * ============================================================
- * MODO CLARO / OSCURO — modo.js
- * ============================================================
- * Lo que elige cada persona en Mi Cuenta → Preferencias. Vive en este
- * navegador (localStorage), no en la cuenta: se tiene que poder aplicar
- * ANTES de que cargue nada, incluso sin sesión, y cada aparato tiene su luz
- * (el teléfono de noche, la compu de la oficina).
- *
- *   'claro'   — como siempre (el de fábrica).
- *   'oscuro'  — fondo oscuro en la tienda y Mi Cuenta.
- *   'sistema' — el que tenga puesto el teléfono o la computadora, y cambia
- *               solo cuando ese cambia.
- *
- * El script de index.html repite esta misma lógica en pocas líneas para
- * pintar el primer cuadro sin parpadeo. Si cambia la llave o los valores,
- * cambian los dos lados.
- * ============================================================
- */
+// MODO CLARO / OSCURO — modo.js
+// Lo que elige cada persona en Mi Cuenta → Preferencias.
 
 export const LLAVE_MODO = 'la635_modo';
 
@@ -53,10 +36,8 @@ export const aplicarModo = (oscuro) => {
   const raiz = document.documentElement;
   if (oscuro) raiz.setAttribute('data-modo', 'oscuro');
   else raiz.removeAttribute('data-modo');
-  /*
-   * La barra del sistema del teléfono (y de la web instalada) toma el color
-   * del fondo de la página, --papel en index.css: blanca en claro, casi negra
-   * en oscuro. Si no, quedaba una franja blanca encima de la tienda oscura.
-   */
+  // La barra del sistema del teléfono (y de la web instalada) toma el color del fondo de la página,
+  // --papel en index.css: blanca en claro, casi negra en oscuro. Si no, quedaba una franja blanca
+  // encima de la tienda oscura.
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', oscuro ? '#121417' : '#FFFFFF');
 };

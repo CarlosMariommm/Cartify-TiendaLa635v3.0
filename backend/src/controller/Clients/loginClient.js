@@ -8,22 +8,8 @@ import { config } from "../../../config.js";
 
 const loginClientController = {};
 
-/*
- * El personal ya NO entra por aquí: se le indica su puerta.
- *
- * Esta puerta abría sesión de personal con solo correo y contraseña, para que
- * el repartidor llegara al Reparto de la tienda web. Eso dejaba a un
- * administrador entrar sin el código del 2FA que le pide /loginAdmin, con una
- * sesión de 30 días que también abría el panel. El Reparto ahora vive en la
- * app (por "¿Trabajas en la tienda?", con su código), y el personal entra al
- * panel por /admin.
- *
- * Pero decirle "correo o contraseña incorrectos" sería mentirle: están bien.
- * Así que, si la contraseña es la de su cuenta del personal, se le contesta
- * `esPersonal` y la web y la app lo llevan a su login con el correo puesto.
- * Solo con la contraseña correcta: sin ella no se revela de quién es el
- * correo.
- */
+// El personal ya NO entra por aquí: se le indica su puerta. Esta puerta abría sesión de personal
+// con solo correo y contraseña, para que el repartidor llegara al Reparto de la tienda web.
 const buscarPersonal = async (email) => {
   const admin = await adminModel.findOne({ email });
   if (admin) return { doc: admin, tipo: "admin" };
@@ -94,14 +80,8 @@ loginClientController.login = async (req, res) => {
     );
 
     if (!isMatch) {
-      /*
-       * Un mismo correo puede tener cuenta de cliente Y de personal, cada una
-       * con su contraseña. Si escribió la del personal, se le dice por dónde
-       * entrar en vez de "contraseña incorrecta".
-       *
-       * Va ANTES de sumar el intento fallido a propósito: escribir la
-       * contraseña de admin no debe ir bloqueando la cuenta de cliente.
-       */
+      // Un mismo correo puede tener cuenta de cliente Y de personal, cada una con su contraseña. Si
+      // escribió la del personal, se le dice por dónde entrar en vez de "contraseña incorrecta".
       const personal = await buscarPersonal(email);
       if (personal && (await esContrasenaDelPersonal(personal, password))) return aSuPuerta(res);
 
@@ -144,14 +124,9 @@ loginClientController.login = async (req, res) => {
       }
     );
 
-    /*
-     * Cookie del ÁREA DE CLIENTE, aparte de la del personal.
-     *
-     * Con una sola cookie para las dos, entrar como cliente pisaba la sesión
-     * de administrador y al revés. Y aquí eso es lo normal, no la excepción:
-     * el dueño es cliente de su propia tienda, con el mismo correo en las dos
-     * tablas. Ver también los dos cajones de localStorage en AuthContext.
-     */
+    // Cookie del ÁREA DE CLIENTE, aparte de la del personal. Con una sola cookie para las dos, entrar
+    // como cliente pisaba la sesión de administrador y al revés. Y aquí eso es lo normal, no la
+    // excepción: el dueño es cliente de su propia tienda, con el mismo correo en las dos tablas.
     res.cookie("authCookieCliente", token, opcionesCookie(30 * 24 * 60 * 60 * 1000)); // 30 días
 
     return res.status(200).json({

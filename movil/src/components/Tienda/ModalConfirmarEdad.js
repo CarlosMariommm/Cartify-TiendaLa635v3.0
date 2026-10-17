@@ -1,20 +1,5 @@
-/*
- * ============================================================
- * CONFIRMAR EDAD — el candado de los productos +18
- * ============================================================
- * Puerto de `frontend/src/components/Store/ModalConfirmarEdad.jsx`. Pide el
- * DUI, no la fecha de nacimiento: en El Salvador el DUI se emite a los 18,
- * así que uno bien formado ya afirma la mayoría de edad. Sigue siendo una
- * barrera BLANDA (no se puede comprobar que el documento sea suyo) — la
- * verificación de verdad es el DUI físico al momento de la entrega, y eso
- * se dice en la propia pantalla.
- *
- * Quien decide CUÁNDO se abre esto es EdadContext, no esta pantalla: aquí
- * solo se pinta y se valida. Montarla o no (en vez de un `if (!abierto)`
- * como en la web) es lo que ya hacen ModalProducto y MenuPasillos en esta
- * app, y de paso regala la animación de apertura sin pedirla dos veces.
- * ============================================================
- */
+// CONFIRMAR EDAD — el candado de los productos +18
+// Puerto de `frontend/src/components/Store/ModalConfirmarEdad.jsx`.
 
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -60,12 +45,9 @@ const ModalConfirmarEdad = ({ alCerrar, alConfirmar }) => {
     ]).start();
   }, [fondoOpacidad, panelY]);
 
-  /*
-   * Mismo cierre animado que ModalProducto, y por la misma razón: tocar
-   * fuera o el botón atrás no pueden quitar la vista de golpe cuando la
-   * apertura sí se anima — se veía como que la mitad del modal funcionaba
-   * distinto a la otra mitad.
-   */
+  // Mismo cierre animado que ModalProducto, y por la misma razón: tocar fuera o el botón atrás no
+  // pueden quitar la vista de golpe cuando la apertura sí se anima — se veía como que la mitad del
+  // modal funcionaba distinto a la otra mitad.
   const cerrarConAnimacion = () => {
     if (cerrandoRef.current) return;
     cerrandoRef.current = true;
@@ -82,10 +64,9 @@ const ModalConfirmarEdad = ({ alCerrar, alConfirmar }) => {
 
   useBotonAtras(cerrarConAnimacion);
 
-  // El asa se arrastra igual que en ModalProducto: baja con el dedo, y al
-  // soltar decide sola si cierra o vuelve a subir, según si pasó la mitad
-  // del panel. Ver el comentario largo en ModalProducto.js sobre por qué
-  // hace falta onPanResponderTerminationRequest.
+  // El asa se arrastra igual que en ModalProducto: baja con el dedo, y al soltar decide sola si
+  // cierra o vuelve a subir, según si pasó la mitad del panel. Ver el comentario largo en
+  // ModalProducto.js sobre por qué hace falta onPanResponderTerminationRequest.
   const panelAlturaRef = useRef(0);
 
   const panResponder = useRef(

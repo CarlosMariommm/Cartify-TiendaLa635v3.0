@@ -1,47 +1,6 @@
-/*
- * ============================================================
- * PAGOS — el saldo digital y los métodos guardados
- * ============================================================
- * El equivalente de `frontend/src/pages/cliente/MetodoPago.jsx`: la tarjeta
- * de saldo (con su canje) arriba, la lista de métodos de pago guardados
- * abajo. Los dos widgets ya existían sueltos —el canje vive en
- * Checkout.js, con `getSaldo`/`canjearTarjeta`— y aquí se juntan en su
- * propio apartado, como en la web.
- *
- * ── Agregar una tarjeta es como en cualquier tienda seria ──
- *
- * Número completo con la marca reconocida al vuelo, titular y vencimiento,
- * con una tarjeta de vista previa que se va llenando (ver VistaTarjeta.js).
- * El número se valida con el dígito verificador (Luhn) y el vencimiento no
- * puede estar en el pasado — las mismas reglas de la web, en utils/tarjetas.js.
- *
- * Antes esta pantalla pedía "alias y los últimos 4 dígitos" a mano: había que
- * mirar la tarjeta y transcribir, nadie validaba nada, y la lista no podía
- * decir de qué marca era ni cuándo vencía.
- *
- * ── No hay pasarela, ni aquí ni en la web ──
- *
- * El número completo NUNCA sale de este formulario: al servidor viajan la
- * marca, el tipo, los últimos 4, el titular y el vencimiento, y el CVV ni se
- * pide (lo pide la pasarela al momento de pagar). El backend recorta igual lo
- * que le manden de más (`updatePaymentMethods` en clientController.js). El
- * cobro de verdad pasa por caja o al entregar; "tarjeta" aquí es la intención
- * de pagar con tarjeta, no un cargo. Mismo criterio que Checkout.js.
- *
- * ── Efectivo ya no se guarda desde aquí ──
- *
- * Esta pantalla llegó a tener una tercera opción, "Efectivo", y se quitó: no
- * es un método que haya que dejar anotado —se elige al pagar, en Checkout.js,
- * que es donde sigue estando— y guardarlo solo llenaba la lista de renglones
- * sin dato. Lo que SÍ se conserva es pintar y poder borrar un efectivo viejo
- * de quien alcanzó a guardarlo: sale de la cuenta, no del formulario.
- *
- * ── Guardar (y borrar) es mandar la lista completa ──
- *
- * El endpoint reemplaza el arreglo entero, igual que direcciones: agregar o
- * quitar un método es guardar la lista ya modificada.
- * ============================================================
- */
+// PAGOS — el saldo digital y los métodos guardados
+// El equivalente de `frontend/src/pages/cliente/MetodoPago.jsx`: la tarjeta de saldo (con su
+// canje) arriba, la lista de métodos de pago guardados abajo.
 
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -240,11 +199,9 @@ const Pagos = ({ alVolver }) => {
     setTocado({ numero: true, vencimiento: true, titular: true });
     if (!listo) return;
 
-    /*
-     * Lo que se guarda: nunca el número completo. `type` (y no `tipo`) es el
-     * nombre que espera el backend y el que lee la web — con el otro, una
-     * tarjeta guardada desde el teléfono aparecía como "Efectivo" allá.
-     */
+    // Lo que se guarda: nunca el número completo. `type` (y no `tipo`) es el nombre que espera el
+    // backend y el que lee la web — con el otro, una tarjeta guardada desde el teléfono aparecía como
+    // "Efectivo" allá.
     const metodo = {
       type: 'tarjeta',
       alias: nuevo.alias.trim() || nombreMarcaTipo({ brand: marca, cardType: nuevo.tipo }, t),
@@ -365,11 +322,8 @@ const Pagos = ({ alVolver }) => {
               const efectivo = metodo.type === 'efectivo';
               const yaVencida = !efectivo && estaVencida(Number(metodo.expMonth), Number(metodo.expYear));
               const vence = vencimientoEnTexto(metodo.expMonth, metodo.expYear);
-              /*
-               * El renglón de abajo: "Visa crédito · •••• 4242 · Vence 08/29".
-               * El nombre de la marca solo si el alias no lo dice ya, que
-               * "Mastercard débito" dos veces se lee como un error.
-               */
+              // El renglón de abajo: "Visa crédito · •••• 4242 · Vence 08/29". El nombre de la marca solo si el
+              // alias no lo dice ya, que "Mastercard débito" dos veces se lee como un error.
               const detalle = efectivo
                 ? t('Efectivo')
                 : [

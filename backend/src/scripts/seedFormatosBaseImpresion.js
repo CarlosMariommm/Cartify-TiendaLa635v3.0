@@ -1,25 +1,6 @@
-/*
- * Seed de FORMATOS BASE de impresión.
- *
- * Un puñado de tamaños de uso general (Carta, Oficio, media carta, DUI,
- * pasaporte) para que el módulo de Impresiones no arranque vacío y el dueño
- * tenga algo de dónde partir. Se marcan con `esBase: true`, que el panel usa
- * solo para separarlos de los formatos propios en la tabla — no cambia en
- * nada cómo se cobran ni se usan.
- *
- * Los precios son un punto de partida, no una tarifa fijada: revíselos en
- * el panel (Impresiones → Agregar/Editar formato) antes de dejarlos activos.
- * La medida de la foto pasaporte es la más común en Centroamérica, pero
- * verifíquela si un cliente la necesita para un trámite oficial.
- *
- * Cómo correrlo:
- *   cd backend
- *   node src/scripts/seedFormatosBaseImpresion.js
- *
- * Es idempotente: busca cada formato por nombre. Si ya existe (Carta y A4,
- * casi seguro, ya estaban cargados a mano) solo le prende `esBase` — nunca
- * toca el precio ni la medida que el admin ya tenía puestos.
- */
+// Seed de FORMATOS BASE de impresión. Un puñado de tamaños de uso general (Carta, Oficio, media
+// carta, DUI, pasaporte) para que el módulo de Impresiones no arranque vacío y el dueño tenga algo
+// de dónde partir.
 import dotenv from "dotenv";
 dotenv.config();
 import mongoose from "mongoose";

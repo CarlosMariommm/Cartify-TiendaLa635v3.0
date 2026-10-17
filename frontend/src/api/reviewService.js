@@ -1,13 +1,8 @@
 import api from './api';
 
-/*
- * ============================================================
- * SERVICIO DE VALORACIONES — reviewService.js
- * ============================================================
- * Lo que opinan los clientes de cada producto. Reemplaza a las reseñas
- * inventadas que traía la ficha de producto.
- * ============================================================
- */
+// SERVICIO DE VALORACIONES — reviewService.js
+// Lo que opinan los clientes de cada producto. Reemplaza a las reseñas inventadas que traía la
+// ficha de producto.
 export const reviewService = {
   // Valoraciones + resumen (promedio, total y reparto por estrella).
   getByProduct: async (productId) => {

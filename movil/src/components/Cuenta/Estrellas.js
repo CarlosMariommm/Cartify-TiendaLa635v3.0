@@ -1,21 +1,6 @@
-/*
- * ============================================================
- * LAS CINCO ESTRELLAS — Estrellas.js
- * ============================================================
- * La fila de estrellas que se toca para calificar, y la misma fila quieta
- * cuando ya se calificó (`soloLectura`). La usan las dos valoraciones que la
- * web tiene en "Mis pedidos" y en el estado del pedido: la del servicio de
- * entrega y la del pedido.
- *
- * El amarillo es fijo, no sale de la paleta: una estrella llena es amarilla
- * en modo claro y en oscuro, y en Navidad también. El vacío sí sigue al modo,
- * porque es el gris del fondo de cada uno.
- *
- * Cada estrella se toca en 44 puntos aunque el dibujo mida 30: es el mínimo
- * con el que un pulgar no falla, y aquí fallar significa mandar 3 estrellas
- * en vez de 4.
- * ============================================================
- */
+// LAS CINCO ESTRELLAS — Estrellas.js
+// La fila de estrellas que se toca para calificar, y la misma fila quieta cuando ya se calificó
+// (`soloLectura`).
 
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Star } from 'lucide-react-native';

@@ -4,22 +4,9 @@ import { printMaterialService } from '../api/printMaterialService';
 import { numeroEnRango } from '../utils/validaciones';
 import { tAhora } from '../utils/idioma';
 
-/*
- * ============================================================
- * MATERIALES DE IMPRESIÓN — useMaterialesImpresion.js
- * ============================================================
- * Toda la lógica del papel y la tinta: cargarlos, editarlos, ajustar cuánto
- * queda, y —lo que de verdad importa— decidir si un formato se puede ofrecer
- * hoy o no.
- *
- * El problema que resuelve: alguien elegía "papel fotográfico a color", pagaba,
- * y se enteraba en el mostrador de que no había. Ahora el formato se apaga solo
- * y dice por qué, antes de cobrar.
- *
- * Lo usan las dos puntas: el panel (para administrar) y la pantalla del cliente
- * (solo para preguntar qué está disponible).
- * ============================================================
- */
+// MATERIALES DE IMPRESIÓN — useMaterialesImpresion.js
+// Toda la lógica del papel y la tinta: cargarlos, editarlos, ajustar cuánto queda, y —lo que de
+// verdad importa— decidir si un formato se puede ofrecer hoy o no.
 
 // Un material da abasto si está activo y queda algo. La existencia en 0 es la
 // única línea que apaga un formato; el mínimo solo sirve para avisar.
@@ -60,24 +47,17 @@ export const useMaterialesImpresion = () => {
   const papeles = useMemo(() => materiales.filter((m) => m.tipo !== 'tinta'), [materiales]);
   const tintas = useMemo(() => materiales.filter((m) => m.tipo === 'tinta'), [materiales]);
 
-  /*
-   * ¿Se puede imprimir a color hoy? Basta con que quede UN tóner de color.
-   * Si la tienda no cargó ninguna tinta todavía, se responde que sí: mientras
-   * nadie diga lo contrario, asumimos que la impresora funciona como siempre.
-   * Apagar el color porque falta configurar algo sería castigar al cliente por
-   * una tarea pendiente del panel.
-   */
+  // ¿Se puede imprimir a color hoy? Basta con que quede UN tóner de color. Si la tienda no cargó
+  // ninguna tinta todavía, se responde que sí: mientras nadie diga lo contrario, asumimos que la
+  // impresora funciona como siempre.
   const hayTintaDeColor = useMemo(() => {
     const deColor = tintas.filter((t) => t.esColor);
     if (deColor.length === 0) return true;
     return deColor.some(hayMaterial);
   }, [tintas]);
 
-  /*
-   * Si un formato se puede ofrecer, y si no, por qué no. Devuelve siempre el
-   * motivo en palabras: "agotado" a secas no le dice a nadie qué pasó ni
-   * cuándo volver.
-   */
+  // Si un formato se puede ofrecer, y si no, por qué no. Devuelve siempre el motivo en palabras:
+  // "agotado" a secas no le dice a nadie qué pasó ni cuándo volver.
   const disponibilidadDeFormato = useCallback((servicio) => {
     if (!servicio?.materialId) {
       // Formato sin material declarado: se comporta como antes de que esto
@@ -137,11 +117,9 @@ export const useMaterialesImpresion = () => {
     }
   };
 
-  /*
-   * Ajuste rápido: llegó el papel, se acabó un cartucho. Se pinta el cambio
-   * ANTES de que conteste el servidor y se revierte si falla — es un número
-   * que se toca muchas veces seguidas y esperar en cada toque se siente roto.
-   */
+  // Ajuste rápido: llegó el papel, se acabó un cartucho. Se pinta el cambio ANTES de que conteste el
+  // servidor y se revierte si falla — es un número que se toca muchas veces seguidas y esperar en
+  // cada toque se siente roto.
   const ajustar = async (id, existencia) => {
     const n = numeroEnRango(existencia, { min: 0, entero: true });
     if (n === null) {

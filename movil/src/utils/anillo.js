@@ -1,18 +1,5 @@
-/*
- * ============================================================
- * EL ANILLO DE PROMOCIONES — anillo.js
- * ============================================================
- * Las cuentas del carrusel de promociones, separadas de la pantalla para
- * poder probarlas. Son las MISMAS que la web (usePromoCarousel.js y el
- * ANILLO de PromoBanners.jsx): la del centro de frente y las de los lados
- * giradas hacia adentro, como los discos de una rocola.
- *
- * La web empuja las de los lados hacia atrás con translateZ. React Native no
- * tiene translateZ, así que esa distancia se convierte en lo que el ojo ve de
- * ella: la tarjeta se achica y se acerca al centro en la misma proporción que
- * la achicaría la perspectiva.
- * ============================================================
- */
+// EL ANILLO DE PROMOCIONES — anillo.js
+// Las cuentas del carrusel de promociones, separadas de la pantalla para poder probarlas.
 
 // Cada cuánto avanza sola, y cuántas entran al carrusel (igual que la web).
 export const INTERVALO_ANILLO = 5000;
@@ -27,11 +14,9 @@ export const ANILLO = {
   PERSPECTIVA: 1250,
 };
 
-/*
- * Las más nuevas primero y solo nueve: si la tienda arma una promo hoy, quiere
- * que se vea, no que quede detrás de una de hace tres meses. Las que no entran
- * igual aplican su descuento: lo que se limita es el anuncio, no la promo.
- */
+// Las más nuevas primero y solo nueve: si la tienda arma una promo hoy, quiere que se vea, no que
+// quede detrás de una de hace tres meses. Las que no entran igual aplican su descuento: lo que se
+// limita es el anuncio, no la promo.
 export const ordenarAnuncios = (visibles, maximo = MAXIMO_ANUNCIOS) =>
   [...(Array.isArray(visibles) ? visibles : [])]
     .sort((a, b) => new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0))
@@ -41,12 +26,9 @@ export const ordenarAnuncios = (visibles, maximo = MAXIMO_ANUNCIOS) =>
 export const indiceEnAnillo = (paso, total) =>
   total > 0 ? ((Math.round(paso) % total) + total) % total : 0;
 
-/*
- * Distancia de una tarjeta al centro, por el camino más corto, en (-total/2,
- * total/2]. Con 5 promos y la 0 al frente, la 4 está a -1 (no a +4): el anillo
- * gira para el lado que menos se mueve. Acepta posiciones con decimales (a
- * medio deslizar) y pasos que ya dieron varias vueltas.
- */
+// Distancia de una tarjeta al centro, por el camino más corto, en (-total/2, total/2]. Con 5
+// promos y la 0 al frente, la 4 está a -1 (no a +4): el anillo gira para el lado que menos se
+// mueve. Acepta posiciones con decimales (a medio deslizar) y pasos que ya dieron varias vueltas.
 export const distanciaEnAnillo = (i, posicion, total) => {
   if (total <= 0) return 0;
   const mitad = total / 2;
@@ -57,11 +39,9 @@ export const distanciaEnAnillo = (i, posicion, total) => {
 // Lo que la web hace con translateZ: cuánto se achica a esa profundidad.
 const lejania = (ad) => ANILLO.PERSPECTIVA / (ANILLO.PERSPECTIVA + ad * ANILLO.PROFUNDIDAD);
 
-/*
- * Cómo se ve una tarjeta a distancia d del centro. `x` va en fracción del
- * ancho de la tarjeta. Más allá de un paso (|d| > 1) ya no se ve: así una
- * que da la vuelta por detrás del anillo no cruza la pantalla a la vista.
- */
+// Cómo se ve una tarjeta a distancia d del centro. `x` va en fracción del ancho de la tarjeta. Más
+// allá de un paso (|d| > 1) ya no se ve: así una que da la vuelta por detrás del anillo no cruza
+// la pantalla a la vista.
 export const poseEnAnillo = (d, { sinGiro = false } = {}) => {
   const ad = Math.abs(d);
   const f = lejania(ad);

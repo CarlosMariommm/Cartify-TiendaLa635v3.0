@@ -1,27 +1,6 @@
-/*
- * ============================================================
- * IMPRESIONES — el pasillo de impresión de la tienda
- * ============================================================
- * Puerto de `frontend/src/pages/impresiones.jsx`: elegir un formato, subir
- * el archivo, ajustar las opciones, ver el precio y enviarlo a imprimir.
- * No es otra tienda — es otro pasillo de la misma, por eso vive fuera de
- * `pasillos` (que solo filtra el catálogo) y tiene su propia pantalla: ver
- * el comentario en components/Tienda/MenuPasillos.js.
- *
- * ── Lo que esta pantalla NO trae, a propósito ──
- *
- * La pestaña "Armar mi impresión" de la web (el editor tipo lienzo que
- * acomoda varias fotos en una hoja) usa un <canvas> de HTML — no hay
- * equivalente nativo en React Native sin traer una librería pesada nueva.
- * Aquí solo existe "Ya tengo mi archivo". Como consecuencia, `paginas` es
- * siempre 1 (igual que en la web, en ese mismo modo: ver `enviar` en
- * impresiones.jsx, que manda `pages: 1` salvo que venga del editor).
- *
- * El pedido que se crea es un Order normal (`channel: 'impresion'`), así que
- * ya aparece solo en "Mis Pedidos" y en la burbuja, con su código de
- * entrega — no hace falta tocar esas pantallas para nada de esto.
- * ============================================================
- */
+// IMPRESIONES — el pasillo de impresión de la tienda
+// Puerto de `frontend/src/pages/impresiones.jsx`: elegir un formato, subir el archivo, ajustar las
+// opciones, ver el precio y enviarlo a imprimir.
 
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';

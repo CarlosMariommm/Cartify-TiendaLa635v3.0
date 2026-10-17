@@ -1,31 +1,17 @@
-/*
- * ============================================================
- * PROMOCIONES — promos.js
- * ============================================================
- * Copia de `frontend/src/utils/promos.js`. Son las reglas de qué promoción
- * rige hoy y cómo se anuncia, y tienen que ser las MISMAS que en la web: una
- * promo que en la computadora ya venció y en el teléfono sigue viva es un
- * precio distinto según por dónde entre el cliente.
- * ============================================================
- */
+// PROMOCIONES — promos.js
+// Copia de `frontend/src/utils/promos.js`.
 
 import { idiomaDeAhora, localeDe, tAhora } from './idioma';
 
 const numero = (v) => Number(v) || 0;
 
-/*
- * El sello del ahorro: "-25%", "$1.25" o "2x1".
- * Ojo: el descuento vive en cada item, NO a nivel de promo.
- */
+// El sello del ahorro: "-25%", "$1.25" o "2x1".
 export const etiquetaPromo = (promo, t = tAhora) => {
   if (!promo) return '';
   const items = Array.isArray(promo.items) ? promo.items : [];
 
-  /*
-   * El anuncio no tiene ahorro que mostrar: su sello es una palabra que la
-   * tienda escribe ("Nuevo", "De la casa"). Sin esto saldría "-0%", que es
-   * peor que no poner nada.
-   */
+  // El anuncio no tiene ahorro que mostrar: su sello es una palabra que la tienda escribe ("Nuevo",
+  // "De la casa"). Sin esto saldría "-0%", que es peor que no poner nada.
   if (promo.type === 'anuncio') {
     return t((promo.etiqueta || '').trim() || 'Nuevo');
   }
@@ -46,12 +32,9 @@ export const etiquetaPromo = (promo, t = tAhora) => {
   return `-${Math.max(...descuentos)}%`;
 };
 
-/*
- * ── Vencimiento ──
- * El backend apaga las promos vencidas cuando alguien pide la lista, pero la
- * app no puede depender de eso: alguien que dejó la app abierta desde ayer
- * seguiría viendo la promo de ayer. Por eso la fecha se mira también acá.
- */
+// ── Vencimiento ── El backend apaga las promos vencidas cuando alguien pide la lista, pero la app
+// no puede depender de eso: alguien que dejó la app abierta desde ayer seguiría viendo la promo de
+// ayer. Por eso la fecha se mira también acá.
 
 // Medianoche de hoy: comparar días completos, no horas.
 const hoyCero = () => {
@@ -75,10 +58,8 @@ export const promoVencida = (promo) => {
 export const promoVigente = (promo) =>
   !!promo && promo.isActive !== false && !promoVencida(promo);
 
-/*
- * Cuánto le queda, dicho como lo diría una persona. "Termina el 3 de agosto"
- * sirve para planear; "Último día" es lo que hace que alguien compre hoy.
- */
+// Cuánto le queda, dicho como lo diría una persona. "Termina el 3 de agosto" sirve para planear;
+// "Último día" es lo que hace que alguien compre hoy.
 export const textoVencimiento = (promo, t = tAhora) => {
   const fin = fechaFin(promo);
   if (!fin) return null;
@@ -95,23 +76,16 @@ export const textoVencimiento = (promo, t = tAhora) => {
   return t('Termina el {fecha}', { fecha: fin.toLocaleDateString(localeDe(idiomaDeAhora()), { day: 'numeric', month: 'long' }) });
 };
 
-/*
- * Las que de verdad se anuncian: vigentes y marcadas para anunciar. No se
- * exige imagen —la tarjeta se dibuja con el texto y los colores del tema— pero
- * sí un título: sin él el banner saldría vacío.
- */
+// Las que de verdad se anuncian: vigentes y marcadas para anunciar. No se exige imagen —la tarjeta
+// se dibuja con el texto y los colores del tema— pero sí un título: sin él el banner saldría
+// vacío.
 export const promosVisibles = (lista) =>
   (Array.isArray(lista) ? lista : []).filter(
     (p) => promoVigente(p) && p.showBanner !== false && (p.image || p.title)
   );
 
-/*
- * ── Clasificación por pasillo ──
- * Los pasillos (módulos) a los que pertenece una promo salen de SUS
- * productos: una promo de pan tiene productos de Panadería, así que es una
- * promo de Panadería. Solo funciona con los items poblados (productId como
- * objeto), que es justo como los devuelve getPromociones.
- */
+// ── Clasificación por pasillo ── Los pasillos (módulos) a los que pertenece una promo salen de
+// SUS productos: una promo de pan tiene productos de Panadería, así que es una promo de Panadería.
 export const modulosDePromo = (promo) => {
   const ids = new Set();
   (promo?.items || []).forEach((it) => {
@@ -123,12 +97,8 @@ export const modulosDePromo = (promo) => {
   return [...ids];
 };
 
-/*
- * ¿Esta promo se muestra en este pasillo? Sin pasillo elegido (toda la
- * tienda), sí. Con pasillo, solo si alguno de sus productos vive ahí. Si la
- * promo no trae de dónde sacar el módulo (productos borrados o sin poblar),
- * se muestra igual: mejor una promo de más que perderla por un dato que falta.
- */
+// ¿Esta promo se muestra en este pasillo? Sin pasillo elegido (toda la tienda), sí. Con pasillo,
+// solo si alguno de sus productos vive ahí.
 export const promoEnModulo = (promo, moduloId) => {
   if (!moduloId) return true;
   const mods = modulosDePromo(promo);

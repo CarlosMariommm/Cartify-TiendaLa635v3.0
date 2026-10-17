@@ -1,33 +1,10 @@
-/*
- * ============================================================
- * BLOQUES DE LA PORTADA — portada.js
- * ============================================================
- * Qué se puede acomodar en la primera pantalla de la tienda.
- *
- * LA REGLA: libertad acotada.
- *
- * El dueño puede ELEGIR CUÁLES filas se muestran y EN QUÉ ORDEN. Lo que no
- * puede es inventar una fila nueva ni escoger a mano qué producto va en cada
- * una. Eso último no es una limitación por pereza: las filas se arman solas
- * con lo que hay en el inventario (ver useSeccionesTienda), y esa es la razón
- * de que sigan teniendo sentido seis meses después sin que nadie las toque.
- * Un constructor libre termina, siempre, en una portada que alguien armó una
- * vez y quedó apuntando a productos que ya no existen.
- *
- * Lo que sí se protege: la portada no puede quedar vacía. Ver useAjustesTienda.
- * ============================================================
- */
+// BLOQUES DE LA PORTADA — portada.js
+// Qué se puede acomodar en la primera pantalla de la tienda. LA REGLA: libertad acotada. El dueño
+// puede ELEGIR CUÁLES filas se muestran y EN QUÉ ORDEN.
 
-/*
- * El catálogo. El ORDEN de este arreglo es el orden por defecto — el que ve
- * una tienda recién instalada que nunca entró a personalizar nada.
- *
- * `fija` marca las filas que el sistema arma siempre igual. Las que no lo son
- * dependen de datos: "Volver a comprar" necesita que ese cliente haya
- * comprado antes, y los estantes automáticos necesitan que el clasificador
- * reconozca familias. Apagar una fila que hoy no se pinta igual sirve: el día
- * que haya datos, aparece o no según lo que se haya decidido aquí.
- */
+// El catálogo. El ORDEN de este arreglo es el orden por defecto — el que ve una tienda recién
+// instalada que nunca entró a personalizar nada. `fija` marca las filas que el sistema arma
+// siempre igual.
 export const BLOQUES_PORTADA = [
   {
     clave: 'promos',
@@ -71,25 +48,14 @@ export const CLAVES_DE_PORTADA = BLOQUES_PORTADA.map((b) => b.clave);
 
 export const bloquePorClave = (clave) => BLOQUES_PORTADA.find((b) => b.clave === clave);
 
-/*
- * Las filas que arma useSeccionesTienda tienen claves propias: las tres
- * conocidas y luego "familia-quesos", "familia-bebidas"… Todas esas caen bajo
- * el mismo interruptor, porque cuáles aparecen depende del inventario y no
- * tendría sentido pedirle a alguien que ordene una lista que cambia sola.
- */
+// Las filas que arma useSeccionesTienda tienen claves propias: las tres conocidas y luego
+// "familia-quesos", "familia-bebidas"…
 export const bloqueDeSeccion = (claveDeSeccion = '') =>
   claveDeSeccion.startsWith('familia-') ? 'familias' : claveDeSeccion;
 
-/*
- * Junta lo guardado con el catálogo y devuelve la lista lista para pintar o
- * para editar: en orden, sin claves que ya no existan y sin dejar fuera las
- * que se agregaron al catálogo después de la última vez que se guardó.
- *
- * Lo segundo importa más de lo que parece: el día que se invente un bloque
- * nuevo, las tiendas que ya habían personalizado su portada NO tienen que
- * volver a entrar a activarlo. Aparece al final, encendido, como cualquier
- * novedad del sistema.
- */
+// Junta lo guardado con el catálogo y devuelve la lista lista para pintar o para editar: en orden,
+// sin claves que ya no existan y sin dejar fuera las que se agregaron al catálogo después de la
+// última vez que se guardó.
 export const resolverPortada = (guardadas = []) => {
   const porClave = new Map(
     (guardadas || [])

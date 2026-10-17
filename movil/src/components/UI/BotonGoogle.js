@@ -1,17 +1,6 @@
-/*
- * ============================================================
- * CON GOOGLE — BotonGoogle.js
- * ============================================================
- * El botón de Google del inicio de sesión y del registro. Contorneado, no
- * relleno como el de la acción principal que va arriba: es la otra puerta,
- * no la primera. Vive aparte para que las dos pantallas no se desigualen;
- * antes estaba escrito solo dentro de LoginClient.
- *
- * Lo que dice lo pone cada pantalla, como el botón oficial de la web:
- * "Continuar con Google" al entrar, "Registrarse con Google" al crear la
- * cuenta.
- * ============================================================
- */
+// CON GOOGLE — BotonGoogle.js
+// El botón de Google del inicio de sesión y del registro. Contorneado, no relleno como el de la
+// acción principal que va arriba: es la otra puerta, no la primera.
 
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { EsperaMascota } from '../Tiqui/Mascota';

@@ -29,12 +29,9 @@ const defaultStyles = {
   light: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
 };
 
-// A tile-less, dependency-free style with a transparent background. Use it for
-// data visualizations (choropleths, world arcs, dot maps) where you draw your
-// own layers and don't need a street basemap. The easiest way to opt in is the
-// `blank` prop:
-//   <Map blank>...</Map>
-// The transparent background lets the themed container show through.
+// A tile-less, dependency-free style with a transparent background. Use it for data visualizations
+// (choropleths, world arcs, dot maps) where you draw your own layers and don't need a street
+// basemap.
 const blankMapStyle = {
   version: 8,
   sources: {},
@@ -949,12 +946,9 @@ function MapPopup({
 const EMPTY_ROUTE_MEASURE = { cumulative: [], total: 0 };
 const EMPTY_COORDINATES = [];
 
-/**
- * `beforeId`, but only when that layer is actually in the style. MapLibre's
- * `addLayer` fires an error and returns *without adding the layer* when
- * `before` is missing, which would silently drop the route — easy to hit with
- * a `beforeId` that exists in one basemap but not another.
- */
+// `beforeId`, but only when that layer is actually in the style. MapLibre's `addLayer` fires an
+// error and returns *without adding the layer* when `before` is missing, which would silently drop
+// the route — easy to hit with a `beforeId` that exists in one basemap but not another.
 function resolveBeforeId(map, beforeId) {
   return beforeId && map.getLayer(beforeId) ? beforeId : undefined;
 }
@@ -964,11 +958,9 @@ function clampFraction(value) {
   return Math.min(1, Math.max(0, value));
 }
 
-/**
- * Cumulative length along the route. Segment lengths use an equirectangular
- * approximation (longitude scaled by cos(latitude)) — accurate enough for
- * splitting a route at a fraction, and much cheaper than haversine.
- */
+// Cumulative length along the route. Segment lengths use an equirectangular approximation
+// (longitude scaled by cos(latitude)) — accurate enough for splitting a route at a fraction, and
+// much cheaper than haversine.
 function measureRoute(coordinates) {
   if (coordinates.length < 2) return EMPTY_ROUTE_MEASURE;
 
@@ -1016,10 +1008,8 @@ function pointAtFraction(coordinates, measure, fraction) {
   return [lng1 + (lng2 - lng1) * ratio, lat1 + (lat2 - lat1) * ratio];
 }
 
-/**
- * The portion of the route up to `fraction`. The final point is interpolated,
- * so the slice ends exactly at the fraction rather than at the nearest vertex.
- */
+// The portion of the route up to `fraction`. The final point is interpolated, so the slice ends
+// exactly at the fraction rather than at the nearest vertex.
 function sliceAtFraction(coordinates, measure, fraction) {
   if (coordinates.length < 2) return [];
 
@@ -1197,10 +1187,9 @@ function MapRoute({
     resolvedDashArray,
   ]);
 
-  // Raise the active route (and anything it owns) above its siblings. With a
-  // `beforeId` it moves to the top of the group below that layer instead.
-  // Siblings that mount later (alternatives arriving from a request) add
-  // their layers on top, so the raise also re-runs on style changes.
+  // Raise the active route (and anything it owns) above its siblings. With a `beforeId` it moves to
+  // the top of the group below that layer instead. Siblings that mount later (alternatives arriving
+  // from a request) add their layers on top, so the raise also re-runs on style changes.
   useEffect(() => {
     if (!ready || !map || !active) return;
 
@@ -1210,10 +1199,9 @@ function MapRoute({
     const raise = () => {
       const order = map.getLayersOrder();
 
-      // React only when layers are added or removed, never to a reorder.
-      // `moveLayer` fires "styledata" itself, so reacting to order would loop
-      // — with one route against its own move, and with two `active` routes
-      // against each other, forever.
+      // React only when layers are added or removed, never to a reorder. `moveLayer` fires "styledata"
+      // itself, so reacting to order would loop — with one route against its own move, and with two
+      // `active` routes against each other, forever.
       const layerSet = [...order].sort().join("|");
       if (layerSet === lastLayerSet) return;
       lastLayerSet = layerSet;
@@ -1312,10 +1300,8 @@ function MapRoute({
   );
 }
 
-/**
- * Draws the traveled portion of the parent `MapRoute` on top of the base line.
- * Renders nothing until the route has a `progress` value.
- */
+// Draws the traveled portion of the parent `MapRoute` on top of the base line. Renders nothing
+// until the route has a `progress` value.
 function RouteProgress({
   color,
   width,
@@ -1414,10 +1400,8 @@ function RouteProgress({
   return null;
 }
 
-/**
- * A `MapMarker` anchored to a position along the parent `MapRoute`. Takes the
- * same children as `MapMarker` (`MarkerContent`, `MarkerPopup`, ...).
- */
+// A `MapMarker` anchored to a position along the parent `MapRoute`. Takes the same children as
+// `MapMarker` (`MarkerContent`, `MarkerPopup`, ...).
 function RouteMarker(
   {
     at,
@@ -1439,21 +1423,16 @@ function RouteMarker(
   );
 }
 
-// Monochrome defaults: a neutral-gray fill (hex of the grayscale chart tokens)
-// with a fixed near-surface line for thin separators. Colors are hardcoded (not
-// theme tokens), tuned for a typical light/dark surface. Override via
-// `fillPaint` / `linePaint`.
+// Monochrome defaults: a neutral-gray fill (hex of the grayscale chart tokens) with a fixed
+// near-surface line for thin separators. Colors are hardcoded (not theme tokens), tuned for a
+// typical light/dark surface. Override via `fillPaint` / `linePaint`.
 const GEOJSON_DEFAULT_COLORS = {
   light: { fill: "#d4d4d4", line: "#ffffff" },
   dark: { fill: "#404040", line: "#171717" }
 };
 
-/**
- * Renders arbitrary GeoJSON as fill + outline layers on the map. Composes like
- * `MapRoute` / `MapArc` — drop it inside `<Map>` (typically with `blank`) for
- * choropleths and region/data maps. For full control over expressions and
- * multiple layers, manage layers directly via `useMap()` instead.
- */
+// Renders arbitrary GeoJSON as fill + outline layers on the map. Composes like `MapRoute` /
+// `MapArc` — drop it inside `<Map>` (typically with `blank`) for choropleths and region/data maps.
 function MapGeoJSON(
   {
     data,
@@ -1683,11 +1662,9 @@ const DEFAULT_ARC_LAYOUT = {
 function buildArcCoordinates(from, to, curvature, samples) {
   const [x0, y0] = from;
   const [xTo, y2] = to;
-  // Unwrap the destination longitude so |dx| <= 180. This makes arcs that
-  // straddle the antimeridian (e.g. Tokyo -> San Francisco) bow the short way
-  // across the Pacific instead of the long way around the globe. Resulting
-  // longitudes may fall outside [-180, 180]; MapLibre renders them correctly
-  // on the globe projection, and on mercator when world copies are enabled.
+  // Unwrap the destination longitude so |dx| <= 180. This makes arcs that straddle the antimeridian
+  // (e.g. Tokyo -> San Francisco) bow the short way across the Pacific instead of the long way
+  // around the globe.
   const rawDx = xTo - x0;
   const x2 = rawDx > 180 ? xTo - 360 : rawDx < -180 ? xTo + 360 : xTo;
   const dx = x2 - x0;

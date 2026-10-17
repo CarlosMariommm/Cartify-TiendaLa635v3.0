@@ -1,15 +1,6 @@
-/*
- * ============================================================
- * PLANTILLAS DE PROMOCIÓN — plantillasPromo.js
- * ============================================================
- * El plan B (y el plan A si nadie configura la llave de la IA).
- *
- * Arma el texto de una promoción con puras reglas: sin internet, sin llaves,
- * sin costo y sin fallar nunca. No es tan creativo como un modelo, pero para
- * una tienda de barrio "25% menos en Queso Fresco" dice todo lo que hay que
- * decir. La IA se encarga de darle vuelo cuando está disponible.
- * ============================================================
- */
+// PLANTILLAS DE PROMOCIÓN — plantillasPromo.js
+// El plan B (y el plan A si nadie configura la llave de la IA). Arma el texto de una promoción con
+// puras reglas: sin internet, sin llaves, sin costo y sin fallar nunca.
 
 const dinero = (n) => `$${(Number(n) || 0).toFixed(2)}`;
 
@@ -78,12 +69,9 @@ const porNxM = (items, buyQty, payQty) => {
 };
 
 /* ---------- Anuncio (sin cambio de precio) ---------- */
-/*
- * Aquí no hay ahorro que contar, así que el gancho es el producto: que exista,
- * que acabe de llegar, que lo hagan ellos. Las plantillas quedan más pobres
- * que en los otros tipos justamente por eso — es el caso donde más se nota
- * cuando la IA está disponible.
- */
+// Aquí no hay ahorro que contar, así que el gancho es el producto: que exista, que acabe de
+// llegar, que lo hagan ellos. Las plantillas quedan más pobres que en los otros tipos justamente
+// por eso — es el caso donde más se nota cuando la IA está disponible.
 const porAnuncio = (items) => {
   const uno = items.length === 1;
   const producto = items[0];
@@ -100,10 +88,8 @@ const porAnuncio = (items) => {
   };
 };
 
-/*
- * Genera el texto completo de la promo. Mismos campos que devuelve la IA, así
- * el formulario no tiene que saber de dónde vino.
- */
+// Genera el texto completo de la promo. Mismos campos que devuelve la IA, así el formulario no
+// tiene que saber de dónde vino.
 export const generarCopyPlantilla = ({ type, items, buyQty = 2, payQty = 1 }) => {
   let copy;
   if (type === "anuncio") copy = porAnuncio(items);

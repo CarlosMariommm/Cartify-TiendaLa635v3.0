@@ -1,35 +1,5 @@
-/*
- * ============================================================
- * INICIAR SESIÓN — la puerta, ya no el portón
- * ============================================================
- * La versión móvil de `frontend/src/pages/LoginClient.jsx`.
- *
- * ── Aquí solo va el formulario ──
- *
- * En la web la pantalla son dos mitades: a la izquierda quién es la tienda y
- * por qué vale la pena tener cuenta —el titular, las tres ventajas y un botón
- * grande de registro— y a la derecha el formulario. Eso se llegó a portar
- * poniendo el argumento debajo, que es lo que la propia web hace en pantalla
- * angosta.
- *
- * Se quitó. En un teléfono ese bloque no acompaña al formulario: lo entierra.
- * Son tres pantallazos de desplazamiento vendiendo la cuenta a alguien que ya
- * está escribiendo su correo para entrar, y con dos caminos distintos para
- * registrarse a distinta altura de la misma pantalla. Queda el enlace del pie
- * de la tarjeta, que es donde uno lo busca.
- *
- * Quien llega aquí ya venía haciendo algo (pagar, ver Mi Cuenta, guardar un
- * favorito), así que la pantalla tiene que verse como parte de la misma tienda
- * y no como un peaje. De ahí la salida de arriba y el "puede seguir viendo la
- * tienda sin cuenta" bajo el título.
- *
- * ── El rediseño de agosto de 2026 ──
- *
- * Formulario sin tarjeta con borde: el título grande a la izquierda y los
- * campos en píldora hacen de contenedor, no hace falta dibujar uno encima.
- * Y se sumó Google de verdad (antes no existía en móvil, solo en la web).
- * ============================================================
- */
+// INICIAR SESIÓN — la puerta, ya no el portón
+// La versión móvil de `frontend/src/pages/LoginClient.jsx`. ── Aquí solo va el formulario ──
 
 import { useRef, useState } from 'react';
 import {
@@ -104,45 +74,33 @@ const LoginClient = ({ irARegistro, irATienda, irAPersonal }) => {
         password: valores.password,
       });
 
-      /*
-       * Un servidor sin actualizar todavía abre sesión del personal por esta
-       * puerta. No se guarda como si fuera de cliente: se le lleva a la suya.
-       */
+      // Un servidor sin actualizar todavía abre sesión del personal por esta puerta. No se guarda como
+      // si fuera de cliente: se le lleva a la suya.
       if (res.userType && res.userType !== 'client') {
         irAPersonal?.(valores.email.trim());
         return;
       }
       login(res.token, 'client', res.client);
     } catch (err) {
-      /*
-       * Escribió su cuenta del personal: el servidor ya no le abre sesión por
-       * aquí (se saltaba el código del segundo paso) y contesta `esPersonal`.
-       * Se le lleva a "¿Trabajas en la tienda?" con el correo ya puesto.
-       */
+      // Escribió su cuenta del personal: el servidor ya no le abre sesión por aquí (se saltaba el código
+      // del segundo paso) y contesta `esPersonal`. Se le lleva a "¿Trabajas en la tienda?" con el correo
+      // ya puesto.
       if (err.esPersonal && irAPersonal) {
         irAPersonal(valores.email.trim());
         return;
       }
-      /*
-       * El error del servidor va dentro de la tarjeta y no en una alerta que
-       * hay que cerrar: "la contraseña es incorrecta" se lee al lado del campo
-       * que hay que corregir, con la contraseña todavía escrita.
-       */
+      // El error del servidor va dentro de la tarjeta y no en una alerta que hay que cerrar: "la
+      // contraseña es incorrecta" se lee al lado del campo que hay que corregir, con la contraseña
+      // todavía escrita.
       setAvisoServidor(err.message || t('No se pudo iniciar sesión'));
     } finally {
       setCargando(false);
     }
   };
 
-  /*
-   * Entrar con Google. El selector de cuenta nativo entrega un idToken; se
-   * manda al backend (misma ruta y misma verificación que la web) y, si
-   * cuadra, se sigue el mismo camino que el login normal.
-   *
-   * El correo aquí lo da Google, no un campo del formulario propio, así que
-   * un error se avisa en el mismo cartel rojo de siempre — no hay a qué
-   * campo pegárselo.
-   */
+  // Entrar con Google. El selector de cuenta nativo entrega un idToken; se manda al backend (misma
+  // ruta y misma verificación que la web) y, si cuadra, se sigue el mismo camino que el login
+  // normal.
   const conGoogle = async () => {
     try {
       setAvisoServidor('');
@@ -163,14 +121,9 @@ const LoginClient = ({ irARegistro, irATienda, irAPersonal }) => {
       const res = await googleLoginDB(idToken);
       login(res.token, res.userType || 'client', res.client);
     } catch (err) {
-      /*
-       * Esta pantalla es para ENTRAR, no para registrarse — igual que la web.
-       * Si el correo de Google no tiene cuenta, el backend se niega a
-       * crearla aquí (no hay dónde aceptar los términos ni dejar el
-       * teléfono) y contesta con `requiereConsentimiento`. Se le avisa claro
-       * y se le manda a Registro, que tiene su propio botón de Google con
-       * las casillas de los términos al lado.
-       */
+      // Esta pantalla es para ENTRAR, no para registrarse — igual que la web. Si el correo de Google no
+      // tiene cuenta, el backend se niega a crearla aquí (no hay dónde aceptar los términos ni dejar el
+      // teléfono) y contesta con `requiereConsentimiento`.
       if (err.requiereConsentimiento) {
         setAvisoServidor(t('No tienes una cuenta con ese correo de Google. Regístrate primero: también puedes hacerlo con Google.'));
         return;
@@ -198,11 +151,8 @@ const LoginClient = ({ irARegistro, irATienda, irAPersonal }) => {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/*
-            Tiqui colgando arriba del formulario, como en el inicio de sesión
-            de la web: se tapa los ojos en la contraseña, se pone contenta
-            mientras entra y pensativa si algo no cuadró.
-          */}
+          {/* Tiqui colgando arriba del formulario, como en el inicio de sesión de la web: se tapa los ojos en
+             la contraseña, se pone contenta mientras entra y pensativa si algo no cuadró. */}
           <View style={estilos.tiqui} pointerEvents="none">
             <TiquiColgada
               cara={cargando || cargandoGoogle ? 'feliz' : avisoServidor ? 'piensa' : enContrasena ? 'tapada' : 'normal'}
@@ -248,10 +198,7 @@ const LoginClient = ({ irARegistro, irATienda, irAPersonal }) => {
 
           <View style={estilos.fila}>
             <Casilla marcada={recordarme} alCambiar={setRecordarme} etiqueta={t('Recordarme 30 días')} />
-            {/*
-              La recuperación todavía no existe en la app: se hace en la web,
-              que ya la tiene completa. Antes este enlace no hacía nada.
-            */}
+            {/* La recuperación todavía no existe en la app: se hace en la web, que ya la tiene completa. */}
             <Pressable
               hitSlop={8}
               accessibilityRole="link"
@@ -292,11 +239,8 @@ const LoginClient = ({ irARegistro, irATienda, irAPersonal }) => {
             alPresionar={conGoogle}
           />
 
-          {/*
-            La única puerta al registro que queda, y va aquí porque es donde
-            se busca: al final del formulario, después de comprobar que no se
-            tiene con qué entrar.
-          */}
+          {/* La única puerta al registro que queda, y va aquí porque es donde se busca: al final del
+             formulario, después de comprobar que no se tiene con qué entrar. */}
           <Text style={estilos.pie}>
             {t('¿No tienes una cuenta?')}{' '}
             <Text style={[estilos.pieEnlace, { color: colores.marcaTexto }]} onPress={irARegistro}>
@@ -304,11 +248,8 @@ const LoginClient = ({ irARegistro, irATienda, irAPersonal }) => {
             </Text>
           </Text>
 
-          {/*
-            La puerta del personal: el administrador entra al Reparto y al panel
-            web; el empleado, al Reparto (ver pages/personal). Discreta a
-            propósito: la pantalla es de los clientes.
-          */}
+          {/* La puerta del personal: el administrador entra al Reparto y al panel web; el empleado, al
+             Reparto (ver pages/personal). Discreta a propósito: la pantalla es de los clientes. */}
           {irAPersonal ? (
             <Text style={estilos.pieAdmin}>
               {t('¿Trabajas en la tienda?')}{' '}

@@ -1,14 +1,5 @@
-/*
- * ============================================================
- * "‹ VOLVER" — el botón de las páginas de producto y de promoción
- * ============================================================
- * El mismo de la web: una píldora con borde, dentro de la página y no en una
- * barra aparte. Toma el color que se le pida (`color`), así se lee igual sobre
- * el papel de la tienda que sobre el fondo de una promoción. `sobreFoto` le
- * pone fondo propio, para cuando queda encima de una imagen que puede ser
- * clara u oscura en esa esquina.
- * ============================================================
- */
+// "‹ VOLVER" — el botón de las páginas de producto y de promoción
+// El mismo de la web: una píldora con borde, dentro de la página y no en una barra aparte.
 
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { ChevronIzquierda } from './Iconos';

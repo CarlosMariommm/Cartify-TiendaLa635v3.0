@@ -1,15 +1,9 @@
 import { useState, useEffect } from 'react';
 import { evaluarCalce } from '../utils/calceImpresion';
 
-/*
- * Avisa cuando el archivo que el cliente subió (sin pasar por el editor) no
- * calza con la medida del formato elegido — proporción muy distinta, o
- * resolución demasiado baja para ese tamaño. No bloquea el envío: ver
- * calceImpresion.js para el porqué.
- *
- * Solo mide imágenes (jpg/png): un PDF no se abre como <img>, y quien sube un
- * PDF normalmente ya lo armó a propósito en el tamaño que quería.
- */
+// Avisa cuando el archivo que el cliente subió (sin pasar por el editor) no calza con la medida
+// del formato elegido — proporción muy distinta, o resolución demasiado baja para ese tamaño. No
+// bloquea el envío: ver calceImpresion.js para el porqué.
 export const useCalceImpresion = (archivo, servicio) => {
   const [advertencia, setAdvertencia] = useState('');
 

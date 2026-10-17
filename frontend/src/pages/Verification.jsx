@@ -192,13 +192,9 @@ const Verification = () => {
         });
         toast.success(t('¡Registro exitoso! Ya puedes iniciar sesión.'));
         localStorage.removeItem('verificationFlow');
-        /*
-         * Este es EL punto donde consta que la persona es nueva: acaba de
-         * verificar el código de su registro. En ningún otro lugar del sistema
-         * se sabe con esta certeza. La marca hace que el mapa de bienvenida le
-         * salga en el login que viene a continuación —y solo en ese—.
-         * Ver utils/primerIngreso.js.
-         */
+        // Este es EL punto donde consta que la persona es nueva: acaba de verificar el código de su
+        // registro. En ningún otro lugar del sistema se sabe con esta certeza. La marca hace que el mapa
+        // de bienvenida le salga en el login que viene a continuación —y solo en ese—.
         marcarRecienRegistrado();
         navigate('/iniciar-sesion');
       } 
@@ -255,12 +251,9 @@ const Verification = () => {
           <InfoBox>
             <InfoText>{t('Se ha enviado un código a {correo}', { correo: identifier })}</InfoText>
 
-            {/*
-              Cada casilla dice cuál es ("Dígito 2 de 6"): sin eso el lector
-              de pantalla anunciaba seis campos iguales sin nombre. Y el
-              teclado numérico en el teléfono, con el código que llegó por
-              mensaje ofrecido para pegar en la primera.
-            */}
+            {/* Cada casilla dice cuál es ("Dígito 2 de 6"): sin eso el lector de pantalla anunciaba seis campos
+               iguales sin nombre. Y el teclado numérico en el teléfono, con el código que llegó por mensaje
+               ofrecido para pegar en la primera. */}
             <CodeContainer role="group" aria-label={t('Código de verificación')}>
               {code.map((digit, idx) => (
                 <CodeInput

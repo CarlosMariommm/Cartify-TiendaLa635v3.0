@@ -5,36 +5,9 @@ import { useUbicacion, CENTRO_POR_DEFECTO } from '../../hooks/useUbicacion';
 import { EsperaMascota } from '../UI/Mascota';
 import { useIdioma } from '../../hooks/useIdioma';
 
-/*
- * ============================================================
- * MARCAR LA DIRECCIÓN EN EL MAPA — MapaDireccion.jsx
- * ============================================================
- * El mapa donde el cliente pone el pin en su portón, con los campos de la
- * dirección al lado. Se usa SIN salir de donde está: dentro del checkout y
- * dentro de Mi Cuenta → Direcciones.
- *
- * POR QUÉ EL MAPA NO ES OPCIONAL
- * Antes se podía escribir la dirección a ciegas en una caja de texto. El
- * resultado eran direcciones sin coordenadas, y eso rompe tres cosas a la vez:
- *
- *   1. El repartidor sale con un texto y sin saber a qué portón tocar. "Calle
- *      Principal 123" hay en media ciudad.
- *   2. El envío se cobra por DISTANCIA. Sin punto no hay distancia, así que
- *      se cobra solo la tarifa base — de menos para quien vive al otro lado
- *      del municipio.
- *   3. El cliente no puede seguir su pedido en el mapa, porque no hay destino
- *      que dibujar.
- *
- * Por eso aquí no se puede guardar sin pin. Lo que sí se puede es corregir el
- * texto: Nominatim acierta la calle pero no sabe que es "la casa de portón
- * verde", y eso lo pone la persona.
- *
- * POR QUÉ VA INCRUSTADO Y NO EN OTRA PANTALLA
- * Mandar a alguien a otra pantalla en medio del pago es el peor momento para
- * pedirle un viaje: ya tenía la plata en la mano. Antes se resolvió dejándolo
- * escribir a ciegas; la salida buena era traer el mapa aquí, no quitarlo.
- * ============================================================
- */
+// MARCAR LA DIRECCIÓN EN EL MAPA — MapaDireccion.jsx
+// El mapa donde el cliente pone el pin en su portón, con los campos de la dirección al lado. Se
+// usa SIN salir de donde está: dentro del checkout y dentro de Mi Cuenta → Direcciones.
 
 const BROWN = 'var(--marca-600)';
 
@@ -70,12 +43,9 @@ const MapaDireccion = ({ onGuardar, onCancelar, guardando = false, alto = 260 })
     <form onSubmit={guardar} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid var(--linea)', position: 'relative' }}>
         <div style={{ height: alto }}>
-          {/*
-            Tocar el mapa mueve el pin (la forma natural de decir "aquí" con el
-            dedo), y el pin también se arrastra. Cuando el GPS encuentra a la
-            persona, el mapa la sigue: sin eso el pin aparecía en su casa y el
-            mapa se quedaba mirando el centro de San Salvador.
-          */}
+          {/* Tocar el mapa mueve el pin (la forma natural de decir "aquí" con el dedo), y el pin también se
+             arrastra. Cuando el GPS encuentra a la persona, el mapa la sigue: sin eso el pin aparecía en su
+             casa y el mapa se quedaba mirando el centro de San Salvador. */}
           <Mapa
             centro={centro}
             zoom={posicion ? 16 : 13}
@@ -89,11 +59,8 @@ const MapaDireccion = ({ onGuardar, onCancelar, guardando = false, alto = 260 })
           />
         </div>
 
-        {/*
-          La instrucción va ENCIMA del mapa y no debajo: si va debajo, en un
-          teléfono queda fuera de la pantalla y nadie se entera de que hay que
-          tocar algo. Un mapa sin pin no se explica solo.
-        */}
+        {/* La instrucción va ENCIMA del mapa y no debajo: si va debajo, en un teléfono queda fuera de la
+           pantalla y nadie se entera de que hay que tocar algo. Un mapa sin pin no se explica solo. */}
         {!posicion && (
           <div style={{
             position: 'absolute', top: 8, left: 8, right: 8, zIndex: 500,
@@ -144,10 +111,8 @@ const MapaDireccion = ({ onGuardar, onCancelar, guardando = false, alto = 260 })
               />
             )}
           </div>
-          {/*
-            El texto se puede corregir a mano. El buscador acierta la calle
-            pero no sabe que es "la casa del portón verde".
-          */}
+          {/* El texto se puede corregir a mano. El buscador acierta la calle pero no sabe que es "la casa del
+             portón verde". */}
         </div>
 
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

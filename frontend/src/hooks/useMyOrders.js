@@ -2,15 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { orderService } from '../api/orderService';
 import { useAuth } from './useAuth';
 
-/*
- * useMyOrders — trae los pedidos del cliente logueado (su historial).
- * La lógica de carga vive aquí; la página MisPedidos solo pinta la lista.
- * Opcionalmente filtra por estado (ej. 'entregado' para la vista de Recibos).
- *
- * Expone `refrescar` para quien necesite la lista al día sin esperar a que el
- * componente se vuelva a montar. Ver PedidoActivoContext: la burbuja de
- * seguimiento vive montada toda la sesión y nunca se remonta sola.
- */
+// useMyOrders — trae los pedidos del cliente logueado (su historial). La lógica de carga vive
+// aquí; la página MisPedidos solo pinta la lista. Opcionalmente filtra por estado (ej. 'entregado'
+// para la vista de Recibos).
 export const useMyOrders = (statusFilter = null) => {
   // Los pedidos son de un CLIENTE. Con la sesión del personal —que en la
   // tienda puede ser la activa— se preguntaba por los pedidos de un id que no

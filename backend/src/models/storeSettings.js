@@ -1,34 +1,12 @@
-/*
- * ============================================================
- * AJUSTES DE LA TIENDA — storeSettings.js
- * ============================================================
- * Cómo se ve la tienda de cara al cliente: su nombre, su logo, qué filas
- * aparecen en la portada y en qué orden, y el tema de temporada.
- *
- * Es un "singleton": hay un solo documento en la colección, igual que
- * loyaltyConfig. La tienda es una, no una lista de tiendas.
- *
- * Por qué existe: el nombre estaba escrito a mano en tres archivos distintos
- * (el encabezado, el pie y el sidebar del panel) y no había forma de cambiarlo
- * sin tocar código. Para una tienda que quiere personalizarse —o para la
- * siguiente que use este mismo sistema— eso es una pared.
- *
- * LO QUE NO ES: un constructor de páginas. Las filas de la portada las sigue
- * armando el sistema con lo que hay en el inventario (ver useSeccionesTienda);
- * aquí solo se decide CUÁLES se muestran y en qué orden. La libertad es
- * acotada a propósito: nadie puede dejar la portada vacía ni inventar una
- * sección que no se sabe llenar.
- * ============================================================
- */
+// AJUSTES DE LA TIENDA — storeSettings.js
+// Cómo se ve la tienda de cara al cliente: su nombre, su logo, qué filas aparecen en la portada y
+// en qué orden, y el tema de temporada.
 
 import { Schema, model } from "mongoose";
 
-/*
- * Una fila de la portada. La `clave` es la que conoce el frontend
- * (utils/portada.js); si llega una que no está en ese catálogo, se ignora al
- * pintar. Guardar la lista completa —y no solo las apagadas— es lo que
- * permite reordenarlas.
- */
+// Una fila de la portada. La `clave` es la que conoce el frontend (utils/portada.js); si llega una
+// que no está en ese catálogo, se ignora al pintar. Guardar la lista completa —y no solo las
+// apagadas— es lo que permite reordenarlas.
 const seccionSchema = new Schema(
   {
     clave: { type: String, required: true },
@@ -38,15 +16,8 @@ const seccionSchema = new Schema(
   { _id: false }
 );
 
-/*
- * Una temporada creada desde el panel. Solo se guarda lo que el dueño elige:
- * dos colores, las fechas, la figura y el saludo. La paleta completa (los
- * tonos claros y oscuros de cada color) la deriva cada cliente —web y app—
- * a partir de esos dos, igual que las de fábrica traen la suya ya resuelta.
- *
- * Las fechas son día y mes, sin año: se repiten cada año. Un rango puede
- * cruzar el año (del 20 de diciembre al 6 de enero).
- */
+// Una temporada creada desde el panel. Solo se guarda lo que el dueño elige: dos colores, las
+// fechas, la figura y el saludo.
 const fechaSinAnioSchema = new Schema(
   {
     mes: { type: Number, required: true, min: 1, max: 12 },
@@ -71,14 +42,7 @@ const temporadaPropiaSchema = new Schema(
   { _id: false }
 );
 
-/*
- * El tema de temporada (Navidad, Halloween...). Ver utils/temporadas.js.
- *
- *   modo 'automatico' → lo elige la fecha; en diciembre se pinta de Navidad
- *                       sin que nadie se acuerde de entrar a cambiarlo.
- *   modo 'manual'     → manda `tema`, pase lo que pase en el calendario.
- *   modo 'ninguno'    → los colores de siempre, todo el año.
- */
+// El tema de temporada (Navidad, Halloween...). Ver utils/temporadas.js.
 const temporadaSchema = new Schema(
   {
     modo: {
@@ -87,59 +51,33 @@ const temporadaSchema = new Schema(
       default: "automatico",
     },
     tema: { type: String, default: "" },
-    /*
-     * La cinta con el saludo y las figuras cayendo de fondo. Se puede apagar
-     * para quedarse solo con los colores — hay tiendas que quieren que se note
-     * la fecha y otras que prefieren no distraer.
-     */
+    // La cinta con el saludo y las figuras cayendo de fondo. Se puede apagar para quedarse solo con
+    // los colores — hay tiendas que quieren que se note la fecha y otras que prefieren no distraer.
     decoracion: { type: Boolean, default: true },
-    /*
-     * El texto de la cinta, por tema — { navidad: "...", halloween: "...", ... }.
-     * Cada tema trae su saludo de fábrica (ver frontend/utils/temporadas.js);
-     * esto guarda solo lo que el dueño reescribió. Un tema sin entrada aquí
-     * (o con el texto en blanco) usa el saludo de fábrica.
-     */
+    // El texto de la cinta, por tema — { navidad: "...", halloween: "...", ... }. Cada tema trae su
+    // saludo de fábrica (ver frontend/utils/temporadas.js); esto guarda solo lo que el dueño
+    // reescribió. Un tema sin entrada aquí (o con el texto en blanco) usa el saludo de fábrica.
     saludos: { type: Schema.Types.Mixed, default: {} },
-    /*
-     * El saludo de los días sin temporada. En blanco no sale cinta, que es
-     * como se veía la tienda antes de que existiera.
-     */
+    // El saludo de los días sin temporada. En blanco no sale cinta, que es como se veía la tienda
+    // antes de que existiera.
     saludoNormal: { type: String, default: "", trim: true, maxlength: 160 },
-    /*
-     * Las temporadas que crea el dueño ("Regreso a clases", "Día de la
-     * madre"...). Conviven con las de fábrica y se eligen igual: por fecha en
-     * automático, o a mano. Ver temporadaPropiaSchema.
-     */
+    // Las temporadas que crea el dueño ("Regreso a clases", "Día de la madre"...). Conviven con las de
+    // fábrica y se eligen igual: por fecha en automático, o a mano. Ver temporadaPropiaSchema.
     personalizados: { type: [temporadaPropiaSchema], default: [] },
-    /*
-     * El disfraz que el dueño le armó a Tiqui para cada temporada, por la
-     * clave de la temporada: { navidad: { cabeza, cara, cuello, rubor } }. Una
-     * temporada sin entrada aquí usa el disfraz de fábrica. Lo revisa
-     * utils/disfracesTiqui.js antes de guardarlo.
-     */
+    // El disfraz que el dueño le armó a Tiqui para cada temporada, por la clave de la temporada: {
+    // navidad: { cabeza, cara, cuello, rubor } }. Una temporada sin entrada aquí usa el disfraz de
+    // fábrica. Lo revisa utils/disfracesTiqui.js antes de guardarlo.
     disfraces: { type: Schema.Types.Mixed, default: {} },
   },
   { _id: false }
 );
 
-/*
- * La llave que hace que el singleton sea singleton DE VERDAD.
- *
- * Con solo "buscar y si no hay, crear", dos peticiones que llegan a la vez
- * encuentran las dos que no hay nada y crean las dos: quedan dos documentos de
- * ajustes y la tienda se pinta con el que salga primero, que puede cambiar
- * entre cargas. El índice único lo hace imposible en la base, que es el único
- * lugar donde una carrera se puede ganar de verdad.
- */
+// La llave que hace que el singleton sea singleton DE VERDAD.
 export const CLAVE_UNICA = "tienda";
 
-/*
- * Una ZONA de envío: un círculo en el mapa (centro + radio) con un precio fijo.
- * Sirve para sobreescribir la fórmula por km donde el dueño quiere un precio
- * puntual: "todo el Centro a $2", "la colonia de arriba a $4 aunque quede cerca".
- * Si una dirección cae dentro de una zona, manda el precio de la zona; si cae en
- * varias, manda la más específica (el radio más chico).
- */
+// Una ZONA de envío: un círculo en el mapa (centro + radio) con un precio fijo. Sirve para
+// sobreescribir la fórmula por km donde el dueño quiere un precio puntual: "todo el Centro a $2",
+// "la colonia de arriba a $4 aunque quede cerca".
 const zonaEnvioSchema = new Schema(
   {
     nombre: { type: String, required: true, trim: true },
@@ -151,15 +89,9 @@ const zonaEnvioSchema = new Schema(
   { _id: false }
 );
 
-/*
- * LOS DATOS DEL NEGOCIO.
- *
- * Los que piden las páginas legales (privacidad, términos, devoluciones) y el
- * pie de página: quién es el responsable, cómo se le contacta y cuándo
- * atiende. Los escribe el dueño en Personalización; ninguno es obligatorio, y
- * lo que quede vacío simplemente no se muestra — mejor un dato de menos que
- * uno inventado en un texto legal.
- */
+// LOS DATOS DEL NEGOCIO.
+// Los que piden las páginas legales (privacidad, términos, devoluciones) y el pie de página: quién
+// es el responsable, cómo se le contacta y cuándo atiende.
 const negocioSchema = new Schema(
   {
     // Nombre del titular (persona natural) o razón social (sociedad).
@@ -178,12 +110,9 @@ const negocioSchema = new Schema(
 const storeSettingsSchema = new Schema(
   {
     clave: { type: String, default: CLAVE_UNICA, unique: true, index: true },
-    /*
-     * El nombre va en DOS líneas porque así se pinta: apiladas, con el mismo
-     * peso y color. "Tienda" no es una etiqueta que acompaña a "la 635", es
-     * parte del nombre del negocio. Guardarlo como una sola cadena obligaría
-     * a adivinar dónde parte.
-     */
+    // El nombre va en DOS líneas porque así se pinta: apiladas, con el mismo peso y color. "Tienda" no
+    // es una etiqueta que acompaña a "la 635", es parte del nombre del negocio. Guardarlo como una
+    // sola cadena obligaría a adivinar dónde parte.
     nombreLinea1: { type: String, default: "Tienda", trim: true, maxlength: 24 },
     nombreLinea2: { type: String, default: "la 635", trim: true, maxlength: 24 },
 
@@ -204,21 +133,9 @@ const storeSettingsSchema = new Schema(
 
     negocio: { type: negocioSchema, default: () => ({}) },
 
-    /*
-     * ENVÍO POR DISTANCIA (+ ajustes por zona).
-     *
-     * El precio ya no es un solo número plano. Se calcula así, de más específico
-     * a más general:
-     *   1. Si la dirección cae dentro de una zonaEnvio → precio de esa zona.
-     *   2. Si no, y hay ubicacionTienda + coordenadas del cliente →
-     *      envioBase + envioPorKm × distancia (redondeado).
-     *   3. Si no se puede medir (falta la ubicación de la tienda o del cliente) →
-     *      se cobra solo envioBase.
-     *
-     * Ya no existe la "tarifa plana de respaldo" (costoEnvio): se cobraba sin
-     * que el panel la mostrara. Los documentos viejos todavía traen el campo,
-     * pero nadie lo lee.
-     */
+    // ENVÍO POR DISTANCIA (+ ajustes por zona). El precio ya no es un solo número plano. Se calcula
+    // así, de más específico a más general: 1. Si la dirección cae dentro de una zonaEnvio → precio de
+    // esa zona. 2.
     ubicacionTienda: {
       lat: { type: Number, default: null }, // de dónde salen los repartos
       lng: { type: Number, default: null },
@@ -230,14 +147,9 @@ const storeSettingsSchema = new Schema(
     envioPorKm: { type: Number, default: 0.5, min: 0 }, // dólares por cada km
     zonasEnvio: { type: [zonaEnvioSchema], default: [] }, // sobreescriben la fórmula
 
-    /*
-     * TARIFA DE SERVICIO. Un cobro extra opcional (empaque, comisión, lo que
-     * el dueño decida). Apagada por defecto: nadie cobra de más sin querer.
-     *   servicioTipo 'fijo'       → servicioValor es en dólares.
-     *   servicioTipo 'porcentaje' → servicioValor es un % del subtotal.
-     * Se aplica igual a domicilio y a retiro; es un cobro de la casa, no del
-     * reparto.
-     */
+    // TARIFA DE SERVICIO. Un cobro extra opcional (empaque, comisión, lo que el dueño decida). Apagada
+    // por defecto: nadie cobra de más sin querer. servicioTipo 'fijo' → servicioValor es en dólares.
+    // servicioTipo 'porcentaje' → servicioValor es un % del subtotal.
     servicioActivo: { type: Boolean, default: false },
     servicioTipo: { type: String, enum: ["fijo", "porcentaje"], default: "fijo" },
     servicioValor: { type: Number, default: 0, min: 0 },

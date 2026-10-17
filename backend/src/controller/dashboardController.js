@@ -4,28 +4,19 @@ import supplierMovementModel from "../models/supplierMovement.js";
 import clientModel from "../models/client.js";
 import { conCanalesDePedido, faltanCuatroSemanasEnLaBase, hayDemostracion, pronosticoSinEsperarDeMas } from "../utils/pronostico.js";
 
-/*
- * Dashboard del admin — arma TODO el resumen en una sola llamada.
- * La idea es que no sean números bonitos, sino cosas accionables: qué reponer,
- * qué caduca, qué preparar y qué ya no se vende.
- */
+// Dashboard del admin — arma TODO el resumen en una sola llamada. La idea es que no sean números
+// bonitos, sino cosas accionables: qué reponer, qué caduca, qué preparar y qué ya no se vende.
 
-/*
- * Umbrales del negocio.
- * "Stock bajo" NO es un número fijo: depende del máximo de cada producto.
- * No es lo mismo que queden 10 refrescos de un máximo de 1000 (crítico) que
- * 10 televisores de un máximo de 12 (normal). Por eso comparamos contra su
- * propio maxQuantity; si el producto no lo tiene, usamos el respaldo fijo.
- */
+// Umbrales del negocio. "Stock bajo" NO es un número fijo: depende del máximo de cada producto. No
+// es lo mismo que queden 10 refrescos de un máximo de 1000 (crítico) que 10 televisores de un
+// máximo de 12 (normal).
 export const RATIO_BAJO = 0.25;      // le queda 25% o menos de su máximo
 export const STOCK_BAJO_ABS = 10;    // respaldo cuando no hay máximo definido
 export const DIAS_CADUCA = 7;        // "caduca esta semana"
 
-/*
- * Convierte un campo a número dentro de la consulta. Hace falta porque algunos
- * productos guardaron stock/maxQuantity como texto (vienen de un formulario con
- * archivos), y Mongo no puede multiplicar cadenas.
- */
+// Convierte un campo a número dentro de la consulta. Hace falta porque algunos productos guardaron
+// stock/maxQuantity como texto (vienen de un formulario con archivos), y Mongo no puede
+// multiplicar cadenas.
 export const numero = (campo) => ({ $convert: { input: campo, to: "double", onError: 0, onNull: 0 } });
 
 // Condición de "stock bajo" relativa al máximo de cada producto.
@@ -45,15 +36,8 @@ export const filtroStockBajo = {
   },
 };
 
-/*
- * Serie de la gráfica (ventas vs compras). Vive aparte porque el front la pide
- * sola cuando cambias de Semana/Mes/Año — así no recarga todo el dashboard.
- *
- * "Compras" salía SIEMPRE en cero: la consulta apuntaba a `Shoppings`, una
- * colección que nadie llena — registrar una compra a un proveedor (Suppliers
- * → estado de cuenta) crea un `SupplierMovement` con type:'compra', no un
- * `Shopping`. Ahora la gráfica lee de donde de verdad se guardan las compras.
- */
+// Serie de la gráfica (ventas vs compras). Vive aparte porque el front la pide sola cuando cambias
+// de Semana/Mes/Año — así no recarga todo el dashboard.
 const construirSerie = async (periodo, desde) => {
   const porDia = periodo === "semana";
   const formato = porDia ? "%d/%m" : "%Y-%m";
@@ -145,17 +129,8 @@ dashboardController.getSummary = async (req, res) => {
         { $group: { _id: null, total: { $sum: "$total" } } },
       ]),
 
-      /*
-       * ── INVERSIÓN del día vs ayer ──
-       * Lo que le costaron a la tienda los productos que vendió: el precio de
-       * costo por la cantidad. Restándoselo a los ingresos sale la ganancia
-       * de verdad — antes se llamaba "ganancia" a los ingresos a secas, que es
-       * como decir que vender a $2 algo que costó $1.80 dejó $2 de ganancia.
-       *
-       * Las impresiones no entran: no tienen producto ni costo cargado (el
-       * papel y la tinta no están modelados), así que su margen no se puede
-       * calcular y sumarles costo cero inflaría la ganancia.
-       */
+      // ── INVERSIÓN del día vs ayer ── Lo que le costaron a la tienda los productos que vendió: el
+      // precio de costo por la cantidad.
       orderModel.aggregate([
         { $match: { ...noCancelado, createdAt: { $gte: hoy, $lt: manana } } },
         { $unwind: "$items" },
@@ -204,13 +179,8 @@ dashboardController.getSummary = async (req, res) => {
         { $group: { _id: null, puntos: { $sum: "$pointsRedeemed" }, descuento: { $sum: "$discount" } } },
       ]),
 
-      /*
-       * ── Productos más vendidos ──
-       *
-       * Solo del catálogo ACTUAL: un producto borrado no vuelve a aparecer
-       * aquí, así el top-8 son 8 productos reales, no un hueco ocupado por
-       * "Clarence (eliminado)" desplazando a uno que sí se puede reponer.
-       */
+      // ── Productos más vendidos ──
+      // Solo del catálogo actual: un producto borrado no aparece, así el top 8 son productos reales.
       orderModel.aggregate([
         { $match: noCancelado },
         { $unwind: "$items" },
@@ -223,12 +193,9 @@ dashboardController.getSummary = async (req, res) => {
           },
         },
         { $sort: { vendidos: -1 } },
-        /*
-         * Pedimos de más y recortamos a 8 hasta el final: algunos de los
-         * primeros pueden caer en el $match de abajo por ser de un producto
-         * ya borrado, y cortar antes dejaría la tabla en menos de 8 sin razón
-         * visible.
-         */
+        // Pedimos de más y recortamos a 8 hasta el final: algunos de los primeros pueden caer en el $match
+        // de abajo por ser de un producto ya borrado, y cortar antes dejaría la tabla en menos de 8 sin
+        // razón visible.
         { $limit: 24 },
         { $lookup: { from: "Products", localField: "_id", foreignField: "_id", as: "p" } },
         { $unwind: "$p" },
@@ -255,18 +222,8 @@ dashboardController.getSummary = async (req, res) => {
         { $lookup: { from: "Modules", localField: "p.moduleId", foreignField: "_id", as: "m" } },
         { $unwind: { path: "$m", preserveNullAndEmptyArrays: true } },
         {
-          /*
-           * Antes todo lo que no tenía módulo caía en un cajón llamado
-           * "Impresiones / otros", que mezclaba dos cosas muy distintas: las
-           * impresiones (que legítimamente no tienen producto) y productos a
-           * los que se les olvidó asignar módulo. Lo primero es normal; lo
-           * segundo es un dato que hay que corregir en el inventario.
-           *
-           * Lo que no tiene módulo se agrupa bajo _id null a propósito: sale de
-           * la comparación entre áreas (donde solo estorbaba, aplastando las
-           * barras de las que sí están asignadas) pero viaja aparte, para poder
-           * decir en voz alta cuánta plata es.
-           */
+          // Lo que no tiene módulo se agrupa aparte (_id null): las impresiones son normales, y un
+          // producto sin módulo es un dato que hay que corregir en el inventario.
           $group: {
             _id: {
               $cond: [
@@ -295,10 +252,8 @@ dashboardController.getSummary = async (req, res) => {
       .select("name stock salePrice")
       .limit(8);
 
-    /*
-     * Ingresos - inversión = ganancia. Tres números distintos que antes se
-     * mostraban como uno solo llamado "ganancia".
-     */
+    // Ingresos - inversión = ganancia. Tres números distintos que antes se mostraban como uno solo
+    // llamado "ganancia".
     const ingresosHoy = Number((dineroHoy[0]?.total || 0).toFixed(2));
     const ingresosAyer = Number((dineroAyer[0]?.total || 0).toFixed(2));
     const inversionHoy = Number((costoHoy[0]?.total || 0).toFixed(2));
@@ -315,12 +270,9 @@ dashboardController.getSummary = async (req, res) => {
 
     const pedidosConMonto = dineroHoy[0]?.cantidad || 0;
 
-    /*
-     * Las ventas sin módulo salen de la gráfica pero NO del reporte: son ventas
-     * viejas, de productos que nunca tuvieron módulo, y esconderlas sin decir
-     * nada dejaría al encargado creyendo que la tienda vendió mucho menos de lo
-     * que vendió. Van aparte para que el front las anuncie en una línea.
-     */
+    // Las ventas sin módulo salen de la gráfica pero NO del reporte: son ventas viejas, de productos
+    // que nunca tuvieron módulo, y esconderlas sin decir nada dejaría al encargado creyendo que la
+    // tienda vendió mucho menos de lo que vendió.
     const modulosConVentas = ventasPorModulo.filter((m) => m._id);
     const ventasHuerfanas = ventasPorModulo.find((m) => !m._id)?.total || 0;
 
@@ -381,10 +333,8 @@ dashboardController.getSummary = async (req, res) => {
   }
 };
 
-/*
- * Solo la gráfica. Lo usa el front al cambiar Semana/Mes/Año, para no volver a
- * pedir (ni repintar) todo el dashboard por un cambio que afecta una sola caja.
- */
+// Solo la gráfica. Lo usa el front al cambiar Semana/Mes/Año, para no volver a pedir (ni repintar)
+// todo el dashboard por un cambio que afecta una sola caja.
 dashboardController.getChart = async (req, res) => {
   try {
     const periodo = req.query.periodo || "mes";
@@ -397,11 +347,9 @@ dashboardController.getChart = async (req, res) => {
   }
 };
 
-/*
- * El pronóstico de ventas y la lista de compras, calculados por el servicio
- * de analítica (Python). Cada falla dice qué pasó: no es lo mismo que el
- * servicio no esté conectado a que esté despertando.
- */
+// El pronóstico de ventas y la lista de compras, calculados por el servicio de analítica (Python).
+// Cada falla dice qué pasó: no es lo mismo que el servicio no esté conectado a que esté
+// despertando.
 const MENSAJES_PRONOSTICO = {
   "sin-servicio": [503, "El pronóstico todavía no está conectado: falta configurar el servicio de analítica."],
   lento: [504, "El servicio de pronóstico tardó demasiado; puede estar despertando. Intente de nuevo en un minuto."],
@@ -410,16 +358,9 @@ const MENSAJES_PRONOSTICO = {
   "sin-demo": [404, "La demostración del pronóstico no está disponible."],
 };
 
-/*
- * `?demo=1`: con la demostración (ventas inventadas de varios meses, para
- * mostrar el pronóstico sin tocar la tienda real; ver utils/pronostico.js).
- * `demoDisponible` le dice al panel si puede ofrecer ese modo.
- *
- * Si el cálculo pasa de 8 segundos (Render gratis despertando, o historia larga), se
- * contesta 202 `{ calculando: true }` y el cálculo SIGUE: el panel vuelve a
- * preguntar en unos segundos y, cuando termina, lo recibe guardado. Antes se
- * esperaba minuto y medio, se cortaba y el cálculo se perdía.
- */
+// `?demo=1`: con la demostración (ventas inventadas de varios meses, para mostrar el pronóstico
+// sin tocar la tienda real; ver utils/pronostico.js). `demoDisponible` le dice al panel si puede
+// ofrecer ese modo.
 const ESPERA_DEL_PANEL_MS = 8 * 1000;
 
 dashboardController.getPronostico = async (req, res) => {
@@ -427,10 +368,8 @@ dashboardController.getPronostico = async (req, res) => {
     const demo = req.query.demo === "1";
     const calculado = await pronosticoSinEsperarDeMas({ forzar: req.query.forzar === "1", demo }, ESPERA_DEL_PANEL_MS);
     if (!calculado) {
-      /*
-       * Con la tienda real todavía sin sus 4 semanas, el panel no tiene que
-       * esperar este cálculo: va a mostrar la demostración. Se le dice ya.
-       */
+      // Con la tienda real todavía sin sus 4 semanas, el panel no tiene que esperar este cálculo: va a
+      // mostrar la demostración. Se le dice ya.
       const faltanCuatroSemanas = demo ? false : await faltanCuatroSemanasEnLaBase().catch(() => false);
       return res.status(202).json({ calculando: true, faltanCuatroSemanas, demoDisponible: hayDemostracion() });
     }

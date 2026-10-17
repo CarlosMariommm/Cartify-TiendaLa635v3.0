@@ -1,10 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { animoDeFrase } from './animoTiqui';
 
-/*
- * El ánimo de las frases fijas de Tiqui en la app: el mismo que en la web
- * (frontend/src/utils/animoTiqui.test.js).
- */
+// El ánimo de las frases fijas de Tiqui en la app: el mismo que en la web
+// (frontend/src/utils/animoTiqui.test.js).
 describe('el ánimo de las frases fijas', () => {
   it('cerrar la compra la emociona y agregar la alegra', () => {
     expect(animoDeFrase('¡Listo! Te abro el pago para que elijas cómo recibirlo y cómo pagar.')).toBe('emocionada');

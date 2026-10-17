@@ -2,11 +2,8 @@ import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import { RUTAS_DEL_PANEL, areaDeRuta } from './sesion';
 
-/*
- * Qué rutas son del panel. Si una pantalla nueva del panel no está en la
- * lista, la web la toma por de la tienda y manda al personal al login (pasó
- * con /pronostico).
- */
+// Qué rutas son del panel. Si una pantalla nueva del panel no está en la lista, la web la toma por
+// de la tienda y manda al personal al login (pasó con /pronostico).
 
 // Las rutas que App.jsx pone dentro del armazón del panel (AdminLayout).
 const rutasDelPanelEnApp = () => {

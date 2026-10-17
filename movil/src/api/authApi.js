@@ -1,56 +1,20 @@
-/*
- * ============================================================
- * SERVICIOS DE SESIÓN — authApi.js
- * ============================================================
- * Las tres llamadas que necesita la app para que alguien tenga cuenta y pueda
- * entrar. Son exactamente los mismos endpoints que usa la web; el backend no
- * se tocó ni hizo falta tocarlo.
- *
- *   POST /loginClient/login              entrar
- *   POST /registerClient                 registrarse (manda el código al correo)
- *   POST /registerClient/verifyCodeEmail confirmar el código y crear la cuenta
- * ============================================================
- */
+// SERVICIOS DE SESIÓN — authApi.js
+// Las tres llamadas que necesita la app para que alguien tenga cuenta y pueda entrar. Son
+// exactamente los mismos endpoints que usa la web; el backend no se tocó ni hizo falta tocarlo.
 
 import { peticion } from './api';
 
-/*
- * Entrar. Devuelve { token, userType, client }.
- *
- * El `userType` importa: por esta misma puerta entran clientes y personal, y
- * el servidor es quien lo dice.
- */
+// Entrar. Devuelve { token, userType, client }. El `userType` importa: por esta misma puerta
+// entran clientes y personal, y el servidor es quien lo dice.
 export const loginClientDB = ({ email, password }) =>
   peticion('/loginClient/login', {
     metodo: 'POST',
     cuerpo: { email, password },
   });
 
-/*
- * Registrarse. No crea la cuenta todavía: el backend guarda los datos en un
- * token de 15 minutos, lo deja en la cookie `registrationCookie` y manda un
- * código de 6 caracteres al correo. La cuenta nace en verificarCodigoCorreo.
- *
- * Va como FormData y no como JSON porque puede traer una foto (ver
- * pages/Register.js, `elegirFoto`) — mismo formato que ya manda
- * `useRegistro.js` en la web, campo por campo y no con un objeto suelto,
- * porque FormData no sabe volcar un objeto de una sola vez.
- *
- * ── El consentimiento ──
- *
- * `aceptaTerminos` NO es opcional: sin él el backend contesta 400 con "Hay que
- * aceptar los términos y el aviso de privacidad" y no hay cuenta. Lo revisa el
- * servidor aunque el formulario ya lo revise, porque cualquiera puede mandar
- * el registro sin pasar por la pantalla. Ver
- * `backend/src/controller/Clients/registerClient.js`.
- *
- * La VERSIÓN de los términos no se manda: la pone el servidor con la suya. Si
- * se aceptara la que dice el cliente, bastaría con inventarse un número para
- * dejar registrado el consentimiento de un texto que nunca existió.
- *
- * Los booleanos van como texto ("true"/"false") porque FormData no sabe de
- * otra cosa; el backend los lee con `esVerdadero`, que acepta ambos.
- */
+// Registrarse. No crea la cuenta todavía: el backend guarda los datos en un token de 15 minutos,
+// lo deja en la cookie `registrationCookie` y manda un código de 6 caracteres al correo. La cuenta
+// nace en verificarCodigoCorreo.
 export const registrarCliente = ({
   fullName,
   dui,
@@ -89,36 +53,18 @@ export const registrarCliente = ({
   return peticion('/registerClient', { metodo: 'POST', cuerpo });
 };
 
-/*
- * Confirmar el código del correo. Aquí sí se crea la cuenta.
- *
- * Esta llamada depende de la cookie `registrationCookie` que dejó el registro:
- * el código por sí solo no le dice nada al servidor, los datos del cliente
- * viven dentro de esa cookie. En Android eso funciona sin hacer nada porque
- * React Native guarda las cookies por debajo (OkHttp), igual que un navegador;
- * por eso no hay que pasarle el correo ni los datos otra vez.
- */
+// Confirmar el código del correo. Aquí sí se crea la cuenta. Esta llamada depende de la cookie
+// `registrationCookie` que dejó el registro: el código por sí solo no le dice nada al servidor,
+// los datos del cliente viven dentro de esa cookie.
 export const verificarCodigoCorreo = (codigo) =>
   peticion('/registerClient/verifyCodeEmail', {
     metodo: 'POST',
     cuerpo: { verificationCodeRequest: codigo },
   });
 
-/*
- * Entrar con Google. `credential` es el idToken que entrega
- * @react-native-google-signin/google-signin; el backend lo verifica contra
- * Google (misma GOOGLE_CLIENT_ID que ya usan frontend y backend) y busca o
- * enlaza la cuenta. Misma respuesta que loginClientDB.
- *
- * El inicio de sesión no manda `extra`: si el correo de Google no tiene
- * cuenta todavía, el backend contesta 403 con `requiereConsentimiento` en vez
- * de crearla — ver googleAuthClient.js en el backend. `peticion()` deja ese
- * campo pegado al error para quien llame.
- *
- * El registro sí lo manda, igual que la web: `aceptaTerminos` y `promociones`
- * de sus casillas, y lo que Google no da (`phoneNumber`, `fechaNacimiento`,
- * `dui`) si ya estaba escrito. Con eso el backend crea la cuenta de una.
- */
+// Entrar con Google. `credential` es el idToken que entrega
+// @react-native-google-signin/google-signin; el backend lo verifica contra Google (misma
+// GOOGLE_CLIENT_ID que ya usan frontend y backend) y busca o enlaza la cuenta.
 export const googleLoginDB = (credential, extra = {}) =>
   peticion('/loginClient/google', {
     metodo: 'POST',

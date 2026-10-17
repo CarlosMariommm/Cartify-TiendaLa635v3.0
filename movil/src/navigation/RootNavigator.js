@@ -1,27 +1,6 @@
-/*
- * ============================================================
- * ROOT NAVIGATOR — todo lo que antes decidía `Raiz` en App.js
- * ============================================================
- * Cada pantalla suelta sigue exactamente igual por dentro (`Carrito.js`,
- * `Checkout.js`, etc.): lo único que cambia es CÓMO llegan sus props de
- * navegación. Antes eran funciones que hacían `setPantalla('x')`; ahora son
- * funciones que hacen `navigation.navigate('X')`. El resto del archivo de cada
- * pantalla no se tocó.
- *
- * ── Por qué `Splash` navega con un efecto y no con el `initialRouteName` ──
- *
- * Porque a dónde ir (Login o Tabs) depende de si había sesión guardada, y eso
- * no se sabe hasta que `AuthProvider` termina de leer el almacén. `Splash` se
- * queda montada ese tiempo (más el mínimo de `useSplashTimer`) y solo entonces
- * decide.
- *
- * ── `AuthWatcher` es el login interactivo, `Splash` es el arranque ──
- *
- * Los dos miran `isAuthenticated`, pero no se pisan: `AuthWatcher` se apaga
- * hasta que `Splash` marca `arranqueResuelto`, así que un login con sesión ya
- * guardada solo lo mueve `Splash`, y un login hecho a mano en la pantalla de
- * entrar solo lo mueve `AuthWatcher`.
- */
+// ROOT NAVIGATOR — todo lo que antes decidía `Raiz` en App.js
+// Cada pantalla suelta sigue exactamente igual por dentro (`Carrito.js`, `Checkout.js`, etc.): lo
+// único que cambia es CÓMO llegan sus props de navegación.
 
 import { useEffect, useMemo, useState } from 'react';
 import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
@@ -56,10 +35,9 @@ const LLAVE_ONBOARDING = llave('onboarding', 'visto');
 const SplashRoute = ({ navigation }) => {
   const { isAuthenticated, cargando } = useAuth();
 
-  // `null` mientras no se sabe todavía si ya se vio la introducción — un
-  // tercer estado, no un `false` de arranque, porque un `false` inicial
-  // mandaría a todo el mundo a Onboarding un instante antes de que
-  // `leer()` conteste que sí la había visto.
+  // `null` mientras no se sabe todavía si ya se vio la introducción — un tercer estado, no un
+  // `false` de arranque, porque un `false` inicial mandaría a todo el mundo a Onboarding un instante
+  // antes de que `leer()` conteste que sí la había visto.
   const [onboardingVisto, setOnboardingVisto] = useState(null);
   useEffect(() => {
     let vivo = true;
@@ -93,12 +71,9 @@ const SplashRoute = ({ navigation }) => {
   return <PantallaCarga />;
 };
 
-/*
- * Al terminar la introducción (o al saltarla) se graba la llave y se sigue
- * EXACTAMENTE por donde habría seguido Splash si nunca hubiera hecho falta
- * mostrarla — mismo criterio, para no mantenerlo escrito dos veces de forma
- * distinta.
- */
+// Al terminar la introducción (o al saltarla) se graba la llave y se sigue EXACTAMENTE por donde
+// habría seguido Splash si nunca hubiera hecho falta mostrarla — mismo criterio, para no
+// mantenerlo escrito dos veces de forma distinta.
 const OnboardingRoute = ({ navigation }) => {
   const { isAuthenticated } = useAuth();
 
@@ -143,11 +118,9 @@ const LoginRoute = ({ navigation }) => (
   />
 );
 
-/*
- * "¿Trabajas en la tienda?": la entrada del personal. Al terminar no navega:
- * PersonalContext guarda la sesión y App.js cambia la app entera al modo
- * personal (Tiqui y Reparto para el administrador; Reparto para el empleado).
- */
+// "¿Trabajas en la tienda?": la entrada del personal. Al terminar no navega: PersonalContext
+// guarda la sesión y App.js cambia la app entera al modo personal (Tiqui y Reparto para el
+// administrador; Reparto para el empleado).
 const LoginPersonalRoute = ({ navigation, route }) => (
   <LoginPersonal alVolver={() => navigation.goBack()} correoInicial={route.params?.correo || ''} />
 );
@@ -224,11 +197,9 @@ const ImpresionesRoute = ({ navigation }) => (
   <Impresiones alVolver={() => navigation.goBack()} />
 );
 
-/*
- * La presentación de Tiqui. Al cerrarla (o terminarla) queda marcada como
- * vista, para que no se vuelva a abrir sola; desde el asistente se puede ver
- * otra vez cuando se quiera. Ver pages/Asistente.js.
- */
+// La presentación de Tiqui. Al cerrarla (o terminarla) queda marcada como vista, para que no se
+// vuelva a abrir sola; desde el asistente se puede ver otra vez cuando se quiera. Ver
+// pages/Asistente.js.
 const ConoceATiquiRoute = ({ navigation }) => {
   const terminar = () => {
     guardar(LLAVE_TIQUI_PRESENTADO, '1');
@@ -239,12 +210,9 @@ const ConoceATiquiRoute = ({ navigation }) => {
 };
 
 const RootNavigator = () => {
-  /*
-   * El fondo que react-navigation pone detrás de cada pantalla mientras
-   * entra o sale. Sin esto, en oscuro se ve un destello blanco en cada
-   * transición: las pantallas son oscuras, pero lo que asoma entre una y
-   * otra es el blanco de fábrica de la librería.
-   */
+  // El fondo que react-navigation pone detrás de cada pantalla mientras entra o sale. Sin esto, en
+  // oscuro se ve un destello blanco en cada transición: las pantallas son oscuras, pero lo que asoma
+  // entre una y otra es el blanco de fábrica de la librería.
   const { oscuro, colores } = useModo();
   const tema = useMemo(() => {
     const base = oscuro ? DarkTheme : DefaultTheme;
@@ -275,12 +243,9 @@ const RootNavigator = () => {
         <Stack.Screen name="Checkout" component={CheckoutRoute} />
         <Stack.Screen name="Confirmacion" component={ConfirmacionRoute} />
         <Stack.Screen name="Seccion" component={SeccionRoute} />
-        {/*
-          Un producto y una promoción son páginas, como en la web: se apilan
-          y se vuelve con "‹ Volver", el botón atrás o el gesto. `getId` las
-          distingue por id: un recomendado abre SU página encima, y tocar
-          dos veces el mismo no abre dos.
-        */}
+        {/* Un producto y una promoción son páginas, como en la web: se apilan y se vuelve con "‹ Volver",
+           el botón atrás o el gesto. `getId` las distingue por id: un recomendado abre SU página encima, y
+           tocar dos veces el mismo no abre dos. */}
         <Stack.Screen name="Producto" component={Producto} getId={({ params }) => params?.id} />
         <Stack.Screen name="Promo" component={Promo} getId={({ params }) => params?.id} />
         <Stack.Screen name="Impresiones" component={ImpresionesRoute} />

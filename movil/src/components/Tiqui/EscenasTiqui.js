@@ -1,24 +1,6 @@
-/*
- * ============================================================
- * ESCENAS DE TIQUI — las ilustraciones de los tutoriales
- * ============================================================
- * Las seis de su tutorial (ConoceATiqui) y las de la bienvenida de la app
- * (Onboarding: la tienda, el mapa y los puntos; la de pedir hablando se
- * comparte). Ilustraciones planas de Tiqui, con la MISMA línea gráfica de su video
- * (video-tiqui/herramientas/piezas.mjs) y de la web: fondo claro con
- * etiquetas fantasma casi invisibles, un brillo azul detrás de ella, Tiqui en
- * navy con rasgos blancos y su cordón azul, y las piezas de siempre
- * (estrellas, corazones, productos, la lupa, la patineta, el confeti).
- *
- * Todo se dibuja en el lienzo de la mascota (400 × 470: la etiqueta ocupa de
- * x=120 a 280 y de y=110 a 382), el mismo de mascotaFormas.js, así que las
- * coordenadas de la web y del video sirven tal cual aquí.
- *
- * Solo pintan: la escena activa recibe `parpadeo` para que Tiqui pestañee.
- * Son ilustraciones, así que van escondidas del lector de pantalla; el texto
- * de cada diapositiva dice lo que muestran.
- * ============================================================
- */
+// ESCENAS DE TIQUI — las ilustraciones de los tutoriales
+// Las seis de su tutorial (ConoceATiqui) y las de la bienvenida de la app (Onboarding: la tienda,
+// el mapa y los puntos; la de pedir hablando se comparte).
 
 import Svg, { Circle, Defs, Ellipse, G, Line, Path, RadialGradient, Rect, Stop, Text as SvgText } from 'react-native-svg';
 

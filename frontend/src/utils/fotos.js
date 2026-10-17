@@ -1,27 +1,6 @@
-/*
- * ============================================================
- * FOTOS AL TAMAÑO EN QUE SE VEN — fotos.js
- * ============================================================
- * Las fotos de los productos y las promociones viven en Cloudinary, y la
- * tienda las pedía tal cual se subieron: la de las fresas pesaba 667 KB para
- * dibujarse en un cuadro de 165 px. Toda la portada eran 11 MB, casi todo
- * fotos, y en un teléfono con datos eso es esperar y pagar.
- *
- * Cloudinary las entrega transformadas si se le pide en la dirección:
- *   f_auto   el mejor formato que entienda el navegador (AVIF o WebP)
- *   q_auto   la calidad más baja que el ojo no nota
- *   c_limit  achica hasta `ancho`, nunca agranda
- *   w_N      el ancho pedido
- * La misma foto de las fresas, a 400 px, pesa 41 KB: dieciséis veces menos.
- *
- * `ancho` es el DOBLE de lo que mide en pantalla, para que se vea nítida en
- * pantallas de alta densidad (casi todos los teléfonos).
- *
- * Lo que no es de Cloudinary (una foto de Google, una vista previa local
- * blob:, una dirección vacía) se devuelve igual: aquí solo se optimiza, nunca
- * se rompe una imagen.
- * ============================================================
- */
+// FOTOS AL TAMAÑO EN QUE SE VEN — fotos.js
+// Las fotos de los productos y las promociones viven en Cloudinary, y la tienda las pedía tal cual
+// se subieron: la de las fresas pesaba 667 KB para dibujarse en un cuadro de 165 px.
 
 const SUBIDA = '/image/upload/';
 

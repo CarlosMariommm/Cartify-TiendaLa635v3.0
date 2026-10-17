@@ -4,16 +4,9 @@ import { useTheme } from '../../context/ThemeContext';
 import { useDropdown } from '../../hooks/useDropdown';
 import OpcionesLectura from './OpcionesLectura';
 
-/*
- * ThemeSwitcher — acceso rápido a la accesibilidad desde el TopBar: las
- * paletas y, debajo, las opciones de lectura (texto más grande y demás).
- *
- * Antes, cambiar de paleta obligaba a entrar hasta Ajustes de Cuenta; ahora
- * está a un clic desde cualquier pantalla del panel. Pensado para cuidar la
- * vista: baja visión, lectura larga, migrañas, cansancio.
- *
- * Toda la lógica de abrir/cerrar vive en useDropdown; aquí solo pintamos.
- */
+// ThemeSwitcher — acceso rápido a la accesibilidad desde el TopBar: las paletas y, debajo, las
+// opciones de lectura (texto más grande y demás). Pensado para cuidar la vista: baja visión,
+// lectura larga, migrañas, cansancio.
 const ThemeSwitcher = () => {
   const { palette, paletteId, setPaletteId, palettes } = useTheme();
   const { isOpen, toggle, close, ref } = useDropdown();

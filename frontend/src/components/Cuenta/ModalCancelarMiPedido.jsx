@@ -8,25 +8,9 @@ import { useIdioma } from '../../hooks/useIdioma';
 import { usePedidoActivoCtx } from '../../context/PedidoActivoContext';
 import { orderService } from '../../api/orderService';
 
-/*
- * ============================================================
- * EL CLIENTE CANCELA SU PEDIDO — ModalCancelarMiPedido.jsx
- * ============================================================
- * Solo mientras está "por preparar" (el servidor también lo revisa: ver
- * orderController.cancelarPorCliente). Se abre desde Mis pedidos y desde la
- * pantalla del pedido.
- *
- * Se pide el porqué con opciones de un toque: al personal le sirve saberlo
- * (¿se equivocó de producto?, ¿tardamos?) y a quien cancela no le cuesta
- * nada. "Prefiero no decirlo" también vale.
- *
- * Antes de confirmar se dice qué se le devuelve, para que nadie dude de si
- * pierde su saldo.
- *
- * `alCancelar` recibe el pedido ya cancelado, para que la pantalla que lo
- * abrió se ponga al día sin volver a cargar todo.
- * ============================================================
- */
+// EL CLIENTE CANCELA SU PEDIDO — ModalCancelarMiPedido.jsx
+// Solo mientras está "por preparar" (el servidor también lo revisa: ver
+// orderController.cancelarPorCliente). Se abre desde Mis pedidos y desde la pantalla del pedido.
 
 const MOTIVOS = [
   'Me equivoqué en el pedido.',
@@ -76,12 +60,9 @@ const ModalCancelarMiPedido = ({ pedido, onClose, alCancelar }) => {
     }
   };
 
-  /*
-   * Por un portal al <body>: este modal se abre desde dentro de Mi Cuenta, y
-   * la animación de entrada de cada página deja un `transform` que ata un
-   * `fixed` a esa caja en vez de a la pantalla. Sin el portal, el encabezado
-   * de la tienda y la burbuja del pedido quedaban por encima del velo.
-   */
+  // Por un portal al <body>: este modal se abre desde dentro de Mi Cuenta, y la animación de entrada
+  // de cada página deja un `transform` que ata un `fixed` a esa caja en vez de a la pantalla. Sin el
+  // portal, el encabezado de la tienda y la burbuja del pedido quedaban por encima del velo.
   return createPortal(
     <AnimatePresence>
       {abierto && (

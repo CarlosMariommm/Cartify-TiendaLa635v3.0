@@ -6,10 +6,8 @@ import { soloAdmin, conSesion, duenoOPersonal } from '../middlewares/validarSesi
 const router = express.Router();
 
 // Admin: crear y listar tarjetas.
-/*
- * La lista de tarjetas trae los CÓDIGOS, y un código de tarjeta de regalo es
- * dinero: quien lo lee, lo canjea. Estaba abierta. Emitirlas, igual.
- */
+// La lista de tarjetas trae los CÓDIGOS, y un código de tarjeta de regalo es dinero: quien lo lee,
+// lo canjea. Emitirlas, igual.
 router.route("/")
     .get(soloAdmin, giftCardController.getGiftCards)
     .post(soloAdmin, giftCardController.insertGiftCard);

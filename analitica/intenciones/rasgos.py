@@ -1,18 +1,6 @@
-"""
-De una frase a sus "rasgos": las pistas con las que el modelo decide.
-
-    p:pagar        cada palabra
-    b:mis_puntos   cada par de palabras seguidas (el orden importa: "mis
-                   pedidos" no es lo mismo que "pedidos de pan")
-    c: pag         pedazos de 3 a 5 letras de cada palabra, con sus bordes.
-                   Aguantan lo que el reconocimiento de voz escribe mal
-                   ("pagár", "pagarr", "carito") y las formas de una misma
-                   palabra ("pagar", "pago", "pagamos").
-
-⚠️  Esto está ESPEJADO en backend/src/utils/intencionesTiqui.js: el servidor
-    calcula los mismos rasgos para usar el modelo. Si cambia una regla aquí,
-    hay que cambiarla allá (la prueba de paridad del servidor lo detecta).
-"""
+"""De una frase a sus "rasgos": las pistas con las que el modelo decide. p:pagar cada palabra
+b:mis_puntos cada par de palabras seguidas (el orden importa: "mis pedidos" no es lo mismo que
+"pedidos de pan") c: pag pedazos de 3 a 5 letras de cada palabra, con sus bordes."""
 
 import re
 import unicodedata

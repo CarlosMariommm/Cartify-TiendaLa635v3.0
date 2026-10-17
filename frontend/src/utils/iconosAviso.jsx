@@ -1,31 +1,11 @@
 import { AlertTriangle, Bike, Check, Heart, HeartOff, Info, Trash2, X } from 'lucide-react';
 
-/*
- * ============================================================
- * LOS ICONOS DE LOS AVISOS — iconosAviso.jsx
- * ============================================================
- * El círculo a la izquierda de la píldora (components/UI/PildoraAviso.jsx).
- * Dice qué pasó antes de leer:
- *   ✓ verde    salió bien          (toast.success, sale solo)
- *   ✕ rojo     no se pudo          (toast.error, sale solo)
- *   i neutro   un aviso sin más    (toast, sale solo)
- * y el resto se pasa a mano en `icon` cuando hay uno más preciso:
- *
- *   toast('Fresas salió del carrito', { icon: ICONOS.quitar })
- *
- * Aparte de la píldora para que la recarga en caliente de Vite siga
- * funcionando: un archivo que exporta un componente no puede exportar
- * también constantes.
- * ============================================================
- */
+// LOS ICONOS DE LOS AVISOS — iconosAviso.jsx
+// El círculo a la izquierda de la píldora (components/UI/PildoraAviso.jsx).
 
-/*
- * El círculo. Con `fondo` es de color y el icono va en blanco; sin él es un
- * círculo tenue del mismo color que el texto, que sirve igual sobre la
- * píldora oscura que sobre la clara del modo oscuro. Es una función y no un
- * componente por lo mismo de arriba: la recarga en caliente no admite
- * componentes sueltos en un archivo de constantes.
- */
+// El círculo. Con `fondo` es de color y el icono va en blanco; sin él es un círculo tenue del
+// mismo color que el texto, que sirve igual sobre la píldora oscura que sobre la clara del modo
+// oscuro.
 const circulo = (hijos, fondo) => (
   <span
     aria-hidden="true"

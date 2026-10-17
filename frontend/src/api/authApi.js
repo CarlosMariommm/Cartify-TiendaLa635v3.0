@@ -1,50 +1,8 @@
-/*
- * ============================================================
- * SERVICIOS DE API — authApi.js
- * ============================================================
- * Este archivo contiene las funciones que se comunican con las
- * rutas de autenticación del backend.
- *
- * Diferencia con los demás servicios:
- *  - Estas funciones usan `fetch` nativo porque se llaman ANTES
- *    de tener sesión (no hay token aún que enviar).
- *  - Los demás servicios usan la instancia de Axios (api.js)
- *    que ya tiene el baseURL y los interceptores configurados.
- *
- * ── `credentials: 'include'` NO ES OPCIONAL AQUÍ ──
- *
- * Sin él, el navegador DESCARTA la cookie de sesión que manda el servidor en
- * la respuesta del login. El frontend vive en el puerto 5173 y el backend en
- * el 4000: son orígenes distintos, y en una petición cruzada el `Set-Cookie`
- * se ignora salvo que se pida explícitamente.
- *
- * Faltaba, y durante meses no se notó porque ninguna ruta leía cookies: la
- * sesión vivía solo en localStorage y la app funcionaba igual. El día que la
- * API empezó a exigir sesión de verdad, el login pasó a "funcionar" —guardaba
- * el localStorage— y acto seguido todo devolvía 401, así que la persona
- * entraba y rebotaba de vuelta al login.
- *
- * Va en las CUATRO: cliente, administrador y los dos pasos del 2FA del
- * personal. Cada una deja su propia cookie.
- * ============================================================
- */
+// SERVICIOS DE API — authApi.js
+// Este archivo contiene las funciones que se comunican con las rutas de autenticación del backend.
 
-// 1- Paso 1 del login de empleados (2FA): envía correo/usuario para recibir OTP
-/*
- * A DÓNDE SE LE HABLA AL SERVIDOR.
- *
- * Aquí estaban las seis direcciones escritas a mano con "localhost:4000".
- * api.js ya usaba la variable de entorno, pero este archivo no — y son justo
- * las llamadas de ENTRAR: el login del cliente, el del admin, el 2FA y Google.
- *
- * Desplegado, eso significaba que el navegador de cada cliente le hablaría a
- * SU PROPIA máquina en vez de al servidor de la tienda: la tienda cargaba
- * bien y nadie podía iniciar sesión.
- *
- * El respaldo sigue siendo localhost para que en local no haya que configurar
- * nada. Es la misma variable que usa api.js, así que las dos mitades apuntan
- * siempre al mismo sitio.
- */
+// A DÓNDE SE LE HABLA AL SERVIDOR: la misma dirección que api.js (VITE_API_URL).
+// 1- Paso 1 del login de empleados (2FA): envía correo o usuario para recibir el código.
 const API = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
 export const loginStep1 = async (data) => {
@@ -144,15 +102,8 @@ export const loginClientDB = async (data) => {
   return response.json();
 };
 
-// 5- Login de clientes con Google. `credential` es el ID token que devuelve el
-// botón de Google; el backend lo verifica y crea/enlaza la cuenta. Misma cookie
-// y misma forma de respuesta que loginClientDB.
-/*
- * `extra` lleva el consentimiento y el teléfono, y SOLO lo manda la pantalla de
- * Registro. Entrar con una cuenta que ya existe no vuelve a pedir nada; crear
- * una nueva sí, porque Google prueba quién es la persona pero no que haya
- * aceptado los términos. Ver googleAuthClient.js en el backend.
- */
+// 5- Login de clientes con Google: el backend verifica el token y crea o enlaza la cuenta.
+// `extra` (consentimiento y teléfono) solo lo manda la pantalla de Registro.
 export const googleLoginDB = async (credential, extra = {}) => {
   const response = await fetch(`${API}/loginClient/google`, {
     method: 'POST',
@@ -163,12 +114,9 @@ export const googleLoginDB = async (credential, extra = {}) => {
   if (!response.ok) {
     const err = await response.json();
     const error = new Error(err.message || 'No se pudo iniciar sesión con Google');
-    /*
-     * El detalle viaja PEGADO al error y no se pierde: cuando el servidor
-     * responde "esta cuenta es nueva y falta el consentimiento", la pantalla
-     * de login necesita saberlo para llevar a registrarse en vez de dejar un
-     * aviso rojo que no dice qué hacer.
-     */
+    // El detalle viaja PEGADO al error y no se pierde: cuando el servidor responde "esta cuenta es
+    // nueva y falta el consentimiento", la pantalla de login necesita saberlo para llevar a
+    // registrarse en vez de dejar un aviso rojo que no dice qué hacer.
     error.requiereConsentimiento = !!err.requiereConsentimiento;
     error.sugerido = err.sugerido || null;
     throw error;

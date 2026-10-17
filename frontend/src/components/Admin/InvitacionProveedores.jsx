@@ -8,25 +8,9 @@ import { modalTransition } from '../../utils/motion';
 import { sinCanalDePedido } from '../../utils/pedidoProveedor';
 import { useTurno } from '../../utils/turnoPanel';
 
-/*
- * ============================================================
- * ENLAZAR LOS PROVEEDORES — InvitacionProveedores.jsx
- * ============================================================
- * Al abrir Proveedores, el administrador ve este aviso si algún proveedor
- * activo todavía no tiene dicho por dónde se le hacen los pedidos (WhatsApp,
- * una app como BEES o llamada). Con eso, la compra sugerida del pronóstico
- * sale con un toque. Ver utils/pedidoProveedor.js.
- *
- * Sale SOLO en Proveedores, que es donde se arregla. Antes salía al entrar
- * al panel, en cualquier pantalla, y se volvía un estorbo.
- *
- *   "Entendido"            no vuelve a salir en esta sesión del navegador.
- *   "No volver a mostrar"  no vuelve a salir en este equipo.
- *
- * BEES no tiene una API pública: no se "conecta" la cuenta, se guarda el
- * enlace de la app y el botón la abre con la lista copiada. Se dice así.
- * ============================================================
- */
+// ENLAZAR LOS PROVEEDORES — InvitacionProveedores.jsx
+// Al abrir Proveedores, el administrador ve este aviso si algún proveedor activo todavía no tiene
+// dicho por dónde se le hacen los pedidos (WhatsApp, una app como BEES o llamada).
 
 export const CLAVE_AHORA_NO = 'cartify:proveedores-ahora-no';
 export const CLAVE_NO_MOSTRAR = 'cartify:proveedores-no-mostrar';

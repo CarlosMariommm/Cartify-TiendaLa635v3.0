@@ -1,31 +1,6 @@
-/*
- * ============================================================
- * AVISAR DE UNA PROMOCIÓN NUEVA — avisoPromo.js
- * ============================================================
- * Cuando la tienda publica una promoción, les escribe a los clientes que
- * pidieron enterarse.
- *
- * POR QUÉ NO BLOQUEA AL PANEL
- * Escribirle a doscientas personas tarda; el gerente que acaba de darle a
- * "Crear promoción" no tiene por qué mirar una rueda girando mientras tanto —
- * y peor: si el correo falla, la promo YA se guardó, así que devolver un error
- * sería mentirle. El controlador dispara esto y responde de una. Lo que pase
- * después se anota en la consola y en la propia promoción.
- *
- * A QUIÉN LE LLEGA
- * Por correo: a los clientes activos, verificados y con
- * `notificationPrefs.promociones` encendido. Quien se registró y dejó la casilla en blanco NO recibe nada: en
- * el registro esa casilla llega desmarcada y su valor se copia tal cual a las
- * preferencias (ver registerClient). Los clientes viejos —los de antes de que
- * hubiera dónde elegir— sí reciben, porque el modelo los deja en true a
- * propósito, y en el pie del correo tienen su enlace para darse de baja.
- *
- * En el teléfono: con su propio interruptor (`avisosApp.promociones`), que
- * no se toca al darse de baja del correo. Y quien tiene en favoritos algo de
- * la promo recibe uno con su favorito (`avisosApp.favoritosEnOferta`) en vez
- * del general. Ver utils/preferenciasAvisos.js.
- * ============================================================
- */
+// AVISAR DE UNA PROMOCIÓN NUEVA — avisoPromo.js
+// Cuando la tienda publica una promoción, les escribe a los clientes que pidieron enterarse. El
+// controlador dispara esto y responde de una.
 
 import promotionModel from "../models/promotion.js";
 import clientModel from "../models/client.js";
@@ -36,13 +11,9 @@ import { plantillaCorreoPromo } from "./plantillaCorreoPromo.js";
 import { enviarPushEnSegundoPlano, esTokenExpo } from "./pushExpo.js";
 import { quiereEnLaApp } from "./preferenciasAvisos.js";
 
-/*
- * De los items de la promo a lo que la plantilla sabe pintar.
- *
- * El precio de oferta se calcula AQUÍ y no se lee de ningún lado, por lo mismo
- * que el carrito no confía en el precio que manda el navegador: el número que
- * va en el correo tiene que ser el que se va a cobrar.
- */
+// De los items de la promo a lo que la plantilla sabe pintar. El precio de oferta se calcula AQUÍ
+// y no se lee de ningún lado, por lo mismo que el carrito no confía en el precio que manda el
+// navegador: el número que va en el correo tiene que ser el que se va a cobrar.
 const armarItems = (promo) =>
   (promo.items || [])
     // Un producto borrado del inventario deja su item huérfano: populate
@@ -72,22 +43,9 @@ const armarItems = (promo) =>
       };
     });
 
-/*
- * ── Lo que dice la notificación del teléfono ──
- * Iba el título de la promo y su descripción entera: en la vista previa del
- * teléfono (una línea de título y una de texto, unos 40 caracteres cada una
- * en Android) salía cortada a la mitad y con demasiado texto, y lo que se
- * alcanzaba a leer no daba ganas de abrirla.
- *
- * Ahora se arma aparte del correo, corta y con un poco de misterio:
- *   - el título dice el gancho ("Tenemos un 2x1 para ti", "Hasta 25%
- *     menos en la tienda") en 40 caracteres o menos;
- *   - el texto no cuenta todo ("¿En qué producto? Toca y descúbrelo.") o
- *     apura si vence pronto ("Solo hasta el domingo. Toca para verlo."), en
- *     45 o menos.
- * El qué y el cuánto quedan para cuando la abren (y para el correo, que sí
- * trae el detalle). De "tú", como todo lo que le habla al cliente.
- */
+// ── Lo que dice la notificación del teléfono ──
+// Un texto corto, aparte del correo: el título lleva el gancho de la promo y el cuerpo lo justo
+// para que den ganas de abrirla.
 const MAX_TITULO = 40;
 const MAX_CUERPO = 45;
 
@@ -145,10 +103,8 @@ export const textoDelPush = (promo, items) => {
   return { titulo: caber(titulo, MAX_TITULO), cuerpo: caber(cuerpo, MAX_CUERPO) };
 };
 
-/*
- * El aviso de quien tiene en favoritos algo de la promo: ese sí dice qué es,
- * porque es justo lo que estaba esperando.
- */
+// El aviso de quien tiene en favoritos algo de la promo: ese sí dice qué es, porque es justo lo
+// que estaba esperando.
 export const textoDeFavoritos = (nombres) => {
   if (nombres.length === 1) {
     const conLlamado = `${nombres[0]}. Toca para verlo.`;
@@ -163,13 +119,9 @@ export const textoDeFavoritos = (nombres) => {
   };
 };
 
-/*
- * Quién recibe cuál, en el teléfono. Quien tiene un favorito en la promo (y
- * ese aviso encendido) recibe el suyo; los demás, el general si tienen las
- * promociones encendidas en la app. Nadie recibe los dos.
- *
- * Los del mismo favorito van juntos: es el mismo texto, sale en un solo envío.
- */
+// Quién recibe cuál, en el teléfono. Quien tiene un favorito en la promo (y ese aviso encendido)
+// recibe el suyo; los demás, el general si tienen las promociones encendidas en la app. Nadie
+// recibe los dos. Los del mismo favorito van juntos: es el mismo texto, sale en un solo envío.
 export const repartirPushDeLaPromo = (clientes, items) => {
   const generales = new Set();
   const porFavoritos = new Map();
@@ -212,19 +164,13 @@ const clientesConLaApp = () =>
     .select("+pushTokens avisosApp favorites")
     .lean();
 
-/*
- * Los destinatarios. Solo el correo: no hace falta traerse la cuenta entera de
- * cada cliente —con sus direcciones y sus métodos de pago— para mandar un
- * volante.
- */
+// Los destinatarios. Solo el correo: no hace falta traerse la cuenta entera de cada cliente —con
+// sus direcciones y sus métodos de pago— para mandar un volante.
 const buscarDestinatarios = async () => {
   const clientes = await clientModel
     .find({
-      /*
-       * $ne: false y no true a secas. Los clientes de antes de que existieran
-       * las preferencias no tienen el campo, y con `: true` habrían quedado
-       * fuera todos ellos — que son justamente los de siempre.
-       */
+      // $ne: false y no true a secas. Los clientes de antes de que existieran las preferencias no tienen
+      // el campo, y con `: true` habrían quedado fuera todos ellos — que son justamente los de siempre.
       "notificationPrefs.promociones": { $ne: false },
       isActive: { $ne: false },
       isVerified: true,
@@ -233,11 +179,9 @@ const buscarDestinatarios = async () => {
     .select("email")
     .lean();
 
-  /*
-   * Sin repetidos, y devolviendo el ID además del correo: el enlace de "dejar
-   * de recibirlos" lleva un token firmado con el id de quien lo recibe, así
-   * que el correo se arma por persona. Ver utils/tokenBaja.js.
-   */
+  // Sin repetidos, y devolviendo el ID además del correo: el enlace de "dejar de recibirlos" lleva
+  // un token firmado con el id de quien lo recibe, así que el correo se arma por persona. Ver
+  // utils/tokenBaja.js.
   const vistos = new Set();
   return clientes.filter((c) => {
     const correo = (c.email || "").trim().toLowerCase();
@@ -247,31 +191,23 @@ const buscarDestinatarios = async () => {
   });
 };
 
-/*
- * Manda el aviso de UNA promoción.
- *
- * @param {string} promoId
- * @returns {Promise<{enviados:number, fallidos:number, motivo?:string}>}
- *   Se devuelve el resumen —en vez de no devolver nada— para poder probarlo
- *   con un script sin tener que leer la consola.
- */
+// Manda el aviso de UNA promoción. @param {string} promoId @returns {Promise<{enviados:number,
+// fallidos:number, motivo?:string}>} Se devuelve el resumen —en vez de no devolver nada— para
+// poder probarlo con un script sin tener que leer la consola.
 export const avisarPromoNueva = async (promoId) => {
   const promo = await promotionModel.findById(promoId).populate("items.productId");
 
   if (!promo) return { enviados: 0, fallidos: 0, motivo: "la promoción ya no existe" };
 
-  /*
-   * UNA sola vez por promoción. Si mañana alguien la edita —para corregir una
-   * palabra del título— nadie tiene que recibir el mismo volante otra vez.
-   */
+  // UNA sola vez por promoción. Si mañana alguien la edita —para corregir una palabra del título—
+  // nadie tiene que recibir el mismo volante otra vez.
   if (promo.avisoEnviadoEn) {
     return { enviados: 0, fallidos: 0, motivo: "ya se había avisado de esta promoción" };
   }
 
-  // Una promo apagada, sin banner o ya vencida no se anuncia. La de "sin
-  // banner" es a propósito: ese es el descuento silencioso, el que la tienda
-  // aplica sin publicarlo (ver el modelo). Anunciarlo por correo sería
-  // exactamente lo contrario de lo que pidió.
+  // Una promo apagada, sin banner o ya vencida no se anuncia. La de "sin banner" es a propósito: ese
+  // es el descuento silencioso, el que la tienda aplica sin publicarlo (ver el modelo). Anunciarlo
+  // por correo sería exactamente lo contrario de lo que pidió.
   if (!promo.isActive) return { enviados: 0, fallidos: 0, motivo: "la promoción está apagada" };
   if (!promo.showBanner) return { enviados: 0, fallidos: 0, motivo: "es un descuento silencioso" };
   if (promo.endsAt && new Date(promo.endsAt) < new Date()) {
@@ -281,15 +217,8 @@ export const avisarPromoNueva = async (promoId) => {
   const items = armarItems(promo);
   if (!items.length) return { enviados: 0, fallidos: 0, motivo: "la promoción quedó sin productos" };
 
-  /*
-   * El volante, también al teléfono. Antes del corte de abajo porque tener la
-   * app y no tener correo verificado es perfectamente posible, y porque el
-   * teléfono tiene su propio interruptor: haberse dado de baja del correo no
-   * lo apaga.
-   *
-   * Sale una sola vez por promo igual que el correo — lo garantiza el
-   * `avisoEnviadoEn` de más arriba, que ya cortó si esta promo se anunció.
-   */
+  // El volante, también al teléfono. Sale una sola vez por promo igual que el correo — lo garantiza
+  // el `avisoEnviadoEn` de más arriba, que ya cortó si esta promo se anunció.
   const { generales, favoritos } = repartirPushDeLaPromo(await clientesConLaApp(), items);
   const datos = { tipo: "promo", promoId: String(promo._id || "") };
   // Corto y con misterio, para la vista previa del teléfono (ver textoDelPush).
@@ -300,12 +229,9 @@ export const avisarPromoNueva = async (promoId) => {
 
   const correos = await buscarDestinatarios();
   if (!correos.length) {
-    /*
-     * Sin nadie a quien escribirle, pero el push ya salió: la promo queda
-     * marcada igual. Sin esto, editarle una coma mañana la haría sonar de
-     * nuevo en todos los teléfonos — que es justo lo que el `avisoEnviadoEn`
-     * existe para evitar.
-     */
+    // Sin nadie a quien escribirle, pero el push ya salió: la promo queda marcada igual. Sin esto,
+    // editarle una coma mañana la haría sonar de nuevo en todos los teléfonos — que es justo lo que el
+    // `avisoEnviadoEn` existe para evitar.
     await promotionModel.findByIdAndUpdate(promoId, { $set: { avisoEnviadoEn: new Date() } });
     return { enviados: 0, fallidos: 0, motivo: "nadie tiene las promociones encendidas por correo" };
   }
@@ -314,17 +240,9 @@ export const avisarPromoNueva = async (promoId) => {
   // qué tienda es antes de decir qué ofrece.
   const tienda = await identidadDeLaTienda();
 
-  /*
-   * De uno en uno, no todos de golpe.
-   *
-   * Un Promise.all sobre trescientos correos le dispara trescientas peticiones
-   * simultáneas a Mailjet, que responde 429 y tira a la basura la mitad de la
-   * lista. En fila llegan todos; tarda más, pero esto corre en segundo plano y
-   * nadie está esperándolo.
-   *
-   * Y uno por destinatario, nunca todos en el mismo "Para": la lista de
-   * clientes de la tienda no es algo que se le reparta a los clientes.
-   */
+  // De uno en uno, no todos de golpe. Un Promise.all sobre trescientos correos le dispara
+  // trescientas peticiones simultáneas a Mailjet, que responde 429 y tira a la basura la mitad de la
+  // lista.
   let enviados = 0;
   let fallidos = 0;
 
@@ -337,14 +255,8 @@ export const avisarPromoNueva = async (promoId) => {
         tienda,
         enlaceBaja: enlaceDeBaja(cliente._id, "promociones"),
       });
-      /*
-       * List-Unsubscribe: el botón que Gmail/Outlook/Yahoo ponen junto al
-       * remitente, sin abrir ninguna página. Que esté presente ya es una
-       * señal de confianza para sus filtros de spam — y de un tiempo para
-       * acá, Gmail y Yahoo lo EXIGEN para que un remitente de volumen no
-       * termine directo en la carpeta de spam sin ni siquiera evaluarse. Ver
-       * la ruta /notificaciones/baja/:token.
-       */
+      // List-Unsubscribe: el botón que Gmail/Outlook/Yahoo ponen junto al remitente, sin abrir ninguna
+      // página.
       const headers = {
         "List-Unsubscribe": `<${enlaceDeBajaUnClic(cliente._id, "promociones")}>`,
         "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
@@ -358,24 +270,17 @@ export const avisarPromoNueva = async (promoId) => {
     }
   }
 
-  /*
-   * Se marca aunque hayan fallado algunos: la alternativa es reintentar la
-   * lista completa la próxima vez y volver a escribirle a los que sí
-   * recibieron.
-   */
+  // Se marca aunque hayan fallado algunos: la alternativa es reintentar la lista completa la próxima
+  // vez y volver a escribirle a los que sí recibieron.
   await promotionModel.findByIdAndUpdate(promoId, { $set: { avisoEnviadoEn: new Date() } });
 
   console.log(`aviso de promo "${promo.title || promo.promoDescription}": ${enviados} enviados, ${fallidos} fallidos`);
   return { enviados, fallidos };
 };
 
-/*
- * La versión que llama el controlador: dispara y se olvida.
- *
- * El `.catch` no es opcional. Sin él, cualquier tropiezo aquí adentro es una
- * promesa rechazada sin dueño, y Node se lleva el proceso entero por delante —
- * o sea, la tienda se cae porque un correo no salió.
- */
+// La versión que llama el controlador: dispara y se olvida. El `.catch` no es opcional. Sin él,
+// cualquier tropiezo aquí adentro es una promesa rechazada sin dueño, y Node se lleva el proceso
+// entero por delante — o sea, la tienda se cae porque un correo no salió.
 export const avisarPromoNuevaEnSegundoPlano = (promoId) => {
   avisarPromoNueva(promoId).catch((error) => {
     console.log("aviso de promo: falló el envío completo: " + error);

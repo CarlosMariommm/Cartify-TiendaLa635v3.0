@@ -4,15 +4,9 @@ import { tAhora } from '../utils/idioma';
 import { clientService } from '../api/clientService';
 import { useAuth } from './useAuth';
 
-/*
- * usePaymentMethods — gestiona los métodos de pago guardados del cliente.
- * Guardamos SOLO datos no sensibles (tipo, alias, marca, últimos 4, titular y
- * vencimiento). La lógica vive aquí; la página MetodoPago solo pinta la lista
- * y el formulario.
- *
- * agregar/eliminar devuelven true si se guardó: el formulario solo se cierra
- * y se limpia cuando el servidor contestó bien.
- */
+// usePaymentMethods — gestiona los métodos de pago guardados del cliente. Guardamos SOLO datos no
+// sensibles (tipo, alias, marca, últimos 4, titular y vencimiento). La lógica vive aquí; la página
+// MetodoPago solo pinta la lista y el formulario.
 export const usePaymentMethods = () => {
   const { user, esCliente } = useAuth();
   const [methods, setMethods] = useState([]);

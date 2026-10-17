@@ -13,27 +13,9 @@ import {
   empezarRedoble, pararRedoble,
 } from '../utils/sonidosJuego';
 
-/*
- * ============================================================
- * EL RETO DE TIQUI — useJuegoTiqui.js
- * ============================================================
- * Todo lo que pasa en el juego del stand; la pantalla (pages/JuegoTiqui.jsx)
- * solo pinta. Las reglas viven en utils/juegoTiqui.js.
- *
- * Las fases, en orden:
- *   inicio     la pantalla que invita a jugar (con la ruleta girando lento)
- *   reglas     Tiqui saluda y explica; al terminar sale la primera pregunta
- *   pregunta   Tiqui la lee; corre el tiempo
- *   respuesta  se marca la buena, Tiqui reacciona y sale el dato
- *   ruleta     ganó: a girar
- *   girando    la ruleta da vueltas
- *   premio     dulce o premio mayor
- *   fin        no llegó a la ruleta
- *
- * Lo que tiene que sobrevivir a recargar la página (cuántos premios mayores
- * quedan, los contadores del día, el mazo) se guarda en esta laptop.
- * ============================================================
- */
+// EL RETO DE TIQUI — useJuegoTiqui.js
+// Todo lo que pasa en el juego del stand; la pantalla (pages/JuegoTiqui.jsx) solo pinta. Las
+// reglas viven en utils/juegoTiqui.js.
 
 const LLAVE = 'reto-tiqui';
 
@@ -229,11 +211,9 @@ export const useJuegoTiqui = () => {
     setFase('inicio');
   }, [silenciar]);
 
-  /*
-   * La ruleta: la que se ve en todo momento, salvo mientras gira y muestra el
-   * premio. Con la probabilidad automática, su porción secreta cambia de
-   * tamaño con cada premio que se entrega (ver probabilidadSecreta).
-   */
+  // La ruleta: la que se ve en todo momento, salvo mientras gira y muestra el premio. Con la
+  // probabilidad automática, su porción secreta cambia de tamaño con cada premio que se entrega (ver
+  // probabilidadSecreta).
   const probabilidad = probabilidadSecreta(ajustes);
   const ruletaActual = useMemo(
     () => armarRuleta({ porcentajeSecreto: probabilidad, quedanSecretos: ajustes.secretos }),
@@ -293,10 +273,8 @@ export const useJuegoTiqui = () => {
     // Solo al cambiar de pregunta: `responder` cambia con ella.
   }, [fase, pregunta?.id, ajustes.segundos, responder]);
 
-  /*
-   * Seguir sola cuando Tiqui terminó de hablar: así el stand avanza aunque
-   * nadie toque nada, y quien juega puede adelantarse con el botón.
-   */
+  // Seguir sola cuando Tiqui terminó de hablar: así el stand avanza aunque nadie toque nada, y quien
+  // juega puede adelantarse con el botón.
   const espera = useMemo(() => {
     if (!voz.termino) return 0;
     if (fase === 'reglas') return ESPERA.reglas;
@@ -316,11 +294,9 @@ export const useJuegoTiqui = () => {
     return () => clearTimeout(reloj);
   }, [espera, fase, avanzar, volverAlInicio]);
 
-  /*
-   * La música de cada pantalla: alegre para llamar gente y en la ruleta, de
-   * suspenso mientras se piensa. Calla mientras gira (suena el redoble) y en
-   * el final deja sonar la fanfarria o el trombón antes de volver.
-   */
+  // La música de cada pantalla: alegre para llamar gente y en la ruleta, de suspenso mientras se
+  // piensa. Calla mientras gira (suena el redoble) y en el final deja sonar la fanfarria o el
+  // trombón antes de volver.
   useEffect(() => {
     if (fase === 'premio' || fase === 'fin') {
       tocarMusica(null);

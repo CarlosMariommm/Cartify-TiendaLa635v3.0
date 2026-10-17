@@ -47,11 +47,9 @@ const EmployeeFormModal = ({ isOpen, onClose, employee, onSave }) => {
   const handleImageChange = (file) => setSelectedImage(file);
 
   const onSubmit = (data) => {
-    /*
-     * La foto es opcional a propósito: alguien que entra a trabajar hoy tiene
-     * que poder quedar registrado hoy, sin depender de que le tomen una foto
-     * decente. Si no la sube, la ficha muestra sus iniciales.
-     */
+    // La foto es opcional a propósito: alguien que entra a trabajar hoy tiene que poder quedar
+    // registrado hoy, sin depender de que le tomen una foto decente. Si no la sube, la ficha muestra
+    // sus iniciales.
     if (!isEditing && !data.password) {
       toast.error('La contraseña es obligatoria para un nuevo empleado');
       return;
@@ -118,10 +116,8 @@ const EmployeeFormModal = ({ isOpen, onClose, employee, onSave }) => {
               />
             </div>
 
-            {/*
-              "cover" y no "contain": es una foto de carnet, se recorta igual
-              que se va a ver después en la ficha del empleado.
-            */}
+            {/* "cover" y no "contain": es una foto de carnet, se recorta igual que se va a ver después en la
+               ficha del empleado. */}
             <div className="my-4">
               <SubidorArchivo
                 accept="image/*"

@@ -1,13 +1,8 @@
 import printMaterialModel from "../models/printMaterial.js";
 
-/*
- * ============================================================
- * MATERIALES DE IMPRESIÓN — printMaterialController.js
- * ============================================================
- * CRUD del papel y la tinta. Mismo molde que printServiceController: los
- * mensajes van en español porque viajan tal cual al navegador del cliente.
- * ============================================================
- */
+// MATERIALES DE IMPRESIÓN — printMaterialController.js
+// CRUD del papel y la tinta. Mismo molde que printServiceController: los mensajes van en español
+// porque viajan tal cual al navegador del cliente.
 const printMaterialController = {};
 
 printMaterialController.getMaterials = async (req, res) => {
@@ -22,11 +17,8 @@ printMaterialController.getMaterials = async (req, res) => {
   }
 };
 
-/*
- * Los números llegan como texto desde el formulario. Se limpian aquí y no en
- * el modelo porque un "12 hojas" mal tecleado tiene que morir en la puerta,
- * no convertirse en NaN adentro de la base.
- */
+// Los números llegan como texto desde el formulario. Se limpian aquí y no en el modelo porque un
+// "12 hojas" mal tecleado tiene que morir en la puerta, no convertirse en NaN adentro de la base.
 const aNumero = (valor, porDefecto = 0) => {
   const n = Number(valor);
   return Number.isFinite(n) && n >= 0 ? n : porDefecto;
@@ -87,12 +79,7 @@ printMaterialController.updateMaterial = async (req, res) => {
   }
 };
 
-/*
- * Ajuste rápido de existencia, para cuando llega el pedido de papel o se acaba
- * un cartucho. Es su propio endpoint porque es LO que se hace todos los días:
- * obligar a abrir el formulario entero y volver a mandar nombre, tipo y unidad
- * solo para cambiar un número es la forma más segura de que nadie lo actualice.
- */
+// Ajuste rápido de existencia, para cuando llega el pedido de papel o se acaba un cartucho.
 printMaterialController.ajustarExistencia = async (req, res) => {
   try {
     const { existencia } = req.body;

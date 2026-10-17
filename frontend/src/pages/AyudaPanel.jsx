@@ -4,25 +4,9 @@ import { ArrowRight, LifeBuoy, Search } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { GRUPOS_AYUDA, buscarEnTemas, temasPara } from '../utils/ayudaPanel';
 
-/*
- * ============================================================
- * AYUDA — cómo funciona cada apartado del panel
- * ============================================================
- * Para el administrador (o el empleado) que no sabe, o no recuerda, dónde se
- * hace algo. El contenido vive en utils/ayudaPanel.js; aquí solo se pinta.
- *
- *   - Un tema por pantalla, agrupados como el menú lateral, con para qué
- *     sirve, cómo se usa paso a paso, lo que conviene saber y un botón para
- *     ir a esa pantalla.
- *   - El buscador filtra por cualquier palabra, sin importar tildes.
- *   - /ayuda?tema=inventario abre directo en ese tema: es a donde lleva el
- *     "?" de la barra de arriba desde cada pantalla, y Tiqui también.
- *   - El empleado solo ve los temas de lo que puede usar.
- *
- * Sin recuadros: los temas van sueltos sobre el fondo, separados por una
- * línea, como un texto que se lee de corrido.
- * ============================================================
- */
+// AYUDA — cómo funciona cada apartado del panel
+// Para el administrador (o el empleado) que no sabe, o no recuerda, dónde se hace algo. El
+// contenido vive en utils/ayudaPanel.js; aquí solo se pinta.
 const AyudaPanel = () => {
   const { user } = useAuth();
   const esAdmin = user?.type === 'admin';
@@ -33,10 +17,8 @@ const AyudaPanel = () => {
   const temas = useMemo(() => temasPara(esAdmin), [esAdmin]);
   const visibles = useMemo(() => buscarEnTemas(temas, busqueda), [temas, busqueda]);
 
-  /*
-   * Llegó pidiendo un tema: se baja hasta él y se marca un momento, para que
-   * el ojo sepa dónde empezar a leer.
-   */
+  // Llegó pidiendo un tema: se baja hasta él y se marca un momento, para que el ojo sepa dónde
+  // empezar a leer.
   const [resaltado, setResaltado] = useState(null);
   useEffect(() => {
     if (!temaPedido) return undefined;
@@ -46,13 +28,9 @@ const AyudaPanel = () => {
     const ir = (suave) =>
       document.getElementById(`tema-${temaPedido}`)?.scrollIntoView({ behavior: suave ? 'smooth' : 'auto', block: 'start' });
 
-    /*
-     * Después de que cargan las letras, no al instante: con la tipografía de
-     * respaldo los textos miden otra cosa, y al llegar la de verdad la página
-     * cambiaba de alto y el título del tema quedaba escondido bajo la barra
-     * (o corto, más abajo). Y al terminar de bajar se revisa: si igual quedó
-     * corrido, un ajuste sin animación; si quedó bien, no se toca nada.
-     */
+    // Después de que cargan las letras, no al instante: con la tipografía de respaldo los textos miden
+    // otra cosa, y al llegar la de verdad la página cambiaba de alto y el título del tema quedaba
+    // escondido bajo la barra (o corto, más abajo).
     (document.fonts?.ready ?? Promise.resolve()).then(() => {
       if (!vivo) return;
       relojes.push(setTimeout(() => { ir(true); setResaltado(temaPedido); }, 120));

@@ -1,19 +1,6 @@
-/*
- * ============================================================
- * EL ÁNIMO DE TIQUI — animoTiqui.js
- * ============================================================
- * Cada frase de Tiqui lleva un ánimo: alegre, emocionada, asombrada, rie,
- * apenada, dudosa o normal. Con él suena su voz (el servidor lo vuelve una
- * etiqueta de ElevenLabs, ver backend/src/utils/vozTiqui.js) y con él pone
- * la cara (MascotaAsistente).
- *
- * Lo que contesta la IA ya trae su ánimo. Las frases fijas de las reglas
- * rápidas ("Te agregué…", "No encontré…") no: el suyo sale de aquí, por cómo
- * empiezan. Antes esto mismo decidía solo la cara (animoDe en AsistenteVoz).
- *
- * La app tiene la misma regla en movil/src/utils/animoTiqui.js.
- * ============================================================
- */
+// EL ÁNIMO DE TIQUI — animoTiqui.js
+// Cada frase de Tiqui lleva un ánimo: alegre, emocionada, asombrada, rie, apenada, dudosa o
+// normal.
 
 export const animoDeFrase = (texto = '') => {
   if (/(Pasa a caja|Lleva tu carrito a caja|Te abro el pago)/.test(texto)) return 'emocionada'; // cerró la compra

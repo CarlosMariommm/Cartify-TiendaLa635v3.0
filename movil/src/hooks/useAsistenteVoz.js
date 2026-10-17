@@ -1,37 +1,5 @@
-/*
- * ============================================================
- * useAsistenteVoz — el "cerebro" del asistente por voz, en móvil
- * ============================================================
- * El equivalente de `frontend/src/hooks/useVoiceAssistant.js`. Las reglas de
- * texto (sinónimos, cantidades, puntaje por producto) son una copia literal:
- * eso es JS puro, sin nada del navegador, y funciona igual en los dos lados.
- *
- * Lo que SÍ cambia es cómo se escucha y se habla:
- *   - Web: `SpeechRecognition` / `speechSynthesis`, del navegador.
- *   - Aquí: `expo-speech-recognition` (módulo nativo, TurboModule — el único
- *     que de verdad soporta la New Architecture; `@react-native-voice/voice`
- *     falla en silencio con ella) y `expo-speech` para hablar.
- *
- * Y habla con la VOZ DE TIQUI (la del video, desde el servidor) cuando la
- * compilación trae expo-audio y el servidor tiene la llave; si no, con la
- * del teléfono. Ver utils/vozTiqui.js. Tiqui tutea, como en su video.
- *
- * Lo que se dejó AFUERA a propósito, para que esto fuera un apartado y no
- * un mes de trabajo:
- *   - Elegir voz del sistema (aquí el teléfono elige la suya en español).
- *   - Llevar a una sección de la cuenta específica o abrir un producto en su
- *     ficha: móvil no tiene esas pantallas conectadas a una ruta global
- *     todavía (ver `Asistente.js`). Sí navega a los 4 apartados y al carrito.
- *   - El upsell ("por cierto, X está en oferta"): el catálogo mapeado de
- *     móvil no trae el campo `esMasVendido` que usaba esa regla.
- *
- * ── El plan B: Tiqui, el mismo cerebro que la web ──
- * `preguntarALaIA` (más abajo) es lo que entra cuando estas reglas de texto
- * no alcanzan: habla con `/ai/asistente` (tool calling de Gemini, con el
- * catálogo, las promociones y los datos de la tienda). Ver el comentario
- * grande de TIQUI en `aiController.js`.
- * ============================================================
- */
+// useAsistenteVoz — el "cerebro" del asistente por voz, en móvil El equivalente de
+// `frontend/src/hooks/useVoiceAssistant.js`.
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
@@ -73,11 +41,9 @@ const VELOCIDADES = [
 // callar: solo cuando la app se va a segundo plano (ver abajo).
 const REINTENTO_SILENCIO_MS = 900;
 
-/*
- * Lo primero que dice cuando la acaban de despertar, antes de contestar. Va
- * con el ánimo "despertando": con la voz de Tiqui, bosteza (ver
- * backend/src/utils/vozTiqui.js). Tiqui es ELLA: "despierta", no "despierto".
- */
+// Lo primero que dice cuando la acaban de despertar, antes de contestar. Va con el ánimo
+// "despertando": con la voz de Tiqui, bosteza (ver backend/src/utils/vozTiqui.js). Tiqui es ELLA:
+// "despierta", no "despierto".
 const AL_DESPERTAR = [
   'Mmm… ya estoy despierta.',
   '¡Ay! Me quedé dormida. Ya estoy aquí.',
@@ -92,10 +58,8 @@ const DESTINOS = [
   { seccion: 'inicio', palabras: /\b(inicio|la tienda|el catalogo|el catálogo)\b/, nombre: 'el inicio', tab: 'inicio' },
 ];
 
-/*
- * Las secciones que la IA puede pedir abrir. Móvil no tiene pantallas propias
- * para puntos, favoritos, direcciones, etc.: viven dentro del perfil.
- */
+// Las secciones que la IA puede pedir abrir. Móvil no tiene pantallas propias para puntos,
+// favoritos, direcciones, etc.: viven dentro del perfil.
 const DESTINO_DE_SECCION = {
   ...Object.fromEntries(DESTINOS.map((d) => [d.seccion, d])),
   ...Object.fromEntries(['puntos', 'favoritos', 'direcciones', 'pagos', 'recibos', 'avisos']
@@ -117,12 +81,9 @@ const PIDE_IR = /\b(ver|vamos|llevame|llévame|muestrame|muéstrame|enseñame|en
 const sinAcentos = (s) => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
 const normalizar = (s) => sinAcentos(s).toLowerCase().trim();
 
-/*
- * Cuántos productos DISTINTOS se nombran en un pedazo de la frase. Se cuenta
- * la palabra que manda en cada nombre ("sandía", "coca", "queso"), sin
- * repetir: "queso fresco" nombra un queso, aunque haya tres quesos en la
- * tienda.
- */
+// Cuántos productos DISTINTOS se nombran en un pedazo de la frase. Se cuenta la palabra que manda
+// en cada nombre ("sandía", "coca", "queso"), sin repetir: "queso fresco" nombra un queso, aunque
+// haya tres quesos en la tienda.
 const productosNombrados = (texto, productos) => {
   const dichas = new Set(texto.split(/\s+/).map((w) => w.replace(/s$/, '')));
   const vistas = new Set();
@@ -135,12 +96,8 @@ const productosNombrados = (texto, productos) => {
 };
 const contarItems = (lista) => lista.reduce((a, i) => a + i.cantidad, 0);
 
-/*
- * Las frases del total. El monto se escribe "$12.50" (así sale en el chat) y
- * la voz lo dice "12 dólares con 50 centavos" (ver paraDecir en vozTiqui).
- * Decía "Tu total es $12.50 con 3 productos": dicho en voz alta quedaba
- * "...con 50 centavos con 3 productos", y con uno solo, "1 productos".
- */
+// Las frases del total. El monto se escribe "$12.50" (así sale en el chat) y la voz lo dice "12
+// dólares con 50 centavos" (ver paraDecir en vozTiqui).
 const productosEnTexto = (lista) => {
   const n = contarItems(lista);
   return n === 1 ? '1 producto' : `${n} productos`;
@@ -151,18 +108,9 @@ const fraseLlevas = (lista, total) => `Llevas ${total.toFixed(2)} en ${productos
 
 const enLista = (xs) => (xs.length === 1 ? xs[0] : `${xs.slice(0, -1).join(', ')} y ${xs[xs.length - 1]}`);
 
-/*
- * ── Lo que entró de verdad ──
- * Tiqui anunciaba lo PEDIDO: "Agregué 74 Manzana" sobre un carrito que había
- * rechazado las 74 porque quedaban 12. Ahora el carrito agrega hasta donde
- * alcance y dice cuánto entró (ver agregarAlCarrito en TiendaContext), y la
- * frase se arma con eso. Igual que en la web (useVoiceAssistant):
- *
- *   - entró todo      → "Agregué 74 Manzanas."
- *   - entró una parte → "Solo me quedaban 12 Manzanas, y ya están en tu carrito."
- *   - no entró nada   → ya lleva todo lo que hay: "Ya tienes en tu carrito 12
- *                       Manzanas, que es todo lo que me queda."
- */
+// ── Lo que entró de verdad ── Tiqui anunciaba lo PEDIDO: "Agregué 74 Manzana" sobre un carrito
+// que había rechazado las 74 porque quedaban 12. Ahora el carrito agrega hasta donde alcance y
+// dice cuánto entró (ver agregarAlCarrito en TiendaContext), y la frase se arma con eso.
 const agregarLoQueHaya = (fns, prod, pedido) => ({
   prod,
   pedido,
@@ -203,11 +151,9 @@ const expandirSinonimos = (t) => {
   return out;
 };
 
-/*
- * Lo que la persona pidió en un pedazo de la frase, sin las palabras de pedir
- * ni la cantidad: de "dos galletas" queda "galletas". Sirve para decir lo que
- * no hay en vez de callarlo. Misma regla que la web (useVoiceAssistant.js).
- */
+// Lo que la persona pidió en un pedazo de la frase, sin las palabras de pedir ni la cantidad: de
+// "dos galletas" queda "galletas". Sirve para decir lo que no hay en vez de callarlo. Misma regla
+// que la web (useVoiceAssistant.js).
 const DE_RELLENO = new Set([
   'quiero', 'quisiera', 'dame', 'deme', 'agrega', 'agregame', 'agregue', 'pon', 'ponme',
   'echa', 'echame', 'das', 'llevo', 'anota', 'anotame', 'necesito', 'los', 'las', 'del',
@@ -255,11 +201,9 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
   const [pensando, setPensando] = useState(false);
   const [hablando, setHablando] = useState(false);
   const [historial, setHistorial] = useState([]);
-  /*
-   * Ya hay respuesta, pero su voz todavía viene en camino. Mientras tanto la
-   * pantalla sigue en "piensa" y el mensaje no se muestra: antes salía el
-   * texto y la boca se movía, y el sonido llegaba después.
-   */
+  // Ya hay respuesta, pero su voz todavía viene en camino. Mientras tanto la pantalla sigue en
+  // "piensa" y el mensaje no se muestra: antes salía el texto y la boca se movía, y el sonido
+  // llegaba después.
   const [esperandoVoz, setEsperandoVoz] = useState(false);
 
   const dataRef = useRef({ productos, carrito, totalCarrito });
@@ -287,19 +231,14 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
   const vozTiquiRef = useRef(false);
   const fallasVozRef = useRef(0);
 
-  /*
-   * La memoria de la charla, al día en el mismo instante (el estado
-   * `historial` recién se actualiza en el próximo render y la pregunta a la IA
-   * sale antes). Viaja con cada pregunta para que entienda un "sí" o un
-   * "mejor dos" que dependen de lo anterior.
-   */
+  // La memoria de la charla, al día en el mismo instante (el estado `historial` recién se actualiza
+  // en el próximo render y la pregunta a la IA sale antes). Viaja con cada pregunta para que
+  // entienda un "sí" o un "mejor dos" que dependen de lo anterior.
   const memoriaRef = useRef([]);
 
-  /*
-   * `visible` es lo que se pinta en la burbuja cuando no es igual a lo dicho
-   * (Tiqui con el nombre del cliente). La memoria, que viaja a la IA, guarda
-   * siempre `texto`: el nombre no le llega a la IA. Ver nombreTiqui.js.
-   */
+  // `visible` es lo que se pinta en la burbuja cuando no es igual a lo dicho (Tiqui con el nombre
+  // del cliente). La memoria, que viaja a la IA, guarda siempre `texto`: el nombre no le llega a la
+  // IA. Ver nombreTiqui.js.
   const registrar = (tipo, texto, visible = texto, animo) => {
     memoriaRef.current = [...memoriaRef.current.slice(-7), { tipo, texto }];
     setHistorial((h) => [...h.slice(-7), { id: idRef.current++, tipo, texto: visible, animo }]);
@@ -339,11 +278,8 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
   }, []);
   arrancarRef.current = arrancarReconocimiento;
 
-  /*
-   * `animo`: el que eligió la IA. Las frases fijas no lo traen y sale de cómo
-   * empiezan (utils/animoTiqui.js). Viaja a la voz de Tiqui; la del teléfono
-   * habla igual que siempre.
-   */
+  // `animo`: el que eligió la IA. Las frases fijas no lo traen y sale de cómo empiezan
+  // (utils/animoTiqui.js). Viaja a la voz de Tiqui; la del teléfono habla igual que siempre.
   const hablar = useCallback((dichoPorElla, animo) => {
     let texto = dichoPorElla;
     let tono = animo || animoDeFrase(texto);
@@ -353,11 +289,8 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
       tono = 'despertando';
     }
     ultimaRespuestaRef.current = texto;
-    /*
-     * A veces, con el nombre del cliente: se ve y se escucha así. La memoria
-     * que viaja a la IA se queda con `texto`, sin el nombre (ver registrar y
-     * nombreTiqui.js).
-     */
+    // A veces, con el nombre del cliente: se ve y se escucha así. La memoria que viaja a la IA se
+    // queda con `texto`, sin el nombre (ver registrar y nombreTiqui.js).
     const dicho = conNombreAVeces(texto, nombreRef.current, usoDelNombreRef.current);
     registrar('bot', texto, dicho, tono);
 
@@ -417,11 +350,9 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
   }, []);
   hablarRef.current = hablar;
 
-  /*
-   * En un empate gana el que TIENE existencias. Con "leche" y dos leches igual
-   * de parecidas, se quedaba con la primera de la lista aunque estuviera
-   * agotada, y Tiqui decía "se nos acabó" teniendo la otra en el estante.
-   */
+  // En un empate gana el que TIENE existencias. Con "leche" y dos leches igual de parecidas, se
+  // quedaba con la primera de la lista aunque estuviera agotada, y Tiqui decía "se nos acabó"
+  // teniendo la otra en el estante.
   const conStock = (p) => (Number(p?.stock) || 0) > 0;
   const buscarProducto = (texto) => {
     const t = expandirSinonimos(normalizar(texto));
@@ -437,19 +368,9 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
     return mejor;
   };
 
-  /*
-   * El backend (`/ai/asistente`) ya hizo el tool calling: esto
-   * solo EJECUTA la lista de acciones que Gemini decidió, una por una, igual
-   * que las reglas locales de más abajo ejecutan lo que entendieron por
-   * regex. Puede traer varias en un mismo turno ("dos manzanas y una
-   * leche" son dos `agregar` en la misma respuesta) — por eso hacía falta
-   * tool calling y no el `responseSchema` de un solo campo que usa la web.
-   *
-   * El monto en dólares de "total"/"comprar" NUNCA sale de lo que dijo la
-   * IA: se arma acá con `totalCarrito`, que es la cuenta exacta de la
-   * tienda. Pedirle aritmética de dinero a un modelo de lenguaje es
-   * invitarlo a redondear mal.
-   */
+  // El backend (`/ai/asistente`) ya hizo el tool calling: esto solo EJECUTA la lista de acciones que
+  // Gemini decidió, una por una, igual que las reglas locales de más abajo ejecutan lo que
+  // entendieron por regex.
   const preguntarALaIA = useCallback(async (frase) => {
     const { productos } = dataRef.current;
     const fns = fnRef.current;
@@ -568,15 +489,8 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
         }
       }
 
-      /*
-       * `agregarAlCarrito`/`eliminarDelCarrito` de arriba no cambian
-       * `dataRef.current` al instante: lo actualiza el próximo render de
-       * TiendaContext, que todavía no pasó en este mismo tick. Leer el total
-       * ahora mismo diría un número viejo justo en el caso que más importa
-       * que esté bien: "dos manzanas y cuánto llevo" en la misma frase. Un
-       * `setTimeout` a 0 alcanza — para cuando corre, ya hubo tiempo de
-       * volver a renderizar y `dataRef.current` está al día.
-       */
+      // `agregarAlCarrito`/`eliminarDelCarrito` de arriba no cambian `dataRef.current` al instante: lo
+      // actualiza el próximo render de TiendaContext, que todavía no pasó en este mismo tick.
       setTimeout(() => {
         // Los tres se pisan a propósito, en este orden: un producto +18 sin
         // confirmar es lo más urgente de decir, y comprar/total con el monto
@@ -584,11 +498,8 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
         let dice = idea.respuesta;
         // El ánimo que eligió la IA vale para SU frase; si se reemplaza, el de la nueva sale de animoTiqui.
         let animo = idea.animo;
-        /*
-         * Si algo no entró completo, lo que dijo la IA ya no es verdad ("te
-         * agregué 74"): se dice lo que se hizo de verdad. La IA ve cuántas
-         * quedan y casi siempre acierta; esto es por si no.
-         */
+        // Si algo no entró completo, lo que dijo la IA ya no es verdad ("te agregué 74"): se dice lo que
+        // se hizo de verdad. La IA ve cuántas quedan y casi siempre acierta; esto es por si no.
         if (topados.length || resultados.some((r) => r.entro < r.pedido)) {
           dice = `${[fraseDeLoAgregado(resultados), ...topados].filter(Boolean).join(' ')} ¿Algo más?`;
           animo = undefined;
@@ -687,12 +598,9 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
       return;
     }
 
-    /*
-     * ── Las promociones ──
-     * Si no nombra un producto ("¿la leche está en oferta?" es sobre la
-     * leche), se ponen a la vista —cerrando la ficha que hubiera abierta— y
-     * Tiqui las cuenta con la IA, que sabe cuáles hay hoy.
-     */
+    // ── Las promociones ── Si no nombra un producto ("¿la leche está en oferta?" es sobre la leche),
+    // se ponen a la vista —cerrando la ficha que hubiera abierta— y Tiqui las cuenta con la IA, que
+    // sabe cuáles hay hoy.
     if (PIDE_PROMOS.test(t) && !buscarProducto(t) && fns.irAPromociones) {
       fns.irAPromociones();
       preguntarALaIA(texto);
@@ -743,13 +651,9 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
     // tal como lo dijo.
     const dichas = normalizar(texto).split(SEPARA_PEDIDOS).map((s) => s.trim()).filter(Boolean);
 
-    /*
-     * Varios productos en un mismo pedazo: el reconocimiento de voz no pone
-     * comas, así que "quiero una sandía dos coca colas un queso fresco" llegaba
-     * como UN pedido y estas reglas se quedaban con el primero que
-     * encontraban (la sandía) y callaban el resto. Separar eso lo hace bien
-     * la IA; aquí solo se le pasa.
-     */
+    // Varios productos en un mismo pedazo: el reconocimiento de voz no pone comas, así que "quiero una
+    // sandía dos coca colas un queso fresco" llegaba como UN pedido y estas reglas se quedaban con el
+    // primero que encontraban (la sandía) y callaban el resto.
     if (dichas.some((d) => productosNombrados(d, dataRef.current.productos) > 1)) {
       preguntarALaIA(texto);
       return;
@@ -757,16 +661,11 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
     const noHay = [];
     // Lo que se intentó agregar y cuánto entró de verdad (ver fraseDeLoAgregado).
     const resultados = [];
-    // Productos +18 encontrados pero NO agregados: sin confirmar la edad, la
-    // voz no mete un producto restringido al carrito por su cuenta — mismo
-    // candado que la tarjeta y la ficha, solo que aquí no hay a dónde abrir
-    // un modal de DUI en medio de la conversación, así que se explica y ya.
+    // Productos +18 encontrados pero NO agregados: sin confirmar la edad, la voz no mete un producto
+    // restringido al carrito por su cuenta — mismo candado que la tarjeta y la ficha, solo que aquí no
+    // hay a dónde abrir un modal de DUI en medio de la conversación, así que se explica y ya.
     const bloqueados = [];
-    /*
-     * Lo que se pidió pero está agotado. Antes se "agregaba" igual: el
-     * carrito lo rechazaba en silencio y el asistente decía "Agregué 1 leche"
-     * sobre una leche que nunca entró. Ahora se dice que se acabó.
-     */
+    // Lo que se pidió pero está agotado. Ahora se dice que se acabó.
     const agotados = [];
     const vistos = new Set();
     for (const [i, parte] of partes.entries()) {
@@ -841,13 +740,9 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
       return;
     }
 
-    /*
-     * Silencio: vuelve a escuchar calladita, sin decir nada, todas las veces
-     * que haga falta. Antes se dormía sola después de tres silencios, y cada
-     * vez había que volver a despertarla. Ahora se duerme solo si la app se va
-     * a segundo plano, si la duermen tocándola o al ir a pagar. Escuchar es del
-     * teléfono y no gasta créditos de la voz.
-     */
+    // Silencio: vuelve a escuchar calladita, sin decir nada, todas las veces que haga falta. Ahora se
+    // duerme solo si la app se va a segundo plano, si la duermen tocándola o al ir a pagar. Escuchar
+    // es del teléfono y no gasta créditos de la voz.
     if (!activoRef.current || hablandoRef.current) return;
     setTimeout(() => arrancarRef.current?.(), REINTENTO_SILENCIO_MS);
   });
@@ -895,11 +790,8 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
     Speech.stop();
   }, []);
 
-  /*
-   * Se duerme cuando la app se va a segundo plano (otra app, el inicio del
-   * teléfono, la pantalla apagada): ahí nadie le está hablando, y seguir con
-   * el micrófono abierto gasta batería.
-   */
+  // Se duerme cuando la app se va a segundo plano (otra app, el inicio del teléfono, la pantalla
+  // apagada): ahí nadie le está hablando, y seguir con el micrófono abierto gasta batería.
   useEffect(() => {
     const sub = AppState.addEventListener('change', (estado) => {
       if (estado === 'background' && activoRef.current) detener();
@@ -907,15 +799,9 @@ export const useAsistenteVoz = ({ productos = [], carrito = [], totalCarrito = 0
     return () => sub.remove();
   }, [detener]);
 
-  /*
-   * La persona se fue de la pantalla de Tiqui (otra pestaña, el carrito, la
-   * presentación): ya no le está hablando a ella, así que deja de escuchar.
-   * Pero NO se duerme: sigue despierta, y al volver retoma sola, sin el
-   * bostezo de recién despertada. Si estaba hablando, termina lo que decía.
-   *
-   * Las pestañas no se desmontan al cambiar de una a otra: sin esto, el
-   * micrófono seguía abierto escuchando en la tienda.
-   */
+  // La persona se fue de la pantalla de Tiqui (otra pestaña, el carrito, la presentación): ya no le
+  // está hablando a ella, así que deja de escuchar. Pero NO se duerme: sigue despierta, y al volver
+  // retoma sola, sin el bostezo de recién despertada. Si estaba hablando, termina lo que decía.
   const pausar = useCallback(() => {
     if (!activoRef.current || pausadoRef.current) return;
     pausadoRef.current = true;

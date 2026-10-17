@@ -3,13 +3,9 @@ import clientController from "../controller/Clients/clientController.js";
 import upload from "../utils/cloudinaryConfig.js";
 import { soloAdmin, duenoOPersonal } from "../middlewares/validarSesion.js";
 
-/*
- * ── Documentación de la API (Swagger) ──
- *
- * Viene de main. Va agrupada aquí y no pegada a cada ruta porque
- * swagger-jsdoc rastrea el archivo entero: dónde esté no cambia lo que
- * documenta, y así el código de las rutas se lee sin interrupciones.
- */
+// ── Documentación de la API (Swagger) ──
+// Va agrupada aquí y no pegada a cada ruta porque swagger-jsdoc rastrea el archivo entero: dónde
+// esté no cambia lo que documenta, y así el código de las rutas se lee sin interrupciones.
 
 /**
  * @swagger
@@ -224,55 +220,28 @@ import { soloAdmin, duenoOPersonal } from "../middlewares/validarSesion.js";
 
 const router = express.Router();
 
-/*
- * SIN middleware de sesión, y es correcto: es el enlace "dejar de recibirlos"
- * del pie de los correos, que tiene que funcionar de un clic desde el teléfono
- * de alguien que quizá nunca inició sesión en este navegador. La puerta la hace
- * el token firmado que viene en el cuerpo. Ver utils/tokenBaja.js.
- *
- * Va ARRIBA de las rutas con /:id para que Express no lea "notificaciones"
- * como si fuera el id de un cliente.
- */
+// SIN middleware de sesión, y es correcto: es el enlace "dejar de recibirlos" del pie de los
+// correos, que tiene que funcionar de un clic desde el teléfono de alguien que quizá nunca inició
+// sesión en este navegador. La puerta la hace el token firmado que viene en el cuerpo.
 router.post("/notificaciones/baja", clientController.bajaNotificacion);
 
-/*
- * LA MISMA BAJA, PERO PARA EL BOTÓN DEL PROPIO CORREO.
- *
- * Gmail, Outlook y Yahoo le ponen un botón de "Cancelar suscripción" junto al
- * nombre del remitente cuando el correo trae el encabezado List-Unsubscribe
- * con soporte de un clic (RFC 8058). Ese botón NO abre ninguna página: el
- * cliente de correo manda un POST a esta URL por su cuenta, con el token ya
- * puesto en el camino — así no depende de que sepa mandar un cuerpo con forma
- * particular.
- *
- * Que exista este encabezado (esté o no encendido para todo el mundo) ya es
- * una señal de confianza para los filtros de spam: dice "este remitente deja
- * salir fácil a quien no quiere sus correos", que es lo contrario de un
- * spammer. Se usa en avisoPromo.js y en el aviso de productos nuevos.
- */
+// LA MISMA BAJA, PERO PARA EL BOTÓN DEL PROPIO CORREO.
+// Gmail, Outlook y Yahoo le ponen un botón de "Cancelar suscripción" junto al nombre del remitente
+// cuando el correo trae el encabezado List-Unsubscribe con soporte de un clic (RFC 8058).
 router.post("/notificaciones/baja/:token", clientController.bajaNotificacion);
 
-/*
- * Todo este router estaba abierto. Con el id en la URL —que se adivina o se
- * copia— cualquiera leía y EDITABA la cuenta de otro: sus direcciones con
- * coordenadas, sus métodos de pago, sus favoritos.
- *
- * `duenoOPersonal("id")` es la regla general aquí: el cliente solo con lo
- * suyo, el personal con lo de todos porque atender es su trabajo.
- */
+// Todo este router estaba abierto. Con el id en la URL —que se adivina o se copia— cualquiera leía
+// y EDITABA la cuenta de otro: sus direcciones con coordenadas, sus métodos de pago, sus
+// favoritos.
 
-/*
- * La lista de todos los clientes: cosa del personal. Misma razón que
- * /registerClient/all, que es la gemela que usa el panel.
- */
+// La lista de todos los clientes: cosa del personal. Misma razón que /registerClient/all, que es
+// la gemela que usa el panel.
 router
   .route("/")
   .get(soloAdmin, clientController.getClients);
 
-/*
- * Borrar una cuenta es irreversible y hasta hace poco estaba abierto: con un
- * curl y un _id cualquiera podía borrar a un cliente de la tienda.
- */
+// Borrar una cuenta es irreversible y hasta hace poco estaba abierto: con un curl y un _id
+// cualquiera podía borrar a un cliente de la tienda.
 router
   .route("/:id")
   .get(duenoOPersonal("id"), clientController.getClientById)
