@@ -268,7 +268,7 @@ const TEMPORADAS_DE_FABRICA = [
 ];
 
 export const temporadasDisponibles = (temporada) => [
-  ...TEMPORADAS_DE_FABRICA,
+  ...TEMPORADAS_DE_FABRICA.filter((t) => !(temporada?.ocultas || []).includes(t.clave)),
   ...(temporada?.personalizados || []).map((t) => ({ clave: t.clave, nombre: t.nombre })),
 ];
 

@@ -29,6 +29,7 @@ vi.mock("../models/storeSettings.js", () => ({
   default: { findOne: () => cadena({ nombreLinea1: "Tienda", nombreLinea2: "la 635", direccion: "Calle Sevilla 635", envioBase: 1, envioPorKm: 0.25, negocio: { horario: "de lunes a sábado, de 7 a 8" } }) },
 }));
 vi.mock("../models/client.js", () => ({ default: { findById: () => cadena({ fullName: "Ana López" }) } }));
+vi.mock("../models/order.js", () => ({ default: { aggregate: async () => [] } }));
 vi.mock("../models/productType.js", () => ({ default: {} }));
 vi.mock("../models/brand.js", () => ({ default: {} }));
 

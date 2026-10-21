@@ -64,6 +64,9 @@ const temporadaSchema = new Schema(
     // Las temporadas que crea el dueño ("Regreso a clases", "Día de la madre"...). Conviven con las de
     // fábrica y se eligen igual: por fecha en automático, o a mano. Ver temporadaPropiaSchema.
     personalizados: { type: [temporadaPropiaSchema], default: [] },
+    // Las temporadas de fábrica que el dueño borró ("navidad", "halloween"...): ya no se pintan solas
+    // ni se pueden elegir, hasta que las restaure desde el panel.
+    ocultas: { type: [String], default: [] },
     // El disfraz que el dueño le armó a Tiqui para cada temporada, por la clave de la temporada: {
     // navidad: { cabeza, cara, cuello, rubor } }. Una temporada sin entrada aquí usa el disfraz de
     // fábrica. Lo revisa utils/disfracesTiqui.js antes de guardarlo.

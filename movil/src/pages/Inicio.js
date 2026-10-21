@@ -2,7 +2,7 @@
 // Buscador, carrito, categorías, carrusel de promociones, "Más vendidos" y la cuadrícula del
 // catálogo (en un FlatList, para que no se trabe con muchos productos).
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useColores, useEstilos } from '../context/ModoContext';
 import { useTienda } from '../context/TiendaContext';
@@ -29,10 +29,13 @@ import { useIdioma } from '../context/IdiomaContext';
 import { soltarProductoPedido, useProductoPedido } from '../utils/enlaces';
 import { useDisposicion } from '../hooks/useDisposicion';
 import { useAireBarraFlotante } from '../components/UI/BarraInferior';
+import { usePedidoActivoCtx } from '../context/PedidoActivoContext';
+import { armarSecciones } from '../utils/secciones';
+import { bloqueDeSeccion } from '../utils/portada';
 
 const Inicio = ({ irACarrito, irASeccion }) => {
   const { t } = useIdioma();
-  const { colores, recargarAjustes } = useTema();
+  const { colores, recargarAjustes, portadaVisible } = useTema();
   const COLORES = useColores();
   const estilos = useEstilos(crearEstilos);
   const {
@@ -52,8 +55,8 @@ const Inicio = ({ irACarrito, irASeccion }) => {
     terminoBusqueda,
     setTerminoBusqueda,
     productosFiltrados,
+    productosDelPasillo,
     productosDestacados,
-    secciones,
     promosDelCarrusel,
     promoSeleccionada,
     setPromoSeleccionada,
@@ -104,6 +107,18 @@ const Inicio = ({ irACarrito, irASeccion }) => {
   // La portada completa solo cuando no se está filtrando nada.
   const mostrarPortada = !categoriaSeleccionada && !terminoBusqueda && !promoSeleccionada;
 
+  // Las filas automáticas, con los pedidos del cliente para "Volver a comprar", agrupadas por el
+  // bloque de la portada al que pertenecen (los estantes van todos en "familias").
+  const { orders } = usePedidoActivoCtx();
+  const seccionesPorBloque = useMemo(() => {
+    const mapa = new Map();
+    armarSecciones(productosDelPasillo, orders).forEach((seccion) => {
+      const bloque = bloqueDeSeccion(seccion.clave);
+      mapa.set(bloque, [...(mapa.get(bloque) || []), seccion]);
+    });
+    return mapa;
+  }, [productosDelPasillo, orders]);
+
   const encabezado = (
     <View>
       {/* La cinta va DENTRO del encabezado de la lista y no arriba, junto a la barra: la barra se queda
@@ -140,48 +155,49 @@ const Inicio = ({ irACarrito, irASeccion }) => {
         </View>
       )}
 
-      {mostrarPortada && promosDelCarrusel.length > 0 && (
-        <CarruselPromos promos={promosDelCarrusel} alElegirPromo={abrirPromo} />
-      )}
-
-      {mostrarPortada && productosDestacados.length > 0 && (
-        <View style={estilos.seccionDestacados}>
-          <View style={estilos.tituloDestacados}>
-            {/* El punto verde de "en vivo" que la web anima. Aquí va fijo:
-                animarlo obligaría a tener un Animated corriendo siempre, y lo
-                que comunica —que esto se mueve solo— ya lo dice el color. */}
-            <View style={estilos.puntoVivo} />
-            <Text style={estilos.tituloSeccion}>{t('Más vendidos')}</Text>
-          </View>
-
-          <FlatList
-            data={productosDestacados}
-            keyExtractor={(p) => p.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={estilos.filaDestacados}
-            renderItem={({ item, index }) => (
-              <View style={estilos.celdaDestacado}>
-                <TarjetaProducto producto={item} alVerDetalle={verDetalle} alAgregar={agregarAlCarrito} indice={index} />
-              </View>
-            )}
-          />
-        </View>
-      )}
-
-      {/* Las filas que se arman solas con el inventario ("Se están acabando", "Nuevos en la tienda"). Si
-         en este momento no hay datos para armar alguna —una tienda con todo el stock lleno no tiene nada
-         acabándose— sencillamente no se pinta. Ver utils/secciones.js. */}
+      {/* La portada, en el orden y con las filas que eligió el panel (Personalización › Portada). */}
       {mostrarPortada &&
-        secciones.map((seccion) => (
-          <FilaProductos
-            key={seccion.clave}
-            seccion={seccion}
-            alVerTodos={() => irASeccion?.(seccion)}
-            alVerDetalle={verDetalle}
-            alAgregar={agregarAlCarrito}
-          />
-        ))}
+        portadaVisible.map((bloque) => {
+          if (bloque.clave === 'promos') {
+            return promosDelCarrusel.length > 0 ? (
+              <CarruselPromos key="promos" promos={promosDelCarrusel} alElegirPromo={abrirPromo} />
+            ) : null;
+          }
+          if (bloque.clave === 'mas-vendidos') {
+            return productosDestacados.length > 0 ? (
+              <View key="mas-vendidos" style={estilos.seccionDestacados}>
+                <View style={estilos.tituloDestacados}>
+                  {/* El punto verde de "en vivo"; aquí va fijo, el color ya dice que se mueve solo. */}
+                  <View style={estilos.puntoVivo} />
+                  <Text style={estilos.tituloSeccion}>{t('Más vendidos')}</Text>
+                </View>
+
+                <FlatList
+                  data={productosDestacados}
+                  keyExtractor={(p) => p.id}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={estilos.filaDestacados}
+                  renderItem={({ item, index }) => (
+                    <View style={estilos.celdaDestacado}>
+                      <TarjetaProducto producto={item} alVerDetalle={verDetalle} alAgregar={agregarAlCarrito} indice={index} />
+                    </View>
+                  )}
+                />
+              </View>
+            ) : null;
+          }
+          // Las filas que se arman con el inventario; si hoy no hay datos para una, no se pinta.
+          return (seccionesPorBloque.get(bloque.clave) || []).map((seccion) => (
+            <FilaProductos
+              key={seccion.clave}
+              seccion={seccion}
+              alVerTodos={() => irASeccion?.(seccion)}
+              alVerDetalle={verDetalle}
+              alAgregar={agregarAlCarrito}
+            />
+          ));
+        })}
 
       <View style={estilos.encabezadoCatalogo}>
         <Text style={estilos.tituloSeccion}>

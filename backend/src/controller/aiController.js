@@ -17,6 +17,7 @@ import {
   ANIMOS_IA, animoValido, conEmocion, modeloDeVoz,
 } from "../utils/vozTiqui.js";
 import { generarCopyPlantilla } from "../utils/plantillasPromo.js";
+import { candidatosParaRecomendar, sortearTanda } from "../utils/paraRecomendar.js";
 import { esFamiliaValida, LISTA_PARA_IA } from "../utils/familias.js";
 
 const aiController = {};
@@ -628,7 +629,12 @@ const SECCIONES = ["pedidos", "puntos", "favoritos", "direcciones", "pagos", "re
 const PIDE_OFERTAS = /\b(ofert|promo|descuent|rebaj|barat|recomiend|recomenda|sugier)/;
 
 const catalogoParaTiqui = async (textoDeLaCharla) => {
-  const [todos, ofertas] = await Promise.all([leerCatalogo(), leerOfertas()]);
+  const [todos, ofertas, porEmpujar] = await Promise.all([
+    leerCatalogo(),
+    leerOfertas(),
+    // Si la cuenta de ventas falla o tarda más de 1,5 s, Tiqui recomienda igual, sin esa lista.
+    Promise.race([candidatosParaRecomendar(), new Promise((r) => setTimeout(r, 1500, []))]).catch(() => []),
+  ]);
   const palabras = palabrasClave(textoDeLaCharla);
   const pideOfertas = PIDE_OFERTAS.test(aTextoPlano(textoDeLaCharla));
   const puntos = (p) =>
@@ -637,11 +643,18 @@ const catalogoParaTiqui = async (textoDeLaCharla) => {
     (ofertas.porProducto.has(p.id) ? (pideOfertas ? 5 : 0.5) : 0);
 
   const conExistencias = todos.filter((p) => p.stock > 0);
-  const disponibles = conExistencias
+  // Lo que la tienda quiere mover (ver utils/paraRecomendar.js): otra tanda en cada respuesta.
+  const porId = new Map(conExistencias.map((p) => [p.id, p]));
+  const paraRecomendar = sortearTanda(porEmpujar.filter((c) => porId.has(c.id)))
+    .map((c) => ({ ...porId.get(c.id), motivos: c.motivos }));
+
+  const ordenados = conExistencias
     .map((p, i) => ({ p, n: puntos(p), i }))
     .sort((a, b) => b.n - a.n || a.i - b.i)
     .map((x) => x.p)
     .slice(0, TOPE_CATALOGO);
+  // Los de "para recomendar" tienen que estar en la lista: las herramientas solo aceptan esos nombres.
+  const disponibles = [...ordenados, ...paraRecomendar.filter((p) => !ordenados.includes(porId.get(p.id)))];
 
   const agotados = palabras.length
     ? todos.filter((p) => p.stock <= 0 && palabras.some((w) => p.clave.includes(w))).slice(0, 5)
@@ -649,10 +662,10 @@ const catalogoParaTiqui = async (textoDeLaCharla) => {
 
   const categorias = [...new Set(conExistencias.map((p) => p.categoria).filter(Boolean))].sort();
 
-  return { disponibles, agotados, categorias, ofertas };
+  return { disponibles, agotados, categorias, ofertas, paraRecomendar };
 };
 
-const armarPreguntaDeTiqui = ({ frase, carrito, charla, disponibles, agotados, categorias, ofertas, tienda, nombre }) => {
+const armarPreguntaDeTiqui = ({ frase, carrito, charla, disponibles, agotados, categorias, ofertas, tienda, nombre, paraRecomendar = [] }) => {
   const enCarrito = carrito.length
     ? carrito.map((i) => `${i.cantidad} ${i.nombre}`).join(", ")
     : "vacío";
@@ -691,6 +704,13 @@ const armarPreguntaDeTiqui = ({ frase, carrito, charla, disponibles, agotados, c
       ? `Promociones vigentes hoy:\n${ofertas.resumen.join("\n")}`
       : "Hoy no hay promociones vigentes.",
     "",
+    ...(paraRecomendar.length
+      ? [
+          "Para recomendar hoy (la tienda quiere moverlos; el motivo es para ti, al cliente dale un porqué que le sirva a él):",
+          paraRecomendar.map((p) => `${p.nombre} · ${plata(p.precio)}${p.porLibra ? " la libra" : ""} · ${p.motivos.join(", ")}`).join("\n"),
+          "",
+        ]
+      : []),
     "Productos con existencias (nombre · precio · cuántos quedan · categoría · marca · oferta):",
     disponibles.map(linea).join("\n") || "(ninguno)",
     ...(agotados.length ? ["", `Agotados hoy, NO se pueden agregar: ${agotados.map((p) => p.nombre).join(", ")}`] : []),
@@ -825,9 +845,13 @@ const MODO_TIQUI = [
   "  por producto.",
   "- Vaciar el carrito, decir el total ('ver_total') o llevarlo a pagar ('ir_a_pagar').",
   "- Mostrar un producto, una categoría, o abrir una sección de su cuenta.",
-  "- Recomendar: elige de la lista lo que le sirve por lo que pide o por lo que ya lleva, y",
-  "  prefiere lo que está en oferta. Nombra uno o dos con su precio y pregúntale si lo",
-  "  quiere; no lo agregues si no te lo pidió.",
+  "- Recomendar: elige lo que le sirve por lo que pide o por lo que ya lleva. Si alguno de",
+  "  'Para recomendar hoy' le sirve, ese va primero; si no, lo que está en oferta. Nombra",
+  "  uno o dos con su precio y di en pocas palabras POR QUÉ se lo recomiendas, con una",
+  "  razón que le sirva al cliente: que combina con lo que lleva, que está a buen precio o",
+  "  en oferta, que es para consumir esta semana (si vence pronto), que es nuevo. Nunca",
+  "  digas que no se vende o que sobra. No repitas lo que ya recomendaste en la charla.",
+  "  Pregúntale si lo quiere; no lo agregues si no te lo pidió.",
   "- Promociones: si pregunta por ofertas, cuéntale una o dos de las vigentes con su precio",
   "  de oferta. Si hoy no hay, dilo y ofrécete a recomendarle algo.",
   "- La tienda: usa solo lo que viene en 'La tienda'. Si trae el horario, el WhatsApp o el",
@@ -1058,14 +1082,14 @@ aiController.asistente = async (req, res) => {
       return res.status(200).json(respaldo || { acciones: [], respuesta: "", entendido: false, origen: "sin-ia" });
     }
 
-    const [{ disponibles, agotados, categorias, ofertas }, tienda, nombre] = await Promise.all([
+    const [{ disponibles, agotados, categorias, ofertas, paraRecomendar }, tienda, nombre] = await Promise.all([
       // Lo que se está hablando decide qué productos van arriba: la frase y lo
       // último de la charla (un "sí" solo no dice nada; lo de antes, sí).
       catalogoParaTiqui([frase, ...charla.slice(-4).map((m) => m.texto)].join(" ")),
       leerTienda(),
       nombreDelCliente(req),
     ]);
-    const contents = armarPreguntaDeTiqui({ frase, carrito, charla, disponibles, agotados, categorias, ofertas, tienda, nombre });
+    const contents = armarPreguntaDeTiqui({ frase, carrito, charla, disponibles, agotados, categorias, ofertas, tienda, nombre, paraRecomendar });
 
     try {
       // Con cobertura: si Gemini se traba, contesta el respaldo sin esperarlo.
