@@ -22,7 +22,7 @@ router.route("/promo-copy")
     .post(soloPersonal, aiController.generarCopyPromo);
 
 // El asistente la toca al abrirse: despierta el servidor (Render se duerme),
-// deja el catálogo en memoria y avisa si hay voz de Tiqui. No gasta IA.
+// deja el catálogo en memoria y avisa si hay voz de Tiqui y si sirve el respaldo de OpenRouter. No gasta IA.
 router.route("/listo")
     .get(aiController.listo);
 

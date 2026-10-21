@@ -18,6 +18,7 @@ import {
 } from "../utils/vozTiqui.js";
 import { generarCopyPlantilla } from "../utils/plantillasPromo.js";
 import { candidatosParaRecomendar, sortearTanda } from "../utils/paraRecomendar.js";
+import { comprobarPasarela } from "../utils/pasarelaIA.js";
 import { esFamiliaValida, LISTA_PARA_IA } from "../utils/familias.js";
 
 const aiController = {};
@@ -341,7 +342,9 @@ aiController.listo = async (req, res) => {
   // `voz`: si hay llave de ElevenLabs. Sin ella, los clientes hablan con la voz del sistema y ni
   // intentan pedir el audio. `voz` comprobada de verdad (ver comprobarVoz): sin ella los clientes
   // hablan con la voz del dispositivo de una vez, sin probar y esperar el error.
-  return res.status(200).json({ listo: true, voz: await comprobarVoz() });
+  // `respaldo`: si la llave de OpenRouter sirve (se revisa gratis, ver utils/pasarelaIA.js).
+  const [voz, respaldo] = await Promise.all([comprobarVoz(), comprobarPasarela()]);
+  return res.status(200).json({ listo: true, voz, respaldo });
 };
 
 // ENTENDER LO QUE PIDIÓ EL CLIENTE (asistente de voz)
