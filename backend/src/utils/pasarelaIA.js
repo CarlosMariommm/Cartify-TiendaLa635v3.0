@@ -126,3 +126,25 @@ export const generarConPasarela = async (peticion, { signal, extra = {} } = {}) 
   }
   return traducirRespuesta(await respuesta.json());
 };
+
+// ¿La llave sirve? OpenRouter tiene una consulta gratis de la propia llave: no gasta nada. Se
+// guarda media hora. LLM Gateway no tiene una igual: con llave, se da por buena.
+let comprobada = { en: 0, llave: "", ok: false };
+export const comprobarPasarela = async ({ pedir = fetch } = {}) => {
+  const p = pasarela();
+  if (!p) return false;
+  if (p.nombre !== "OpenRouter") return true;
+  if (comprobada.llave === p.llave && Date.now() - comprobada.en < 30 * 60 * 1000) return comprobada.ok;
+  let ok = false;
+  try {
+    const r = await pedir("https://openrouter.ai/api/v1/key", {
+      headers: { Authorization: `Bearer ${p.llave}` },
+      signal: AbortSignal.timeout(4000),
+    });
+    ok = r.ok;
+  } catch {
+    ok = false;
+  }
+  comprobada = { en: Date.now(), llave: p.llave, ok };
+  return ok;
+};
