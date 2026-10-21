@@ -1,6 +1,6 @@
 import { useRef, useState, useCallback, useEffect, useLayoutEffect, useSyncExternalStore } from 'react';
 import { aiService } from '../api/aiService';
-import { decirConTiqui, callarTiqui, paraDecir } from '../utils/vozTiqui';
+import { decirConTiqui, callarTiqui, paraDecir, desbloquearAudio } from '../utils/vozTiqui';
 import { cantidadParaDecir } from '../utils/unidades';
 import { conNombreAVeces } from '../utils/nombreTiqui';
 import { animoDeFrase } from '../utils/animoTiqui';
@@ -466,8 +466,18 @@ export const useVoiceAssistant = ({
       // hace que algunos navegadores la ignoren y hablen en inglés.
       u.lang = voz.lang;
     }
-    u.onend = continuar;
-    u.onerror = continuar;
+    // En el teléfono a veces no llega el aviso de que terminó (o no suena nada): sin este plazo,
+    // Tiqui quedaba "hablando" para siempre y no volvía a escuchar.
+    let listo = false;
+    const una = () => {
+      if (listo) return;
+      listo = true;
+      clearTimeout(plazo);
+      continuar();
+    };
+    const plazo = setTimeout(una, 2500 + (paraDecir(texto).length * 90) / rateRef.current);
+    u.onend = una;
+    u.onerror = una;
     window.speechSynthesis.speak(u);
   };
 
@@ -890,6 +900,7 @@ export const useVoiceAssistant = ({
 
   const iniciar = useCallback(() => {
     if (!soportado) { hablar('Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge.'); return; }
+    desbloquearAudio();
     activoRef.current = true;
     setActivo(true);
     arrancarReconocimiento();
@@ -900,6 +911,7 @@ export const useVoiceAssistant = ({
   // pero tenía que aguantarse la frase completa antes de poder hablar.
   const interrumpir = useCallback(() => {
     callarTodo();
+    desbloquearAudio();
     hablandoRef.current = false;
     setHablando(false);
     activoRef.current = true;
