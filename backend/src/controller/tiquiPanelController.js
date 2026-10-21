@@ -1,10 +1,12 @@
 import { FunctionCallingConfigMode, Type } from "@google/genai";
 import adminModel from "../models/admin.js";
 import employeeModel from "../models/employee.js";
+import productModel from "../models/product.js";
 import { getIA, generarConCobertura } from "../utils/iaClient.js";
 import { comprobarVoz } from "../utils/vozTiqui.js";
 import { panoramaDelNegocio, productosDeLaCharla } from "../utils/panoramaNegocio.js";
 import { consejoPrincipal } from "../utils/consejosVentas.js";
+import { compararPrecio } from "../utils/compararPrecios.js";
 import { calentarPronostico, pronosticoParaTiqui } from "../utils/pronostico.js";
 import {
   CAMBIOS_ADMIN, CAMBIOS_EMPLEADO, ESTADOS_DESTINO, aplicarCambio, firmarPropuesta, leerPropuesta, proponerCambio,
@@ -123,6 +125,10 @@ const herramientasDe = (esAdmin) => [
                   lleva: { type: Type.NUMBER, description: "Para precio_promocion de una promo NxM: cuántos lleva (el 3 de un 3x2)." },
                   paga: { type: Type.NUMBER, description: "Para precio_promocion de una promo NxM: cuántos paga (el 2 de un 3x2)." },
                   temporada: { type: Type.STRING, description: "Para temporada: la clave de la lista (navidad, halloween…), automatica o ninguna." },
+                  comparar_precio: {
+                    type: Type.STRING,
+                    description: "Solo si piden comparar el precio de UN producto con otras tiendas o el mercado: su nombre EXACTO de la lista. Vacío en cualquier otro caso.",
+                  },
                 }
               : {}),
           },
@@ -195,6 +201,12 @@ const instrucciones = ({ esAdmin, nombre }) => [
         "- Usa SOLO las cuentas que te paso; no calcules porcentajes ni precios por tu cuenta.",
         "- Si te dice que sí a un ajuste que sugeriste, propón el cambio con 'precio_promocion' (o",
         "  'precio' si es el precio de un producto) con los números que sugeriste.",
+        "",
+        "COMPARAR PRECIOS CON OTRAS TIENDAS:",
+        "- Si te piden comparar el precio de un producto con otros súper o con el mercado ('¿a cuánto",
+        "  la venden en Walmart?', '¿estamos caros con la Coca?'), pon su nombre EXACTO en",
+        "  'comparar_precio' y en 'texto' solo 'Déjame buscar'. Yo busco en Walmart y las Despensas",
+        "  y contesto con los precios. Si no sabes cuál producto es, pregunta.",
         "",
         "PRONÓSTICO (si te lo paso):",
         "- En 'PRONÓSTICO' está lo que calculó el servicio de análisis con el historial de ventas: la",
@@ -323,6 +335,20 @@ const estadoDeLaFrase = (frase) => {
   return "";
 };
 
+// Busca el producto por su nombre en el inventario y lo compara con otras tiendas.
+const compararDelInventario = async (nombre) => {
+  const escapado = nombre.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const producto = await productModel
+    .findOne({ name: new RegExp(`^${escapado}$`, "i"), isActive: { $ne: false } }, "name salePrice unidadVenta")
+    .lean();
+  if (!producto) return `No encontré ${nombre} en el inventario. ¿Cómo se llama exactamente?`;
+  try {
+    return await compararPrecio({ nombre: producto.name, precio: Number(producto.salePrice) || 0, porLibra: producto.unidadVenta === "libra" });
+  } catch {
+    return "No pude buscar precios en otras tiendas ahora. Prueba en un rato.";
+  }
+};
+
 // Lo que dice Tiqui si el modelo abrió algo pero se olvidó de hablar.
 const fraseDeRespaldo = (accion) => (accion ? `Te abro ${accion.que}.` : "");
 
@@ -390,6 +416,13 @@ tiquiPanelController.conversar = async (req, res) => {
           entendido: true,
           origen: "ia",
         });
+      }
+
+      // Comparar con otras tiendas (solo el administrador): la respuesta la arma la búsqueda.
+      const pedido = String(args.comparar_precio || "").trim();
+      if (esAdmin && pedido) {
+        const comparado = await compararDelInventario(pedido);
+        return res.status(200).json({ acciones: accion ? [accion] : [], respuesta: comparado, entendido: true, origen: "ia" });
       }
 
       if (!dice) dice = fraseDeRespaldo(accion);

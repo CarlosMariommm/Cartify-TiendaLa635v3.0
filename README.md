@@ -27,7 +27,7 @@ Y en las tres está **Tiqui**, la mascota de la tienda: una etiqueta de precio c
 ### Para quien compra (web y app)
 
 - **Se compra sin cuenta**: la sesión se pide recién al pagar, para entrar a Mi Cuenta o para guardar favoritos. El carrito se queda guardado aunque se vaya el internet.
-- **Tiqui, la asistente de voz**: "quiero dos manzanas y una leche" y las pone en el carrito; también cuenta las ofertas, abre secciones y lleva al pago. Entiende con inteligencia artificial (Google Gemini, con Gemma de respaldo) y habla con una voz de ElevenLabs que cambia de ánimo: alegre, asombrada, apenada… En la app se despierta tocándola.
+- **Tiqui, la asistente de voz**: "quiero dos manzanas y una leche" y las pone en el carrito; también cuenta las ofertas, abre secciones y lleva al pago. Recomienda primero lo que conviene mover (lo que vence pronto o casi no se vende) y dice por qué. Entiende con inteligencia artificial (Google Gemini, con Gemma de respaldo y un modelo gratis de OpenRouter si Google se satura) y habla con una voz de ElevenLabs que cambia de ánimo: alegre, asombrada, apenada… En la app se despierta tocándola.
 - **Retiro en la tienda o envío a domicilio**, con costo por zonas. El pedido se entrega con un **código de 4 dígitos** que solo ve el cliente.
 - **Seguimiento en el mapa**:
   - Con el GPS del repartidor: su punto en vivo, la ruta por las calles que le falta (OpenRouteService) y cuánto tarda en llegar.
@@ -40,7 +40,7 @@ Y en las tres está **Tiqui**, la mascota de la tienda: una etiqueta de precio c
 - **Preferencias**: modo claro, oscuro o automático, y español o inglés (el panel del negocio se queda en español).
 - **Avisos** del pedido por correo y, en la app, notificaciones push. Cada correo trae su enlace para darse de baja.
 - Inicio de sesión con **Google**, confirmación de edad para productos +18, **reseñas**, botón de **WhatsApp** y enlaces de productos que se pueden compartir (con vista previa en WhatsApp y que abren la app si está instalada).
-- **Temporadas**: en Navidad, Halloween, la Independencia o San Valentín la tienda cambia de color y Tiqui se disfraza.
+- **Temporadas**: en Navidad, Halloween, la Independencia o San Valentín la tienda cambia de color y Tiqui se disfraza. Las de fábrica se pueden borrar y restaurar desde el panel.
 - Las visitas se cuentan de forma anónima y sin cookies, solo si se acepta en el aviso.
 
 ### Para el negocio (panel en `/admin`)
@@ -57,7 +57,7 @@ Y en las tres está **Tiqui**, la mascota de la tienda: una etiqueta de precio c
 - **Personalización**: nombre y logo, orden de la portada, temporada, datos del negocio, ubicación de la tienda y zonas de envío.
 - **Mini tutorial** la primera vez que el administrador entra a cada apartado.
 - **Paletas para cuidar la vista**: Mi marca, Lectura, Contraste reforzado, Modo oscuro, Calma y Calma noche, más opciones de lectura.
-- **Tiqui del panel**: la asistente del equipo, aparte de la de los clientes. Responde sobre el negocio y avisa de promociones con pérdida o productos por vencer. Cambia datos **solo con confirmación**.
+- **Tiqui del panel**: la asistente del equipo, aparte de la de los clientes. Responde sobre el negocio, avisa de promociones con pérdida o productos por vencer y compara precios con Walmart, La Despensa de Don Juan y Maxi Despensa. Cambia datos **solo con confirmación**.
 - **En la app**, el personal entra en modo personal:
   - El **Reparto**: pedidos a domicilio, "Salí a repartir" (comparte la ubicación con el cliente) y entrega con código.
   - Para el administrador, además, el **panel web** dentro de la app, con su Tiqui.
@@ -130,6 +130,8 @@ Queda en `http://localhost:4000/api`, con la documentación en `http://localhost
 | `GOOGLE_CLIENT_ID` | Inicio de sesión con Google (el mismo de la web) |
 | `GEMINI_API_KEY`, `GEMINI_MODEL`, `GEMINI_MODEL_RESPALDO`, `GEMINI_MODEL_ASISTENTE_RESPALDO` | La inteligencia artificial de Tiqui |
 | `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, `ELEVENLABS_MODEL` | La voz de Tiqui (sin ellas, Tiqui habla con la voz del navegador o del teléfono) |
+| `OPENROUTER_API_KEY`, `OPENROUTER_MODELOS` | El respaldo de Tiqui cuando Gemini se satura (modelos gratis de OpenRouter) |
+| `LLMGATEWAY_API_KEY`, `LLMGATEWAY_MODELOS` | La otra pasarela posible, si no hay llave de OpenRouter (cobra créditos) |
 | `TIQUI_IA_PROPIA` | `1` enciende el clasificador propio de Tiqui (apagado si no está) |
 | `OPENROUTESERVICE_API_KEY` | La ruta por las calles en el seguimiento del pedido (sin ella, el mapa sale sin la línea) |
 | `ANALITICA_URL`, `ANALITICA_CLAVE` | El servicio de pronóstico y la clave que comparte con el servidor |
