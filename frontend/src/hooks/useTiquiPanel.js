@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { tiquiPanelService } from '../api/tiquiPanelService';
-import { decirConTiqui, callarTiqui, paraDecir } from '../utils/vozTiqui';
+import { decirConTiqui, callarTiqui, paraDecir, desbloquearAudio } from '../utils/vozTiqui';
 import { avisarCambioDeTiqui } from '../utils/cambiosDeTiqui';
 
 // TIQUI DEL PANEL — la conversación (useTiquiPanel.js)
@@ -10,6 +10,8 @@ import { avisarCambioDeTiqui } from '../utils/cambiosDeTiqui';
 const SILENCIOS_ANTES_DE_DESCANSAR = 2;
 const REINTENTO_SILENCIO_MS = 900;
 const LLAVE_SILENCIO = 'kartify:tiqui-panel-sin-voz';
+// El último consejo de ventas que se omitió: ese no vuelve a salir; uno nuevo, sí.
+const LLAVE_CONSEJO = 'kartify:tiqui-panel-consejo-omitido';
 
 // Lo que dice cuando no pudo contestar, según por qué.
 const SIN_RESPUESTA = {
@@ -86,9 +88,10 @@ export const useTiquiPanel = () => {
   useEffect(() => { muteRef.current = muteada; }, [muteada]);
   useEffect(() => { pantallaRef.current = `${location.pathname}${location.search}`; }, [location.pathname, location.search]);
 
-  const registrar = (quien, texto) => {
+  // `extra`: marcas del mensaje para la pantalla (`consejo`); a la IA solo viaja quién y qué.
+  const registrar = (quien, texto, extra = {}) => {
     memoriaRef.current = [...memoriaRef.current.slice(-7), { quien, texto }];
-    setMensajes((m) => [...m.slice(-7), { id: idRef.current++, quien, texto }]);
+    setMensajes((m) => [...m.slice(-7), { id: idRef.current++, quien, texto, ...extra }]);
   };
 
   const callarTodo = () => {
@@ -162,8 +165,17 @@ export const useTiquiPanel = () => {
     const u = new SpeechSynthesisUtterance(paraDecir(texto));
     const voz = vozDelSistema();
     if (voz) { u.voice = voz; u.lang = voz.lang; } else { u.lang = 'es-SV'; }
-    u.onend = continuar;
-    u.onerror = continuar;
+    // Si el navegador no avisa que terminó (pasa en el teléfono), sigue igual al acabarse el tiempo.
+    let listo = false;
+    const una = () => {
+      if (listo) return;
+      listo = true;
+      clearTimeout(plazo);
+      continuar();
+    };
+    const plazo = setTimeout(una, 2500 + paraDecir(texto).length * 90);
+    u.onend = una;
+    u.onerror = una;
     sintesis.speak(u);
   };
 
@@ -273,9 +285,11 @@ export const useTiquiPanel = () => {
       // El consejo de ventas (solo al administrador, y solo si hay algo que lo amerite: una promo que
       // deja pérdida, algo que caduca). Va como lo primero que dice Tiqui, en lugar del saludo, y queda
       // en la charla para que un "sí, ajústala" sepa de qué se habla.
-      if (consejo && !memoriaRef.current.length) {
+      let omitido = '';
+      try { omitido = localStorage.getItem(LLAVE_CONSEJO) || ''; } catch { /* modo privado */ }
+      if (consejo && consejo !== omitido && !memoriaRef.current.length) {
         memoriaRef.current = [{ quien: 'tiqui', texto: consejo }];
-        setMensajes([{ id: idRef.current++, quien: 'tiqui', texto: consejo }]);
+        setMensajes([{ id: idRef.current++, quien: 'tiqui', texto: consejo, consejo: true }]);
       }
     });
   };
@@ -284,6 +298,8 @@ export const useTiquiPanel = () => {
   const tocar = useCallback(() => {
     setAbierta(true);
     prepararServidor();
+    // En el toque: el teléfono solo deja sonar la voz si el primer sonido sale de un toque.
+    desbloquearAudio();
     if (!soportado) return; // sin micrófono, se le escribe
     if (pensando) return;   // ya va a contestar: otra frase se le encimaría
     if (escuchando && !hablando) {
@@ -306,6 +322,7 @@ export const useTiquiPanel = () => {
     if (!frase || pensando) return;
     setAbierta(true);
     prepararServidor();
+    desbloquearAudio();
     activoRef.current = false;
     setActivo(false);
     pararEscucha();
@@ -321,6 +338,29 @@ export const useTiquiPanel = () => {
     callarTodo();
     setHablando(false);
     setAbierta(false);
+  }, []);
+
+  // Quita el consejo de ventas y no lo vuelve a mostrar (hasta que haya otro distinto).
+  const omitirConsejo = useCallback(() => {
+    const consejo = memoriaRef.current.find((m, i) => i === 0 && m.quien === 'tiqui')?.texto || '';
+    try { localStorage.setItem(LLAVE_CONSEJO, consejo); } catch { /* modo privado */ }
+    memoriaRef.current = memoriaRef.current.filter((m) => m.texto !== consejo);
+    setMensajes((lista) => lista.filter((m) => !m.consejo));
+    callarTodo();
+    setHablando(false);
+  }, []);
+
+  // Borra la charla y empieza de cero (lo propuesto sin confirmar queda sin hacer).
+  const nuevaCharla = useCallback(() => {
+    activoRef.current = false;
+    setActivo(false);
+    pararEscucha();
+    callarTodo();
+    setHablando(false);
+    guardarPendiente(null);
+    setConfundida(false);
+    memoriaRef.current = [];
+    setMensajes([]);
   }, []);
 
   const alternarVoz = useCallback(() => {
@@ -343,7 +383,7 @@ export const useTiquiPanel = () => {
   return {
     abierta, activo, escuchando, pensando, hablando, transcripcion, mensajes, confundida,
     muteada, vozTiqui, sonandoTiqui, soportado,
-    tocar, escribir, cerrar, alternarVoz,
+    tocar, escribir, cerrar, alternarVoz, omitirConsejo, nuevaCharla,
     // Un cambio propuesto esperando respuesta, y cómo contestarle con botones.
     pendiente, confirmar: aplicar, descartar,
   };
