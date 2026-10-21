@@ -3,7 +3,7 @@ import { Plus, Pencil, Trash2, Sparkles, Star, Heart, Snowflake, Leaf, Moon, Ban
 import {
   FIGURAS_DE_TEMPORADA,
   NOMBRES_DE_MES,
-  TEMAS_DE_TEMPORADA,
+  temasDeFabrica,
   paletaDesdeColores,
   contrasteConBlanco,
   describirRango,
@@ -42,7 +42,7 @@ const esHex = (v) => /^#[0-9a-fA-F]{6}$/.test(v);
 
 // ¿El rango pisa alguna temporada de fábrica? Se recorre día por día un año bisiesto: son 366
 // comparaciones, nada, y así no hay que pensar en los rangos que cruzan el año.
-const coincideConFabrica = (desde, hasta) => {
+const coincideConFabrica = (desde, hasta, fabrica) => {
   const encontradas = new Set();
   const inicio = desde.mes * 100 + desde.dia;
   const fin = hasta.mes * 100 + hasta.dia;
@@ -50,7 +50,7 @@ const coincideConFabrica = (desde, hasta) => {
     const n = (d.getMonth() + 1) * 100 + d.getDate();
     const dentro = inicio <= fin ? n >= inicio && n <= fin : n >= inicio || n <= fin;
     if (!dentro) continue;
-    const tema = temaDeLaFecha(d, TEMAS_DE_TEMPORADA);
+    const tema = temaDeLaFecha(d, fabrica);
     if (tema) encontradas.add(tema.nombre);
   }
   return [...encontradas];
@@ -216,7 +216,7 @@ const TemporadasPropias = ({ temporada, guardar, guardando }) => {
   };
 
   const pocoContraste = borrador && esHex(borrador.colorPrincipal) && contrasteConBlanco(borrador.colorPrincipal) < 4.5;
-  const pisa = borrador ? coincideConFabrica(borrador.desde, borrador.hasta) : [];
+  const pisa = borrador ? coincideConFabrica(borrador.desde, borrador.hasta, temasDeFabrica(temporada)) : [];
 
   return (
     <div

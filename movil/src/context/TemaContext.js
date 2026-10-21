@@ -7,6 +7,7 @@ import { AppState } from 'react-native';
 import { getAjustes } from '../api/ajustesApi';
 import { COLORES } from '../theme/colores';
 import { paletaOscura, temaActivo } from '../utils/temporadas';
+import { resolverPortada } from '../utils/portada';
 import { useModo } from './ModoContext';
 
 const TemaContext = createContext(null);
@@ -29,6 +30,8 @@ export const TemaProvider = ({ children, marcaFija, sinTemporada = false }) => {
   const { oscuro } = useModo();
   const [temporada, setTemporada] = useState(null);
   const [decoracionEncendida, setDecoracionEncendida] = useState(true);
+  // Las filas de la portada como las dejó el panel (Personalización › Portada): cuáles y en qué orden.
+  const [seccionesGuardadas, setSeccionesGuardadas] = useState([]);
 
   // Trae los ajustes de la tienda (la temporada y su decoración). Devuelve si salió bien.
   const recargarAjustes = useCallback(async () => {
@@ -38,6 +41,7 @@ export const TemaProvider = ({ children, marcaFija, sinTemporada = false }) => {
       // La decoración se puede apagar dejando solo los colores. Va encendida por defecto: quien elige
       // poner Navidad espera que se note, no tener que ir a buscar un segundo interruptor.
       setDecoracionEncendida(ajustes?.temporada?.decoracion !== false);
+      setSeccionesGuardadas(Array.isArray(ajustes?.secciones) ? ajustes.secciones : []);
       return true;
     } catch {
       // Sin ajustes la tienda se ve con los colores de siempre, que es exactamente lo correcto. Que la
@@ -70,6 +74,11 @@ export const TemaProvider = ({ children, marcaFija, sinTemporada = false }) => {
     return propio ? { ...base, decoracion: { ...base.decoracion, saludo: propio } } : base;
   }, [temporada, sinTemporada]);
 
+  const portadaVisible = useMemo(
+    () => resolverPortada(seccionesGuardadas).filter((b) => b.visible),
+    [seccionesGuardadas]
+  );
+
   const valor = useMemo(() => {
     // La paleta ya resuelta: siempre completa, haya temporada o no.
     const clara = tema ? { ...PALETA_BASE, ...tema.colores } : PALETA_BASE;
@@ -89,10 +98,12 @@ export const TemaProvider = ({ children, marcaFija, sinTemporada = false }) => {
       saludoNormal: (temporada?.saludoNormal || '').trim(),
       // Los disfraces que el dueño le armó a Tiqui en el panel, por temporada.
       disfraces: sinTemporada ? null : temporada?.disfraces || null,
-      // Para jalar para recargar: vuelve a traer la temporada.
+      // Las filas de la portada que se ven, en el orden del panel. Ver utils/portada.js.
+      portadaVisible,
+      // Para jalar para recargar: vuelve a traer la temporada y la portada.
       recargarAjustes,
     };
-  }, [tema, decoracionEncendida, temporada, oscuro, recargarAjustes, marcaFija, sinTemporada]);
+  }, [tema, decoracionEncendida, temporada, oscuro, recargarAjustes, marcaFija, sinTemporada, portadaVisible]);
 
   return <TemaContext.Provider value={valor}>{children}</TemaContext.Provider>;
 };

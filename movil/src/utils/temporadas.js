@@ -214,10 +214,16 @@ const temaDesdePropio = (propio) => ({
   },
 });
 
+// Las de fábrica que el dueño no borró desde el panel (`temporada.ocultas`).
+export const temasDeFabrica = (temporada) => {
+  const ocultas = Array.isArray(temporada?.ocultas) ? temporada.ocultas : [];
+  return TEMAS_DE_TEMPORADA.filter((t) => !ocultas.includes(t.clave));
+};
+
 // Las propias primero: si comparten fechas con una de fábrica, gana la propia.
 export const todosLosTemas = (temporada) => [
   ...(Array.isArray(temporada?.personalizados) ? temporada.personalizados : []).map(temaDesdePropio),
-  ...TEMAS_DE_TEMPORADA,
+  ...temasDeFabrica(temporada),
 ];
 
 export const temaPorClave = (clave, lista = TEMAS_DE_TEMPORADA) =>

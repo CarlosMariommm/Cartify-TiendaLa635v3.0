@@ -21,7 +21,7 @@ const FilaProductos = ({ seccion, alVerTodos, alVerDetalle, alAgregar }) => {
       <View style={estilos.encabezado}>
         <Pressable onPress={alVerTodos} style={estilos.titulos} accessibilityRole="button">
           <Text style={estilos.titulo}>{t(seccion.titulo)}</Text>
-          {!!seccion.subtitulo && <Text style={estilos.subtitulo}>{t(seccion.subtitulo)}</Text>}
+          {!!seccion.subtitulo && <Text style={estilos.subtitulo}>{t(seccion.subtitulo, seccion.subtituloVars)}</Text>}
         </Pressable>
 
         {hayMas && (

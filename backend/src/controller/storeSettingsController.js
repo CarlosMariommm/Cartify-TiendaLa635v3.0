@@ -150,7 +150,7 @@ storeSettingsController.updateSettings = async (req, res) => {
     // Temporada, campo por campo y con NOTACIÓN DE PUNTOS. O sea que mandar solo `tema` devolvía
     // `modo` a 'automatico', y mandar solo `modo` borraba el tema. Silenciosamente, sin error.
     if (req.body.temporada && typeof req.body.temporada === "object") {
-      const { modo, tema, decoracion, saludos, saludoNormal, personalizados, disfraces } = req.body.temporada;
+      const { modo, tema, decoracion, saludos, saludoNormal, personalizados, disfraces, ocultas } = req.body.temporada;
 
       if (modo !== undefined) {
         if (!MODOS_DE_TEMPORADA.includes(modo)) {
@@ -202,6 +202,18 @@ storeSettingsController.updateSettings = async (req, res) => {
           if (elegida.startsWith("propia-") && !lista.some((t) => t.clave === elegida)) {
             cambios["temporada.tema"] = "";
           }
+        }
+      }
+
+      // Las de fábrica que el dueño borró. Solo se aceptan claves de fábrica; si la elegida a mano
+      // queda borrada, se suelta la elección.
+      if (ocultas !== undefined) {
+        if (!Array.isArray(ocultas)) return res.status(400).json({ message: "Las temporadas borradas no son válidas" });
+        const limpias = [...new Set(ocultas.map(String))].filter((c) => CLAVES_DE_FABRICA.includes(c));
+        cambios["temporada.ocultas"] = limpias;
+        if (tema === undefined) {
+          const actuales = await storeSettingsModel.findOne({ clave: CLAVE_UNICA }).select("temporada.tema").lean();
+          if (limpias.includes(actuales?.temporada?.tema || "")) cambios["temporada.tema"] = "";
         }
       }
     }

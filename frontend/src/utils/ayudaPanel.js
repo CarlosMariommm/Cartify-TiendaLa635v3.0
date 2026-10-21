@@ -43,6 +43,7 @@ export const TEMAS_AYUDA = [
       'Tóquela abajo a la derecha y háblele, o escríbale en el cuadro de texto.',
       'Pregúntele lo que quiera saber: “¿cómo vamos hoy?”, “¿qué pedidos esperan?”, “¿qué se está acabando?”, “¿cuánto les debemos a los proveedores?”.',
       'Como ayudante de ventas, avisa si una promoción deja pérdida, si algo se vende por debajo del costo, qué caduca pronto y qué no se mueve. Pregúntele “¿qué me recomiendas para vender más?”.',
+      'Compara sus precios con Walmart, La Despensa de Don Juan y Maxi Despensa: “¿a cuánto venden la Coca en Walmart?” o “¿estamos caros con el Sprite?”.',
       'Puede mover pedidos, cambiar existencias y precios, mostrar u ocultar productos, prender, apagar o ajustar promociones y cambiar la temporada. Antes de hacer algo siempre pregunta “¿Lo hago?”: nada cambia hasta que usted dice que sí.',
     ],
     consejos: [

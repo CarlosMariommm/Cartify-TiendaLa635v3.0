@@ -37,7 +37,6 @@ const ESPERA_MAXIMA_MS = 5000;
 let reproductor = null;
 let suscripcion = null;
 let turno = 0;
-let modoListo = false;
 
 const soltar = () => {
   suscripcion?.remove?.();
@@ -61,12 +60,9 @@ export const decirConTiqui = async (url, { velocidad = 1, alEmpezar, alTerminar,
   soltar();
 
   try {
-    // Una vez: que suene aunque el iPhone esté en silencio (como expo-speech) y sin dejar el micrófono
-    // tomado: el reconocedor de voz lo pide aparte cada vez que empieza a escuchar.
-    if (!modoListo) {
-      await ExpoAudio.setAudioModeAsync({ playsInSilentMode: true, allowsRecording: false, interruptionMode: 'duckOthers' });
-      modoListo = true;
-    }
+    // Antes de cada frase: el reconocedor deja el audio en modo "grabar" y la voz salía bajito por el
+    // auricular. Así suena por el parlante, aunque el iPhone esté en silencio.
+    await ExpoAudio.setAudioModeAsync({ playsInSilentMode: true, allowsRecording: false, interruptionMode: 'duckOthers' });
     if (!vigente()) return;
 
     const jugador = ExpoAudio.createAudioPlayer({ uri: url });

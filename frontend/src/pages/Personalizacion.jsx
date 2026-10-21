@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Palette, ArrowUp, ArrowDown, Eye, EyeOff, Trash2, Lock, Check, Store as StoreIcon, Truck, LayoutGrid } from 'lucide-react';
+import { Palette, ArrowUp, ArrowDown, Eye, EyeOff, Trash2, Lock, Check, Store as StoreIcon, Truck, LayoutGrid, RotateCcw } from 'lucide-react';
 import { useAjustesCtx } from '../context/AjustesContext';
 import SubidorArchivo from '../components/UI/SubidorArchivo';
 import ConfiguracionEnvio from '../components/Admin/ConfiguracionEnvio';
@@ -7,7 +7,7 @@ import ServicioTarifa from '../components/Admin/ServicioTarifa';
 import TemporadasPropias from '../components/Admin/TemporadasPropias';
 import EditorDisfrazTiqui from '../components/Admin/EditorDisfrazTiqui';
 import DatosNegocio from '../components/Admin/DatosNegocio';
-import { TEMAS_DE_TEMPORADA, temaDeLaFecha, temaActivo, todosLosTemas } from '../utils/temporadas';
+import { TEMAS_DE_TEMPORADA, temaDeLaFecha, temaActivo, todosLosTemas, temasDeFabrica } from '../utils/temporadas';
 import Mascota from '../components/UI/Mascota';
 import { disfrazDeTema, describirDisfraz } from '../utils/disfracesTiqui';
 
@@ -74,6 +74,16 @@ const Personalizacion = () => {
   const temas = todosLosTemas(temporada);
   const porCalendario = temaDeLaFecha(new Date(), temas);
   const pintandoAhora = temaActivo(temporada);
+
+  // Las de fábrica que el dueño borró: no se pintan ni se eligen hasta que las restaure.
+  const ocultas = Array.isArray(temporada.ocultas) ? temporada.ocultas : [];
+  const borradas = TEMAS_DE_TEMPORADA.filter((t) => ocultas.includes(t.clave));
+  const [fabricaPorBorrar, setFabricaPorBorrar] = useState(null);
+  const borrarDeFabrica = async (clave) => {
+    const ok = await guardar({ temporada: { ocultas: [...ocultas, clave] } });
+    if (ok) setFabricaPorBorrar(null);
+  };
+  const restaurarDeFabrica = (clave) => guardar({ temporada: { ocultas: ocultas.filter((c) => c !== clave) } });
 
   const MODOS = [
     { clave: 'automatico', nombre: 'Automático', ayuda: 'Lo elige la fecha, sin que nadie entre a cambiarlo.' },
@@ -476,12 +486,12 @@ const Personalizacion = () => {
                 const disfraz = disfrazDeTema(tema, temporada.disfraces);
 
                 return (
+                  <div key={tema.clave} className="relative">
                   <button
-                    key={tema.clave}
                     type="button"
                     onClick={() => guardar({ temporada: { tema: tema.clave } })}
                     disabled={!seleccionable || guardando}
-                    className="flex items-center gap-3 p-3 rounded-xl border text-left transition-colors disabled:cursor-default"
+                    className={`w-full h-full flex items-center gap-3 p-3 rounded-xl border text-left transition-colors disabled:cursor-default${tema.propio ? '' : ' pr-10'}`}
                     style={{
                       borderColor: elegido ? 'var(--theme-primary)' : 'var(--theme-card-border)',
                       backgroundColor: elegido ? 'var(--theme-primary-light)' : 'transparent',
@@ -526,9 +536,74 @@ const Personalizacion = () => {
                       )}
                     </div>
                   </button>
+
+                  {/* Las de fábrica se pueden borrar (y restaurar abajo); las propias, en "Sus temporadas". */}
+                  {!tema.propio && (
+                    fabricaPorBorrar === tema.clave ? (
+                      <div
+                        className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border"
+                        style={{ backgroundColor: 'var(--theme-card-bg)', borderColor: 'var(--theme-card-border)' }}
+                      >
+                        <span className="text-xs font-semibold" style={{ color: 'var(--theme-text-secondary)' }}>
+                          ¿Borrar {tema.nombre}?
+                        </span>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => borrarDeFabrica(tema.clave)}
+                            disabled={guardando}
+                            className="px-3 py-1.5 rounded-full text-xs font-bold text-white disabled:opacity-60"
+                            style={{ backgroundColor: '#dc2626' }}
+                          >
+                            Sí, borrar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setFabricaPorBorrar(null)}
+                            className="px-3 py-1.5 rounded-full text-xs font-semibold border"
+                            style={{ borderColor: 'var(--theme-card-border)', color: 'var(--theme-text-secondary)' }}
+                          >
+                            No
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setFabricaPorBorrar(tema.clave)}
+                        disabled={guardando}
+                        aria-label={`Borrar ${tema.nombre}`}
+                        title={`Borrar ${tema.nombre}`}
+                        className="absolute top-2 right-2 w-7 h-7 grid place-items-center rounded-lg border disabled:opacity-50"
+                        style={{ borderColor: 'var(--theme-card-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-card-bg)' }}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )
+                  )}
+                  </div>
                 );
               })}
             </div>
+
+            {borradas.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 mt-4 text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
+                <span className="font-semibold">Borradas (toque para restaurar):</span>
+                {borradas.map((t) => (
+                  <button
+                    key={t.clave}
+                    type="button"
+                    onClick={() => restaurarDeFabrica(t.clave)}
+                    disabled={guardando}
+                    title={`Restaurar ${t.nombre}`}
+                    className="inline-flex items-center gap-1 px-3 py-1 rounded-full border font-semibold disabled:opacity-60"
+                    style={{ borderColor: 'var(--theme-card-border)', color: 'var(--theme-primary)' }}
+                  >
+                    <RotateCcw className="w-3 h-3" /> {t.nombre}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {temporada.modo !== 'manual' && (
               <p className="text-xs mt-4" style={{ color: 'var(--theme-text-muted)' }}>
@@ -622,7 +697,7 @@ const Personalizacion = () => {
                 </p>
               </div>
 
-              {TEMAS_DE_TEMPORADA.map((tema) => (
+              {temasDeFabrica(temporada).map((tema) => (
                 <div key={tema.clave} className="space-y-1.5">
                   <label className="block text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>
                     {tema.nombre}

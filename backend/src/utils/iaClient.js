@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { generarConPasarela, pasarela } from "./pasarelaIA.js";
 
 // Cliente de Gemini (Google) — redacta el texto de las promociones. La llave se saca gratis en
 // https://aistudio.google.com/apikey (sin tarjeta) y va en el .env como GEMINI_API_KEY.
@@ -92,8 +93,19 @@ export const generarConIA = async (peticion, { intentos = 3, tiempoMaximo, plazo
     console.log(`IA: "${model}" no respondió en ${intentos} intentos, probando el siguiente modelo`);
   }
 
+  // Gemini entero trabado: último intento por la pasarela (OpenRouter), si hay llave.
+  if (pasarela() && quedan() >= 800) {
+    try {
+      return await generarConPasarela(peticion, { signal: AbortSignal.timeout(Math.min(quedan(), 25000)) });
+    } catch (error) {
+      console.log(`IA: la pasarela tampoco respondió — ${String(error.message).slice(0, 80)}`);
+    }
+  }
+
   throw ultimoError;
 };
+
+const PASARELA = "pasarela";
 
 // CON COBERTURA — el asistente no espera a un modelo trabado
 // `generarConIA` prueba los modelos UNO DETRÁS DE OTRO.
@@ -106,7 +118,8 @@ export const generarConCobertura = (
   const ia = getIA();
   if (!ia) return Promise.reject(new Error("La IA no está configurada"));
 
-  const lista = modelos.filter((m, i) => m && modelos.indexOf(m) === i);
+  // Detrás de los de Gemini corre la pasarela (OpenRouter), si hay llave: otra empresa, otra capacidad.
+  const lista = [...modelos.filter((m, i) => m && modelos.indexOf(m) === i), ...(pasarela() ? [PASARELA] : [])];
   const general = new AbortController();
 
   return new Promise((resolver, rechazar) => {
@@ -140,8 +153,10 @@ export const generarConCobertura = (
       // Si este no contesta en `cobertura`, entra el siguiente en paralelo.
       reloj = setTimeout(lanzar, cobertura);
 
-      ia.models
-        .generateContent({ ...peticion, model, config: { ...(peticion.config || {}), abortSignal: general.signal } })
+      const pedido = model === PASARELA
+        ? generarConPasarela(peticion, { signal: general.signal })
+        : ia.models.generateContent({ ...peticion, model, config: { ...(peticion.config || {}), abortSignal: general.signal } });
+      pedido
         .then((respuesta) => {
           if (terminado) return;
           cerrar();
