@@ -36,10 +36,42 @@ const raiz = () => document.documentElement;
 
 const ponerBoca = (nivel) => raiz().style.setProperty('--voz-tiqui', nivel.toFixed(3));
 
-// El analizador se arma una sola vez y recién al primer uso: el navegador no deja crear audio
-// antes de que la persona toque algo, y para cuando Tiqui habla ya tocó el micrófono.
+// En el iPhone el analizador deja la voz muda (el audio de otro dominio sale en silencio): ahí la
+// boca se mueve con la animación de siempre.
+const esIphone = () =>
+  typeof navigator !== 'undefined' &&
+  (/iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+
+const crearAudio = () => {
+  if (audio) return;
+  audio = new Audio();
+  // Sin esto el analizador no puede leer un audio que viene de otro dominio.
+  audio.crossOrigin = 'anonymous';
+  audio.preload = 'auto';
+};
+
+// Una décima de segundo de silencio: se toca en el mismo toque del micrófono para que el teléfono
+// deje sonar después la voz que llega de la IA.
+let silencio = '';
+const urlSilencio = () => {
+  if (silencio) return silencio;
+  const n = 800;
+  const bytes = new Uint8Array(44 + n);
+  const vista = new DataView(bytes.buffer);
+  const texto = (pos, s) => [...s].forEach((c, i) => vista.setUint8(pos + i, c.charCodeAt(0)));
+  texto(0, 'RIFF'); vista.setUint32(4, 36 + n, true); texto(8, 'WAVEfmt ');
+  vista.setUint32(16, 16, true); vista.setUint16(20, 1, true); vista.setUint16(22, 1, true);
+  vista.setUint32(24, 8000, true); vista.setUint32(28, 8000, true);
+  vista.setUint16(32, 1, true); vista.setUint16(34, 8, true);
+  texto(36, 'data'); vista.setUint32(40, n, true); bytes.fill(128, 44);
+  silencio = URL.createObjectURL(new Blob([bytes], { type: 'audio/wav' }));
+  return silencio;
+};
+
+// El analizador se arma una sola vez, dentro de un toque: fuera de él el teléfono deja el
+// contexto de audio pausado y todo lo que pasa por ahí sale mudo.
 const prepararAnalizador = () => {
-  if (analizador || !audio) return;
+  if (analizador || !audio || esIphone()) return;
   try {
     const Contexto = window.AudioContext || window.webkitAudioContext;
     if (!Contexto) return;
@@ -81,13 +113,7 @@ export const decirConTiqui = (url, { velocidad = 1, alEmpezar, alTerminar, alFal
   const miTurno = ++turno;
   const vigente = () => miTurno === turno;
 
-  if (!audio) {
-    audio = new Audio();
-    // Sin esto el analizador no puede leer un audio que viene de otro dominio.
-    audio.crossOrigin = 'anonymous';
-    audio.preload = 'auto';
-  }
-  prepararAnalizador();
+  crearAudio();
   contexto?.resume?.().catch(() => {});
 
   let empezo = false;
@@ -138,6 +164,29 @@ export const decirConTiqui = (url, { velocidad = 1, alEmpezar, alTerminar, alFal
     audio.pause();
     pararBoca();
   };
+};
+
+// Se llama en el toque del micrófono: destraba el audio y la voz del sistema en el teléfono, que
+// solo dejan sonar si el primer sonido sale de un toque. Sin esto Tiqui quedaba muda en el celular.
+export const desbloquearAudio = () => {
+  if (typeof window === 'undefined') return;
+  try {
+    crearAudio();
+    prepararAnalizador();
+    contexto?.resume?.().catch(() => {});
+    if (audio.paused) {
+      audio.src = urlSilencio();
+      audio.play().catch(() => {});
+    }
+  } catch { /* sin audio, habla el sistema */ }
+  try {
+    const synth = window.speechSynthesis;
+    if (synth && !synth.speaking) {
+      const nada = new SpeechSynthesisUtterance(' ');
+      nada.volume = 0;
+      synth.speak(nada);
+    }
+  } catch { /* el navegador no tiene voz propia */ }
 };
 
 // Calla lo que esté diciendo, sin avisar a nadie (interrumpir, cerrar, silenciar).
