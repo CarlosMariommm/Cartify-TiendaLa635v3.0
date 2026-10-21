@@ -10,6 +10,7 @@ import { construirInventario, construirResumenTienda } from '../utils/reportesTi
 import { useAjustesCtx } from '../context/AjustesContext';
 import StatCard from '../components/UI/StatCard';
 import DescargaPredictiva from '../components/Admin/DescargaPredictiva';
+import GananciaPorProducto from '../components/Admin/GananciaPorProducto';
 import { useAuth } from '../hooks/useAuth';
 import { useDashboard } from '../hooks/useDashboard';
 import { useResumenCredito } from '../hooks/useCreditoProveedor';
@@ -363,6 +364,9 @@ const AdminDashboard = () => {
           </div>
         )}
       </div>
+
+      {/* ── Ganancia por producto (los costos son del administrador) ── */}
+      {esAdmin && <GananciaPorProducto />}
 
       {/* ── Ventas por módulo + sin movimiento ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

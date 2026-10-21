@@ -8,7 +8,7 @@ vi.mock("@google/genai", async (original) => ({
   GoogleGenAI: class { constructor() { this.models = gemini; } },
 }));
 
-const { traducirPeticion, traducirRespuesta, esquemaJson, pasarela } = await import("./pasarelaIA.js");
+const { traducirPeticion, traducirRespuesta, esquemaJson, pasarela, comprobarPasarela } = await import("./pasarelaIA.js");
 const { generarConCobertura } = await import("./iaClient.js");
 
 const HERRAMIENTAS = [{
@@ -77,5 +77,25 @@ describe("respaldo cuando Gemini se satura", () => {
     expect(gemini.generateContent).toHaveBeenCalledTimes(3);
     expect(r.functionCalls[0].args.texto).toBe("¡Hola!");
     expect(globalThis.fetch.mock.calls[0][0]).toContain("openrouter.ai");
+  });
+});
+
+describe("¿la llave de OpenRouter sirve?", () => {
+  afterEach(() => { delete process.env.OPENROUTER_API_KEY; });
+
+  it("sin llave, no hay respaldo", async () => {
+    expect(await comprobarPasarela()).toBe(false);
+  });
+
+  it("pregunta por la llave, gratis, y dice si sirve", async () => {
+    process.env.OPENROUTER_API_KEY = "buena";
+    const pedir = vi.fn(async () => ({ ok: true }));
+    expect(await comprobarPasarela({ pedir })).toBe(true);
+    expect(pedir.mock.calls[0][0]).toBe("https://openrouter.ai/api/v1/key");
+  });
+
+  it("una llave mala no sirve", async () => {
+    process.env.OPENROUTER_API_KEY = "mala";
+    expect(await comprobarPasarela({ pedir: async () => ({ ok: false }) })).toBe(false);
   });
 });

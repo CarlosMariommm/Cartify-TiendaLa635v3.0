@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { SendHorizontal, Volume2, VolumeX, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, RotateCcw, SendHorizontal, Volume2, VolumeX, X } from 'lucide-react';
 import MascotaAsistente from '../Store/MascotaAsistente';
 import { useTiquiPanel } from '../../hooks/useTiquiPanel';
 import { useAuth } from '../../hooks/useAuth';
@@ -14,7 +14,7 @@ const EASE_OUT = [0.23, 1, 0.32, 1];
 
 // Lo que se le puede preguntar, para quien no sabe por dónde empezar.
 // "¿Qué me recomiendas?" la vuelve ayudante de ventas: promos que pierden, lo que no se mueve.
-const SUGERENCIAS_ADMIN = ['¿Cómo vamos hoy?', '¿Qué tengo que pedir esta semana?', '¿Qué me recomiendas para vender más?', '¿Cómo van las promociones?', '¿Qué pedidos esperan?'];
+const SUGERENCIAS_ADMIN = ['¿Cómo vamos hoy?', '¿Qué tengo que pedir esta semana?', '¿Qué me recomiendas para vender más?', '¿Cómo van las promociones?', '¿A cuánto venden la Coca-Cola en Walmart?', '¿Qué pedidos esperan?'];
 const SUGERENCIAS_EMPLEADO = ['¿Cómo vamos hoy?', '¿Qué pedidos esperan?', '¿Qué va en camino?'];
 
 // Si el fondo del panel es claro, Tiqui va navy (como en el modo claro de la tienda).
@@ -37,6 +37,7 @@ const TiquiPanel = () => {
   const { palette } = useTheme() || {};
   const t = useTiquiPanel();
   const [texto, setTexto] = useState('');
+  const [verCharla, setVerCharla] = useState(false);
   const campoRef = useRef(null);
 
   const esEmpleado = user?.type === 'employee';
@@ -80,7 +81,14 @@ const TiquiPanel = () => {
     setTexto('');
   };
 
-  const sugerencias = esEmpleado ? SUGERENCIAS_EMPLEADO : SUGERENCIAS_ADMIN;
+  // Antes de preguntar, todas; después, tres que todavía no se hayan hecho.
+  const yaPreguntado = new Set(t.mensajes.filter((m) => m.quien === 'persona').map((m) => m.texto));
+  const todas = esEmpleado ? SUGERENCIAS_EMPLEADO : SUGERENCIAS_ADMIN;
+  const conversando = t.mensajes.some((m) => m.quien === 'persona');
+  const sugerencias = conversando ? todas.filter((x) => !yaPreguntado.has(x)).slice(0, 3) : todas;
+  const enConsejo = ultimoTiqui?.consejo && !t.pensando;
+  // Lo de antes del último globo, para "Ver la charla".
+  const anteriores = t.mensajes.filter((m) => m.id !== ultimoTiqui?.id);
 
   return (
     <div className="tiqui-panel fixed bottom-3 right-3 sm:bottom-5 sm:right-5 z-[25] flex flex-col items-end gap-2 pointer-events-none">
@@ -96,6 +104,18 @@ const TiquiPanel = () => {
             style={{ transformOrigin: 'bottom right' }}
           >
             <div className="flex gap-1.5">
+              {t.mensajes.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => { t.nuevaCharla(); setVerCharla(false); }}
+                  aria-label="Empezar una charla nueva"
+                  title="Empezar de nuevo"
+                  className="w-9 h-9 rounded-full grid place-items-center shadow-sm transition-transform active:scale-95"
+                  style={BOTON_CHICO}
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+              )}
               <button
                 type="button"
                 onClick={t.alternarVoz}
@@ -118,6 +138,38 @@ const TiquiPanel = () => {
               </button>
             </div>
 
+            {/* La charla de antes, para releer lo que se dijo. */}
+            {anteriores.length > 0 && !enConsejo && (
+              <button
+                type="button"
+                onClick={() => setVerCharla((v) => !v)}
+                className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold shadow-sm"
+                style={{ ...BOTON_CHICO, color: 'var(--theme-text-secondary)' }}
+              >
+                {verCharla ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
+                {verCharla ? 'Ocultar la charla' : 'Ver la charla'}
+              </button>
+            )}
+            {verCharla && anteriores.length > 0 && (
+              <div
+                className="w-full max-h-[38vh] overflow-y-auto flex flex-col gap-1.5 p-2 rounded-2xl shadow-sm"
+                style={BOTON_CHICO}
+              >
+                {anteriores.map((m) => (
+                  <p
+                    key={m.id}
+                    className={`max-w-[88%] text-[13px] leading-snug px-3 py-1.5 rounded-2xl ${m.quien === 'persona' ? 'self-end text-right' : 'self-start'}`}
+                    style={{
+                      backgroundColor: m.quien === 'persona' ? 'var(--theme-primary-light)' : 'transparent',
+                      color: m.quien === 'persona' ? 'var(--theme-text-primary)' : 'var(--theme-text-secondary)',
+                    }}
+                  >
+                    {m.texto}
+                  </p>
+                ))}
+              </div>
+            )}
+
             {/* Lo que dice Tiqui: su globo, con la cola hacia ella. */}
             <motion.div
               key={t.pensando ? 'pensando' : (ultimoTiqui?.id ?? 'saludo')}
@@ -138,6 +190,30 @@ const TiquiPanel = () => {
                 ? <span className="masc-puntos" aria-label="Tiqui está pensando"><i /><i /><i /></span>
                 : (ultimoTiqui?.texto || saludo)}
             </motion.div>
+
+            {/* El consejo de ventas con que abre: se contesta o se omite (y ese ya no vuelve). */}
+            {enConsejo && (
+              <div className="flex gap-2" role="group" aria-label="El consejo de ventas">
+                <button
+                  type="button"
+                  onClick={t.omitirConsejo}
+                  className="px-4 h-9 rounded-full text-sm font-semibold shadow-sm transition-transform active:scale-95"
+                  style={BOTON_CHICO}
+                >
+                  Omitir
+                </button>
+                {/\?\s*$/.test(ultimoTiqui.texto) && (
+                  <button
+                    type="button"
+                    onClick={() => t.escribir('Sí')}
+                    className="px-4 h-9 rounded-full text-sm font-bold shadow-sm transition-transform active:scale-95"
+                    style={{ backgroundColor: 'var(--theme-primary)', color: 'var(--theme-button-text)' }}
+                  >
+                    Sí
+                  </button>
+                )}
+              </div>
+            )}
 
             {/* Lo que dice la persona, en vivo mientras habla. */}
             {textoPersona && (
@@ -173,8 +249,8 @@ const TiquiPanel = () => {
               </div>
             )}
 
-            {/* Por dónde empezar: solo antes de la primera pregunta. */}
-            {!t.mensajes.length && !t.escuchando && !t.pendiente && (
+            {/* Por dónde empezar, y después qué más preguntar. */}
+            {sugerencias.length > 0 && !enConsejo && !t.escuchando && !t.pensando && !t.pendiente && (
               <div className="flex flex-wrap justify-end gap-1.5">
                 {sugerencias.map((s) => (
                   <button

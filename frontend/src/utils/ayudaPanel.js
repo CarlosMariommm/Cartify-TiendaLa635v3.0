@@ -47,7 +47,8 @@ export const TEMAS_AYUDA = [
       'Puede mover pedidos, cambiar existencias y precios, mostrar u ocultar productos, prender, apagar o ajustar promociones y cambiar la temporada. Antes de hacer algo siempre pregunta “¿Lo hago?”: nada cambia hasta que usted dice que sí.',
     ],
     consejos: [
-      'Si hay algo urgente, como una promoción que está dejando pérdida, se lo dice apenas la abre.',
+      'Si hay algo urgente, como una promoción que está dejando pérdida, se lo dice apenas la abre. Con “Omitir” lo quita y ese consejo ya no vuelve a salir.',
+      'Con la flecha circular de arriba empieza una charla nueva, y con “Ver la charla” relee lo que ya le dijo.',
       'El empleado puede pedirle que mueva pedidos; lo demás solo lo cambia el administrador.',
     ],
   },
@@ -64,6 +65,7 @@ export const TEMAS_AYUDA = [
       'La gráfica compara ventas y compras por semana o por mes.',
       '“Requiere tu atención” junta lo urgente: pedidos que esperan, productos que se acaban o que caducan.',
       'Más abajo: lo más vendido, cuánto vende cada módulo de la tienda y lo que nadie ha comprado.',
+      'Ganancia por producto (solo el administrador): cuánto deja cada producto por unidad y con todo lo que hay en bodega, cuánto hay invertido y cuánto quedaría si se vende todo. Se puede buscar, filtrar los que no dejan ganancia y ordenar por ganancia o margen.',
       '“Descargar” saca el resumen de la tienda en PDF (del periodo que elija), el inventario completo o, para el administrador, el reporte predictivo.',
     ],
     consejos: [
